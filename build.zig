@@ -26,8 +26,7 @@ pub fn build(b: *std.Build) !void {
     });
 
     // link steamworks to this executable
-    var steamworks = try steam_linker.linkSteamLibrary(b, exe, "steamworks");
-    _ = steamworks;
+    _ = try steam_linker.linkSteamLibrary(b, exe, "steamworks");
     try steam_linker.copy(comptime steam_linker.thisDir() ++ "/src", "zig-out/bin", "steam_appid.txt");
 
     // This declares intent for the executable to be installed into the
@@ -61,10 +60,12 @@ pub fn build(b: *std.Build) !void {
     // Creates a step for unit testing. This only builds the test executable
     // but does not run it.
     const unit_tests = b.addTest(.{
-        .root_source_file = .{ .path = "src/main.zig" },
+        .root_source_file = .{ .path = "src/steam.zig" },
         .target = target,
         .optimize = optimize,
     });
+
+    _ = try steam_linker.linkSteamLibrary(b, unit_tests, "steamworks");
 
     const run_unit_tests = b.addRunArtifact(unit_tests);
 

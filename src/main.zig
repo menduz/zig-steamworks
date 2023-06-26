@@ -47,6 +47,10 @@ pub fn main() !void {
     std.debug.print("GetFakeIP: {}\n", .{pInfo});
     if (!pInfo.m_identity.IsEqualTo(pInfo.m_identity)) @panic("not equal");
 
+    if (steam.SteamUser().BLoggedOn()) {
+        std.debug.print("Current username: {s}\n", .{steam.SteamFriends().GetPersonaName()});
+    }
+
     var pDetails: *steam.SteamNetAuthenticationStatus_t = try std.heap.c_allocator.create(steam.SteamNetAuthenticationStatus_t);
     defer std.heap.c_allocator.destroy(pDetails);
 

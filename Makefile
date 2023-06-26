@@ -11,6 +11,7 @@ build: build-source
 build-source:
 	node generate.js steamworks/public/steam/steam_api.json
 	zig fmt src/steam.zig
+	zig build test -Dtarget=$(TARGET) -Doptimize=$(LEVEL) -freference-trace --verbose
 
 cross:
 	@$(MAKE) build TARGET=aarch64-macos-none 
@@ -26,6 +27,5 @@ link-universal:
 clean:
 	rm -rf zig-cache
 	rm -rf zig-out
-
 
 .PHONY: build
