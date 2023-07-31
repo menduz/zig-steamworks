@@ -21,6 +21,32 @@ const cpp = [
 ]
 
 
+const g_CustomPackSize = {
+  // Callbacks
+  "AvatarImageLoaded_t": "4",
+  "FriendRichPresenceUpdate_t": "4",
+  "GameConnectedClanChatMsg_t": "4",
+  "GameConnectedChatLeave_t": "1",
+  "JoinClanChatRoomCompletionResult_t": "4",
+  "GameConnectedFriendChatMsg_t": "4",
+  "FriendsGetFollowerCount_t": "4",
+  "FriendsIsFollowing_t": "4",
+  "FriendsEnumerateFollowingList_t": "4",
+  "GSClientDeny_t": "4",
+  "GSClientKick_t": "4",
+  "GSClientGroupStatus_t": "1",
+  "GSStatsReceived_t": "4",
+  "GSStatsStored_t": "4",
+  "P2PSessionConnectFail_t": "1",
+  "SocketStatusCallback_t": "4",
+  "ValidateAuthTicketResponse_t": "4",
+
+  // Structs
+  "InputAnalogActionData_t": "1",
+  "InputDigitalActionData_t": "1",
+}
+
+
 // cleanup
 {
   data.callback_structs = data.callback_structs.filter($ => {
@@ -36,6 +62,7 @@ out.push(`const std = @import("std");`)
 out.push(`const builtin = @import("builtin");`)
 
 out.push(`pub const CGameID = u64;`)
+out.push(`pub const default_alignment = 1;`)
 out.push(`pub const CSteamID = u64;`)
 out.push(`pub const intptr_t = ?*anyopaque;`)
 out.push(`pub const size_t = isize;`)
@@ -384,6 +411,8 @@ function printFns(structName, data) {
   }
 }
 
+
+
 function printStruct(struct) {
   const structName = struct.struct;
   out.push(`pub const ${structName} = extern struct {`)
@@ -391,7 +420,10 @@ function printStruct(struct) {
   struct.fields.forEach(_ => {
     const type = convertType(_.fieldtype)
     const val = getDefaultValue(type, struct)
-    out.push(`  ${_.fieldname}: ${convertType(_.fieldtype)} ${val !== undefined ? '=' + val : ''},`)
+
+
+    const alignment = structName in g_CustomPackSize ? `align(${g_CustomPackSize[structName]})` : `align(default_alignment)`; // https://github.com/ziglang/zig/issues/16633
+    out.push(`  ${_.fieldname}: ${convertType(_.fieldtype)} ${alignment} ${val !== undefined ? '=' + val : ''},`)
   });
 
   struct.consts && printConsts(struct.consts);

@@ -2,6 +2,7 @@
 const std = @import("std");
 const builtin = @import("builtin");
 pub const CGameID = u64;
+pub const default_alignment = 1;
 pub const CSteamID = u64;
 pub const intptr_t = ?*anyopaque;
 pub const size_t = isize;
@@ -874,24 +875,24 @@ pub const FSteamNetworkingSocketsDebugOutput = ?*const fn (ESteamNetworkingSocke
 pub const SteamServersConnected_t = extern struct {};
 /// callbackId = 102
 pub const SteamServerConnectFailure_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_bStillRetrying: bool = false,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_bStillRetrying: bool align(default_alignment) = false,
 };
 /// callbackId = 103
 pub const SteamServersDisconnected_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
 };
 /// callbackId = 113
 pub const ClientGameServerDeny_t = extern struct {
-    m_uAppID: uint32 = 0,
-    m_unGameServerIP: uint32 = 0,
-    m_usGameServerPort: uint16 = 0,
-    m_bSecure: uint16 = 0,
-    m_uReason: uint32 = 0,
+    m_uAppID: uint32 align(default_alignment) = 0,
+    m_unGameServerIP: uint32 align(default_alignment) = 0,
+    m_usGameServerPort: uint16 align(default_alignment) = 0,
+    m_bSecure: uint16 align(default_alignment) = 0,
+    m_uReason: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 117
 pub const IPCFailure_t = extern struct {
-    m_eFailureType: uint8 = 0,
+    m_eFailureType: uint8 align(default_alignment) = 0,
 
     // Enums
 
@@ -904,203 +905,203 @@ pub const IPCFailure_t = extern struct {
 pub const LicensesUpdated_t = extern struct {};
 /// callbackId = 143
 pub const ValidateAuthTicketResponse_t = extern struct {
-    m_SteamID: CSteamID,
-    m_eAuthSessionResponse: EAuthSessionResponse = EAuthSessionResponse.k_EAuthSessionResponseOK,
-    m_OwnerSteamID: CSteamID,
+    m_SteamID: CSteamID align(4),
+    m_eAuthSessionResponse: EAuthSessionResponse align(4) = EAuthSessionResponse.k_EAuthSessionResponseOK,
+    m_OwnerSteamID: CSteamID align(4),
 };
 /// callbackId = 152
 pub const MicroTxnAuthorizationResponse_t = extern struct {
-    m_unAppID: uint32 = 0,
-    m_ulOrderID: uint64 = 0,
-    m_bAuthorized: uint8 = 0,
+    m_unAppID: uint32 align(default_alignment) = 0,
+    m_ulOrderID: uint64 align(default_alignment) = 0,
+    m_bAuthorized: uint8 align(default_alignment) = 0,
 };
 /// callbackId = 154
 pub const EncryptedAppTicketResponse_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
 };
 /// callbackId = 163
 pub const GetAuthSessionTicketResponse_t = extern struct {
-    m_hAuthTicket: HAuthTicket = 0,
-    m_eResult: EResult = EResult.k_EResultNone,
+    m_hAuthTicket: HAuthTicket align(default_alignment) = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
 };
 /// callbackId = 164
 pub const GameWebCallback_t = extern struct {
-    m_szURL: [256]u8,
+    m_szURL: [256]u8 align(default_alignment),
 };
 /// callbackId = 165
 pub const StoreAuthURLResponse_t = extern struct {
-    m_szURL: [512]u8,
+    m_szURL: [512]u8 align(default_alignment),
 };
 /// callbackId = 166
 pub const MarketEligibilityResponse_t = extern struct {
-    m_bAllowed: bool = false,
-    m_eNotAllowedReason: EMarketNotAllowedReasonFlags = EMarketNotAllowedReasonFlags.k_EMarketNotAllowedReason_None,
-    m_rtAllowedAtTime: RTime32 = 0,
-    m_cdaySteamGuardRequiredDays: i32 = 0,
-    m_cdayNewDeviceCooldown: i32 = 0,
+    m_bAllowed: bool align(default_alignment) = false,
+    m_eNotAllowedReason: EMarketNotAllowedReasonFlags align(default_alignment) = EMarketNotAllowedReasonFlags.k_EMarketNotAllowedReason_None,
+    m_rtAllowedAtTime: RTime32 align(default_alignment) = 0,
+    m_cdaySteamGuardRequiredDays: i32 align(default_alignment) = 0,
+    m_cdayNewDeviceCooldown: i32 align(default_alignment) = 0,
 };
 /// callbackId = 167
 pub const DurationControl_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_appid: AppId_t = 0,
-    m_bApplicable: bool = false,
-    m_csecsLast5h: int32 = 0,
-    m_progress: EDurationControlProgress = EDurationControlProgress.k_EDurationControlProgress_Full,
-    m_notification: EDurationControlNotification = EDurationControlNotification.k_EDurationControlNotification_None,
-    m_csecsToday: int32 = 0,
-    m_csecsRemaining: int32 = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_appid: AppId_t align(default_alignment) = 0,
+    m_bApplicable: bool align(default_alignment) = false,
+    m_csecsLast5h: int32 align(default_alignment) = 0,
+    m_progress: EDurationControlProgress align(default_alignment) = EDurationControlProgress.k_EDurationControlProgress_Full,
+    m_notification: EDurationControlNotification align(default_alignment) = EDurationControlNotification.k_EDurationControlNotification_None,
+    m_csecsToday: int32 align(default_alignment) = 0,
+    m_csecsRemaining: int32 align(default_alignment) = 0,
 };
 /// callbackId = 168
 pub const GetTicketForWebApiResponse_t = extern struct {
-    m_hAuthTicket: HAuthTicket = 0,
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_cubTicket: i32 = 0,
-    m_rgubTicket: [2560]uint8,
+    m_hAuthTicket: HAuthTicket align(default_alignment) = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_cubTicket: i32 align(default_alignment) = 0,
+    m_rgubTicket: [2560]uint8 align(default_alignment),
 };
 /// callbackId = 304
 pub const PersonaStateChange_t = extern struct {
-    m_ulSteamID: uint64 = 0,
-    m_nChangeFlags: i32 = 0,
+    m_ulSteamID: uint64 align(default_alignment) = 0,
+    m_nChangeFlags: i32 align(default_alignment) = 0,
 };
 /// callbackId = 331
 pub const GameOverlayActivated_t = extern struct {
-    m_bActive: uint8 = 0,
-    m_bUserInitiated: bool = false,
-    m_nAppID: AppId_t = 0,
+    m_bActive: uint8 align(default_alignment) = 0,
+    m_bUserInitiated: bool align(default_alignment) = false,
+    m_nAppID: AppId_t align(default_alignment) = 0,
 };
 /// callbackId = 332
 pub const GameServerChangeRequested_t = extern struct {
-    m_rgchServer: [64]u8,
-    m_rgchPassword: [64]u8,
+    m_rgchServer: [64]u8 align(default_alignment),
+    m_rgchPassword: [64]u8 align(default_alignment),
 };
 /// callbackId = 333
 pub const GameLobbyJoinRequested_t = extern struct {
-    m_steamIDLobby: CSteamID,
-    m_steamIDFriend: CSteamID,
+    m_steamIDLobby: CSteamID align(default_alignment),
+    m_steamIDFriend: CSteamID align(default_alignment),
 };
 /// callbackId = 334
 pub const AvatarImageLoaded_t = extern struct {
-    m_steamID: CSteamID,
-    m_iImage: i32 = 0,
-    m_iWide: i32 = 0,
-    m_iTall: i32 = 0,
+    m_steamID: CSteamID align(4),
+    m_iImage: i32 align(4) = 0,
+    m_iWide: i32 align(4) = 0,
+    m_iTall: i32 align(4) = 0,
 };
 /// callbackId = 335
 pub const ClanOfficerListResponse_t = extern struct {
-    m_steamIDClan: CSteamID,
-    m_cOfficers: i32 = 0,
-    m_bSuccess: uint8 = 0,
+    m_steamIDClan: CSteamID align(default_alignment),
+    m_cOfficers: i32 align(default_alignment) = 0,
+    m_bSuccess: uint8 align(default_alignment) = 0,
 };
 /// callbackId = 336
 pub const FriendRichPresenceUpdate_t = extern struct {
-    m_steamIDFriend: CSteamID,
-    m_nAppID: AppId_t = 0,
+    m_steamIDFriend: CSteamID align(4),
+    m_nAppID: AppId_t align(4) = 0,
 };
 /// callbackId = 337
 pub const GameRichPresenceJoinRequested_t = extern struct {
-    m_steamIDFriend: CSteamID,
-    m_rgchConnect: [256]u8,
+    m_steamIDFriend: CSteamID align(default_alignment),
+    m_rgchConnect: [256]u8 align(default_alignment),
 };
 /// callbackId = 338
 pub const GameConnectedClanChatMsg_t = extern struct {
-    m_steamIDClanChat: CSteamID,
-    m_steamIDUser: CSteamID,
-    m_iMessageID: i32 = 0,
+    m_steamIDClanChat: CSteamID align(4),
+    m_steamIDUser: CSteamID align(4),
+    m_iMessageID: i32 align(4) = 0,
 };
 /// callbackId = 339
 pub const GameConnectedChatJoin_t = extern struct {
-    m_steamIDClanChat: CSteamID,
-    m_steamIDUser: CSteamID,
+    m_steamIDClanChat: CSteamID align(default_alignment),
+    m_steamIDUser: CSteamID align(default_alignment),
 };
 /// callbackId = 340
 pub const GameConnectedChatLeave_t = extern struct {
-    m_steamIDClanChat: CSteamID,
-    m_steamIDUser: CSteamID,
-    m_bKicked: bool = false,
-    m_bDropped: bool = false,
+    m_steamIDClanChat: CSteamID align(1),
+    m_steamIDUser: CSteamID align(1),
+    m_bKicked: bool align(1) = false,
+    m_bDropped: bool align(1) = false,
 };
 /// callbackId = 341
 pub const DownloadClanActivityCountsResult_t = extern struct {
-    m_bSuccess: bool = false,
+    m_bSuccess: bool align(default_alignment) = false,
 };
 /// callbackId = 342
 pub const JoinClanChatRoomCompletionResult_t = extern struct {
-    m_steamIDClanChat: CSteamID,
-    m_eChatRoomEnterResponse: EChatRoomEnterResponse,
+    m_steamIDClanChat: CSteamID align(4),
+    m_eChatRoomEnterResponse: EChatRoomEnterResponse align(4),
 };
 /// callbackId = 343
 pub const GameConnectedFriendChatMsg_t = extern struct {
-    m_steamIDUser: CSteamID,
-    m_iMessageID: i32 = 0,
+    m_steamIDUser: CSteamID align(4),
+    m_iMessageID: i32 align(4) = 0,
 };
 /// callbackId = 344
 pub const FriendsGetFollowerCount_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_steamID: CSteamID,
-    m_nCount: i32 = 0,
+    m_eResult: EResult align(4) = EResult.k_EResultNone,
+    m_steamID: CSteamID align(4),
+    m_nCount: i32 align(4) = 0,
 };
 /// callbackId = 345
 pub const FriendsIsFollowing_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_steamID: CSteamID,
-    m_bIsFollowing: bool = false,
+    m_eResult: EResult align(4) = EResult.k_EResultNone,
+    m_steamID: CSteamID align(4),
+    m_bIsFollowing: bool align(4) = false,
 };
 /// callbackId = 346
 pub const FriendsEnumerateFollowingList_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_rgSteamID: [50]CSteamID,
-    m_nResultsReturned: int32 = 0,
-    m_nTotalResultCount: int32 = 0,
+    m_eResult: EResult align(4) = EResult.k_EResultNone,
+    m_rgSteamID: [50]CSteamID align(4),
+    m_nResultsReturned: int32 align(4) = 0,
+    m_nTotalResultCount: int32 align(4) = 0,
 };
 /// callbackId = 347
 pub const SetPersonaNameResponse_t = extern struct {
-    m_bSuccess: bool = false,
-    m_bLocalSuccess: bool = false,
-    m_result: EResult = EResult.k_EResultNone,
+    m_bSuccess: bool align(default_alignment) = false,
+    m_bLocalSuccess: bool align(default_alignment) = false,
+    m_result: EResult align(default_alignment) = EResult.k_EResultNone,
 };
 /// callbackId = 348
 pub const UnreadChatMessagesChanged_t = extern struct {};
 /// callbackId = 349
 pub const OverlayBrowserProtocolNavigation_t = extern struct {
-    rgchURI: [1024]u8,
+    rgchURI: [1024]u8 align(default_alignment),
 };
 /// callbackId = 350
 pub const EquippedProfileItemsChanged_t = extern struct {
-    m_steamID: CSteamID,
+    m_steamID: CSteamID align(default_alignment),
 };
 /// callbackId = 351
 pub const EquippedProfileItems_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_steamID: CSteamID,
-    m_bHasAnimatedAvatar: bool = false,
-    m_bHasAvatarFrame: bool = false,
-    m_bHasProfileModifier: bool = false,
-    m_bHasProfileBackground: bool = false,
-    m_bHasMiniProfileBackground: bool = false,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_steamID: CSteamID align(default_alignment),
+    m_bHasAnimatedAvatar: bool align(default_alignment) = false,
+    m_bHasAvatarFrame: bool align(default_alignment) = false,
+    m_bHasProfileModifier: bool align(default_alignment) = false,
+    m_bHasProfileBackground: bool align(default_alignment) = false,
+    m_bHasMiniProfileBackground: bool align(default_alignment) = false,
 };
 /// callbackId = 701
 pub const IPCountry_t = extern struct {};
 /// callbackId = 702
 pub const LowBatteryPower_t = extern struct {
-    m_nMinutesBatteryLeft: uint8 = 0,
+    m_nMinutesBatteryLeft: uint8 align(default_alignment) = 0,
 };
 /// callbackId = 703
 pub const SteamAPICallCompleted_t = extern struct {
-    m_hAsyncCall: SteamAPICall_t = 0,
-    m_iCallback: i32 = 0,
-    m_cubParam: uint32 = 0,
+    m_hAsyncCall: SteamAPICall_t align(default_alignment) = 0,
+    m_iCallback: i32 align(default_alignment) = 0,
+    m_cubParam: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 704
 pub const SteamShutdown_t = extern struct {};
 /// callbackId = 705
 pub const CheckFileSignature_t = extern struct {
-    m_eCheckFileSignature: ECheckFileSignature = ECheckFileSignature.k_ECheckFileSignatureInvalidSignature,
+    m_eCheckFileSignature: ECheckFileSignature align(default_alignment) = ECheckFileSignature.k_ECheckFileSignatureInvalidSignature,
 };
 /// callbackId = 714
 pub const GamepadTextInputDismissed_t = extern struct {
-    m_bSubmitted: bool = false,
-    m_unSubmittedText: uint32 = 0,
-    m_unAppID: AppId_t = 0,
+    m_bSubmitted: bool align(default_alignment) = false,
+    m_unSubmittedText: uint32 align(default_alignment) = 0,
+    m_unAppID: AppId_t align(default_alignment) = 0,
 };
 /// callbackId = 736
 pub const AppResumingFromSuspend_t = extern struct {};
@@ -1108,117 +1109,117 @@ pub const AppResumingFromSuspend_t = extern struct {};
 pub const FloatingGamepadTextInputDismissed_t = extern struct {};
 /// callbackId = 739
 pub const FilterTextDictionaryChanged_t = extern struct {
-    m_eLanguage: i32 = 0,
+    m_eLanguage: i32 align(default_alignment) = 0,
 };
 /// callbackId = 502
 pub const FavoritesListChanged_t = extern struct {
-    m_nIP: uint32 = 0,
-    m_nQueryPort: uint32 = 0,
-    m_nConnPort: uint32 = 0,
-    m_nAppID: uint32 = 0,
-    m_nFlags: uint32 = 0,
-    m_bAdd: bool = false,
-    m_unAccountId: AccountID_t = 0,
+    m_nIP: uint32 align(default_alignment) = 0,
+    m_nQueryPort: uint32 align(default_alignment) = 0,
+    m_nConnPort: uint32 align(default_alignment) = 0,
+    m_nAppID: uint32 align(default_alignment) = 0,
+    m_nFlags: uint32 align(default_alignment) = 0,
+    m_bAdd: bool align(default_alignment) = false,
+    m_unAccountId: AccountID_t align(default_alignment) = 0,
 };
 /// callbackId = 503
 pub const LobbyInvite_t = extern struct {
-    m_ulSteamIDUser: uint64 = 0,
-    m_ulSteamIDLobby: uint64 = 0,
-    m_ulGameID: uint64 = 0,
+    m_ulSteamIDUser: uint64 align(default_alignment) = 0,
+    m_ulSteamIDLobby: uint64 align(default_alignment) = 0,
+    m_ulGameID: uint64 align(default_alignment) = 0,
 };
 /// callbackId = 504
 pub const LobbyEnter_t = extern struct {
-    m_ulSteamIDLobby: uint64 = 0,
-    m_rgfChatPermissions: uint32 = 0,
-    m_bLocked: bool = false,
-    m_EChatRoomEnterResponse: uint32 = 0,
+    m_ulSteamIDLobby: uint64 align(default_alignment) = 0,
+    m_rgfChatPermissions: uint32 align(default_alignment) = 0,
+    m_bLocked: bool align(default_alignment) = false,
+    m_EChatRoomEnterResponse: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 505
 pub const LobbyDataUpdate_t = extern struct {
-    m_ulSteamIDLobby: uint64 = 0,
-    m_ulSteamIDMember: uint64 = 0,
-    m_bSuccess: uint8 = 0,
+    m_ulSteamIDLobby: uint64 align(default_alignment) = 0,
+    m_ulSteamIDMember: uint64 align(default_alignment) = 0,
+    m_bSuccess: uint8 align(default_alignment) = 0,
 };
 /// callbackId = 506
 pub const LobbyChatUpdate_t = extern struct {
-    m_ulSteamIDLobby: uint64 = 0,
-    m_ulSteamIDUserChanged: uint64 = 0,
-    m_ulSteamIDMakingChange: uint64 = 0,
-    m_rgfChatMemberStateChange: uint32 = 0,
+    m_ulSteamIDLobby: uint64 align(default_alignment) = 0,
+    m_ulSteamIDUserChanged: uint64 align(default_alignment) = 0,
+    m_ulSteamIDMakingChange: uint64 align(default_alignment) = 0,
+    m_rgfChatMemberStateChange: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 507
 pub const LobbyChatMsg_t = extern struct {
-    m_ulSteamIDLobby: uint64 = 0,
-    m_ulSteamIDUser: uint64 = 0,
-    m_eChatEntryType: uint8 = 0,
-    m_iChatID: uint32 = 0,
+    m_ulSteamIDLobby: uint64 align(default_alignment) = 0,
+    m_ulSteamIDUser: uint64 align(default_alignment) = 0,
+    m_eChatEntryType: uint8 align(default_alignment) = 0,
+    m_iChatID: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 509
 pub const LobbyGameCreated_t = extern struct {
-    m_ulSteamIDLobby: uint64 = 0,
-    m_ulSteamIDGameServer: uint64 = 0,
-    m_unIP: uint32 = 0,
-    m_usPort: uint16 = 0,
+    m_ulSteamIDLobby: uint64 align(default_alignment) = 0,
+    m_ulSteamIDGameServer: uint64 align(default_alignment) = 0,
+    m_unIP: uint32 align(default_alignment) = 0,
+    m_usPort: uint16 align(default_alignment) = 0,
 };
 /// callbackId = 510
 pub const LobbyMatchList_t = extern struct {
-    m_nLobbiesMatching: uint32 = 0,
+    m_nLobbiesMatching: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 512
 pub const LobbyKicked_t = extern struct {
-    m_ulSteamIDLobby: uint64 = 0,
-    m_ulSteamIDAdmin: uint64 = 0,
-    m_bKickedDueToDisconnect: uint8 = 0,
+    m_ulSteamIDLobby: uint64 align(default_alignment) = 0,
+    m_ulSteamIDAdmin: uint64 align(default_alignment) = 0,
+    m_bKickedDueToDisconnect: uint8 align(default_alignment) = 0,
 };
 /// callbackId = 513
 pub const LobbyCreated_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_ulSteamIDLobby: uint64 = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_ulSteamIDLobby: uint64 align(default_alignment) = 0,
 };
 /// callbackId = 515
 pub const PSNGameBootInviteResult_t = extern struct {
-    m_bGameBootInviteExists: bool = false,
-    m_steamIDLobby: CSteamID,
+    m_bGameBootInviteExists: bool align(default_alignment) = false,
+    m_steamIDLobby: CSteamID align(default_alignment),
 };
 /// callbackId = 516
 pub const FavoritesListAccountsUpdated_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
 };
 /// callbackId = 5201
 pub const SearchForGameProgressCallback_t = extern struct {
-    m_ullSearchID: uint64 = 0,
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_lobbyID: CSteamID,
-    m_steamIDEndedSearch: CSteamID,
-    m_nSecondsRemainingEstimate: int32 = 0,
-    m_cPlayersSearching: int32 = 0,
+    m_ullSearchID: uint64 align(default_alignment) = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_lobbyID: CSteamID align(default_alignment),
+    m_steamIDEndedSearch: CSteamID align(default_alignment),
+    m_nSecondsRemainingEstimate: int32 align(default_alignment) = 0,
+    m_cPlayersSearching: int32 align(default_alignment) = 0,
 };
 /// callbackId = 5202
 pub const SearchForGameResultCallback_t = extern struct {
-    m_ullSearchID: uint64 = 0,
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nCountPlayersInGame: int32 = 0,
-    m_nCountAcceptedGame: int32 = 0,
-    m_steamIDHost: CSteamID,
-    m_bFinalCallback: bool = false,
+    m_ullSearchID: uint64 align(default_alignment) = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nCountPlayersInGame: int32 align(default_alignment) = 0,
+    m_nCountAcceptedGame: int32 align(default_alignment) = 0,
+    m_steamIDHost: CSteamID align(default_alignment),
+    m_bFinalCallback: bool align(default_alignment) = false,
 };
 /// callbackId = 5211
 pub const RequestPlayersForGameProgressCallback_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_ullSearchID: uint64 = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_ullSearchID: uint64 align(default_alignment) = 0,
 };
 /// callbackId = 5212
 pub const RequestPlayersForGameResultCallback_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_ullSearchID: uint64 = 0,
-    m_SteamIDPlayerFound: CSteamID,
-    m_SteamIDLobby: CSteamID,
-    m_ePlayerAcceptState: c_int = 0,
-    m_nPlayerIndex: int32 = 0,
-    m_nTotalPlayersFound: int32 = 0,
-    m_nTotalPlayersAcceptedGame: int32 = 0,
-    m_nSuggestedTeamIndex: int32 = 0,
-    m_ullUniqueGameID: uint64 = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_ullSearchID: uint64 align(default_alignment) = 0,
+    m_SteamIDPlayerFound: CSteamID align(default_alignment),
+    m_SteamIDLobby: CSteamID align(default_alignment),
+    m_ePlayerAcceptState: c_int align(default_alignment) = 0,
+    m_nPlayerIndex: int32 align(default_alignment) = 0,
+    m_nTotalPlayersFound: int32 align(default_alignment) = 0,
+    m_nTotalPlayersAcceptedGame: int32 align(default_alignment) = 0,
+    m_nSuggestedTeamIndex: int32 align(default_alignment) = 0,
+    m_ullUniqueGameID: uint64 align(default_alignment) = 0,
 
     // Enums
 
@@ -1230,41 +1231,41 @@ pub const RequestPlayersForGameResultCallback_t = extern struct {
 };
 /// callbackId = 5213
 pub const RequestPlayersForGameFinalResultCallback_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_ullSearchID: uint64 = 0,
-    m_ullUniqueGameID: uint64 = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_ullSearchID: uint64 align(default_alignment) = 0,
+    m_ullUniqueGameID: uint64 align(default_alignment) = 0,
 };
 /// callbackId = 5214
 pub const SubmitPlayerResultResultCallback_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    ullUniqueGameID: uint64 = 0,
-    steamIDPlayer: CSteamID,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    ullUniqueGameID: uint64 align(default_alignment) = 0,
+    steamIDPlayer: CSteamID align(default_alignment),
 };
 /// callbackId = 5215
 pub const EndGameResultCallback_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    ullUniqueGameID: uint64 = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    ullUniqueGameID: uint64 align(default_alignment) = 0,
 };
 /// callbackId = 5301
 pub const JoinPartyCallback_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_ulBeaconID: PartyBeaconID_t = 0,
-    m_SteamIDBeaconOwner: CSteamID,
-    m_rgchConnectString: [256]u8,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_ulBeaconID: PartyBeaconID_t align(default_alignment) = 0,
+    m_SteamIDBeaconOwner: CSteamID align(default_alignment),
+    m_rgchConnectString: [256]u8 align(default_alignment),
 };
 /// callbackId = 5302
 pub const CreateBeaconCallback_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_ulBeaconID: PartyBeaconID_t = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_ulBeaconID: PartyBeaconID_t align(default_alignment) = 0,
 };
 /// callbackId = 5303
 pub const ReservationNotificationCallback_t = extern struct {
-    m_ulBeaconID: PartyBeaconID_t = 0,
-    m_steamIDJoiner: CSteamID,
+    m_ulBeaconID: PartyBeaconID_t align(default_alignment) = 0,
+    m_steamIDJoiner: CSteamID align(default_alignment),
 };
 /// callbackId = 5304
 pub const ChangeNumOpenSlotsCallback_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
 };
 /// callbackId = 5305
 pub const AvailableBeaconLocationsUpdated_t = extern struct {};
@@ -1272,293 +1273,293 @@ pub const AvailableBeaconLocationsUpdated_t = extern struct {};
 pub const ActiveBeaconsUpdated_t = extern struct {};
 /// callbackId = 1307
 pub const RemoteStorageFileShareResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_hFile: UGCHandle_t = 0,
-    m_rgchFilename: [260]u8,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_hFile: UGCHandle_t align(default_alignment) = 0,
+    m_rgchFilename: [260]u8 align(default_alignment),
 };
 /// callbackId = 1309
 pub const RemoteStoragePublishFileResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nPublishedFileId: PublishedFileId_t = 0,
-    m_bUserNeedsToAcceptWorkshopLegalAgreement: bool = false,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_bUserNeedsToAcceptWorkshopLegalAgreement: bool align(default_alignment) = false,
 };
 /// callbackId = 1311
 pub const RemoteStorageDeletePublishedFileResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nPublishedFileId: PublishedFileId_t = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
 };
 /// callbackId = 1312
 pub const RemoteStorageEnumerateUserPublishedFilesResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nResultsReturned: int32 = 0,
-    m_nTotalResultCount: int32 = 0,
-    m_rgPublishedFileId: [50]PublishedFileId_t,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nResultsReturned: int32 align(default_alignment) = 0,
+    m_nTotalResultCount: int32 align(default_alignment) = 0,
+    m_rgPublishedFileId: [50]PublishedFileId_t align(default_alignment),
 };
 /// callbackId = 1313
 pub const RemoteStorageSubscribePublishedFileResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nPublishedFileId: PublishedFileId_t = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
 };
 /// callbackId = 1314
 pub const RemoteStorageEnumerateUserSubscribedFilesResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nResultsReturned: int32 = 0,
-    m_nTotalResultCount: int32 = 0,
-    m_rgPublishedFileId: [50]PublishedFileId_t,
-    m_rgRTimeSubscribed: [50]uint32,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nResultsReturned: int32 align(default_alignment) = 0,
+    m_nTotalResultCount: int32 align(default_alignment) = 0,
+    m_rgPublishedFileId: [50]PublishedFileId_t align(default_alignment),
+    m_rgRTimeSubscribed: [50]uint32 align(default_alignment),
 };
 /// callbackId = 1315
 pub const RemoteStorageUnsubscribePublishedFileResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nPublishedFileId: PublishedFileId_t = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
 };
 /// callbackId = 1316
 pub const RemoteStorageUpdatePublishedFileResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nPublishedFileId: PublishedFileId_t = 0,
-    m_bUserNeedsToAcceptWorkshopLegalAgreement: bool = false,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_bUserNeedsToAcceptWorkshopLegalAgreement: bool align(default_alignment) = false,
 };
 /// callbackId = 1317
 pub const RemoteStorageDownloadUGCResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_hFile: UGCHandle_t = 0,
-    m_nAppID: AppId_t = 0,
-    m_nSizeInBytes: int32 = 0,
-    m_pchFileName: [260]u8,
-    m_ulSteamIDOwner: uint64 = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_hFile: UGCHandle_t align(default_alignment) = 0,
+    m_nAppID: AppId_t align(default_alignment) = 0,
+    m_nSizeInBytes: int32 align(default_alignment) = 0,
+    m_pchFileName: [260]u8 align(default_alignment),
+    m_ulSteamIDOwner: uint64 align(default_alignment) = 0,
 };
 /// callbackId = 1318
 pub const RemoteStorageGetPublishedFileDetailsResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nPublishedFileId: PublishedFileId_t = 0,
-    m_nCreatorAppID: AppId_t = 0,
-    m_nConsumerAppID: AppId_t = 0,
-    m_rgchTitle: [129]u8,
-    m_rgchDescription: [8000]u8,
-    m_hFile: UGCHandle_t = 0,
-    m_hPreviewFile: UGCHandle_t = 0,
-    m_ulSteamIDOwner: uint64 = 0,
-    m_rtimeCreated: uint32 = 0,
-    m_rtimeUpdated: uint32 = 0,
-    m_eVisibility: ERemoteStoragePublishedFileVisibility = ERemoteStoragePublishedFileVisibility.k_ERemoteStoragePublishedFileVisibilityPublic,
-    m_bBanned: bool = false,
-    m_rgchTags: [1025]u8,
-    m_bTagsTruncated: bool = false,
-    m_pchFileName: [260]u8,
-    m_nFileSize: int32 = 0,
-    m_nPreviewFileSize: int32 = 0,
-    m_rgchURL: [256]u8,
-    m_eFileType: EWorkshopFileType = EWorkshopFileType.k_EWorkshopFileTypeFirst,
-    m_bAcceptedForUse: bool = false,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_nCreatorAppID: AppId_t align(default_alignment) = 0,
+    m_nConsumerAppID: AppId_t align(default_alignment) = 0,
+    m_rgchTitle: [129]u8 align(default_alignment),
+    m_rgchDescription: [8000]u8 align(default_alignment),
+    m_hFile: UGCHandle_t align(default_alignment) = 0,
+    m_hPreviewFile: UGCHandle_t align(default_alignment) = 0,
+    m_ulSteamIDOwner: uint64 align(default_alignment) = 0,
+    m_rtimeCreated: uint32 align(default_alignment) = 0,
+    m_rtimeUpdated: uint32 align(default_alignment) = 0,
+    m_eVisibility: ERemoteStoragePublishedFileVisibility align(default_alignment) = ERemoteStoragePublishedFileVisibility.k_ERemoteStoragePublishedFileVisibilityPublic,
+    m_bBanned: bool align(default_alignment) = false,
+    m_rgchTags: [1025]u8 align(default_alignment),
+    m_bTagsTruncated: bool align(default_alignment) = false,
+    m_pchFileName: [260]u8 align(default_alignment),
+    m_nFileSize: int32 align(default_alignment) = 0,
+    m_nPreviewFileSize: int32 align(default_alignment) = 0,
+    m_rgchURL: [256]u8 align(default_alignment),
+    m_eFileType: EWorkshopFileType align(default_alignment) = EWorkshopFileType.k_EWorkshopFileTypeFirst,
+    m_bAcceptedForUse: bool align(default_alignment) = false,
 };
 /// callbackId = 1319
 pub const RemoteStorageEnumerateWorkshopFilesResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nResultsReturned: int32 = 0,
-    m_nTotalResultCount: int32 = 0,
-    m_rgPublishedFileId: [50]PublishedFileId_t,
-    m_rgScore: [50]f32,
-    m_nAppId: AppId_t = 0,
-    m_unStartIndex: uint32 = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nResultsReturned: int32 align(default_alignment) = 0,
+    m_nTotalResultCount: int32 align(default_alignment) = 0,
+    m_rgPublishedFileId: [50]PublishedFileId_t align(default_alignment),
+    m_rgScore: [50]f32 align(default_alignment),
+    m_nAppId: AppId_t align(default_alignment) = 0,
+    m_unStartIndex: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 1320
 pub const RemoteStorageGetPublishedItemVoteDetailsResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_unPublishedFileId: PublishedFileId_t = 0,
-    m_nVotesFor: int32 = 0,
-    m_nVotesAgainst: int32 = 0,
-    m_nReports: int32 = 0,
-    m_fScore: f32 = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_unPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_nVotesFor: int32 align(default_alignment) = 0,
+    m_nVotesAgainst: int32 align(default_alignment) = 0,
+    m_nReports: int32 align(default_alignment) = 0,
+    m_fScore: f32 align(default_alignment) = 0,
 };
 /// callbackId = 1321
 pub const RemoteStoragePublishedFileSubscribed_t = extern struct {
-    m_nPublishedFileId: PublishedFileId_t = 0,
-    m_nAppID: AppId_t = 0,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_nAppID: AppId_t align(default_alignment) = 0,
 };
 /// callbackId = 1322
 pub const RemoteStoragePublishedFileUnsubscribed_t = extern struct {
-    m_nPublishedFileId: PublishedFileId_t = 0,
-    m_nAppID: AppId_t = 0,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_nAppID: AppId_t align(default_alignment) = 0,
 };
 /// callbackId = 1323
 pub const RemoteStoragePublishedFileDeleted_t = extern struct {
-    m_nPublishedFileId: PublishedFileId_t = 0,
-    m_nAppID: AppId_t = 0,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_nAppID: AppId_t align(default_alignment) = 0,
 };
 /// callbackId = 1324
 pub const RemoteStorageUpdateUserPublishedItemVoteResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nPublishedFileId: PublishedFileId_t = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
 };
 /// callbackId = 1325
 pub const RemoteStorageUserVoteDetails_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nPublishedFileId: PublishedFileId_t = 0,
-    m_eVote: EWorkshopVote = EWorkshopVote.k_EWorkshopVoteUnvoted,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_eVote: EWorkshopVote align(default_alignment) = EWorkshopVote.k_EWorkshopVoteUnvoted,
 };
 /// callbackId = 1326
 pub const RemoteStorageEnumerateUserSharedWorkshopFilesResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nResultsReturned: int32 = 0,
-    m_nTotalResultCount: int32 = 0,
-    m_rgPublishedFileId: [50]PublishedFileId_t,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nResultsReturned: int32 align(default_alignment) = 0,
+    m_nTotalResultCount: int32 align(default_alignment) = 0,
+    m_rgPublishedFileId: [50]PublishedFileId_t align(default_alignment),
 };
 /// callbackId = 1327
 pub const RemoteStorageSetUserPublishedFileActionResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nPublishedFileId: PublishedFileId_t = 0,
-    m_eAction: EWorkshopFileAction = EWorkshopFileAction.k_EWorkshopFileActionPlayed,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_eAction: EWorkshopFileAction align(default_alignment) = EWorkshopFileAction.k_EWorkshopFileActionPlayed,
 };
 /// callbackId = 1328
 pub const RemoteStorageEnumeratePublishedFilesByUserActionResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_eAction: EWorkshopFileAction = EWorkshopFileAction.k_EWorkshopFileActionPlayed,
-    m_nResultsReturned: int32 = 0,
-    m_nTotalResultCount: int32 = 0,
-    m_rgPublishedFileId: [50]PublishedFileId_t,
-    m_rgRTimeUpdated: [50]uint32,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_eAction: EWorkshopFileAction align(default_alignment) = EWorkshopFileAction.k_EWorkshopFileActionPlayed,
+    m_nResultsReturned: int32 align(default_alignment) = 0,
+    m_nTotalResultCount: int32 align(default_alignment) = 0,
+    m_rgPublishedFileId: [50]PublishedFileId_t align(default_alignment),
+    m_rgRTimeUpdated: [50]uint32 align(default_alignment),
 };
 /// callbackId = 1329
 pub const RemoteStoragePublishFileProgress_t = extern struct {
-    m_dPercentFile: f64 = 0,
-    m_bPreview: bool = false,
+    m_dPercentFile: f64 align(default_alignment) = 0,
+    m_bPreview: bool align(default_alignment) = false,
 };
 /// callbackId = 1330
 pub const RemoteStoragePublishedFileUpdated_t = extern struct {
-    m_nPublishedFileId: PublishedFileId_t = 0,
-    m_nAppID: AppId_t = 0,
-    m_ulUnused: uint64 = 0,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_nAppID: AppId_t align(default_alignment) = 0,
+    m_ulUnused: uint64 align(default_alignment) = 0,
 };
 /// callbackId = 1331
 pub const RemoteStorageFileWriteAsyncComplete_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
 };
 /// callbackId = 1332
 pub const RemoteStorageFileReadAsyncComplete_t = extern struct {
-    m_hFileReadAsync: SteamAPICall_t = 0,
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nOffset: uint32 = 0,
-    m_cubRead: uint32 = 0,
+    m_hFileReadAsync: SteamAPICall_t align(default_alignment) = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nOffset: uint32 align(default_alignment) = 0,
+    m_cubRead: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 1333
 pub const RemoteStorageLocalFileChange_t = extern struct {};
 /// callbackId = 1101
 pub const UserStatsReceived_t = extern struct {
-    m_nGameID: uint64 = 0,
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_steamIDUser: CSteamID,
+    m_nGameID: uint64 align(default_alignment) = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_steamIDUser: CSteamID align(default_alignment),
 };
 /// callbackId = 1102
 pub const UserStatsStored_t = extern struct {
-    m_nGameID: uint64 = 0,
-    m_eResult: EResult = EResult.k_EResultNone,
+    m_nGameID: uint64 align(default_alignment) = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
 };
 /// callbackId = 1103
 pub const UserAchievementStored_t = extern struct {
-    m_nGameID: uint64 = 0,
-    m_bGroupAchievement: bool = false,
-    m_rgchAchievementName: [128]u8,
-    m_nCurProgress: uint32 = 0,
-    m_nMaxProgress: uint32 = 0,
+    m_nGameID: uint64 align(default_alignment) = 0,
+    m_bGroupAchievement: bool align(default_alignment) = false,
+    m_rgchAchievementName: [128]u8 align(default_alignment),
+    m_nCurProgress: uint32 align(default_alignment) = 0,
+    m_nMaxProgress: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 1104
 pub const LeaderboardFindResult_t = extern struct {
-    m_hSteamLeaderboard: SteamLeaderboard_t = 0,
-    m_bLeaderboardFound: uint8 = 0,
+    m_hSteamLeaderboard: SteamLeaderboard_t align(default_alignment) = 0,
+    m_bLeaderboardFound: uint8 align(default_alignment) = 0,
 };
 /// callbackId = 1105
 pub const LeaderboardScoresDownloaded_t = extern struct {
-    m_hSteamLeaderboard: SteamLeaderboard_t = 0,
-    m_hSteamLeaderboardEntries: SteamLeaderboardEntries_t = 0,
-    m_cEntryCount: i32 = 0,
+    m_hSteamLeaderboard: SteamLeaderboard_t align(default_alignment) = 0,
+    m_hSteamLeaderboardEntries: SteamLeaderboardEntries_t align(default_alignment) = 0,
+    m_cEntryCount: i32 align(default_alignment) = 0,
 };
 /// callbackId = 1106
 pub const LeaderboardScoreUploaded_t = extern struct {
-    m_bSuccess: uint8 = 0,
-    m_hSteamLeaderboard: SteamLeaderboard_t = 0,
-    m_nScore: int32 = 0,
-    m_bScoreChanged: uint8 = 0,
-    m_nGlobalRankNew: i32 = 0,
-    m_nGlobalRankPrevious: i32 = 0,
+    m_bSuccess: uint8 align(default_alignment) = 0,
+    m_hSteamLeaderboard: SteamLeaderboard_t align(default_alignment) = 0,
+    m_nScore: int32 align(default_alignment) = 0,
+    m_bScoreChanged: uint8 align(default_alignment) = 0,
+    m_nGlobalRankNew: i32 align(default_alignment) = 0,
+    m_nGlobalRankPrevious: i32 align(default_alignment) = 0,
 };
 /// callbackId = 1107
 pub const NumberOfCurrentPlayers_t = extern struct {
-    m_bSuccess: uint8 = 0,
-    m_cPlayers: int32 = 0,
+    m_bSuccess: uint8 align(default_alignment) = 0,
+    m_cPlayers: int32 align(default_alignment) = 0,
 };
 /// callbackId = 1108
 pub const UserStatsUnloaded_t = extern struct {
-    m_steamIDUser: CSteamID,
+    m_steamIDUser: CSteamID align(default_alignment),
 };
 /// callbackId = 1109
 pub const UserAchievementIconFetched_t = extern struct {
-    m_nGameID: CGameID,
-    m_rgchAchievementName: [128]u8,
-    m_bAchieved: bool = false,
-    m_nIconHandle: i32 = 0,
+    m_nGameID: CGameID align(default_alignment),
+    m_rgchAchievementName: [128]u8 align(default_alignment),
+    m_bAchieved: bool align(default_alignment) = false,
+    m_nIconHandle: i32 align(default_alignment) = 0,
 };
 /// callbackId = 1110
 pub const GlobalAchievementPercentagesReady_t = extern struct {
-    m_nGameID: uint64 = 0,
-    m_eResult: EResult = EResult.k_EResultNone,
+    m_nGameID: uint64 align(default_alignment) = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
 };
 /// callbackId = 1111
 pub const LeaderboardUGCSet_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_hSteamLeaderboard: SteamLeaderboard_t = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_hSteamLeaderboard: SteamLeaderboard_t align(default_alignment) = 0,
 };
 /// callbackId = 1112
 pub const GlobalStatsReceived_t = extern struct {
-    m_nGameID: uint64 = 0,
-    m_eResult: EResult = EResult.k_EResultNone,
+    m_nGameID: uint64 align(default_alignment) = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
 };
 /// callbackId = 1005
 pub const DlcInstalled_t = extern struct {
-    m_nAppID: AppId_t = 0,
+    m_nAppID: AppId_t align(default_alignment) = 0,
 };
 /// callbackId = 1014
 pub const NewUrlLaunchParameters_t = extern struct {};
 /// callbackId = 1021
 pub const AppProofOfPurchaseKeyResponse_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nAppID: uint32 = 0,
-    m_cchKeyLength: uint32 = 0,
-    m_rgchKey: [240]u8,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nAppID: uint32 align(default_alignment) = 0,
+    m_cchKeyLength: uint32 align(default_alignment) = 0,
+    m_rgchKey: [240]u8 align(default_alignment),
 };
 /// callbackId = 1023
 pub const FileDetailsResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_ulFileSize: uint64 = 0,
-    m_FileSHA: [20]uint8,
-    m_unFlags: uint32 = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_ulFileSize: uint64 align(default_alignment) = 0,
+    m_FileSHA: [20]uint8 align(default_alignment),
+    m_unFlags: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 1030
 pub const TimedTrialStatus_t = extern struct {
-    m_unAppID: AppId_t = 0,
-    m_bIsOffline: bool = false,
-    m_unSecondsAllowed: uint32 = 0,
-    m_unSecondsPlayed: uint32 = 0,
+    m_unAppID: AppId_t align(default_alignment) = 0,
+    m_bIsOffline: bool align(default_alignment) = false,
+    m_unSecondsAllowed: uint32 align(default_alignment) = 0,
+    m_unSecondsPlayed: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 1202
 pub const P2PSessionRequest_t = extern struct {
-    m_steamIDRemote: CSteamID,
+    m_steamIDRemote: CSteamID align(default_alignment),
 };
 /// callbackId = 1203
 pub const P2PSessionConnectFail_t = extern struct {
-    m_steamIDRemote: CSteamID,
-    m_eP2PSessionError: uint8 = 0,
+    m_steamIDRemote: CSteamID align(1),
+    m_eP2PSessionError: uint8 align(1) = 0,
 };
 /// callbackId = 1201
 pub const SocketStatusCallback_t = extern struct {
-    m_hSocket: SNetSocket_t = 0,
-    m_hListenSocket: SNetListenSocket_t = 0,
-    m_steamIDRemote: CSteamID,
-    m_eSNetSocketState: i32 = 0,
+    m_hSocket: SNetSocket_t align(4) = 0,
+    m_hListenSocket: SNetListenSocket_t align(4) = 0,
+    m_steamIDRemote: CSteamID align(4),
+    m_eSNetSocketState: i32 align(4) = 0,
 };
 /// callbackId = 2301
 pub const ScreenshotReady_t = extern struct {
-    m_hLocal: ScreenshotHandle = 0,
-    m_eResult: EResult = EResult.k_EResultNone,
+    m_hLocal: ScreenshotHandle align(default_alignment) = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
 };
 /// callbackId = 2302
 pub const ScreenshotRequested_t = extern struct {};
@@ -1566,7 +1567,7 @@ pub const ScreenshotRequested_t = extern struct {};
 pub const PlaybackStatusHasChanged_t = extern struct {};
 /// callbackId = 4002
 pub const VolumeHasChanged_t = extern struct {
-    m_flNewVolume: f32 = 0,
+    m_flNewVolume: f32 align(default_alignment) = 0,
 };
 /// callbackId = 4101
 pub const MusicPlayerRemoteWillActivate_t = extern struct {};
@@ -1586,508 +1587,508 @@ pub const MusicPlayerWantsPlayPrevious_t = extern struct {};
 pub const MusicPlayerWantsPlayNext_t = extern struct {};
 /// callbackId = 4109
 pub const MusicPlayerWantsShuffled_t = extern struct {
-    m_bShuffled: bool = false,
+    m_bShuffled: bool align(default_alignment) = false,
 };
 /// callbackId = 4110
 pub const MusicPlayerWantsLooped_t = extern struct {
-    m_bLooped: bool = false,
+    m_bLooped: bool align(default_alignment) = false,
 };
 /// callbackId = 4011
 pub const MusicPlayerWantsVolume_t = extern struct {
-    m_flNewVolume: f32 = 0,
+    m_flNewVolume: f32 align(default_alignment) = 0,
 };
 /// callbackId = 4012
 pub const MusicPlayerSelectsQueueEntry_t = extern struct {
-    nID: i32 = 0,
+    nID: i32 align(default_alignment) = 0,
 };
 /// callbackId = 4013
 pub const MusicPlayerSelectsPlaylistEntry_t = extern struct {
-    nID: i32 = 0,
+    nID: i32 align(default_alignment) = 0,
 };
 /// callbackId = 4114
 pub const MusicPlayerWantsPlayingRepeatStatus_t = extern struct {
-    m_nPlayingRepeatStatus: i32 = 0,
+    m_nPlayingRepeatStatus: i32 align(default_alignment) = 0,
 };
 /// callbackId = 2101
 pub const HTTPRequestCompleted_t = extern struct {
-    m_hRequest: HTTPRequestHandle = 0,
-    m_ulContextValue: uint64 = 0,
-    m_bRequestSuccessful: bool = false,
-    m_eStatusCode: EHTTPStatusCode = EHTTPStatusCode.k_EHTTPStatusCodeInvalid,
-    m_unBodySize: uint32 = 0,
+    m_hRequest: HTTPRequestHandle align(default_alignment) = 0,
+    m_ulContextValue: uint64 align(default_alignment) = 0,
+    m_bRequestSuccessful: bool align(default_alignment) = false,
+    m_eStatusCode: EHTTPStatusCode align(default_alignment) = EHTTPStatusCode.k_EHTTPStatusCodeInvalid,
+    m_unBodySize: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 2102
 pub const HTTPRequestHeadersReceived_t = extern struct {
-    m_hRequest: HTTPRequestHandle = 0,
-    m_ulContextValue: uint64 = 0,
+    m_hRequest: HTTPRequestHandle align(default_alignment) = 0,
+    m_ulContextValue: uint64 align(default_alignment) = 0,
 };
 /// callbackId = 2103
 pub const HTTPRequestDataReceived_t = extern struct {
-    m_hRequest: HTTPRequestHandle = 0,
-    m_ulContextValue: uint64 = 0,
-    m_cOffset: uint32 = 0,
-    m_cBytesReceived: uint32 = 0,
+    m_hRequest: HTTPRequestHandle align(default_alignment) = 0,
+    m_ulContextValue: uint64 align(default_alignment) = 0,
+    m_cOffset: uint32 align(default_alignment) = 0,
+    m_cBytesReceived: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 2801
 pub const SteamInputDeviceConnected_t = extern struct {
-    m_ulConnectedDeviceHandle: InputHandle_t = 0,
+    m_ulConnectedDeviceHandle: InputHandle_t align(default_alignment) = 0,
 };
 /// callbackId = 2802
 pub const SteamInputDeviceDisconnected_t = extern struct {
-    m_ulDisconnectedDeviceHandle: InputHandle_t = 0,
+    m_ulDisconnectedDeviceHandle: InputHandle_t align(default_alignment) = 0,
 };
 /// callbackId = 2803
 pub const SteamInputConfigurationLoaded_t = extern struct {
-    m_unAppID: AppId_t = 0,
-    m_ulDeviceHandle: InputHandle_t = 0,
-    m_ulMappingCreator: CSteamID,
-    m_unMajorRevision: uint32 = 0,
-    m_unMinorRevision: uint32 = 0,
-    m_bUsesSteamInputAPI: bool = false,
-    m_bUsesGamepadAPI: bool = false,
+    m_unAppID: AppId_t align(default_alignment) = 0,
+    m_ulDeviceHandle: InputHandle_t align(default_alignment) = 0,
+    m_ulMappingCreator: CSteamID align(default_alignment),
+    m_unMajorRevision: uint32 align(default_alignment) = 0,
+    m_unMinorRevision: uint32 align(default_alignment) = 0,
+    m_bUsesSteamInputAPI: bool align(default_alignment) = false,
+    m_bUsesGamepadAPI: bool align(default_alignment) = false,
 };
 /// callbackId = 2804
 pub const SteamInputGamepadSlotChange_t = extern struct {
-    m_unAppID: AppId_t = 0,
-    m_ulDeviceHandle: InputHandle_t = 0,
-    m_eDeviceType: ESteamInputType = ESteamInputType.k_ESteamInputType_Unknown,
-    m_nOldGamepadSlot: i32 = 0,
-    m_nNewGamepadSlot: i32 = 0,
+    m_unAppID: AppId_t align(default_alignment) = 0,
+    m_ulDeviceHandle: InputHandle_t align(default_alignment) = 0,
+    m_eDeviceType: ESteamInputType align(default_alignment) = ESteamInputType.k_ESteamInputType_Unknown,
+    m_nOldGamepadSlot: i32 align(default_alignment) = 0,
+    m_nNewGamepadSlot: i32 align(default_alignment) = 0,
 };
 /// callbackId = 3401
 pub const SteamUGCQueryCompleted_t = extern struct {
-    m_handle: UGCQueryHandle_t = 0,
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_unNumResultsReturned: uint32 = 0,
-    m_unTotalMatchingResults: uint32 = 0,
-    m_bCachedData: bool = false,
-    m_rgchNextCursor: [256]u8,
+    m_handle: UGCQueryHandle_t align(default_alignment) = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_unNumResultsReturned: uint32 align(default_alignment) = 0,
+    m_unTotalMatchingResults: uint32 align(default_alignment) = 0,
+    m_bCachedData: bool align(default_alignment) = false,
+    m_rgchNextCursor: [256]u8 align(default_alignment),
 };
 /// callbackId = 3402
 pub const SteamUGCRequestUGCDetailsResult_t = extern struct {
-    m_details: SteamUGCDetails_t,
-    m_bCachedData: bool = false,
+    m_details: SteamUGCDetails_t align(default_alignment),
+    m_bCachedData: bool align(default_alignment) = false,
 };
 /// callbackId = 3403
 pub const CreateItemResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nPublishedFileId: PublishedFileId_t = 0,
-    m_bUserNeedsToAcceptWorkshopLegalAgreement: bool = false,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_bUserNeedsToAcceptWorkshopLegalAgreement: bool align(default_alignment) = false,
 };
 /// callbackId = 3404
 pub const SubmitItemUpdateResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_bUserNeedsToAcceptWorkshopLegalAgreement: bool = false,
-    m_nPublishedFileId: PublishedFileId_t = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_bUserNeedsToAcceptWorkshopLegalAgreement: bool align(default_alignment) = false,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
 };
 /// callbackId = 3405
 pub const ItemInstalled_t = extern struct {
-    m_unAppID: AppId_t = 0,
-    m_nPublishedFileId: PublishedFileId_t = 0,
+    m_unAppID: AppId_t align(default_alignment) = 0,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
 };
 /// callbackId = 3406
 pub const DownloadItemResult_t = extern struct {
-    m_unAppID: AppId_t = 0,
-    m_nPublishedFileId: PublishedFileId_t = 0,
-    m_eResult: EResult = EResult.k_EResultNone,
+    m_unAppID: AppId_t align(default_alignment) = 0,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
 };
 /// callbackId = 3407
 pub const UserFavoriteItemsListChanged_t = extern struct {
-    m_nPublishedFileId: PublishedFileId_t = 0,
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_bWasAddRequest: bool = false,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_bWasAddRequest: bool align(default_alignment) = false,
 };
 /// callbackId = 3408
 pub const SetUserItemVoteResult_t = extern struct {
-    m_nPublishedFileId: PublishedFileId_t = 0,
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_bVoteUp: bool = false,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_bVoteUp: bool align(default_alignment) = false,
 };
 /// callbackId = 3409
 pub const GetUserItemVoteResult_t = extern struct {
-    m_nPublishedFileId: PublishedFileId_t = 0,
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_bVotedUp: bool = false,
-    m_bVotedDown: bool = false,
-    m_bVoteSkipped: bool = false,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_bVotedUp: bool align(default_alignment) = false,
+    m_bVotedDown: bool align(default_alignment) = false,
+    m_bVoteSkipped: bool align(default_alignment) = false,
 };
 /// callbackId = 3410
 pub const StartPlaytimeTrackingResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
 };
 /// callbackId = 3411
 pub const StopPlaytimeTrackingResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
 };
 /// callbackId = 3412
 pub const AddUGCDependencyResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nPublishedFileId: PublishedFileId_t = 0,
-    m_nChildPublishedFileId: PublishedFileId_t = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_nChildPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
 };
 /// callbackId = 3413
 pub const RemoveUGCDependencyResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nPublishedFileId: PublishedFileId_t = 0,
-    m_nChildPublishedFileId: PublishedFileId_t = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_nChildPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
 };
 /// callbackId = 3414
 pub const AddAppDependencyResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nPublishedFileId: PublishedFileId_t = 0,
-    m_nAppID: AppId_t = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_nAppID: AppId_t align(default_alignment) = 0,
 };
 /// callbackId = 3415
 pub const RemoveAppDependencyResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nPublishedFileId: PublishedFileId_t = 0,
-    m_nAppID: AppId_t = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_nAppID: AppId_t align(default_alignment) = 0,
 };
 /// callbackId = 3416
 pub const GetAppDependenciesResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nPublishedFileId: PublishedFileId_t = 0,
-    m_rgAppIDs: [32]AppId_t,
-    m_nNumAppDependencies: uint32 = 0,
-    m_nTotalNumAppDependencies: uint32 = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_rgAppIDs: [32]AppId_t align(default_alignment),
+    m_nNumAppDependencies: uint32 align(default_alignment) = 0,
+    m_nTotalNumAppDependencies: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 3417
 pub const DeleteItemResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nPublishedFileId: PublishedFileId_t = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
 };
 /// callbackId = 3418
 pub const UserSubscribedItemsListChanged_t = extern struct {
-    m_nAppID: AppId_t = 0,
+    m_nAppID: AppId_t align(default_alignment) = 0,
 };
 /// callbackId = 3420
 pub const WorkshopEULAStatus_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nAppID: AppId_t = 0,
-    m_unVersion: uint32 = 0,
-    m_rtAction: RTime32 = 0,
-    m_bAccepted: bool = false,
-    m_bNeedsAction: bool = false,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nAppID: AppId_t align(default_alignment) = 0,
+    m_unVersion: uint32 align(default_alignment) = 0,
+    m_rtAction: RTime32 align(default_alignment) = 0,
+    m_bAccepted: bool align(default_alignment) = false,
+    m_bNeedsAction: bool align(default_alignment) = false,
 };
 /// callbackId = 3901
 pub const SteamAppInstalled_t = extern struct {
-    m_nAppID: AppId_t = 0,
-    m_iInstallFolderIndex: i32 = 0,
+    m_nAppID: AppId_t align(default_alignment) = 0,
+    m_iInstallFolderIndex: i32 align(default_alignment) = 0,
 };
 /// callbackId = 3902
 pub const SteamAppUninstalled_t = extern struct {
-    m_nAppID: AppId_t = 0,
-    m_iInstallFolderIndex: i32 = 0,
+    m_nAppID: AppId_t align(default_alignment) = 0,
+    m_iInstallFolderIndex: i32 align(default_alignment) = 0,
 };
 /// callbackId = 4501
 pub const HTML_BrowserReady_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
 };
 /// callbackId = 4502
 pub const HTML_NeedsPaint_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
-    pBGRA: [*c]const u8 = null,
-    unWide: uint32 = 0,
-    unTall: uint32 = 0,
-    unUpdateX: uint32 = 0,
-    unUpdateY: uint32 = 0,
-    unUpdateWide: uint32 = 0,
-    unUpdateTall: uint32 = 0,
-    unScrollX: uint32 = 0,
-    unScrollY: uint32 = 0,
-    flPageScale: f32 = 0,
-    unPageSerial: uint32 = 0,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
+    pBGRA: [*c]const u8 align(default_alignment) = null,
+    unWide: uint32 align(default_alignment) = 0,
+    unTall: uint32 align(default_alignment) = 0,
+    unUpdateX: uint32 align(default_alignment) = 0,
+    unUpdateY: uint32 align(default_alignment) = 0,
+    unUpdateWide: uint32 align(default_alignment) = 0,
+    unUpdateTall: uint32 align(default_alignment) = 0,
+    unScrollX: uint32 align(default_alignment) = 0,
+    unScrollY: uint32 align(default_alignment) = 0,
+    flPageScale: f32 align(default_alignment) = 0,
+    unPageSerial: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 4503
 pub const HTML_StartRequest_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
-    pchURL: [*c]const u8 = null,
-    pchTarget: [*c]const u8 = null,
-    pchPostData: [*c]const u8 = null,
-    bIsRedirect: bool = false,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
+    pchURL: [*c]const u8 align(default_alignment) = null,
+    pchTarget: [*c]const u8 align(default_alignment) = null,
+    pchPostData: [*c]const u8 align(default_alignment) = null,
+    bIsRedirect: bool align(default_alignment) = false,
 };
 /// callbackId = 4504
 pub const HTML_CloseBrowser_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
 };
 /// callbackId = 4505
 pub const HTML_URLChanged_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
-    pchURL: [*c]const u8 = null,
-    pchPostData: [*c]const u8 = null,
-    bIsRedirect: bool = false,
-    pchPageTitle: [*c]const u8 = null,
-    bNewNavigation: bool = false,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
+    pchURL: [*c]const u8 align(default_alignment) = null,
+    pchPostData: [*c]const u8 align(default_alignment) = null,
+    bIsRedirect: bool align(default_alignment) = false,
+    pchPageTitle: [*c]const u8 align(default_alignment) = null,
+    bNewNavigation: bool align(default_alignment) = false,
 };
 /// callbackId = 4506
 pub const HTML_FinishedRequest_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
-    pchURL: [*c]const u8 = null,
-    pchPageTitle: [*c]const u8 = null,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
+    pchURL: [*c]const u8 align(default_alignment) = null,
+    pchPageTitle: [*c]const u8 align(default_alignment) = null,
 };
 /// callbackId = 4507
 pub const HTML_OpenLinkInNewTab_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
-    pchURL: [*c]const u8 = null,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
+    pchURL: [*c]const u8 align(default_alignment) = null,
 };
 /// callbackId = 4508
 pub const HTML_ChangedTitle_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
-    pchTitle: [*c]const u8 = null,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
+    pchTitle: [*c]const u8 align(default_alignment) = null,
 };
 /// callbackId = 4509
 pub const HTML_SearchResults_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
-    unResults: uint32 = 0,
-    unCurrentMatch: uint32 = 0,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
+    unResults: uint32 align(default_alignment) = 0,
+    unCurrentMatch: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 4510
 pub const HTML_CanGoBackAndForward_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
-    bCanGoBack: bool = false,
-    bCanGoForward: bool = false,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
+    bCanGoBack: bool align(default_alignment) = false,
+    bCanGoForward: bool align(default_alignment) = false,
 };
 /// callbackId = 4511
 pub const HTML_HorizontalScroll_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
-    unScrollMax: uint32 = 0,
-    unScrollCurrent: uint32 = 0,
-    flPageScale: f32 = 0,
-    bVisible: bool = false,
-    unPageSize: uint32 = 0,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
+    unScrollMax: uint32 align(default_alignment) = 0,
+    unScrollCurrent: uint32 align(default_alignment) = 0,
+    flPageScale: f32 align(default_alignment) = 0,
+    bVisible: bool align(default_alignment) = false,
+    unPageSize: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 4512
 pub const HTML_VerticalScroll_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
-    unScrollMax: uint32 = 0,
-    unScrollCurrent: uint32 = 0,
-    flPageScale: f32 = 0,
-    bVisible: bool = false,
-    unPageSize: uint32 = 0,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
+    unScrollMax: uint32 align(default_alignment) = 0,
+    unScrollCurrent: uint32 align(default_alignment) = 0,
+    flPageScale: f32 align(default_alignment) = 0,
+    bVisible: bool align(default_alignment) = false,
+    unPageSize: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 4513
 pub const HTML_LinkAtPosition_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
-    x: uint32 = 0,
-    y: uint32 = 0,
-    pchURL: [*c]const u8 = null,
-    bInput: bool = false,
-    bLiveLink: bool = false,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
+    x: uint32 align(default_alignment) = 0,
+    y: uint32 align(default_alignment) = 0,
+    pchURL: [*c]const u8 align(default_alignment) = null,
+    bInput: bool align(default_alignment) = false,
+    bLiveLink: bool align(default_alignment) = false,
 };
 /// callbackId = 4514
 pub const HTML_JSAlert_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
-    pchMessage: [*c]const u8 = null,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
+    pchMessage: [*c]const u8 align(default_alignment) = null,
 };
 /// callbackId = 4515
 pub const HTML_JSConfirm_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
-    pchMessage: [*c]const u8 = null,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
+    pchMessage: [*c]const u8 align(default_alignment) = null,
 };
 /// callbackId = 4516
 pub const HTML_FileOpenDialog_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
-    pchTitle: [*c]const u8 = null,
-    pchInitialFile: [*c]const u8 = null,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
+    pchTitle: [*c]const u8 align(default_alignment) = null,
+    pchInitialFile: [*c]const u8 align(default_alignment) = null,
 };
 /// callbackId = 4521
 pub const HTML_NewWindow_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
-    pchURL: [*c]const u8 = null,
-    unX: uint32 = 0,
-    unY: uint32 = 0,
-    unWide: uint32 = 0,
-    unTall: uint32 = 0,
-    unNewWindow_BrowserHandle_IGNORE: HHTMLBrowser = 0,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
+    pchURL: [*c]const u8 align(default_alignment) = null,
+    unX: uint32 align(default_alignment) = 0,
+    unY: uint32 align(default_alignment) = 0,
+    unWide: uint32 align(default_alignment) = 0,
+    unTall: uint32 align(default_alignment) = 0,
+    unNewWindow_BrowserHandle_IGNORE: HHTMLBrowser align(default_alignment) = 0,
 };
 /// callbackId = 4522
 pub const HTML_SetCursor_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
-    eMouseCursor: uint32 = 0,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
+    eMouseCursor: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 4523
 pub const HTML_StatusText_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
-    pchMsg: [*c]const u8 = null,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
+    pchMsg: [*c]const u8 align(default_alignment) = null,
 };
 /// callbackId = 4524
 pub const HTML_ShowToolTip_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
-    pchMsg: [*c]const u8 = null,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
+    pchMsg: [*c]const u8 align(default_alignment) = null,
 };
 /// callbackId = 4525
 pub const HTML_UpdateToolTip_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
-    pchMsg: [*c]const u8 = null,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
+    pchMsg: [*c]const u8 align(default_alignment) = null,
 };
 /// callbackId = 4526
 pub const HTML_HideToolTip_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
 };
 /// callbackId = 4527
 pub const HTML_BrowserRestarted_t = extern struct {
-    unBrowserHandle: HHTMLBrowser = 0,
-    unOldBrowserHandle: HHTMLBrowser = 0,
+    unBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
+    unOldBrowserHandle: HHTMLBrowser align(default_alignment) = 0,
 };
 /// callbackId = 4700
 pub const SteamInventoryResultReady_t = extern struct {
-    m_handle: SteamInventoryResult_t = 0,
-    m_result: EResult = EResult.k_EResultNone,
+    m_handle: SteamInventoryResult_t align(default_alignment) = 0,
+    m_result: EResult align(default_alignment) = EResult.k_EResultNone,
 };
 /// callbackId = 4701
 pub const SteamInventoryFullUpdate_t = extern struct {
-    m_handle: SteamInventoryResult_t = 0,
+    m_handle: SteamInventoryResult_t align(default_alignment) = 0,
 };
 /// callbackId = 4702
 pub const SteamInventoryDefinitionUpdate_t = extern struct {};
 /// callbackId = 4703
 pub const SteamInventoryEligiblePromoItemDefIDs_t = extern struct {
-    m_result: EResult = EResult.k_EResultNone,
-    m_steamID: CSteamID,
-    m_numEligiblePromoItemDefs: i32 = 0,
-    m_bCachedData: bool = false,
+    m_result: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_steamID: CSteamID align(default_alignment),
+    m_numEligiblePromoItemDefs: i32 align(default_alignment) = 0,
+    m_bCachedData: bool align(default_alignment) = false,
 };
 /// callbackId = 4704
 pub const SteamInventoryStartPurchaseResult_t = extern struct {
-    m_result: EResult = EResult.k_EResultNone,
-    m_ulOrderID: uint64 = 0,
-    m_ulTransID: uint64 = 0,
+    m_result: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_ulOrderID: uint64 align(default_alignment) = 0,
+    m_ulTransID: uint64 align(default_alignment) = 0,
 };
 /// callbackId = 4705
 pub const SteamInventoryRequestPricesResult_t = extern struct {
-    m_result: EResult = EResult.k_EResultNone,
-    m_rgchCurrency: [4]u8,
+    m_result: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_rgchCurrency: [4]u8 align(default_alignment),
 };
 /// callbackId = 4611
 pub const GetVideoURLResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_unVideoAppID: AppId_t = 0,
-    m_rgchURL: [256]u8,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_unVideoAppID: AppId_t align(default_alignment) = 0,
+    m_rgchURL: [256]u8 align(default_alignment),
 };
 /// callbackId = 4624
 pub const GetOPFSettingsResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_unVideoAppID: AppId_t = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_unVideoAppID: AppId_t align(default_alignment) = 0,
 };
 /// callbackId = 5001
 pub const SteamParentalSettingsChanged_t = extern struct {};
 /// callbackId = 5701
 pub const SteamRemotePlaySessionConnected_t = extern struct {
-    m_unSessionID: RemotePlaySessionID_t = 0,
+    m_unSessionID: RemotePlaySessionID_t align(default_alignment) = 0,
 };
 /// callbackId = 5702
 pub const SteamRemotePlaySessionDisconnected_t = extern struct {
-    m_unSessionID: RemotePlaySessionID_t = 0,
+    m_unSessionID: RemotePlaySessionID_t align(default_alignment) = 0,
 };
 /// callbackId = 5703
 pub const SteamRemotePlayTogetherGuestInvite_t = extern struct {
-    m_szConnectURL: [1024]u8,
+    m_szConnectURL: [1024]u8 align(default_alignment),
 };
 /// callbackId = 1251
 pub const SteamNetworkingMessagesSessionRequest_t = extern struct {
-    m_identityRemote: SteamNetworkingIdentity,
+    m_identityRemote: SteamNetworkingIdentity align(default_alignment),
 };
 /// callbackId = 1252
 pub const SteamNetworkingMessagesSessionFailed_t = extern struct {
-    m_info: SteamNetConnectionInfo_t,
+    m_info: SteamNetConnectionInfo_t align(default_alignment),
 };
 /// callbackId = 1221
 pub const SteamNetConnectionStatusChangedCallback_t = extern struct {
-    m_hConn: HSteamNetConnection = 0,
-    m_info: SteamNetConnectionInfo_t,
-    m_eOldState: ESteamNetworkingConnectionState = ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_None,
+    m_hConn: HSteamNetConnection align(default_alignment) = 0,
+    m_info: SteamNetConnectionInfo_t align(default_alignment),
+    m_eOldState: ESteamNetworkingConnectionState align(default_alignment) = ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_None,
 };
 /// callbackId = 1222
 pub const SteamNetAuthenticationStatus_t = extern struct {
-    m_eAvail: ESteamNetworkingAvailability = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Unknown,
-    m_debugMsg: [256]u8,
+    m_eAvail: ESteamNetworkingAvailability align(default_alignment) = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Unknown,
+    m_debugMsg: [256]u8 align(default_alignment),
 };
 /// callbackId = 1281
 pub const SteamRelayNetworkStatus_t = extern struct {
-    m_eAvail: ESteamNetworkingAvailability = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Unknown,
-    m_bPingMeasurementInProgress: i32 = 0,
-    m_eAvailNetworkConfig: ESteamNetworkingAvailability = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Unknown,
-    m_eAvailAnyRelay: ESteamNetworkingAvailability = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Unknown,
-    m_debugMsg: [256]u8,
+    m_eAvail: ESteamNetworkingAvailability align(default_alignment) = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Unknown,
+    m_bPingMeasurementInProgress: i32 align(default_alignment) = 0,
+    m_eAvailNetworkConfig: ESteamNetworkingAvailability align(default_alignment) = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Unknown,
+    m_eAvailAnyRelay: ESteamNetworkingAvailability align(default_alignment) = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Unknown,
+    m_debugMsg: [256]u8 align(default_alignment),
 };
 /// callbackId = 201
 pub const GSClientApprove_t = extern struct {
-    m_SteamID: CSteamID,
-    m_OwnerSteamID: CSteamID,
+    m_SteamID: CSteamID align(default_alignment),
+    m_OwnerSteamID: CSteamID align(default_alignment),
 };
 /// callbackId = 202
 pub const GSClientDeny_t = extern struct {
-    m_SteamID: CSteamID,
-    m_eDenyReason: EDenyReason = EDenyReason.k_EDenyInvalid,
-    m_rgchOptionalText: [128]u8,
+    m_SteamID: CSteamID align(4),
+    m_eDenyReason: EDenyReason align(4) = EDenyReason.k_EDenyInvalid,
+    m_rgchOptionalText: [128]u8 align(4),
 };
 /// callbackId = 203
 pub const GSClientKick_t = extern struct {
-    m_SteamID: CSteamID,
-    m_eDenyReason: EDenyReason = EDenyReason.k_EDenyInvalid,
+    m_SteamID: CSteamID align(4),
+    m_eDenyReason: EDenyReason align(4) = EDenyReason.k_EDenyInvalid,
 };
 /// callbackId = 206
 pub const GSClientAchievementStatus_t = extern struct {
-    m_SteamID: uint64 = 0,
-    m_pchAchievement: [128]u8,
-    m_bUnlocked: bool = false,
+    m_SteamID: uint64 align(default_alignment) = 0,
+    m_pchAchievement: [128]u8 align(default_alignment),
+    m_bUnlocked: bool align(default_alignment) = false,
 };
 /// callbackId = 115
 pub const GSPolicyResponse_t = extern struct {
-    m_bSecure: uint8 = 0,
+    m_bSecure: uint8 align(default_alignment) = 0,
 };
 /// callbackId = 207
 pub const GSGameplayStats_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_nRank: int32 = 0,
-    m_unTotalConnects: uint32 = 0,
-    m_unTotalMinutesPlayed: uint32 = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_nRank: int32 align(default_alignment) = 0,
+    m_unTotalConnects: uint32 align(default_alignment) = 0,
+    m_unTotalMinutesPlayed: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 208
 pub const GSClientGroupStatus_t = extern struct {
-    m_SteamIDUser: CSteamID,
-    m_SteamIDGroup: CSteamID,
-    m_bMember: bool = false,
-    m_bOfficer: bool = false,
+    m_SteamIDUser: CSteamID align(1),
+    m_SteamIDGroup: CSteamID align(1),
+    m_bMember: bool align(1) = false,
+    m_bOfficer: bool align(1) = false,
 };
 /// callbackId = 209
 pub const GSReputation_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_unReputationScore: uint32 = 0,
-    m_bBanned: bool = false,
-    m_unBannedIP: uint32 = 0,
-    m_usBannedPort: uint16 = 0,
-    m_ulBannedGameID: uint64 = 0,
-    m_unBanExpires: uint32 = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_unReputationScore: uint32 align(default_alignment) = 0,
+    m_bBanned: bool align(default_alignment) = false,
+    m_unBannedIP: uint32 align(default_alignment) = 0,
+    m_usBannedPort: uint16 align(default_alignment) = 0,
+    m_ulBannedGameID: uint64 align(default_alignment) = 0,
+    m_unBanExpires: uint32 align(default_alignment) = 0,
 };
 /// callbackId = 210
 pub const AssociateWithClanResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
 };
 /// callbackId = 211
 pub const ComputeNewPlayerCompatibilityResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_cPlayersThatDontLikeCandidate: i32 = 0,
-    m_cPlayersThatCandidateDoesntLike: i32 = 0,
-    m_cClanPlayersThatDontLikeCandidate: i32 = 0,
-    m_SteamIDCandidate: CSteamID,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_cPlayersThatDontLikeCandidate: i32 align(default_alignment) = 0,
+    m_cPlayersThatCandidateDoesntLike: i32 align(default_alignment) = 0,
+    m_cClanPlayersThatDontLikeCandidate: i32 align(default_alignment) = 0,
+    m_SteamIDCandidate: CSteamID align(default_alignment),
 };
 /// callbackId = 1800
 pub const GSStatsReceived_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_steamIDUser: CSteamID,
+    m_eResult: EResult align(4) = EResult.k_EResultNone,
+    m_steamIDUser: CSteamID align(4),
 };
 /// callbackId = 1801
 pub const GSStatsStored_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_steamIDUser: CSteamID,
+    m_eResult: EResult align(4) = EResult.k_EResultNone,
+    m_steamIDUser: CSteamID align(4),
 };
 /// callbackId = 1223
 pub const SteamNetworkingFakeIPResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_identity: SteamNetworkingIdentity,
-    m_unIP: uint32 = 0,
-    m_unPorts: [8]uint16,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_identity: SteamNetworkingIdentity align(default_alignment),
+    m_unIP: uint32 align(default_alignment) = 0,
+    m_unPorts: [8]uint16 align(default_alignment),
 
     // Constants
     pub const k_nMaxReturnPorts: i32 = 8;
@@ -4246,8 +4247,8 @@ pub const EServerMode = enum(c_int) {
 
 // Structs
 pub const SteamIPAddress_t = extern struct {
-    m_rgubIPv6: [16]uint8,
-    m_eType: ESteamIPType = ESteamIPType.k_ESteamIPTypeIPv4,
+    m_rgubIPv6: [16]uint8 align(default_alignment),
+    m_eType: ESteamIPType align(default_alignment) = ESteamIPType.k_ESteamIPTypeIPv4,
     // methods
     const Self = @This();
     pub fn IsSet(self: *Self) bool {
@@ -4258,15 +4259,15 @@ pub const SteamIPAddress_t = extern struct {
 // static functions
 extern fn SteamAPI_SteamIPAddress_t_IsSet(self: ?*anyopaque) callconv(.C) bool;
 pub const FriendGameInfo_t = extern struct {
-    m_gameID: CGameID,
-    m_unGameIP: uint32 = 0,
-    m_usGamePort: uint16 = 0,
-    m_usQueryPort: uint16 = 0,
-    m_steamIDLobby: CSteamID,
+    m_gameID: CGameID align(default_alignment),
+    m_unGameIP: uint32 align(default_alignment) = 0,
+    m_usGamePort: uint16 align(default_alignment) = 0,
+    m_usQueryPort: uint16 align(default_alignment) = 0,
+    m_steamIDLobby: CSteamID align(default_alignment),
 };
 pub const MatchMakingKeyValuePair_t = extern struct {
-    m_szKey: [256]u8,
-    m_szValue: [256]u8,
+    m_szKey: [256]u8 align(default_alignment),
+    m_szValue: [256]u8 align(default_alignment),
     // methods
     const Self = @This();
     pub fn Construct(self: *Self) void {
@@ -4277,9 +4278,9 @@ pub const MatchMakingKeyValuePair_t = extern struct {
 // static functions
 extern fn SteamAPI_MatchMakingKeyValuePair_t_Construct(self: ?*anyopaque) callconv(.C) void;
 pub const servernetadr_t = extern struct {
-    m_usConnectionPort: uint16 = 0,
-    m_usQueryPort: uint16 = 0,
-    m_unIP: uint32 = 0,
+    m_usConnectionPort: uint16 align(default_alignment) = 0,
+    m_usQueryPort: uint16 align(default_alignment) = 0,
+    m_unIP: uint32 align(default_alignment) = 0,
     // methods
     const Self = @This();
     pub fn Construct(self: *Self) void {
@@ -4345,24 +4346,24 @@ extern fn SteamAPI_servernetadr_t_GetQueryAddressString(self: ?*anyopaque) callc
 extern fn SteamAPI_servernetadr_t_IsLessThan(self: ?*anyopaque, netadr: servernetadr_t) callconv(.C) bool;
 extern fn SteamAPI_servernetadr_t_Assign(self: ?*anyopaque, that: servernetadr_t) callconv(.C) void;
 pub const gameserveritem_t = extern struct {
-    m_NetAdr: servernetadr_t,
-    m_nPing: i32 = 0,
-    m_bHadSuccessfulResponse: bool = false,
-    m_bDoNotRefresh: bool = false,
-    m_szGameDir: [32]u8,
-    m_szMap: [32]u8,
-    m_szGameDescription: [64]u8,
-    m_nAppID: uint32 = 0,
-    m_nPlayers: i32 = 0,
-    m_nMaxPlayers: i32 = 0,
-    m_nBotPlayers: i32 = 0,
-    m_bPassword: bool = false,
-    m_bSecure: bool = false,
-    m_ulTimeLastPlayed: uint32 = 0,
-    m_nServerVersion: i32 = 0,
-    m_szServerName: [64]u8,
-    m_szGameTags: [128]u8,
-    m_steamID: CSteamID,
+    m_NetAdr: servernetadr_t align(default_alignment),
+    m_nPing: i32 align(default_alignment) = 0,
+    m_bHadSuccessfulResponse: bool align(default_alignment) = false,
+    m_bDoNotRefresh: bool align(default_alignment) = false,
+    m_szGameDir: [32]u8 align(default_alignment),
+    m_szMap: [32]u8 align(default_alignment),
+    m_szGameDescription: [64]u8 align(default_alignment),
+    m_nAppID: uint32 align(default_alignment) = 0,
+    m_nPlayers: i32 align(default_alignment) = 0,
+    m_nMaxPlayers: i32 align(default_alignment) = 0,
+    m_nBotPlayers: i32 align(default_alignment) = 0,
+    m_bPassword: bool align(default_alignment) = false,
+    m_bSecure: bool align(default_alignment) = false,
+    m_ulTimeLastPlayed: uint32 align(default_alignment) = 0,
+    m_nServerVersion: i32 align(default_alignment) = 0,
+    m_szServerName: [64]u8 align(default_alignment),
+    m_szGameTags: [128]u8 align(default_alignment),
+    m_steamID: CSteamID align(default_alignment),
     // methods
     const Self = @This();
     pub fn Construct(self: *Self) void {
@@ -4383,114 +4384,114 @@ extern fn SteamAPI_gameserveritem_t_Construct(self: ?*anyopaque) callconv(.C) vo
 extern fn SteamAPI_gameserveritem_t_GetName(self: ?*anyopaque) callconv(.C) [*c]const u8;
 extern fn SteamAPI_gameserveritem_t_SetName(self: ?*anyopaque, pName: [*c]const u8) callconv(.C) void;
 pub const SteamPartyBeaconLocation_t = extern struct {
-    m_eType: ESteamPartyBeaconLocationType = ESteamPartyBeaconLocationType.k_ESteamPartyBeaconLocationType_Invalid,
-    m_ulLocationID: uint64 = 0,
+    m_eType: ESteamPartyBeaconLocationType align(default_alignment) = ESteamPartyBeaconLocationType.k_ESteamPartyBeaconLocationType_Invalid,
+    m_ulLocationID: uint64 align(default_alignment) = 0,
 };
 pub const SteamParamStringArray_t = extern struct {
-    m_ppStrings: [*c][*c]const u8 = null,
-    m_nNumStrings: int32 = 0,
+    m_ppStrings: [*c][*c]const u8 align(default_alignment) = null,
+    m_nNumStrings: int32 align(default_alignment) = 0,
 };
 pub const LeaderboardEntry_t = extern struct {
-    m_steamIDUser: CSteamID,
-    m_nGlobalRank: int32 = 0,
-    m_nScore: int32 = 0,
-    m_cDetails: int32 = 0,
-    m_hUGC: UGCHandle_t = 0,
+    m_steamIDUser: CSteamID align(default_alignment),
+    m_nGlobalRank: int32 align(default_alignment) = 0,
+    m_nScore: int32 align(default_alignment) = 0,
+    m_cDetails: int32 align(default_alignment) = 0,
+    m_hUGC: UGCHandle_t align(default_alignment) = 0,
 };
 pub const P2PSessionState_t = extern struct {
-    m_bConnectionActive: uint8 = 0,
-    m_bConnecting: uint8 = 0,
-    m_eP2PSessionError: uint8 = 0,
-    m_bUsingRelay: uint8 = 0,
-    m_nBytesQueuedForSend: int32 = 0,
-    m_nPacketsQueuedForSend: int32 = 0,
-    m_nRemoteIP: uint32 = 0,
-    m_nRemotePort: uint16 = 0,
+    m_bConnectionActive: uint8 align(default_alignment) = 0,
+    m_bConnecting: uint8 align(default_alignment) = 0,
+    m_eP2PSessionError: uint8 align(default_alignment) = 0,
+    m_bUsingRelay: uint8 align(default_alignment) = 0,
+    m_nBytesQueuedForSend: int32 align(default_alignment) = 0,
+    m_nPacketsQueuedForSend: int32 align(default_alignment) = 0,
+    m_nRemoteIP: uint32 align(default_alignment) = 0,
+    m_nRemotePort: uint16 align(default_alignment) = 0,
 };
 pub const InputAnalogActionData_t = extern struct {
-    eMode: EInputSourceMode = EInputSourceMode.k_EInputSourceMode_None,
-    x: f32 = 0,
-    y: f32 = 0,
-    bActive: bool = false,
+    eMode: EInputSourceMode align(1) = EInputSourceMode.k_EInputSourceMode_None,
+    x: f32 align(1) = 0,
+    y: f32 align(1) = 0,
+    bActive: bool align(1) = false,
 };
 pub const InputDigitalActionData_t = extern struct {
-    bState: bool = false,
-    bActive: bool = false,
+    bState: bool align(1) = false,
+    bActive: bool align(1) = false,
 };
 pub const InputMotionData_t = extern struct {
-    rotQuatX: f32 = 0,
-    rotQuatY: f32 = 0,
-    rotQuatZ: f32 = 0,
-    rotQuatW: f32 = 0,
-    posAccelX: f32 = 0,
-    posAccelY: f32 = 0,
-    posAccelZ: f32 = 0,
-    rotVelX: f32 = 0,
-    rotVelY: f32 = 0,
-    rotVelZ: f32 = 0,
+    rotQuatX: f32 align(default_alignment) = 0,
+    rotQuatY: f32 align(default_alignment) = 0,
+    rotQuatZ: f32 align(default_alignment) = 0,
+    rotQuatW: f32 align(default_alignment) = 0,
+    posAccelX: f32 align(default_alignment) = 0,
+    posAccelY: f32 align(default_alignment) = 0,
+    posAccelZ: f32 align(default_alignment) = 0,
+    rotVelX: f32 align(default_alignment) = 0,
+    rotVelY: f32 align(default_alignment) = 0,
+    rotVelZ: f32 align(default_alignment) = 0,
 };
 pub const InputMotionDataV2_t = extern struct {
-    driftCorrectedQuatX: f32 = 0,
-    driftCorrectedQuatY: f32 = 0,
-    driftCorrectedQuatZ: f32 = 0,
-    driftCorrectedQuatW: f32 = 0,
-    sensorFusionQuatX: f32 = 0,
-    sensorFusionQuatY: f32 = 0,
-    sensorFusionQuatZ: f32 = 0,
-    sensorFusionQuatW: f32 = 0,
-    deferredSensorFusionQuatX: f32 = 0,
-    deferredSensorFusionQuatY: f32 = 0,
-    deferredSensorFusionQuatZ: f32 = 0,
-    deferredSensorFusionQuatW: f32 = 0,
-    gravityX: f32 = 0,
-    gravityY: f32 = 0,
-    gravityZ: f32 = 0,
-    degreesPerSecondX: f32 = 0,
-    degreesPerSecondY: f32 = 0,
-    degreesPerSecondZ: f32 = 0,
+    driftCorrectedQuatX: f32 align(default_alignment) = 0,
+    driftCorrectedQuatY: f32 align(default_alignment) = 0,
+    driftCorrectedQuatZ: f32 align(default_alignment) = 0,
+    driftCorrectedQuatW: f32 align(default_alignment) = 0,
+    sensorFusionQuatX: f32 align(default_alignment) = 0,
+    sensorFusionQuatY: f32 align(default_alignment) = 0,
+    sensorFusionQuatZ: f32 align(default_alignment) = 0,
+    sensorFusionQuatW: f32 align(default_alignment) = 0,
+    deferredSensorFusionQuatX: f32 align(default_alignment) = 0,
+    deferredSensorFusionQuatY: f32 align(default_alignment) = 0,
+    deferredSensorFusionQuatZ: f32 align(default_alignment) = 0,
+    deferredSensorFusionQuatW: f32 align(default_alignment) = 0,
+    gravityX: f32 align(default_alignment) = 0,
+    gravityY: f32 align(default_alignment) = 0,
+    gravityZ: f32 align(default_alignment) = 0,
+    degreesPerSecondX: f32 align(default_alignment) = 0,
+    degreesPerSecondY: f32 align(default_alignment) = 0,
+    degreesPerSecondZ: f32 align(default_alignment) = 0,
 };
 pub const SteamInputActionEvent_t = extern struct {
-    controllerHandle: InputHandle_t = 0,
-    eEventType: ESteamInputActionEventType = ESteamInputActionEventType.ESteamInputActionEventType_DigitalAction,
-    analogAction: DigitalAnalogAction_t,
+    controllerHandle: InputHandle_t align(default_alignment) = 0,
+    eEventType: ESteamInputActionEventType align(default_alignment) = ESteamInputActionEventType.ESteamInputActionEventType_DigitalAction,
+    analogAction: DigitalAnalogAction_t align(default_alignment),
 };
 pub const SteamUGCDetails_t = extern struct {
-    m_nPublishedFileId: PublishedFileId_t = 0,
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_eFileType: EWorkshopFileType = EWorkshopFileType.k_EWorkshopFileTypeFirst,
-    m_nCreatorAppID: AppId_t = 0,
-    m_nConsumerAppID: AppId_t = 0,
-    m_rgchTitle: [129]u8,
-    m_rgchDescription: [8000]u8,
-    m_ulSteamIDOwner: uint64 = 0,
-    m_rtimeCreated: uint32 = 0,
-    m_rtimeUpdated: uint32 = 0,
-    m_rtimeAddedToUserList: uint32 = 0,
-    m_eVisibility: ERemoteStoragePublishedFileVisibility = ERemoteStoragePublishedFileVisibility.k_ERemoteStoragePublishedFileVisibilityPublic,
-    m_bBanned: bool = false,
-    m_bAcceptedForUse: bool = false,
-    m_bTagsTruncated: bool = false,
-    m_rgchTags: [1025]u8,
-    m_hFile: UGCHandle_t = 0,
-    m_hPreviewFile: UGCHandle_t = 0,
-    m_pchFileName: [260]u8,
-    m_nFileSize: int32 = 0,
-    m_nPreviewFileSize: int32 = 0,
-    m_rgchURL: [256]u8,
-    m_unVotesUp: uint32 = 0,
-    m_unVotesDown: uint32 = 0,
-    m_flScore: f32 = 0,
-    m_unNumChildren: uint32 = 0,
+    m_nPublishedFileId: PublishedFileId_t align(default_alignment) = 0,
+    m_eResult: EResult align(default_alignment) = EResult.k_EResultNone,
+    m_eFileType: EWorkshopFileType align(default_alignment) = EWorkshopFileType.k_EWorkshopFileTypeFirst,
+    m_nCreatorAppID: AppId_t align(default_alignment) = 0,
+    m_nConsumerAppID: AppId_t align(default_alignment) = 0,
+    m_rgchTitle: [129]u8 align(default_alignment),
+    m_rgchDescription: [8000]u8 align(default_alignment),
+    m_ulSteamIDOwner: uint64 align(default_alignment) = 0,
+    m_rtimeCreated: uint32 align(default_alignment) = 0,
+    m_rtimeUpdated: uint32 align(default_alignment) = 0,
+    m_rtimeAddedToUserList: uint32 align(default_alignment) = 0,
+    m_eVisibility: ERemoteStoragePublishedFileVisibility align(default_alignment) = ERemoteStoragePublishedFileVisibility.k_ERemoteStoragePublishedFileVisibilityPublic,
+    m_bBanned: bool align(default_alignment) = false,
+    m_bAcceptedForUse: bool align(default_alignment) = false,
+    m_bTagsTruncated: bool align(default_alignment) = false,
+    m_rgchTags: [1025]u8 align(default_alignment),
+    m_hFile: UGCHandle_t align(default_alignment) = 0,
+    m_hPreviewFile: UGCHandle_t align(default_alignment) = 0,
+    m_pchFileName: [260]u8 align(default_alignment),
+    m_nFileSize: int32 align(default_alignment) = 0,
+    m_nPreviewFileSize: int32 align(default_alignment) = 0,
+    m_rgchURL: [256]u8 align(default_alignment),
+    m_unVotesUp: uint32 align(default_alignment) = 0,
+    m_unVotesDown: uint32 align(default_alignment) = 0,
+    m_flScore: f32 align(default_alignment) = 0,
+    m_unNumChildren: uint32 align(default_alignment) = 0,
 };
 pub const SteamItemDetails_t = extern struct {
-    m_itemId: SteamItemInstanceID_t = 0,
-    m_iDefinition: SteamItemDef_t = 0,
-    m_unQuantity: uint16 = 0,
-    m_unFlags: uint16 = 0,
+    m_itemId: SteamItemInstanceID_t align(default_alignment) = 0,
+    m_iDefinition: SteamItemDef_t align(default_alignment) = 0,
+    m_unQuantity: uint16 align(default_alignment) = 0,
+    m_unFlags: uint16 align(default_alignment) = 0,
 };
 pub const SteamNetworkingIPAddr = extern struct {
-    m_ipv6: [16]uint8,
-    m_port: uint16 = 0,
+    m_ipv6: [16]uint8 align(default_alignment),
+    m_port: uint16 align(default_alignment) = 0,
 
     // Constants
     pub const k_cchMaxString: i32 = 48;
@@ -4564,9 +4565,9 @@ extern fn SteamAPI_SteamNetworkingIPAddr_IsEqualTo(self: ?*anyopaque, x: SteamNe
 extern fn SteamAPI_SteamNetworkingIPAddr_GetFakeIPType(self: ?*anyopaque) callconv(.C) ESteamNetworkingFakeIPType;
 extern fn SteamAPI_SteamNetworkingIPAddr_IsFakeIP(self: ?*anyopaque) callconv(.C) bool;
 pub const SteamNetworkingIdentity = extern struct {
-    m_eType: ESteamNetworkingIdentityType = ESteamNetworkingIdentityType.k_ESteamNetworkingIdentityType_Invalid,
-    m_cbSize: i32 = 0,
-    m_szUnknownRawString: [128]u8,
+    m_eType: ESteamNetworkingIdentityType align(default_alignment) = ESteamNetworkingIdentityType.k_ESteamNetworkingIdentityType_Invalid,
+    m_cbSize: i32 align(default_alignment) = 0,
+    m_szUnknownRawString: [128]u8 align(default_alignment),
 
     // Constants
     pub const k_cchMaxString: i32 = 128;
@@ -4713,59 +4714,59 @@ extern fn SteamAPI_SteamNetworkingIdentity_IsEqualTo(self: ?*anyopaque, x: Steam
 extern fn SteamAPI_SteamNetworkingIdentity_ToString(self: ?*anyopaque, buf: [*c]u8, cbBuf: uint32) callconv(.C) void;
 extern fn SteamAPI_SteamNetworkingIdentity_ParseString(self: ?*anyopaque, pszStr: [*c]const u8) callconv(.C) bool;
 pub const SteamNetConnectionInfo_t = extern struct {
-    m_identityRemote: SteamNetworkingIdentity,
-    m_nUserData: int64 = 0,
-    m_hListenSocket: HSteamListenSocket = 0,
-    m_addrRemote: SteamNetworkingIPAddr,
-    m__pad1: uint16 = 0,
-    m_idPOPRemote: SteamNetworkingPOPID = 0,
-    m_idPOPRelay: SteamNetworkingPOPID = 0,
-    m_eState: ESteamNetworkingConnectionState = ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_None,
-    m_eEndReason: i32 = 0,
-    m_szEndDebug: [128]u8,
-    m_szConnectionDescription: [128]u8,
-    m_nFlags: i32 = 0,
-    reserved: [63]uint32,
+    m_identityRemote: SteamNetworkingIdentity align(default_alignment),
+    m_nUserData: int64 align(default_alignment) = 0,
+    m_hListenSocket: HSteamListenSocket align(default_alignment) = 0,
+    m_addrRemote: SteamNetworkingIPAddr align(default_alignment),
+    m__pad1: uint16 align(default_alignment) = 0,
+    m_idPOPRemote: SteamNetworkingPOPID align(default_alignment) = 0,
+    m_idPOPRelay: SteamNetworkingPOPID align(default_alignment) = 0,
+    m_eState: ESteamNetworkingConnectionState align(default_alignment) = ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_None,
+    m_eEndReason: i32 align(default_alignment) = 0,
+    m_szEndDebug: [128]u8 align(default_alignment),
+    m_szConnectionDescription: [128]u8 align(default_alignment),
+    m_nFlags: i32 align(default_alignment) = 0,
+    reserved: [63]uint32 align(default_alignment),
 };
 pub const SteamNetConnectionRealTimeStatus_t = extern struct {
-    m_eState: ESteamNetworkingConnectionState = ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_None,
-    m_nPing: i32 = 0,
-    m_flConnectionQualityLocal: f32 = 0,
-    m_flConnectionQualityRemote: f32 = 0,
-    m_flOutPacketsPerSec: f32 = 0,
-    m_flOutBytesPerSec: f32 = 0,
-    m_flInPacketsPerSec: f32 = 0,
-    m_flInBytesPerSec: f32 = 0,
-    m_nSendRateBytesPerSecond: i32 = 0,
-    m_cbPendingUnreliable: i32 = 0,
-    m_cbPendingReliable: i32 = 0,
-    m_cbSentUnackedReliable: i32 = 0,
-    m_usecQueueTime: SteamNetworkingMicroseconds = 0,
-    reserved: [16]uint32,
+    m_eState: ESteamNetworkingConnectionState align(default_alignment) = ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_None,
+    m_nPing: i32 align(default_alignment) = 0,
+    m_flConnectionQualityLocal: f32 align(default_alignment) = 0,
+    m_flConnectionQualityRemote: f32 align(default_alignment) = 0,
+    m_flOutPacketsPerSec: f32 align(default_alignment) = 0,
+    m_flOutBytesPerSec: f32 align(default_alignment) = 0,
+    m_flInPacketsPerSec: f32 align(default_alignment) = 0,
+    m_flInBytesPerSec: f32 align(default_alignment) = 0,
+    m_nSendRateBytesPerSecond: i32 align(default_alignment) = 0,
+    m_cbPendingUnreliable: i32 align(default_alignment) = 0,
+    m_cbPendingReliable: i32 align(default_alignment) = 0,
+    m_cbSentUnackedReliable: i32 align(default_alignment) = 0,
+    m_usecQueueTime: SteamNetworkingMicroseconds align(default_alignment) = 0,
+    reserved: [16]uint32 align(default_alignment),
 };
 pub const SteamNetConnectionRealTimeLaneStatus_t = extern struct {
-    m_cbPendingUnreliable: i32 = 0,
-    m_cbPendingReliable: i32 = 0,
-    m_cbSentUnackedReliable: i32 = 0,
-    _reservePad1: i32 = 0,
-    m_usecQueueTime: SteamNetworkingMicroseconds = 0,
-    reserved: [10]uint32,
+    m_cbPendingUnreliable: i32 align(default_alignment) = 0,
+    m_cbPendingReliable: i32 align(default_alignment) = 0,
+    m_cbSentUnackedReliable: i32 align(default_alignment) = 0,
+    _reservePad1: i32 align(default_alignment) = 0,
+    m_usecQueueTime: SteamNetworkingMicroseconds align(default_alignment) = 0,
+    reserved: [10]uint32 align(default_alignment),
 };
 pub const SteamNetworkingMessage_t = extern struct {
-    m_pData: ?*anyopaque = null,
-    m_cbSize: i32 = 0,
-    m_conn: HSteamNetConnection = 0,
-    m_identityPeer: SteamNetworkingIdentity,
-    m_nConnUserData: int64 = 0,
-    m_usecTimeReceived: SteamNetworkingMicroseconds = 0,
-    m_nMessageNumber: int64 = 0,
-    m_pfnFreeData: ?*const fn ([*c]SteamNetworkingMessage_t) callconv(.C) void,
-    m_pfnRelease: ?*const fn ([*c]SteamNetworkingMessage_t) callconv(.C) void,
-    m_nChannel: i32 = 0,
-    m_nFlags: i32 = 0,
-    m_nUserData: int64 = 0,
-    m_idxLane: uint16 = 0,
-    _pad1__: uint16 = 0,
+    m_pData: ?*anyopaque align(default_alignment) = null,
+    m_cbSize: i32 align(default_alignment) = 0,
+    m_conn: HSteamNetConnection align(default_alignment) = 0,
+    m_identityPeer: SteamNetworkingIdentity align(default_alignment),
+    m_nConnUserData: int64 align(default_alignment) = 0,
+    m_usecTimeReceived: SteamNetworkingMicroseconds align(default_alignment) = 0,
+    m_nMessageNumber: int64 align(default_alignment) = 0,
+    m_pfnFreeData: ?*const fn ([*c]SteamNetworkingMessage_t) callconv(.C) void align(default_alignment),
+    m_pfnRelease: ?*const fn ([*c]SteamNetworkingMessage_t) callconv(.C) void align(default_alignment),
+    m_nChannel: i32 align(default_alignment) = 0,
+    m_nFlags: i32 align(default_alignment) = 0,
+    m_nUserData: int64 align(default_alignment) = 0,
+    m_idxLane: uint16 align(default_alignment) = 0,
+    _pad1__: uint16 align(default_alignment) = 0,
     // methods
     const Self = @This();
     pub fn Release(self: *Self) void {
@@ -4776,12 +4777,12 @@ pub const SteamNetworkingMessage_t = extern struct {
 // static functions
 extern fn SteamAPI_SteamNetworkingMessage_t_Release(self: ?*anyopaque) callconv(.C) void;
 pub const SteamNetworkPingLocation_t = extern struct {
-    m_data: [512]uint8,
+    m_data: [512]uint8 align(default_alignment),
 };
 pub const SteamNetworkingConfigValue_t = extern struct {
-    m_eValue: ESteamNetworkingConfigValue = ESteamNetworkingConfigValue.k_ESteamNetworkingConfig_Invalid,
-    m_eDataType: ESteamNetworkingConfigDataType,
-    m_int64: i64 = 0,
+    m_eValue: ESteamNetworkingConfigValue align(default_alignment) = ESteamNetworkingConfigValue.k_ESteamNetworkingConfig_Invalid,
+    m_eDataType: ESteamNetworkingConfigDataType align(default_alignment),
+    m_int64: i64 align(default_alignment) = 0,
     // methods
     const Self = @This();
     pub fn SetInt32(self: *Self, eVal: ESteamNetworkingConfigValue, data: i32) void {
@@ -4812,8 +4813,8 @@ extern fn SteamAPI_SteamNetworkingConfigValue_t_SetFloat(self: ?*anyopaque, eVal
 extern fn SteamAPI_SteamNetworkingConfigValue_t_SetPtr(self: ?*anyopaque, eVal: ESteamNetworkingConfigValue, data: ?*anyopaque) callconv(.C) void;
 extern fn SteamAPI_SteamNetworkingConfigValue_t_SetString(self: ?*anyopaque, eVal: ESteamNetworkingConfigValue, data: [*c]const u8) callconv(.C) void;
 pub const SteamDatagramHostedAddress = extern struct {
-    m_cbSize: i32 = 0,
-    m_data: [128]u8,
+    m_cbSize: i32 align(default_alignment) = 0,
+    m_data: [128]u8 align(default_alignment),
     // methods
     const Self = @This();
     pub fn Clear(self: *Self) void {
@@ -4834,12 +4835,12 @@ extern fn SteamAPI_SteamDatagramHostedAddress_Clear(self: ?*anyopaque) callconv(
 extern fn SteamAPI_SteamDatagramHostedAddress_GetPopID(self: ?*anyopaque) callconv(.C) SteamNetworkingPOPID;
 extern fn SteamAPI_SteamDatagramHostedAddress_SetDevAddress(self: ?*anyopaque, nIP: uint32, nPort: uint16, popid: SteamNetworkingPOPID) callconv(.C) void;
 pub const SteamDatagramGameCoordinatorServerLogin = extern struct {
-    m_identity: SteamNetworkingIdentity,
-    m_routing: SteamDatagramHostedAddress,
-    m_nAppID: AppId_t = 0,
-    m_rtime: RTime32 = 0,
-    m_cbAppData: i32 = 0,
-    m_appData: [2048]u8,
+    m_identity: SteamNetworkingIdentity align(default_alignment),
+    m_routing: SteamDatagramHostedAddress align(default_alignment),
+    m_nAppID: AppId_t align(default_alignment) = 0,
+    m_rtime: RTime32 align(default_alignment) = 0,
+    m_cbAppData: i32 align(default_alignment) = 0,
+    m_appData: [2048]u8 align(default_alignment),
 };
 
 // Interfaces
