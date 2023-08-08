@@ -5,8 +5,14 @@ pub fn thisDir() []const u8 {
 }
 
 /// Link and compile the steamworks library. Also copy the redistributable files to the out-dir
-pub fn linkSteamLibrary(b: *std.build.Builder, exe: *std.build.LibExeObjStep, comptime steamworksPath: []const u8) !*std.build.LibExeObjStep {
-    var steam = b.addStaticLibrary(.{ .name = "steamworks", .target = exe.target, .optimize = exe.optimize });
+pub fn linkSteamLibrary(b: *std.build.Builder, exe: *std.build.LibExeObjStep) !*std.build.LibExeObjStep {
+    const steamworksPath = "steamworks";
+    var steam = b.addStaticLibrary(.{
+        .name = "steamworks",
+        .root_source_file = .{ .path = comptime thisDir() ++ "/src/main.cpp" },
+        .target = exe.target,
+        .optimize = exe.optimize,
+    });
     steam.linkLibC();
     steam.linkLibCpp();
 
@@ -16,38 +22,47 @@ pub fn linkSteamLibrary(b: *std.build.Builder, exe: *std.build.LibExeObjStep, co
     flagContainer.append("-Wno-return-type-c-linkage") catch unreachable;
     flagContainer.append("-fno-sanitize=undefined") catch unreachable;
 
+    // const lib = b.addStaticLibrary(.{
+    //     .name = "mach-glfw",
+    //     .root_source_file = .{ .path = "stub.c" },
+    //     .target = target,
+    //     .optimize = optimize,
+    // });
+    // lib.linkLibrary(b.dependency("glfw", .{
+    //     .target = lib.target,
+    //     .optimize = lib.optimize,
+    // }).artifact("glfw"));
+
     if (exe.target.os_tag != null) {
         if (exe.target.os_tag.? == .macos) {
-            try copy(steamworksPath ++ "/redistributable_bin/osx", "zig-out/bin", "libsteam_api.dylib");
-            try copy(steamworksPath ++ "/public/steam/lib/osx", "zig-out/bin", "libsdkencryptedappticket.dylib");
+            //try copy(steamworksPath ++ "/redistributable_bin/osx", "zig-out/bin", "libsteam_api.dylib");
+            //try copy(steamworksPath ++ "/public/steam/lib/osx", "zig-out/bin", "libsdkencryptedappticket.dylib");
             steam.linkSystemLibrary(steamworksPath ++ "/public/steam/lib/osx/libsdkencryptedappticket.dylib");
             steam.linkSystemLibrary(steamworksPath ++ "/redistributable_bin/osx/libsteam_api.dylib");
         } else if (exe.target.os_tag.? == .linux) {
-            try copy(steamworksPath ++ "/redistributable_bin/linux64", "zig-out/bin", "libsteam_api.so");
-            try copy(steamworksPath ++ "/public/steam/lib/linux64", "zig-out/bin", "libsdkencryptedappticket.so");
+            //try copy(steamworksPath ++ "/redistributable_bin/linux64", "zig-out/bin", "libsteam_api.so");
+            //try copy(steamworksPath ++ "/public/steam/lib/linux64", "zig-out/bin", "libsdkencryptedappticket.so");
             steam.linkSystemLibrary(steamworksPath ++ "/public/steam/lib/linux64/libsdkencryptedappticket.so");
             steam.linkSystemLibrary(steamworksPath ++ "/redistributable_bin/linux64/libsteam_api.so");
         } else if (exe.target.os_tag.? == .windows) {
-            try copy(steamworksPath ++ "/public/steam/lib/win64", "zig-out/bin", "sdkencryptedappticket64.dll");
-            try copy(steamworksPath ++ "/public/steam/lib/win64", "zig-out/bin", "sdkencryptedappticket64.lib");
-            try copy(steamworksPath ++ "/redistributable_bin/win64", "zig-out/bin", "steam_api64.dll");
-            try copy(steamworksPath ++ "/redistributable_bin/win64", "zig-out/bin", "steam_api64.lib");
-            steam.addLibraryPath(steamworksPath ++ "/public/steam/lib/win64");
-            steam.addLibraryPath(steamworksPath ++ "/redistributable_bin/win64");
-            exe.addLibraryPath(steamworksPath ++ "/public/steam/lib/win64");
-            exe.addLibraryPath(steamworksPath ++ "/redistributable_bin/win64");
+            //try copy(steamworksPath ++ "/public/steam/lib/win64", "zig-out/bin", "sdkencryptedappticket64.dll");
+            // try copy(steamworksPath ++ "/public/steam/lib/win64", "zig-out/bin", "sdkencryptedappticket64.lib");
+            //try copy(steamworksPath ++ "/redistributable_bin/win64", "zig-out/bin", "steam_api64.dll");
+            // try copy(steamworksPath ++ "/redistributable_bin/win64", "zig-out/bin", "steam_api64.lib");
+            steam.addLibraryPath(.{ .path = steamworksPath ++ "/public/steam/lib/win64" });
+            steam.addLibraryPath(.{ .path = steamworksPath ++ "/redistributable_bin/win64" });
             steam.linkSystemLibrary("sdkencryptedappticket64");
             steam.linkSystemLibrary("steam_api64");
+            // b.installLibFile(src_path: []const u8, dest_rel_path: []const u8)
         }
     }
 
     // Include dirs.
-    steam.addIncludePath(steamworksPath ++ "/public/steam");
+    steam.addIncludePath(.{ .path = steamworksPath ++ "/public/steam" });
 
     // Add C
     steam.addCSourceFiles(&.{comptime thisDir() ++ "/src/steam.cpp"}, flagContainer.items);
-
-    exe.linkLibrary(steam);
+    b.installArtifact(steam);
 
     return steam;
 }

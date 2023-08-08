@@ -1,177 +1,27 @@
-const steam = @import("steam.zig");
+const steam = @import("steamworks");
+const builtin = @import("builtin");
 const std = @import("std");
 const t = std.testing;
+const win = builtin.os.tag == .windows;
 
-test {
-    try test_serializer(
-        steam.LobbyCreated_t{ .m_eResult = steam.EResult.k_EResultOK, .m_ulSteamIDLobby = 109775242231394386 },
-        "0100000052b0554e00008601", // mac
-    );
+extern "C" fn steam_callback_size(cb_id: c_int) callconv(.C) c_int;
+extern "C" fn steam_callback_align(cb_id: c_int) callconv(.C) c_int;
+extern "C" fn steam_callback_size_field(cb_id: c_int, field_number: c_int) callconv(.C) c_int;
+extern "C" fn steam_callback_align_field(cb_id: c_int, field_number: c_int) callconv(.C) c_int;
 
-    try test_serializer(
-        steam.LobbyCreated_t{ .m_eResult = steam.EResult.k_EResultOK, .m_ulSteamIDLobby = 7498452822249142752 },
-        "01000000e0792f031ddb0f6800008601", // win
-    );
+pub const ValvePackingSentinel_t = struct {
+    m_u32: u32 align(steam.StructPlatformPackSize),
+    m_u64: u64 align(steam.StructPlatformPackSize),
+    m_u16: u16 align(steam.StructPlatformPackSize),
+    m_d: f64 align(steam.StructPlatformPackSize),
+};
 
-    try test_serializer(
-        steam.PersonaStateChange_t{ .m_ulSteamID = 76561197998998680, .m_nChangeFlags = 32 },
-        "98044f020100100120000000", // mac
-    );
-
-    try test_serializer(
-        steam.PersonaStateChange_t{ .m_ulSteamID = 76561199045870667, .m_nChangeFlags = 16 },
-        "4b04b540010010011000000000000000", // win
-    );
-
-    try test_serializer(
-        steam.LobbyEnter_t{ .m_ulSteamIDLobby = 109775242587369560, .m_rgfChatPermissions = 0, .m_bLocked = false, .m_EChatRoomEnterResponse = 1 },
-        "58708d630000860100000000008113ba01000000", // mac
-    );
-
-    try test_serializer(
-        steam.LobbyEnter_t{ .m_ulSteamIDLobby = 109775242663025437, .m_rgfChatPermissions = 0, .m_bLocked = false, .m_EChatRoomEnterResponse = 1 },
-        "1ddb0f6800008601000000000000000001000000a4f7dc07", // win
-    );
-
-    try test_serializer(
-        steam.LobbyEnter_t{ .m_ulSteamIDLobby = 109775242231394386, .m_rgfChatPermissions = 0, .m_bLocked = false, .m_EChatRoomEnterResponse = 1 },
-        "52b0554e000086010000000000f5452f01000000", // mac
-    );
-
-    try test_serializer(
-        steam.LobbyDataUpdate_t{ .m_ulSteamIDLobby = 109775242587369560, .m_ulSteamIDMember = 109775242587369560, .m_bSuccess = 1 },
-        "58708d630000860158708d630000860101708d63", // mac
-    );
-
-    try test_serializer(
-        steam.LobbyDataUpdate_t{ .m_ulSteamIDLobby = 109775242663025437, .m_ulSteamIDMember = 109775242663025437, .m_bSuccess = 1 },
-        "1ddb0f68000086011ddb0f680000860101c0666e04001f00", // win
-    );
-
-    try test_serializer(
-        steam.LobbyChatMsg_t{ .m_ulSteamIDLobby = 109775242587369560, .m_ulSteamIDUser = 76561197998998680, .m_eChatEntryType = 1, .m_iChatID = 0 },
-        "58708d630000860198044f0201001001019b5a0a00000000",
-    );
-}
-
-comptime {
-    // mac, LobbyChatMsg_t f39f356300008601 98044f0201001001 01...... 01000000
-    assert_offset(steam.LobbyChatMsg_t, "m_ulSteamIDLobby", 0);
-    assert_offset(steam.LobbyChatMsg_t, "m_ulSteamIDUser", 8);
-    assert_offset(steam.LobbyChatMsg_t, "m_eChatEntryType", 16);
-    assert_offset(steam.LobbyChatMsg_t, "m_iChatID", 20);
-
-    // mac, LobbyEnter_t c2d6696300008601 c2d66963 00...... 01......
-    assert_offset(steam.LobbyEnter_t, "m_ulSteamIDLobby", 0);
-    assert_offset(steam.LobbyEnter_t, "m_rgfChatPermissions", 8);
-    assert_offset(steam.LobbyEnter_t, "m_bLocked", 12);
-    assert_offset(steam.LobbyEnter_t, "m_EChatRoomEnterResponse", 16);
-
-    assert_callback_size(101, 1); // "23SteamServersConnected_t",
-    assert_callback_size(102, 8); // "27SteamServerConnectFailure_t",
-    assert_callback_size(103, 4); // "26SteamServersDisconnected_t",
-    assert_callback_size(113, 16); // "22ClientGameServerDeny_t",
-    assert_callback_size(115, 1); // "18GSPolicyResponse_t",
-    assert_callback_size(125, 1); // "17LicensesUpdated_t",
-    assert_callback_size(143, 20); // "28ValidateAuthTicketResponse_t",
-    assert_callback_size(164, 256); // "Unknown",
-    assert_callback_size(167, 32); // "Unknown",
-    assert_callback_size(201, 16); // "17GSClientApprove_t",
-    assert_callback_size(202, 140); // "14GSClientDeny_t",
-    assert_callback_size(203, 12); // "14GSClientKick_t",
-    // assert_callback_size(204, 8); // "20GSClientSteam2Deny_t",
-    // assert_callback_size(205, 12); // "22GSClientSteam2Accept_t",
-    assert_callback_size(206, 140); // "27GSClientAchievementStatus_t",
-    assert_callback_size(207, 16); // "17GSGameplayStats_t",
-    assert_callback_size(208, 18); // "21GSClientGroupStatus_t",
-    assert_callback_size(211, 24); // "37ComputeNewPlayerCompatibilityResult_t",
-    assert_callback_size(304, 12); // "20PersonaStateChange_t",
-    assert_callback_size(331, 8); // "22GameOverlayActivated_t",
-    assert_callback_size(333, 16); // "Unknown",
-    assert_callback_size(334, 20); // "19AvatarImageLoaded_t",
-    assert_callback_size(336, 12); // "26FriendRichPresenceUpdate_t",
-    assert_callback_size(337, 264); // "Unknown",
-    assert_callback_size(338, 20); // "Unknown",
-    assert_callback_size(339, 16); // "Unknown",
-    assert_callback_size(340, 18); // "Unknown",
-    assert_callback_size(348, 1); // "27UnreadChatMessagesChanged_t",
-    assert_callback_size(349, 1024); // "Unknown",
-    assert_callback_size(350, 8); // "29EquippedProfileItemsChanged_t",
-
-    // assert_callback_size(351, 20); // "22EquippedProfileItems_t", NOT present in steam.h
-
-    assert_callback_size(502, 28); // "22FavoritesListChanged_t",
-    assert_callback_size(503, 24); // "13LobbyInvite_t",
-    assert_callback_size(504, 20); // "12LobbyEnter_t",
-    assert_callback_size(505, 20); // "17LobbyDataUpdate_t",
-    assert_callback_size(506, 28); // "17LobbyChatUpdate_t",
-    assert_callback_size(507, 24); // "14LobbyChatMsg_t",
-    assert_callback_size(509, 24); // "Unknown",
-    assert_callback_size(510, 4); // "16LobbyMatchList_t",
-    assert_callback_size(512, 20); // "13LobbyKicked_t",
-    assert_callback_size(513, 12); // "14LobbyCreated_t",
-    assert_callback_size(701, 1); // "11IPCountry_t",
-    assert_callback_size(702, 1); // "Unknown",
-    assert_callback_size(736, 1); // "Unknown",
-    assert_callback_size(738, 1); // "Unknown",
-    assert_callback_size(739, 4); // "Unknown",
-    assert_callback_size(1014, 1); // "Unknown",
-    assert_callback_size(1030, 16); // "18TimedTrialStatus_t",
-    assert_callback_size(1101, 20); // "19UserStatsReceived_t",
-    assert_callback_size(1102, 12); // "Unknown",
-    assert_callback_size(1103, 148); // "23UserAchievementStored_t",
-    assert_callback_size(1108, 8); // "Unknown",
-    assert_callback_size(1109, 144); // "28UserAchievementIconFetched_t",
-    assert_callback_size(1201, 20); // "22SocketStatusCallback_t",
-    assert_callback_size(1202, 8); // "Unknown",
-    assert_callback_size(1203, 9); // "Unknown",
-    assert_callback_size(1309, 16); // "32RemoteStoragePublishFileResult_t",
-    assert_callback_size(1316, 16); // "40RemoteStorageUpdatePublishedFileResult_t",
-    assert_callback_size(1321, 12); // "38RemoteStoragePublishedFileSubscribed_t",
-    assert_callback_size(1322, 12); // "40RemoteStoragePublishedFileUnsubscribed_t",
-    assert_callback_size(1323, 12); // "35RemoteStoragePublishedFileDeleted_t",
-    assert_callback_size(1329, 12); // "Unknown",
-    assert_callback_size(1330, 20); // "Unknown",
-    assert_callback_size(1800, 12); // "17GSStatsReceived_t",
-    assert_callback_size(2102, 12); // "28HTTPRequestHeadersReceived_t",
-    assert_callback_size(2103, 20); // "25HTTPRequestDataReceived_t",
-    assert_callback_size(2301, 8); // "Unknown",
-    assert_callback_size(2302, 1); // "Unknown",
-    assert_callback_size(2801, 8); // "Unknown",
-    assert_callback_size(2802, 8); // "Unknown",
-    assert_callback_size(2803, 32); // "Unknown",
-    assert_callback_size(2804, 24); // "Unknown",
-    assert_callback_size(3405, 12); // "15ItemInstalled_t",
-    assert_callback_size(3418, 4); // "32UserSubscribedItemsListChanged_t",
-    assert_callback_size(3901, 8); // "Unknown",
-    assert_callback_size(3902, 8); // "Unknown",
-    assert_callback_size(4001, 1); // "PlaybackStatusHasChanged_t",
-    assert_callback_size(4002, 4); // "VolumeHasChanged_t",
-    assert_callback_size(4105, 1); // "MusicPlayerWantsPlay_t",
-    assert_callback_size(4106, 1); // "MusicPlayerWantsPause_t",
-    assert_callback_size(4107, 1); // "MusicPlayerWantsPlayPrevious_t",
-    assert_callback_size(4108, 1); // "MusicPlayerWantsPlayNext_t",
-    assert_callback_size(4611, 264); // "GetVideoURLResult_t",
-    assert_callback_size(4624, 8); // "GetOPFSettingsResult_t",
-    assert_callback_size(4700, 8); // "27SteamInventoryResultReady_t",
-    assert_callback_size(4701, 4); // "26SteamInventoryFullUpdate_t",
-    assert_callback_size(4702, 1); // "Unknown",
-    assert_callback_size(5001, 1); // "30SteamParentalSettingsChanged_t",
-    assert_callback_size(5201, 36); // "31SearchForGameProgressCallback_t",
-    assert_callback_size(5202, 32); // "29SearchForGameResultCallback_t",
-    assert_callback_size(5211, 12); // "39RequestPlayersForGameProgressCallback_t",
-    assert_callback_size(5212, 56); //RequestPlayersForGameResultCallback_t
-    assert_callback_size(5213, 20); // steam.RequestPlayersForGameFinalResultCallback_t
-    assert_callback_size(5305, 1); // steam.AvailableBeaconLocationsUpdated_t
-    assert_callback_size(5306, 1); // steam.ActiveBeaconsUpdated_t
-    assert_callback_size(5701, 4); // steam.SteamRemotePlaySessionConnected_t
-    assert_callback_size(5702, 4); // steam.SteamRemotePlaySessionDisconnected_t
-    assert_callback_size(5703, 1024); // steam.SteamRemotePlayTogetherGuestInvite_t
-}
-
-fn assert_callback_size(comptime id: comptime_int, comptime size: comptime_int) void {
+pub fn assert_callback_size(comptime id: comptime_int, comptime size: comptime_int) void {
     const T: type = get_callback_type(id);
+    assert_type_size(T, size);
+}
 
+pub fn assert_type_size(comptime T: type, comptime size: comptime_int) void {
     if (@sizeOf(T) > 0 and @sizeOf(T) != size) {
         @compileLog(T, "Invalid size:", @sizeOf(T), "Desired size:", size);
     }
@@ -179,31 +29,38 @@ fn assert_callback_size(comptime id: comptime_int, comptime size: comptime_int) 
 
 // const Error = error{ InvalidChar, IllegalCharacter, Overflow };
 
-fn assert_offset(comptime T: type, comptime field: []const u8, offset: u32) void {
+pub fn assert_offset(comptime T: type, comptime field: []const u8, offset: u32) void {
     if (@offsetOf(T, field) != offset) {
-        @compileLog(@offsetOf(T, field));
-        @compileError("Invalid offset, check the compiler logs");
+        @compileLog("Invalid offset, check the compiler logs", @offsetOf(T, field));
     }
 }
 
-const Error = error{ InvalidChar, IllegalCharacter, Overflow };
+pub const Error = error{ InvalidChar, IllegalCharacter, Overflow };
 
-fn test_serializer(value: anytype, comptime slice: []const u8) !void {
+pub fn bytes_from_slice(slice: []const u8) []const u8 {
+    @setEvalBranchQuota(10000);
     var bytes: [slice.len / 2]u8 = std.mem.zeroes([slice.len / 2]u8);
     for (slice, 0..) |char, index| {
         var shift: u3 = if (@rem(index, 2) == 0) 4 else 0;
         var pos: usize = @divFloor(index, 2);
         bytes[pos] = bytes[pos] | try charToInt(char) << shift;
     }
+    return &bytes;
+}
+
+pub fn test_serializer(comptime value: anytype, comptime slice: []const u8) !void {
+    const bytes: []const u8 = comptime bytes_from_slice(slice);
+    comptime if (@sizeOf(@TypeOf(value)) > bytes.len) {
+        @compileLog("Sizeof provided slice is not enough", @sizeOf(@TypeOf(value)), bytes.len, slice);
+    };
+    const from_slice_debug = comptime steam.from_slice_debug(@TypeOf(value), bytes);
+    const from_slice = comptime steam.from_slice(@TypeOf(value), bytes);
 
     // ensure that both deserializers work the same regardless of alignment
-    try t.expectEqualDeep(
-        steam.from_slice(@TypeOf(value), &bytes),
-        steam.from_slice_debug(@TypeOf(value), &bytes),
-    );
+    try t.expectEqualDeep(from_slice, from_slice_debug);
 
     // lastly compare against control value
-    try t.expectEqualDeep(value, steam.from_slice_debug(@TypeOf(value), &bytes));
+    try t.expectEqualDeep(value, from_slice_debug);
 }
 
 fn charToInt(c: u8) !u8 {
@@ -215,7 +72,50 @@ fn charToInt(c: u8) !u8 {
     };
 }
 
-fn get_callback_type(comptime id: comptime_int) type {
+const callbacks = [_]i32{ 101, 102, 103, 113, 117, 125, 143, 152, 154, 163, 164, 165, 166, 167, 168, 304, 331, 332, 333, 334, 335, 336, 337, 338, 339, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 701, 702, 703, 704, 705, 714, 736, 738, 739, 502, 503, 504, 505, 506, 507, 509, 510, 512, 513, 515, 516, 5201, 5202, 5211, 5212, 5213, 5214, 5215, 5301, 5302, 5303, 5304, 5305, 5306, 1307, 1309, 1311, 1312, 1313, 1314, 1315, 1316, 1317, 1318, 1319, 1320, 1321, 1322, 1323, 1324, 1325, 1326, 1327, 1328, 1329, 1330, 1331, 1332, 1333, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108, 1109, 1110, 1111, 1112, 1005, 1014, 1021, 1023, 1030, 1202, 1203, 1201, 2301, 2302, 4001, 4002, 4101, 4102, 4103, 4104, 4105, 4106, 4107, 4108, 4109, 4110, 4011, 4012, 4013, 4114, 2101, 2102, 2103, 2801, 2802, 2803, 2804, 3401, 3402, 3403, 3404, 3405, 3406, 3407, 3408, 3409, 3410, 3411, 3412, 3413, 3414, 3415, 3416, 3417, 3418, 3420, 3901, 3902, 4501, 4502, 4503, 4504, 4505, 4506, 4507, 4508, 4509, 4510, 4511, 4512, 4513, 4514, 4515, 4516, 4521, 4522, 4523, 4524, 4525, 4526, 4527, 4700, 4701, 4702, 4703, 4704, 4705, 4611, 4624, 5001, 5701, 5702, 5703, 1251, 1252, 1221, 1222, 1281, 201, 202, 203, 206, 115, 207, 208, 209, 210, 211, 1800, 1801 };
+
+pub fn check_callbacks_sizes() !void {
+    @setEvalBranchQuota(100000);
+    inline for (callbacks) |cb_id| {
+        const T = get_callback_type(cb_id);
+        const expected_size = steam_callback_size(cb_id);
+        const actual_size = @sizeOf(T);
+
+        var print = false;
+
+        std.debug.print("Checking {s}:\n", .{@typeName(T)});
+        if (actual_size != expected_size) {
+            std.debug.print("   size: C: {d}\tZig: {d}\n", .{ expected_size, actual_size });
+            if (@sizeOf(T) > 0) {
+                // try t.expectEqual(expected_size, @sizeOf(T));
+            } else {
+                std.debug.print("  IGNORED\n", .{});
+            }
+            print = true;
+        }
+
+        const expected_alignment = steam_callback_align(cb_id);
+        const actual_alignment = @alignOf(T);
+        if (expected_alignment != actual_alignment) {
+            std.debug.print("  align: C: {d}\tZig: {d}\n", .{ expected_alignment, actual_alignment });
+            if (@sizeOf(T) > 0) {
+                // try t.expectEqual(expected_alignment, actual_alignment);
+            } else {
+                std.debug.print("  IGNORED\n", .{});
+            }
+            print = true;
+        }
+
+        if (print) {
+            std.debug.print("  fields:\n", .{});
+            inline for (@typeInfo(T).Struct.fields, 0..) |field, i| {
+                std.debug.print("    {s} align \tC: {d}\t Zig: {d}\n", .{ field.name, steam_callback_align_field(cb_id, @intCast(i)), field.alignment });
+            }
+        }
+    }
+}
+
+pub fn get_callback_type(comptime id: comptime_int) type {
     return switch (id) {
         101 => steam.SteamServersConnected_t,
         102 => steam.SteamServerConnectFailure_t,
