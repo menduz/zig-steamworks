@@ -70,10 +70,16 @@ pub fn build(b: *std.Build) !void {
     flagContainer.append("-fno-sanitize=undefined") catch unreachable;
     flagContainer.append("-Wgnu-alignof-expression") catch unreachable;
     flagContainer.append("-Wno-gnu") catch unreachable;
+
     addLibraryPath(lib);
 
-    lib.linkSystemLibrary("sdkencryptedappticket");
-    lib.linkSystemLibrary("steam_api");
+    if (lib.target.os_tag.? == .windows) {
+        lib.linkSystemLibraryNeeded("sdkencryptedappticket64");
+        lib.linkSystemLibraryNeeded("steam_api64");
+    } else {
+        lib.linkSystemLibrary("sdkencryptedappticket");
+        lib.linkSystemLibrary("steam_api");
+    }
 
     // Include dirs.
     lib.addIncludePath(.{ .path = "steamworks/public/steam" });

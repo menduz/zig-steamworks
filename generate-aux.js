@@ -20,26 +20,13 @@ const cpp = [
   `#import "steam_api.h"`,
   `#import "steam_gameserver.h"`,
   `#import "steamdatagram_tickets.h"`,
+  `#import "steamnetworkingfakeip.h"`,
 ]
-
-// cleanup
-{
-  data.callback_structs = data.callback_structs.filter($ => {
-    if ($.struct == 'PS3TrophiesInstalled_t') return false
-    if ($.struct == 'GSStatsUnloaded_t') return false
-    return true
-  })
-}
 
 var isFirst = true
 
-const deny_list = ['SteamNetworkingFakeIPResult_t']
-
 function writeDumpStruct(struct) {
   const structName = struct.struct
-
-  if (deny_list.includes(structName)) return
-
 
   { // struct
     const comma = isFirst ? '' : ',' 

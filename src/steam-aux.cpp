@@ -5,6 +5,7 @@
 #import "steam_api.h"
 #import "steam_gameserver.h"
 #import "steamdatagram_tickets.h"
+#import "steamnetworkingfakeip.h"
 int main() {
   std::fprintf(stdout, "{\n");
   // SteamServersConnected_t
@@ -1281,6 +1282,18 @@ int main() {
     std::fprintf(stdout, "  \"size\": %d, \"align\": %d \n", sizeof(LeaderboardUGCSet_t), alignof(LeaderboardUGCSet_t));
     std::fprintf(stdout, "}\n");
   }
+  // PS3TrophiesInstalled_t
+  { std::fprintf(stdout, ",\"PS3TrophiesInstalled_t\": {");
+    { std::fprintf(stdout, "\"fields\": [");
+      struct PS3TrophiesInstalled_t    *p_PS3TrophiesInstalled_t = 0;
+      std::fprintf(stdout, "  {\"field\": \"m_nGameID\", \"size\": %d, \"align\": %d},\n", sizeof(p_PS3TrophiesInstalled_t->m_nGameID), alignof(p_PS3TrophiesInstalled_t->m_nGameID));
+      std::fprintf(stdout, "  {\"field\": \"m_eResult\", \"size\": %d, \"align\": %d},\n", sizeof(p_PS3TrophiesInstalled_t->m_eResult), alignof(p_PS3TrophiesInstalled_t->m_eResult));
+      std::fprintf(stdout, "  {\"field\": \"m_ulRequiredDiskSpace\", \"size\": %d, \"align\": %d}", sizeof(p_PS3TrophiesInstalled_t->m_ulRequiredDiskSpace), alignof(p_PS3TrophiesInstalled_t->m_ulRequiredDiskSpace));
+      std::fprintf(stdout, "],\n");
+    }
+    std::fprintf(stdout, "  \"size\": %d, \"align\": %d \n", sizeof(PS3TrophiesInstalled_t), alignof(PS3TrophiesInstalled_t));
+    std::fprintf(stdout, "}\n");
+  }
   // GlobalStatsReceived_t
   { std::fprintf(stdout, ",\"GlobalStatsReceived_t\": {");
     { std::fprintf(stdout, "\"fields\": [");
@@ -2509,6 +2522,29 @@ int main() {
       std::fprintf(stdout, "],\n");
     }
     std::fprintf(stdout, "  \"size\": %d, \"align\": %d \n", sizeof(GSStatsStored_t), alignof(GSStatsStored_t));
+    std::fprintf(stdout, "}\n");
+  }
+  // GSStatsUnloaded_t
+  { std::fprintf(stdout, ",\"GSStatsUnloaded_t\": {");
+    { std::fprintf(stdout, "\"fields\": [");
+      struct GSStatsUnloaded_t    *p_GSStatsUnloaded_t = 0;
+      std::fprintf(stdout, "  {\"field\": \"m_steamIDUser\", \"size\": %d, \"align\": %d}", sizeof(p_GSStatsUnloaded_t->m_steamIDUser), alignof(p_GSStatsUnloaded_t->m_steamIDUser));
+      std::fprintf(stdout, "],\n");
+    }
+    std::fprintf(stdout, "  \"size\": %d, \"align\": %d \n", sizeof(GSStatsUnloaded_t), alignof(GSStatsUnloaded_t));
+    std::fprintf(stdout, "}\n");
+  }
+  // SteamNetworkingFakeIPResult_t
+  { std::fprintf(stdout, ",\"SteamNetworkingFakeIPResult_t\": {");
+    { std::fprintf(stdout, "\"fields\": [");
+      struct SteamNetworkingFakeIPResult_t    *p_SteamNetworkingFakeIPResult_t = 0;
+      std::fprintf(stdout, "  {\"field\": \"m_eResult\", \"size\": %d, \"align\": %d},\n", sizeof(p_SteamNetworkingFakeIPResult_t->m_eResult), alignof(p_SteamNetworkingFakeIPResult_t->m_eResult));
+      std::fprintf(stdout, "  {\"field\": \"m_identity\", \"size\": %d, \"align\": %d},\n", sizeof(p_SteamNetworkingFakeIPResult_t->m_identity), alignof(p_SteamNetworkingFakeIPResult_t->m_identity));
+      std::fprintf(stdout, "  {\"field\": \"m_unIP\", \"size\": %d, \"align\": %d},\n", sizeof(p_SteamNetworkingFakeIPResult_t->m_unIP), alignof(p_SteamNetworkingFakeIPResult_t->m_unIP));
+      std::fprintf(stdout, "  {\"field\": \"m_unPorts\", \"size\": %d, \"align\": %d}", sizeof(p_SteamNetworkingFakeIPResult_t->m_unPorts), alignof(p_SteamNetworkingFakeIPResult_t->m_unPorts));
+      std::fprintf(stdout, "],\n");
+    }
+    std::fprintf(stdout, "  \"size\": %d, \"align\": %d \n", sizeof(SteamNetworkingFakeIPResult_t), alignof(SteamNetworkingFakeIPResult_t));
     std::fprintf(stdout, "}\n");
   }
   // SteamIPAddress_t

@@ -1,14 +1,7 @@
 const fs = require('fs')
-const path = require('path')
-
-const [nodeBinary, jsFile, json] = process.argv
-
-if (!json || !json.endsWith('steam_api.json')) {
-  throw new Error(`Please provide a path to steam_api.json as first argument`)
-}
-
-const data = require(path.resolve(json));
-
+const data = require('./steamworks/public/steam/steam_api.json')
+const winAlign = require('./steamworks/align-info-windows.json')
+const unixAlign = require('./steamworks/align-info-macos.json')
 const outFile = 'src/main.zig'
 const outFileCpp = 'src/steam.cpp'
 
@@ -72,7 +65,7 @@ const g_CustomPackSize = {
   "SteamNetworkingMessagesSessionFailed_t": "1",
   "SteamNetworkingIdentity": "1",
 
-  CSteamID: 1,
+  // CSteamID: 1,
   PartyBeaconID_t: 8,
   uint64: 8,
   UGCHandle_t: 8,
@@ -92,68 +85,27 @@ const g_CustomPackSize = {
 function getStructAlignment(struct, field) {
   const structName = struct.struct;
 
-  // if (structName in g_CustomPackSize)
-  //   return `align(${g_CustomPackSize[structName]})`
+  const win = winAlign[structName]
+  const unix = unixAlign[structName]
 
-  // let pack4onwindows = false;
-
-  // if (structName.includes('MatchMakingKeyValuePair_t'))
-  //   pack4onwindows = true;
-
-  const [head_field, ...tail_fields] = struct.fields
-
-  const sanitized_name = field.fieldtype.replace(/(\[.*\])/g, '').trim()
-
-  const struct_has_classes = tail_fields.filter(_ => typeIsClass(_)).length
-  const isPack4OnWindows = structName.includes('MatchMakingKeyValuePair_t') || struct_has_classes
-
-  function typeIsClass(type) {
-    return (type.fieldtype == 'CSteamID' || type.fieldtype == 'CGameID') && !type.fieldname.startsWith('m_ul')
+  if (!win || !unix) {
+    console.error(`!!! Missing struct align ${structName}`)
+    return ''
   }
 
-  let max_alignment = null // struct_has_classes ? 4 : null
+  const winField = win.fields.find(_ => _.field == field.fieldname)
+  const unixField = unix.fields.find(_ => _.field == field.fieldname)
 
-  let candidate_alignment = null
-
-  if (sanitized_name in g_CustomPackSize) {
-    candidate_alignment = g_CustomPackSize[sanitized_name]
+  if (!winField || !unixField) {
+    console.error(`!!! Missing struct field ${structName}.${JSON.stringify(field.fieldname)}`)
+    return '@compileError("Missing struct field alignment")'
   }
 
-  if (candidate_alignment) {
-    return `align(${candidate_alignment})`
-  }
-
-  if (isPack4OnWindows) {
-    return `align(StructPackSize)`
-  }
-
-  if (struct_has_classes) {
+  if (winField.align > unixField.align) {
     return `align(StructPlatformPackSize)`
+  } else {
+    return `align(${winField.align})`
   }
-
-  if (struct.fields.length == 1) {
-    return `align(1)`
-  }
-
-  // let should_omit_defaults =
-  //   struct.fields.length > 1 &&
-  //   head_field == field &&
-  //   field_is_class;
-  // //   const count = struct.fields.filter(_ => _.fieldtype.toLowerCase().includes('csteamid'))
-  // //   if (count.length > 1) {
-  // //     should_omit_defaults = false
-  // //   }
-  // // }
-  // if (should_omit_defaults) {
-  //   // if (sanitized_name in g_CustomPackSize)
-  //   //   return `align(${Math.max(+g_CustomPackSize[sanitized_name], 4)})`
-  // } else {
-  //   if (field_is_class) return `align(StructPackSize)`
-  //   if (sanitized_name in g_CustomPackSize)
-  //     return `align(${g_CustomPackSize[sanitized_name]})`
-  // }
-
-  return ''; // https://github.com/ziglang/zig/issues/16633
 }
 
 
