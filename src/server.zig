@@ -1,13 +1,18 @@
-const steam = @import("steam.zig");
+const steam = @import("main.zig");
 
-pub const MASTERSERVERUPDATERPORT_USEGAMESOCKETSHARE = 0xFFFE;
+/// If you pass MASTERSERVERUPDATERPORT_USEGAMESOCKETSHARE into usQueryPort, then it causes the game server API to use
+/// "GameSocketShare" mode, which means that the game is responsible for sending and receiving UDP packets for the master
+/// server updater.
+///
+/// More info about this here: https://partner.steamgames.com/doc/api/ISteamGameServer#HandleIncomingPacket
+pub const MASTERSERVERUPDATERPORT_USEGAMESOCKETSHARE = 0xFFFF;
 
 // Initialize SteamGameServer client and interface objects, and set server properties which may not be changed.
 //
 // After calling this function, you should set any additional server parameters, and then
 // call ISteamGameServer::LogOnAnonymous() or ISteamGameServer::LogOn()
 //
-// - usSteamPort is the local port used to communicate with the steam servers.
+// - usLegacySteamPort is the local port used to communicate with the steam servers.
 //   NOTE: unless you are using ver old Steam client binaries, this parameter is ignored, and
 //         you should pass 0.  Gameservers now always use WebSockets to talk to Steam.
 //         This protocol is TCP-based and thus always uses an ephemeral local port.
@@ -20,7 +25,7 @@ pub const MASTERSERVERUPDATERPORT_USEGAMESOCKETSHARE = 0xFFFE;
 //		UDP packets for the master  server updater. See references to GameSocketShare in isteamgameserver.h.
 // - The version string is usually in the form x.x.x.x, and is used by the master server to detect when the
 //		server is out of date.  (Only servers with the latest version will be listed.)
-pub extern fn SteamGameServer_Init(unIP: steam.uint32, usSteamPort: steam.uint16, usGamePort: steam.uint16, usQueryPort: steam.uint16, eServerMode: steam.EServerMode, pchVersionString: [*c]const u8) callconv(.C) bool;
+pub extern fn SteamInternal_GameServer_Init(unIP: steam.uint32, usLegacySteamPort: u16, usGamePort: steam.uint16, usQueryPort: steam.uint16, eServerMode: steam.EServerMode, pchVersionString: [*c]const u8) callconv(.C) bool;
 
 // Shutdown SteamGameSeverXxx interfaces, log out, and free resources.
 pub extern fn SteamGameServer_Shutdown() callconv(.C) void;

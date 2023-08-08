@@ -1,7 +1,8 @@
-steamworks/**
-!steamworks/README
 zig-cache
 zig-out
 node_modules
 **/.DS_Store
-t.h
+.vscode/settings.json
+steamworks/glmgr
+steamworks/steamworksexample
+steamworks/tools

@@ -1,0 +1,5257 @@
+{
+  "SteamServersConnected_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "SteamServerConnectFailure_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bStillRetrying",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 8,
+    "align": 4
+  },
+  "SteamServersDisconnected_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "ClientGameServerDeny_t": {
+    "fields": [
+      {
+        "field": "m_uAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unGameServerIP",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_usGameServerPort",
+        "size": 2,
+        "align": 2
+      },
+      {
+        "field": "m_bSecure",
+        "size": 2,
+        "align": 2
+      },
+      {
+        "field": "m_uReason",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 16,
+    "align": 4
+  },
+  "IPCFailure_t": {
+    "fields": [
+      {
+        "field": "m_eFailureType",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 1,
+    "align": 1
+  },
+  "LicensesUpdated_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "ValidateAuthTicketResponse_t": {
+    "fields": [
+      {
+        "field": "m_SteamID",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_eAuthSessionResponse",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_OwnerSteamID",
+        "size": 8,
+        "align": 1
+      }
+    ],
+    "size": 20,
+    "align": 4
+  },
+  "MicroTxnAuthorizationResponse_t": {
+    "fields": [
+      {
+        "field": "m_unAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_ulOrderID",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_bAuthorized",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "EncryptedAppTicketResponse_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "GetAuthSessionTicketResponse_t": {
+    "fields": [
+      {
+        "field": "m_hAuthTicket",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 8,
+    "align": 4
+  },
+  "GameWebCallback_t": {
+    "fields": [
+      {
+        "field": "m_szURL",
+        "size": 256,
+        "align": 1
+      }
+    ],
+    "size": 256,
+    "align": 1
+  },
+  "StoreAuthURLResponse_t": {
+    "fields": [
+      {
+        "field": "m_szURL",
+        "size": 512,
+        "align": 1
+      }
+    ],
+    "size": 512,
+    "align": 1
+  },
+  "MarketEligibilityResponse_t": {
+    "fields": [
+      {
+        "field": "m_bAllowed",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_eNotAllowedReason",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rtAllowedAtTime",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_cdaySteamGuardRequiredDays",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_cdayNewDeviceCooldown",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 20,
+    "align": 4
+  },
+  "DurationControl_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_appid",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bApplicable",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_csecsLast5h",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_progress",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_notification",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_csecsToday",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_csecsRemaining",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 32,
+    "align": 4
+  },
+  "GetTicketForWebApiResponse_t": {
+    "fields": [
+      {
+        "field": "m_hAuthTicket",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_cubTicket",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rgubTicket",
+        "size": 2560,
+        "align": 1
+      }
+    ],
+    "size": 2572,
+    "align": 4
+  },
+  "PersonaStateChange_t": {
+    "fields": [
+      {
+        "field": "m_ulSteamID",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_nChangeFlags",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "GameOverlayActivated_t": {
+    "fields": [
+      {
+        "field": "m_bActive",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_bUserInitiated",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_nAppID",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 8,
+    "align": 4
+  },
+  "GameServerChangeRequested_t": {
+    "fields": [
+      {
+        "field": "m_rgchServer",
+        "size": 64,
+        "align": 1
+      },
+      {
+        "field": "m_rgchPassword",
+        "size": 64,
+        "align": 1
+      }
+    ],
+    "size": 128,
+    "align": 1
+  },
+  "GameLobbyJoinRequested_t": {
+    "fields": [
+      {
+        "field": "m_steamIDLobby",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_steamIDFriend",
+        "size": 8,
+        "align": 1
+      }
+    ],
+    "size": 16,
+    "align": 1
+  },
+  "AvatarImageLoaded_t": {
+    "fields": [
+      {
+        "field": "m_steamID",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_iImage",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_iWide",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_iTall",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 20,
+    "align": 4
+  },
+  "ClanOfficerListResponse_t": {
+    "fields": [
+      {
+        "field": "m_steamIDClan",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_cOfficers",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bSuccess",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 16,
+    "align": 4
+  },
+  "FriendRichPresenceUpdate_t": {
+    "fields": [
+      {
+        "field": "m_steamIDFriend",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_nAppID",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 12,
+    "align": 4
+  },
+  "GameRichPresenceJoinRequested_t": {
+    "fields": [
+      {
+        "field": "m_steamIDFriend",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_rgchConnect",
+        "size": 256,
+        "align": 1
+      }
+    ],
+    "size": 264,
+    "align": 1
+  },
+  "GameConnectedClanChatMsg_t": {
+    "fields": [
+      {
+        "field": "m_steamIDClanChat",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_steamIDUser",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_iMessageID",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 20,
+    "align": 4
+  },
+  "GameConnectedChatJoin_t": {
+    "fields": [
+      {
+        "field": "m_steamIDClanChat",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_steamIDUser",
+        "size": 8,
+        "align": 1
+      }
+    ],
+    "size": 16,
+    "align": 1
+  },
+  "GameConnectedChatLeave_t": {
+    "fields": [
+      {
+        "field": "m_steamIDClanChat",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_steamIDUser",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_bKicked",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_bDropped",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 18,
+    "align": 1
+  },
+  "DownloadClanActivityCountsResult_t": {
+    "fields": [
+      {
+        "field": "m_bSuccess",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 1,
+    "align": 1
+  },
+  "JoinClanChatRoomCompletionResult_t": {
+    "fields": [
+      {
+        "field": "m_steamIDClanChat",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_eChatRoomEnterResponse",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 12,
+    "align": 4
+  },
+  "GameConnectedFriendChatMsg_t": {
+    "fields": [
+      {
+        "field": "m_steamIDUser",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_iMessageID",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 12,
+    "align": 4
+  },
+  "FriendsGetFollowerCount_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_steamID",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_nCount",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 16,
+    "align": 4
+  },
+  "FriendsIsFollowing_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_steamID",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_bIsFollowing",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 16,
+    "align": 4
+  },
+  "FriendsEnumerateFollowingList_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rgSteamID",
+        "size": 400,
+        "align": 1
+      },
+      {
+        "field": "m_nResultsReturned",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nTotalResultCount",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 412,
+    "align": 4
+  },
+  "SetPersonaNameResponse_t": {
+    "fields": [
+      {
+        "field": "m_bSuccess",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_bLocalSuccess",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_result",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 8,
+    "align": 4
+  },
+  "UnreadChatMessagesChanged_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "OverlayBrowserProtocolNavigation_t": {
+    "fields": [
+      {
+        "field": "rgchURI",
+        "size": 1024,
+        "align": 1
+      }
+    ],
+    "size": 1024,
+    "align": 1
+  },
+  "EquippedProfileItemsChanged_t": {
+    "fields": [
+      {
+        "field": "m_steamID",
+        "size": 8,
+        "align": 1
+      }
+    ],
+    "size": 8,
+    "align": 1
+  },
+  "EquippedProfileItems_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_steamID",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_bHasAnimatedAvatar",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_bHasAvatarFrame",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_bHasProfileModifier",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_bHasProfileBackground",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_bHasMiniProfileBackground",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 20,
+    "align": 4
+  },
+  "IPCountry_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "LowBatteryPower_t": {
+    "fields": [
+      {
+        "field": "m_nMinutesBatteryLeft",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 1,
+    "align": 1
+  },
+  "SteamAPICallCompleted_t": {
+    "fields": [
+      {
+        "field": "m_hAsyncCall",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_iCallback",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_cubParam",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "SteamShutdown_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "CheckFileSignature_t": {
+    "fields": [
+      {
+        "field": "m_eCheckFileSignature",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "GamepadTextInputDismissed_t": {
+    "fields": [
+      {
+        "field": "m_bSubmitted",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_unSubmittedText",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unAppID",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 12,
+    "align": 4
+  },
+  "AppResumingFromSuspend_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "FloatingGamepadTextInputDismissed_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "FilterTextDictionaryChanged_t": {
+    "fields": [
+      {
+        "field": "m_eLanguage",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "FavoritesListChanged_t": {
+    "fields": [
+      {
+        "field": "m_nIP",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nQueryPort",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nConnPort",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nFlags",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bAdd",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_unAccountId",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 28,
+    "align": 4
+  },
+  "LobbyInvite_t": {
+    "fields": [
+      {
+        "field": "m_ulSteamIDUser",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_ulSteamIDLobby",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_ulGameID",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "LobbyEnter_t": {
+    "fields": [
+      {
+        "field": "m_ulSteamIDLobby",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_rgfChatPermissions",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bLocked",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_EChatRoomEnterResponse",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "LobbyDataUpdate_t": {
+    "fields": [
+      {
+        "field": "m_ulSteamIDLobby",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_ulSteamIDMember",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_bSuccess",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "LobbyChatUpdate_t": {
+    "fields": [
+      {
+        "field": "m_ulSteamIDLobby",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_ulSteamIDUserChanged",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_ulSteamIDMakingChange",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_rgfChatMemberStateChange",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 32,
+    "align": 8
+  },
+  "LobbyChatMsg_t": {
+    "fields": [
+      {
+        "field": "m_ulSteamIDLobby",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_ulSteamIDUser",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_eChatEntryType",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_iChatID",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "LobbyGameCreated_t": {
+    "fields": [
+      {
+        "field": "m_ulSteamIDLobby",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_ulSteamIDGameServer",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_unIP",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_usPort",
+        "size": 2,
+        "align": 2
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "LobbyMatchList_t": {
+    "fields": [
+      {
+        "field": "m_nLobbiesMatching",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "LobbyKicked_t": {
+    "fields": [
+      {
+        "field": "m_ulSteamIDLobby",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_ulSteamIDAdmin",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_bKickedDueToDisconnect",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "LobbyCreated_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_ulSteamIDLobby",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "PSNGameBootInviteResult_t": {
+    "fields": [
+      {
+        "field": "m_bGameBootInviteExists",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_steamIDLobby",
+        "size": 8,
+        "align": 1
+      }
+    ],
+    "size": 9,
+    "align": 1
+  },
+  "FavoritesListAccountsUpdated_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "SearchForGameProgressCallback_t": {
+    "fields": [
+      {
+        "field": "m_ullSearchID",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_lobbyID",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_steamIDEndedSearch",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_nSecondsRemainingEstimate",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_cPlayersSearching",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 40,
+    "align": 8
+  },
+  "SearchForGameResultCallback_t": {
+    "fields": [
+      {
+        "field": "m_ullSearchID",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nCountPlayersInGame",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nCountAcceptedGame",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_steamIDHost",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_bFinalCallback",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 32,
+    "align": 8
+  },
+  "RequestPlayersForGameProgressCallback_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_ullSearchID",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "RequestPlayersForGameResultCallback_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_ullSearchID",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_SteamIDPlayerFound",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_SteamIDLobby",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_ePlayerAcceptState",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPlayerIndex",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nTotalPlayersFound",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nTotalPlayersAcceptedGame",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nSuggestedTeamIndex",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_ullUniqueGameID",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 64,
+    "align": 8
+  },
+  "RequestPlayersForGameFinalResultCallback_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_ullSearchID",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_ullUniqueGameID",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "SubmitPlayerResultResultCallback_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "ullUniqueGameID",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "steamIDPlayer",
+        "size": 8,
+        "align": 1
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "EndGameResultCallback_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "ullUniqueGameID",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "JoinPartyCallback_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_ulBeaconID",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_SteamIDBeaconOwner",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_rgchConnectString",
+        "size": 256,
+        "align": 1
+      }
+    ],
+    "size": 280,
+    "align": 8
+  },
+  "CreateBeaconCallback_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_ulBeaconID",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "ReservationNotificationCallback_t": {
+    "fields": [
+      {
+        "field": "m_ulBeaconID",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_steamIDJoiner",
+        "size": 8,
+        "align": 1
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "ChangeNumOpenSlotsCallback_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "AvailableBeaconLocationsUpdated_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "ActiveBeaconsUpdated_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "RemoteStorageFileShareResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_hFile",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_rgchFilename",
+        "size": 260,
+        "align": 1
+      }
+    ],
+    "size": 280,
+    "align": 8
+  },
+  "RemoteStoragePublishFileResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_bUserNeedsToAcceptWorkshopLegalAgreement",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "RemoteStorageDeletePublishedFileResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "RemoteStorageEnumerateUserPublishedFilesResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nResultsReturned",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nTotalResultCount",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rgPublishedFileId",
+        "size": 400,
+        "align": 8
+      }
+    ],
+    "size": 416,
+    "align": 8
+  },
+  "RemoteStorageSubscribePublishedFileResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "RemoteStorageEnumerateUserSubscribedFilesResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nResultsReturned",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nTotalResultCount",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rgPublishedFileId",
+        "size": 400,
+        "align": 8
+      },
+      {
+        "field": "m_rgRTimeSubscribed",
+        "size": 200,
+        "align": 4
+      }
+    ],
+    "size": 616,
+    "align": 8
+  },
+  "RemoteStorageUnsubscribePublishedFileResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "RemoteStorageUpdatePublishedFileResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_bUserNeedsToAcceptWorkshopLegalAgreement",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "RemoteStorageDownloadUGCResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_hFile",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_nAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nSizeInBytes",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_pchFileName",
+        "size": 260,
+        "align": 1
+      },
+      {
+        "field": "m_ulSteamIDOwner",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 296,
+    "align": 8
+  },
+  "RemoteStorageGetPublishedFileDetailsResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_nCreatorAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nConsumerAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rgchTitle",
+        "size": 129,
+        "align": 1
+      },
+      {
+        "field": "m_rgchDescription",
+        "size": 8000,
+        "align": 1
+      },
+      {
+        "field": "m_hFile",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_hPreviewFile",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_ulSteamIDOwner",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_rtimeCreated",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rtimeUpdated",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_eVisibility",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bBanned",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_rgchTags",
+        "size": 1025,
+        "align": 1
+      },
+      {
+        "field": "m_bTagsTruncated",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_pchFileName",
+        "size": 260,
+        "align": 1
+      },
+      {
+        "field": "m_nFileSize",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPreviewFileSize",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rgchURL",
+        "size": 256,
+        "align": 1
+      },
+      {
+        "field": "m_eFileType",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bAcceptedForUse",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 9760,
+    "align": 8
+  },
+  "RemoteStorageEnumerateWorkshopFilesResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nResultsReturned",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nTotalResultCount",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rgPublishedFileId",
+        "size": 400,
+        "align": 8
+      },
+      {
+        "field": "m_rgScore",
+        "size": 200,
+        "align": 4
+      },
+      {
+        "field": "m_nAppId",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unStartIndex",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 624,
+    "align": 8
+  },
+  "RemoteStorageGetPublishedItemVoteDetailsResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_nVotesFor",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nVotesAgainst",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nReports",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_fScore",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 32,
+    "align": 8
+  },
+  "RemoteStoragePublishedFileSubscribed_t": {
+    "fields": [
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_nAppID",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "RemoteStoragePublishedFileUnsubscribed_t": {
+    "fields": [
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_nAppID",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "RemoteStoragePublishedFileDeleted_t": {
+    "fields": [
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_nAppID",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "RemoteStorageUpdateUserPublishedItemVoteResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "RemoteStorageUserVoteDetails_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_eVote",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "RemoteStorageEnumerateUserSharedWorkshopFilesResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nResultsReturned",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nTotalResultCount",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rgPublishedFileId",
+        "size": 400,
+        "align": 8
+      }
+    ],
+    "size": 416,
+    "align": 8
+  },
+  "RemoteStorageSetUserPublishedFileActionResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_eAction",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "RemoteStorageEnumeratePublishedFilesByUserActionResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_eAction",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nResultsReturned",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nTotalResultCount",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rgPublishedFileId",
+        "size": 400,
+        "align": 8
+      },
+      {
+        "field": "m_rgRTimeUpdated",
+        "size": 200,
+        "align": 4
+      }
+    ],
+    "size": 616,
+    "align": 8
+  },
+  "RemoteStoragePublishFileProgress_t": {
+    "fields": [
+      {
+        "field": "m_dPercentFile",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_bPreview",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "RemoteStoragePublishedFileUpdated_t": {
+    "fields": [
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_nAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_ulUnused",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "RemoteStorageFileWriteAsyncComplete_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "RemoteStorageFileReadAsyncComplete_t": {
+    "fields": [
+      {
+        "field": "m_hFileReadAsync",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nOffset",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_cubRead",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "RemoteStorageLocalFileChange_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "UserStatsReceived_t": {
+    "fields": [
+      {
+        "field": "m_nGameID",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_steamIDUser",
+        "size": 8,
+        "align": 1
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "UserStatsStored_t": {
+    "fields": [
+      {
+        "field": "m_nGameID",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "UserAchievementStored_t": {
+    "fields": [
+      {
+        "field": "m_nGameID",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_bGroupAchievement",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_rgchAchievementName",
+        "size": 128,
+        "align": 1
+      },
+      {
+        "field": "m_nCurProgress",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nMaxProgress",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 152,
+    "align": 8
+  },
+  "LeaderboardFindResult_t": {
+    "fields": [
+      {
+        "field": "m_hSteamLeaderboard",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_bLeaderboardFound",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "LeaderboardScoresDownloaded_t": {
+    "fields": [
+      {
+        "field": "m_hSteamLeaderboard",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_hSteamLeaderboardEntries",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_cEntryCount",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "LeaderboardScoreUploaded_t": {
+    "fields": [
+      {
+        "field": "m_bSuccess",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_hSteamLeaderboard",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_nScore",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bScoreChanged",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_nGlobalRankNew",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nGlobalRankPrevious",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 32,
+    "align": 8
+  },
+  "NumberOfCurrentPlayers_t": {
+    "fields": [
+      {
+        "field": "m_bSuccess",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_cPlayers",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 8,
+    "align": 4
+  },
+  "UserStatsUnloaded_t": {
+    "fields": [
+      {
+        "field": "m_steamIDUser",
+        "size": 8,
+        "align": 1
+      }
+    ],
+    "size": 8,
+    "align": 1
+  },
+  "UserAchievementIconFetched_t": {
+    "fields": [
+      {
+        "field": "m_nGameID",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_rgchAchievementName",
+        "size": 128,
+        "align": 1
+      },
+      {
+        "field": "m_bAchieved",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_nIconHandle",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 144,
+    "align": 4
+  },
+  "GlobalAchievementPercentagesReady_t": {
+    "fields": [
+      {
+        "field": "m_nGameID",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "LeaderboardUGCSet_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_hSteamLeaderboard",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "PS3TrophiesInstalled_t": {
+    "fields": [
+      {
+        "field": "m_nGameID",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_ulRequiredDiskSpace",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "GlobalStatsReceived_t": {
+    "fields": [
+      {
+        "field": "m_nGameID",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "DlcInstalled_t": {
+    "fields": [
+      {
+        "field": "m_nAppID",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "NewUrlLaunchParameters_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "AppProofOfPurchaseKeyResponse_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_cchKeyLength",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rgchKey",
+        "size": 240,
+        "align": 1
+      }
+    ],
+    "size": 252,
+    "align": 4
+  },
+  "FileDetailsResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_ulFileSize",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_FileSHA",
+        "size": 20,
+        "align": 1
+      },
+      {
+        "field": "m_unFlags",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 40,
+    "align": 8
+  },
+  "TimedTrialStatus_t": {
+    "fields": [
+      {
+        "field": "m_unAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bIsOffline",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_unSecondsAllowed",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unSecondsPlayed",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 16,
+    "align": 4
+  },
+  "P2PSessionRequest_t": {
+    "fields": [
+      {
+        "field": "m_steamIDRemote",
+        "size": 8,
+        "align": 1
+      }
+    ],
+    "size": 8,
+    "align": 1
+  },
+  "P2PSessionConnectFail_t": {
+    "fields": [
+      {
+        "field": "m_steamIDRemote",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_eP2PSessionError",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 9,
+    "align": 1
+  },
+  "SocketStatusCallback_t": {
+    "fields": [
+      {
+        "field": "m_hSocket",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_hListenSocket",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_steamIDRemote",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_eSNetSocketState",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 20,
+    "align": 4
+  },
+  "ScreenshotReady_t": {
+    "fields": [
+      {
+        "field": "m_hLocal",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 8,
+    "align": 4
+  },
+  "ScreenshotRequested_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "PlaybackStatusHasChanged_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "VolumeHasChanged_t": {
+    "fields": [
+      {
+        "field": "m_flNewVolume",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "MusicPlayerRemoteWillActivate_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "MusicPlayerRemoteWillDeactivate_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "MusicPlayerRemoteToFront_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "MusicPlayerWillQuit_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "MusicPlayerWantsPlay_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "MusicPlayerWantsPause_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "MusicPlayerWantsPlayPrevious_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "MusicPlayerWantsPlayNext_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "MusicPlayerWantsShuffled_t": {
+    "fields": [
+      {
+        "field": "m_bShuffled",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 1,
+    "align": 1
+  },
+  "MusicPlayerWantsLooped_t": {
+    "fields": [
+      {
+        "field": "m_bLooped",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 1,
+    "align": 1
+  },
+  "MusicPlayerWantsVolume_t": {
+    "fields": [
+      {
+        "field": "m_flNewVolume",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "MusicPlayerSelectsQueueEntry_t": {
+    "fields": [
+      {
+        "field": "nID",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "MusicPlayerSelectsPlaylistEntry_t": {
+    "fields": [
+      {
+        "field": "nID",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "MusicPlayerWantsPlayingRepeatStatus_t": {
+    "fields": [
+      {
+        "field": "m_nPlayingRepeatStatus",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "HTTPRequestCompleted_t": {
+    "fields": [
+      {
+        "field": "m_hRequest",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_ulContextValue",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_bRequestSuccessful",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_eStatusCode",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unBodySize",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 32,
+    "align": 8
+  },
+  "HTTPRequestHeadersReceived_t": {
+    "fields": [
+      {
+        "field": "m_hRequest",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_ulContextValue",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "HTTPRequestDataReceived_t": {
+    "fields": [
+      {
+        "field": "m_hRequest",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_ulContextValue",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_cOffset",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_cBytesReceived",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "SteamInputDeviceConnected_t": {
+    "fields": [
+      {
+        "field": "m_ulConnectedDeviceHandle",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 8,
+    "align": 8
+  },
+  "SteamInputDeviceDisconnected_t": {
+    "fields": [
+      {
+        "field": "m_ulDisconnectedDeviceHandle",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 8,
+    "align": 8
+  },
+  "SteamInputConfigurationLoaded_t": {
+    "fields": [
+      {
+        "field": "m_unAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_ulDeviceHandle",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_ulMappingCreator",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_unMajorRevision",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unMinorRevision",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bUsesSteamInputAPI",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_bUsesGamepadAPI",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 40,
+    "align": 8
+  },
+  "SteamInputGamepadSlotChange_t": {
+    "fields": [
+      {
+        "field": "m_unAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_ulDeviceHandle",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_eDeviceType",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nOldGamepadSlot",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nNewGamepadSlot",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 32,
+    "align": 8
+  },
+  "SteamUGCQueryCompleted_t": {
+    "fields": [
+      {
+        "field": "m_handle",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unNumResultsReturned",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unTotalMatchingResults",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bCachedData",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_rgchNextCursor",
+        "size": 256,
+        "align": 1
+      }
+    ],
+    "size": 280,
+    "align": 8
+  },
+  "SteamUGCRequestUGCDetailsResult_t": {
+    "fields": [
+      {
+        "field": "m_details",
+        "size": 9776,
+        "align": 8
+      },
+      {
+        "field": "m_bCachedData",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 9784,
+    "align": 8
+  },
+  "CreateItemResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_bUserNeedsToAcceptWorkshopLegalAgreement",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "SubmitItemUpdateResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bUserNeedsToAcceptWorkshopLegalAgreement",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "ItemInstalled_t": {
+    "fields": [
+      {
+        "field": "m_unAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "DownloadItemResult_t": {
+    "fields": [
+      {
+        "field": "m_unAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "UserFavoriteItemsListChanged_t": {
+    "fields": [
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bWasAddRequest",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "SetUserItemVoteResult_t": {
+    "fields": [
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bVoteUp",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "GetUserItemVoteResult_t": {
+    "fields": [
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bVotedUp",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_bVotedDown",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_bVoteSkipped",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "StartPlaytimeTrackingResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "StopPlaytimeTrackingResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "AddUGCDependencyResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_nChildPublishedFileId",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "RemoveUGCDependencyResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_nChildPublishedFileId",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "AddAppDependencyResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_nAppID",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "RemoveAppDependencyResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_nAppID",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "GetAppDependenciesResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_rgAppIDs",
+        "size": 128,
+        "align": 4
+      },
+      {
+        "field": "m_nNumAppDependencies",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nTotalNumAppDependencies",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 152,
+    "align": 8
+  },
+  "DeleteItemResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "UserSubscribedItemsListChanged_t": {
+    "fields": [
+      {
+        "field": "m_nAppID",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "WorkshopEULAStatus_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unVersion",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rtAction",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bAccepted",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_bNeedsAction",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 20,
+    "align": 4
+  },
+  "SteamAppInstalled_t": {
+    "fields": [
+      {
+        "field": "m_nAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_iInstallFolderIndex",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 8,
+    "align": 4
+  },
+  "SteamAppUninstalled_t": {
+    "fields": [
+      {
+        "field": "m_nAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_iInstallFolderIndex",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 8,
+    "align": 4
+  },
+  "HTML_BrowserReady_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "HTML_NeedsPaint_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "pBGRA",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "unWide",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "unTall",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "unUpdateX",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "unUpdateY",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "unUpdateWide",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "unUpdateTall",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "unScrollX",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "unScrollY",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "flPageScale",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "unPageSerial",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 56,
+    "align": 8
+  },
+  "HTML_StartRequest_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "pchURL",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "pchTarget",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "pchPostData",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "bIsRedirect",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 40,
+    "align": 8
+  },
+  "HTML_CloseBrowser_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "HTML_URLChanged_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "pchURL",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "pchPostData",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "bIsRedirect",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "pchPageTitle",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "bNewNavigation",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 48,
+    "align": 8
+  },
+  "HTML_FinishedRequest_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "pchURL",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "pchPageTitle",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "HTML_OpenLinkInNewTab_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "pchURL",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "HTML_ChangedTitle_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "pchTitle",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "HTML_SearchResults_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "unResults",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "unCurrentMatch",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 12,
+    "align": 4
+  },
+  "HTML_CanGoBackAndForward_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "bCanGoBack",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "bCanGoForward",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 8,
+    "align": 4
+  },
+  "HTML_HorizontalScroll_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "unScrollMax",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "unScrollCurrent",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "flPageScale",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "bVisible",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "unPageSize",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 24,
+    "align": 4
+  },
+  "HTML_VerticalScroll_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "unScrollMax",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "unScrollCurrent",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "flPageScale",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "bVisible",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "unPageSize",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 24,
+    "align": 4
+  },
+  "HTML_LinkAtPosition_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "x",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "y",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "pchURL",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "bInput",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "bLiveLink",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 32,
+    "align": 8
+  },
+  "HTML_JSAlert_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "pchMessage",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "HTML_JSConfirm_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "pchMessage",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "HTML_FileOpenDialog_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "pchTitle",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "pchInitialFile",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "HTML_NewWindow_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "pchURL",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "unX",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "unY",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "unWide",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "unTall",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "unNewWindow_BrowserHandle_IGNORE",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 40,
+    "align": 8
+  },
+  "HTML_SetCursor_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "eMouseCursor",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 8,
+    "align": 4
+  },
+  "HTML_StatusText_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "pchMsg",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "HTML_ShowToolTip_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "pchMsg",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "HTML_UpdateToolTip_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "pchMsg",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "HTML_HideToolTip_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "HTML_BrowserRestarted_t": {
+    "fields": [
+      {
+        "field": "unBrowserHandle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "unOldBrowserHandle",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 8,
+    "align": 4
+  },
+  "SteamInventoryResultReady_t": {
+    "fields": [
+      {
+        "field": "m_handle",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_result",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 8,
+    "align": 4
+  },
+  "SteamInventoryFullUpdate_t": {
+    "fields": [
+      {
+        "field": "m_handle",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "SteamInventoryDefinitionUpdate_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "SteamInventoryEligiblePromoItemDefIDs_t": {
+    "fields": [
+      {
+        "field": "m_result",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_steamID",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_numEligiblePromoItemDefs",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bCachedData",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 20,
+    "align": 4
+  },
+  "SteamInventoryStartPurchaseResult_t": {
+    "fields": [
+      {
+        "field": "m_result",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_ulOrderID",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_ulTransID",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 24,
+    "align": 8
+  },
+  "SteamInventoryRequestPricesResult_t": {
+    "fields": [
+      {
+        "field": "m_result",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rgchCurrency",
+        "size": 4,
+        "align": 1
+      }
+    ],
+    "size": 8,
+    "align": 4
+  },
+  "GetVideoURLResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unVideoAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rgchURL",
+        "size": 256,
+        "align": 1
+      }
+    ],
+    "size": 264,
+    "align": 4
+  },
+  "GetOPFSettingsResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unVideoAppID",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 8,
+    "align": 4
+  },
+  "SteamParentalSettingsChanged_t": {
+    "fields": [],
+    "size": 1,
+    "align": 1
+  },
+  "SteamRemotePlaySessionConnected_t": {
+    "fields": [
+      {
+        "field": "m_unSessionID",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "SteamRemotePlaySessionDisconnected_t": {
+    "fields": [
+      {
+        "field": "m_unSessionID",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "SteamRemotePlayTogetherGuestInvite_t": {
+    "fields": [
+      {
+        "field": "m_szConnectURL",
+        "size": 1024,
+        "align": 1
+      }
+    ],
+    "size": 1024,
+    "align": 1
+  },
+  "SteamNetworkingMessagesSessionRequest_t": {
+    "fields": [
+      {
+        "field": "m_identityRemote",
+        "size": 136,
+        "align": 1
+      }
+    ],
+    "size": 136,
+    "align": 1
+  },
+  "SteamNetworkingMessagesSessionFailed_t": {
+    "fields": [
+      {
+        "field": "m_info",
+        "size": 696,
+        "align": 1
+      }
+    ],
+    "size": 696,
+    "align": 1
+  },
+  "SteamNetConnectionStatusChangedCallback_t": {
+    "fields": [
+      {
+        "field": "m_hConn",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_info",
+        "size": 696,
+        "align": 8
+      },
+      {
+        "field": "m_eOldState",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 712,
+    "align": 8
+  },
+  "SteamNetAuthenticationStatus_t": {
+    "fields": [
+      {
+        "field": "m_eAvail",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_debugMsg",
+        "size": 256,
+        "align": 1
+      }
+    ],
+    "size": 260,
+    "align": 4
+  },
+  "SteamRelayNetworkStatus_t": {
+    "fields": [
+      {
+        "field": "m_eAvail",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bPingMeasurementInProgress",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_eAvailNetworkConfig",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_eAvailAnyRelay",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_debugMsg",
+        "size": 256,
+        "align": 1
+      }
+    ],
+    "size": 272,
+    "align": 4
+  },
+  "GSClientApprove_t": {
+    "fields": [
+      {
+        "field": "m_SteamID",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_OwnerSteamID",
+        "size": 8,
+        "align": 1
+      }
+    ],
+    "size": 16,
+    "align": 1
+  },
+  "GSClientDeny_t": {
+    "fields": [
+      {
+        "field": "m_SteamID",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_eDenyReason",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rgchOptionalText",
+        "size": 128,
+        "align": 1
+      }
+    ],
+    "size": 140,
+    "align": 4
+  },
+  "GSClientKick_t": {
+    "fields": [
+      {
+        "field": "m_SteamID",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_eDenyReason",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 12,
+    "align": 4
+  },
+  "GSClientAchievementStatus_t": {
+    "fields": [
+      {
+        "field": "m_SteamID",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_pchAchievement",
+        "size": 128,
+        "align": 1
+      },
+      {
+        "field": "m_bUnlocked",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 144,
+    "align": 8
+  },
+  "GSPolicyResponse_t": {
+    "fields": [
+      {
+        "field": "m_bSecure",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 1,
+    "align": 1
+  },
+  "GSGameplayStats_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nRank",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unTotalConnects",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unTotalMinutesPlayed",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 16,
+    "align": 4
+  },
+  "GSClientGroupStatus_t": {
+    "fields": [
+      {
+        "field": "m_SteamIDUser",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_SteamIDGroup",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_bMember",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_bOfficer",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 18,
+    "align": 1
+  },
+  "GSReputation_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unReputationScore",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bBanned",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_unBannedIP",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_usBannedPort",
+        "size": 2,
+        "align": 2
+      },
+      {
+        "field": "m_ulBannedGameID",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_unBanExpires",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 40,
+    "align": 8
+  },
+  "AssociateWithClanResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
+    "align": 4
+  },
+  "ComputeNewPlayerCompatibilityResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_cPlayersThatDontLikeCandidate",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_cPlayersThatCandidateDoesntLike",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_cClanPlayersThatDontLikeCandidate",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_SteamIDCandidate",
+        "size": 8,
+        "align": 1
+      }
+    ],
+    "size": 24,
+    "align": 4
+  },
+  "GSStatsReceived_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_steamIDUser",
+        "size": 8,
+        "align": 1
+      }
+    ],
+    "size": 12,
+    "align": 4
+  },
+  "GSStatsStored_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_steamIDUser",
+        "size": 8,
+        "align": 1
+      }
+    ],
+    "size": 12,
+    "align": 4
+  },
+  "GSStatsUnloaded_t": {
+    "fields": [
+      {
+        "field": "m_steamIDUser",
+        "size": 8,
+        "align": 1
+      }
+    ],
+    "size": 8,
+    "align": 1
+  },
+  "SteamNetworkingFakeIPResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_identity",
+        "size": 136,
+        "align": 1
+      },
+      {
+        "field": "m_unIP",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unPorts",
+        "size": 16,
+        "align": 2
+      }
+    ],
+    "size": 160,
+    "align": 4
+  },
+  "SteamIPAddress_t": {
+    "fields": [
+      {
+        "field": "m_rgubIPv6",
+        "size": 16,
+        "align": 1
+      },
+      {
+        "field": "m_eType",
+        "size": 4,
+        "align": 1
+      }
+    ],
+    "size": 20,
+    "align": 1
+  },
+  "FriendGameInfo_t": {
+    "fields": [
+      {
+        "field": "m_gameID",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_unGameIP",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_usGamePort",
+        "size": 2,
+        "align": 2
+      },
+      {
+        "field": "m_usQueryPort",
+        "size": 2,
+        "align": 2
+      },
+      {
+        "field": "m_steamIDLobby",
+        "size": 8,
+        "align": 1
+      }
+    ],
+    "size": 24,
+    "align": 4
+  },
+  "MatchMakingKeyValuePair_t": {
+    "fields": [
+      {
+        "field": "m_szKey",
+        "size": 256,
+        "align": 1
+      },
+      {
+        "field": "m_szValue",
+        "size": 256,
+        "align": 1
+      }
+    ],
+    "size": 512,
+    "align": 1
+  },
+  "servernetadr_t": {
+    "fields": [
+      {
+        "field": "m_usConnectionPort",
+        "size": 2,
+        "align": 2
+      },
+      {
+        "field": "m_usQueryPort",
+        "size": 2,
+        "align": 2
+      },
+      {
+        "field": "m_unIP",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 8,
+    "align": 4
+  },
+  "gameserveritem_t": {
+    "fields": [
+      {
+        "field": "m_NetAdr",
+        "size": 8,
+        "align": 4
+      },
+      {
+        "field": "m_nPing",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bHadSuccessfulResponse",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_bDoNotRefresh",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_szGameDir",
+        "size": 32,
+        "align": 1
+      },
+      {
+        "field": "m_szMap",
+        "size": 32,
+        "align": 1
+      },
+      {
+        "field": "m_szGameDescription",
+        "size": 64,
+        "align": 1
+      },
+      {
+        "field": "m_nAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPlayers",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nMaxPlayers",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nBotPlayers",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bPassword",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_bSecure",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_ulTimeLastPlayed",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nServerVersion",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_szServerName",
+        "size": 64,
+        "align": 1
+      },
+      {
+        "field": "m_szGameTags",
+        "size": 128,
+        "align": 1
+      },
+      {
+        "field": "m_steamID",
+        "size": 8,
+        "align": 1
+      }
+    ],
+    "size": 372,
+    "align": 4
+  },
+  "SteamPartyBeaconLocation_t": {
+    "fields": [
+      {
+        "field": "m_eType",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_ulLocationID",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "SteamParamStringArray_t": {
+    "fields": [
+      {
+        "field": "m_ppStrings",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_nNumStrings",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "LeaderboardEntry_t": {
+    "fields": [
+      {
+        "field": "m_steamIDUser",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "m_nGlobalRank",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nScore",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_cDetails",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_hUGC",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 32,
+    "align": 8
+  },
+  "P2PSessionState_t": {
+    "fields": [
+      {
+        "field": "m_bConnectionActive",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_bConnecting",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_eP2PSessionError",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_bUsingRelay",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_nBytesQueuedForSend",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPacketsQueuedForSend",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nRemoteIP",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nRemotePort",
+        "size": 2,
+        "align": 2
+      }
+    ],
+    "size": 20,
+    "align": 4
+  },
+  "InputAnalogActionData_t": {
+    "fields": [
+      {
+        "field": "eMode",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "x",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "y",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "bActive",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 13,
+    "align": 1
+  },
+  "InputDigitalActionData_t": {
+    "fields": [
+      {
+        "field": "bState",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "bActive",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 2,
+    "align": 1
+  },
+  "InputMotionData_t": {
+    "fields": [
+      {
+        "field": "rotQuatX",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "rotQuatY",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "rotQuatZ",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "rotQuatW",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "posAccelX",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "posAccelY",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "posAccelZ",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "rotVelX",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "rotVelY",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "rotVelZ",
+        "size": 4,
+        "align": 1
+      }
+    ],
+    "size": 40,
+    "align": 1
+  },
+  "InputMotionDataV2_t": {
+    "fields": [
+      {
+        "field": "driftCorrectedQuatX",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "driftCorrectedQuatY",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "driftCorrectedQuatZ",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "driftCorrectedQuatW",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "sensorFusionQuatX",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "sensorFusionQuatY",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "sensorFusionQuatZ",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "sensorFusionQuatW",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "deferredSensorFusionQuatX",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "deferredSensorFusionQuatY",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "deferredSensorFusionQuatZ",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "deferredSensorFusionQuatW",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "gravityX",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "gravityY",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "gravityZ",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "degreesPerSecondX",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "degreesPerSecondY",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "degreesPerSecondZ",
+        "size": 4,
+        "align": 1
+      }
+    ],
+    "size": 72,
+    "align": 1
+  },
+  "SteamInputActionEvent_t": {
+    "fields": [
+      {
+        "field": "controllerHandle",
+        "size": 8,
+        "align": 1
+      },
+      {
+        "field": "eEventType",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "analogAction",
+        "size": 21,
+        "align": 1
+      }
+    ],
+    "size": 33,
+    "align": 1
+  },
+  "SteamUGCDetails_t": {
+    "fields": [
+      {
+        "field": "m_nPublishedFileId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_eFileType",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nCreatorAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nConsumerAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rgchTitle",
+        "size": 129,
+        "align": 1
+      },
+      {
+        "field": "m_rgchDescription",
+        "size": 8000,
+        "align": 1
+      },
+      {
+        "field": "m_ulSteamIDOwner",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_rtimeCreated",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rtimeUpdated",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rtimeAddedToUserList",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_eVisibility",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_bBanned",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_bAcceptedForUse",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_bTagsTruncated",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_rgchTags",
+        "size": 1025,
+        "align": 1
+      },
+      {
+        "field": "m_hFile",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_hPreviewFile",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_pchFileName",
+        "size": 260,
+        "align": 1
+      },
+      {
+        "field": "m_nFileSize",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPreviewFileSize",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rgchURL",
+        "size": 256,
+        "align": 1
+      },
+      {
+        "field": "m_unVotesUp",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unVotesDown",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_flScore",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unNumChildren",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 9776,
+    "align": 8
+  },
+  "SteamItemDetails_t": {
+    "fields": [
+      {
+        "field": "m_itemId",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_iDefinition",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unQuantity",
+        "size": 2,
+        "align": 2
+      },
+      {
+        "field": "m_unFlags",
+        "size": 2,
+        "align": 2
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "SteamNetworkingIPAddr": {
+    "fields": [
+      {
+        "field": "m_ipv6",
+        "size": 16,
+        "align": 1
+      },
+      {
+        "field": "m_port",
+        "size": 2,
+        "align": 1
+      }
+    ],
+    "size": 18,
+    "align": 1
+  },
+  "SteamNetworkingIdentity": {
+    "fields": [
+      {
+        "field": "m_eType",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "m_cbSize",
+        "size": 4,
+        "align": 1
+      },
+      {
+        "field": "m_szUnknownRawString",
+        "size": 128,
+        "align": 1
+      }
+    ],
+    "size": 136,
+    "align": 1
+  },
+  "SteamNetConnectionInfo_t": {
+    "fields": [
+      {
+        "field": "m_identityRemote",
+        "size": 136,
+        "align": 1
+      },
+      {
+        "field": "m_nUserData",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_hListenSocket",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_addrRemote",
+        "size": 18,
+        "align": 1
+      },
+      {
+        "field": "m__pad1",
+        "size": 2,
+        "align": 2
+      },
+      {
+        "field": "m_idPOPRemote",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_idPOPRelay",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_eState",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_eEndReason",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_szEndDebug",
+        "size": 128,
+        "align": 1
+      },
+      {
+        "field": "m_szConnectionDescription",
+        "size": 128,
+        "align": 1
+      },
+      {
+        "field": "m_nFlags",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "reserved",
+        "size": 252,
+        "align": 4
+      }
+    ],
+    "size": 696,
+    "align": 8
+  },
+  "SteamNetConnectionRealTimeStatus_t": {
+    "fields": [
+      {
+        "field": "m_eState",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nPing",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_flConnectionQualityLocal",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_flConnectionQualityRemote",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_flOutPacketsPerSec",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_flOutBytesPerSec",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_flInPacketsPerSec",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_flInBytesPerSec",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nSendRateBytesPerSecond",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_cbPendingUnreliable",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_cbPendingReliable",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_cbSentUnackedReliable",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_usecQueueTime",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "reserved",
+        "size": 64,
+        "align": 4
+      }
+    ],
+    "size": 120,
+    "align": 8
+  },
+  "SteamNetConnectionRealTimeLaneStatus_t": {
+    "fields": [
+      {
+        "field": "m_cbPendingUnreliable",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_cbPendingReliable",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_cbSentUnackedReliable",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "_reservePad1",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_usecQueueTime",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "reserved",
+        "size": 40,
+        "align": 4
+      }
+    ],
+    "size": 64,
+    "align": 8
+  },
+  "SteamNetworkingMessage_t": {
+    "fields": [
+      {
+        "field": "m_pData",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_cbSize",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_conn",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_identityPeer",
+        "size": 136,
+        "align": 1
+      },
+      {
+        "field": "m_nConnUserData",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_usecTimeReceived",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_nMessageNumber",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_pfnFreeData",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_pfnRelease",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_nChannel",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nFlags",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nUserData",
+        "size": 8,
+        "align": 8
+      },
+      {
+        "field": "m_idxLane",
+        "size": 2,
+        "align": 2
+      },
+      {
+        "field": "_pad1__",
+        "size": 2,
+        "align": 2
+      }
+    ],
+    "size": 216,
+    "align": 8
+  },
+  "SteamNetworkPingLocation_t": {
+    "fields": [
+      {
+        "field": "m_data",
+        "size": 512,
+        "align": 1
+      }
+    ],
+    "size": 512,
+    "align": 1
+  },
+  "SteamNetworkingConfigValue_t": {
+    "fields": [
+      {
+        "field": "m_eValue",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_eDataType",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_int64",
+        "size": 8,
+        "align": 8
+      }
+    ],
+    "size": 16,
+    "align": 8
+  },
+  "SteamDatagramHostedAddress": {
+    "fields": [
+      {
+        "field": "m_cbSize",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_data",
+        "size": 128,
+        "align": 1
+      }
+    ],
+    "size": 132,
+    "align": 4
+  },
+  "SteamDatagramGameCoordinatorServerLogin": {
+    "fields": [
+      {
+        "field": "m_identity",
+        "size": 136,
+        "align": 1
+      },
+      {
+        "field": "m_routing",
+        "size": 132,
+        "align": 4
+      },
+      {
+        "field": "m_nAppID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_rtime",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_cbAppData",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_appData",
+        "size": 2048,
+        "align": 1
+      }
+    ],
+    "size": 2328,
+    "align": 4
+  }
+}
