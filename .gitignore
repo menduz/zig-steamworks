@@ -3,3 +3,6 @@ zig-out
 node_modules
 **/.DS_Store
 .vscode/settings.json
+steamworks/glmgr
+steamworks/steamworksexample
+steamworks/tools

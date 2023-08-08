@@ -6,7 +6,17 @@ const steam_linker = @import("./linker.zig");
 // will not add the library path transitively to lib3.linkLibrary(lib2)
 pub fn addLibraryPath(compile: *std.build.CompileStep) void {
     if (compile.target.os_tag != null) {
-        if (compile.target.os_tag.? == .windows) {
+        if (compile.target.os_tag.? == .macos) {
+            compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = sdkPath("/steamworks/redistributable_bin/osx/libsteam_api.dylib") }, "libsteam_api.dylib").step);
+            compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = sdkPath("/steamworks/public/steam/lib/osx/libsdkencryptedappticket.dylib") }, "libsdkencryptedappticket.dylib").step);
+            compile.addLibraryPath(.{ .path = sdkPath("/steamworks/public/steam/lib/osx") });
+            compile.addLibraryPath(.{ .path = sdkPath("/steamworks/redistributable_bin/osx") });
+        } else if (compile.target.os_tag.? == .linux) {
+            compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = "steamworks/redistributable_bin/linux64/libsteam_api.so" }, "libsteam_api.so").step);
+            compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = "steamworks/public/steam/lib/linux64/libsdkencryptedappticket.so" }, "libsdkencryptedappticket.so").step);
+            compile.addLibraryPath(.{ .path = sdkPath("/steamworks/public/steam/lib/linux64") });
+            compile.addLibraryPath(.{ .path = sdkPath("/steamworks/redistributable_bin/linux64") });
+        } else if (compile.target.os_tag.? == .windows) {
             compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = "steamworks/public/steam/lib/win64/sdkencryptedappticket64.dll" }, "sdkencryptedappticket64.dll").step);
             compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = "steamworks/redistributable_bin/win64/steam_api64.dll" }, "steam_api64.dll").step);
             compile.addLibraryPath(.{ .path = sdkPath("/steamworks/public/steam/lib/win64") });
@@ -62,26 +72,8 @@ pub fn build(b: *std.Build) !void {
     flagContainer.append("-Wno-gnu") catch unreachable;
     addLibraryPath(lib);
 
-    if (lib.target.os_tag != null) {
-        if (lib.target.os_tag.? == .macos) {
-            b.installBinFile("steamworks/redistributable_bin/osx/libsteam_api.dylib", "libsteam_api.dylib");
-            b.installBinFile("steamworks/public/steam/lib/osx/libsdkencryptedappticket.dll", "libsdkencryptedappticket.dylib");
-            lib.linkSystemLibrary("steamworks/public/steam/lib/osx/libsdkencryptedappticket.dylib");
-            lib.linkSystemLibrary("steamworks/redistributable_bin/osx/libsteam_api.dylib");
-        } else if (lib.target.os_tag.? == .linux) {
-            b.installBinFile("steamworks/redistributable_bin/linux64/libsteam_api.so", "libsteam_api.so");
-            b.installBinFile("steamworks/public/steam/lib/linux64/libsdkencryptedappticket.so", "libsdkencryptedappticket.so");
-            lib.linkSystemLibrary("steamworks/public/steam/lib/linux64/libsdkencryptedappticket.so");
-            lib.linkSystemLibrary("steamworks/redistributable_bin/linux64/libsteam_api.so");
-        } else if (lib.target.os_tag.? == .windows) {
-            lib.linkSystemLibraryNeeded("sdkencryptedappticket64");
-            lib.linkSystemLibraryNeeded("steam_api64");
-        } else {
-            @panic("Invalid target platform");
-        }
-    } else {
-        std.debug.panic("Invalid target {any}\n", .{lib.target});
-    }
+    lib.linkSystemLibrary("sdkencryptedappticket");
+    lib.linkSystemLibrary("steam_api");
 
     // Include dirs.
     lib.addIncludePath(.{ .path = "steamworks/public/steam" });

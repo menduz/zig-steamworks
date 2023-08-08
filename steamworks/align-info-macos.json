@@ -109,7 +109,7 @@
       {
         "field": "m_ulOrderID",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_bAuthorized",
@@ -117,8 +117,8 @@
         "align": 1
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 16,
+    "align": 4
   },
   "EncryptedAppTicketResponse_t": {
     "fields": [
@@ -277,7 +277,7 @@
       {
         "field": "m_ulSteamID",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_nChangeFlags",
@@ -285,8 +285,8 @@
         "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "GameOverlayActivated_t": {
     "fields": [
@@ -704,7 +704,7 @@
       {
         "field": "m_hAsyncCall",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_iCallback",
@@ -718,7 +718,7 @@
       }
     ],
     "size": 16,
-    "align": 8
+    "align": 4
   },
   "SteamShutdown_t": {
     "fields": [],
@@ -824,28 +824,28 @@
       {
         "field": "m_ulSteamIDUser",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_ulSteamIDLobby",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_ulGameID",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
     "size": 24,
-    "align": 8
+    "align": 4
   },
   "LobbyEnter_t": {
     "fields": [
       {
         "field": "m_ulSteamIDLobby",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_rgfChatPermissions",
@@ -863,20 +863,20 @@
         "align": 4
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 20,
+    "align": 4
   },
   "LobbyDataUpdate_t": {
     "fields": [
       {
         "field": "m_ulSteamIDLobby",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_ulSteamIDMember",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_bSuccess",
@@ -884,25 +884,25 @@
         "align": 1
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 20,
+    "align": 4
   },
   "LobbyChatUpdate_t": {
     "fields": [
       {
         "field": "m_ulSteamIDLobby",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_ulSteamIDUserChanged",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_ulSteamIDMakingChange",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_rgfChatMemberStateChange",
@@ -910,20 +910,20 @@
         "align": 4
       }
     ],
-    "size": 32,
-    "align": 8
+    "size": 28,
+    "align": 4
   },
   "LobbyChatMsg_t": {
     "fields": [
       {
         "field": "m_ulSteamIDLobby",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_ulSteamIDUser",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_eChatEntryType",
@@ -937,19 +937,19 @@
       }
     ],
     "size": 24,
-    "align": 8
+    "align": 4
   },
   "LobbyGameCreated_t": {
     "fields": [
       {
         "field": "m_ulSteamIDLobby",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_ulSteamIDGameServer",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_unIP",
@@ -963,7 +963,7 @@
       }
     ],
     "size": 24,
-    "align": 8
+    "align": 4
   },
   "LobbyMatchList_t": {
     "fields": [
@@ -981,12 +981,12 @@
       {
         "field": "m_ulSteamIDLobby",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_ulSteamIDAdmin",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_bKickedDueToDisconnect",
@@ -994,8 +994,8 @@
         "align": 1
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 20,
+    "align": 4
   },
   "LobbyCreated_t": {
     "fields": [
@@ -1007,11 +1007,11 @@
       {
         "field": "m_ulSteamIDLobby",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "PSNGameBootInviteResult_t": {
     "fields": [
@@ -1045,7 +1045,7 @@
       {
         "field": "m_ullSearchID",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_eResult",
@@ -1073,15 +1073,15 @@
         "align": 4
       }
     ],
-    "size": 40,
-    "align": 8
+    "size": 36,
+    "align": 4
   },
   "SearchForGameResultCallback_t": {
     "fields": [
       {
         "field": "m_ullSearchID",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_eResult",
@@ -1110,7 +1110,7 @@
       }
     ],
     "size": 32,
-    "align": 8
+    "align": 4
   },
   "RequestPlayersForGameProgressCallback_t": {
     "fields": [
@@ -1122,11 +1122,11 @@
       {
         "field": "m_ullSearchID",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "RequestPlayersForGameResultCallback_t": {
     "fields": [
@@ -1138,7 +1138,7 @@
       {
         "field": "m_ullSearchID",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_SteamIDPlayerFound",
@@ -1178,11 +1178,11 @@
       {
         "field": "m_ullUniqueGameID",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 64,
-    "align": 8
+    "size": 56,
+    "align": 4
   },
   "RequestPlayersForGameFinalResultCallback_t": {
     "fields": [
@@ -1194,16 +1194,16 @@
       {
         "field": "m_ullSearchID",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_ullUniqueGameID",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 20,
+    "align": 4
   },
   "SubmitPlayerResultResultCallback_t": {
     "fields": [
@@ -1215,7 +1215,7 @@
       {
         "field": "ullUniqueGameID",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "steamIDPlayer",
@@ -1223,8 +1223,8 @@
         "align": 1
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 20,
+    "align": 4
   },
   "EndGameResultCallback_t": {
     "fields": [
@@ -1236,11 +1236,11 @@
       {
         "field": "ullUniqueGameID",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "JoinPartyCallback_t": {
     "fields": [
@@ -1252,7 +1252,7 @@
       {
         "field": "m_ulBeaconID",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_SteamIDBeaconOwner",
@@ -1265,8 +1265,8 @@
         "align": 1
       }
     ],
-    "size": 280,
-    "align": 8
+    "size": 276,
+    "align": 4
   },
   "CreateBeaconCallback_t": {
     "fields": [
@@ -1278,18 +1278,18 @@
       {
         "field": "m_ulBeaconID",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "ReservationNotificationCallback_t": {
     "fields": [
       {
         "field": "m_ulBeaconID",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_steamIDJoiner",
@@ -1298,7 +1298,7 @@
       }
     ],
     "size": 16,
-    "align": 8
+    "align": 4
   },
   "ChangeNumOpenSlotsCallback_t": {
     "fields": [
@@ -1331,7 +1331,7 @@
       {
         "field": "m_hFile",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_rgchFilename",
@@ -1339,8 +1339,8 @@
         "align": 1
       }
     ],
-    "size": 280,
-    "align": 8
+    "size": 272,
+    "align": 4
   },
   "RemoteStoragePublishFileResult_t": {
     "fields": [
@@ -1352,7 +1352,7 @@
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_bUserNeedsToAcceptWorkshopLegalAgreement",
@@ -1360,8 +1360,8 @@
         "align": 1
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 16,
+    "align": 4
   },
   "RemoteStorageDeletePublishedFileResult_t": {
     "fields": [
@@ -1373,11 +1373,11 @@
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "RemoteStorageEnumerateUserPublishedFilesResult_t": {
     "fields": [
@@ -1399,11 +1399,11 @@
       {
         "field": "m_rgPublishedFileId",
         "size": 400,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 416,
-    "align": 8
+    "size": 412,
+    "align": 4
   },
   "RemoteStorageSubscribePublishedFileResult_t": {
     "fields": [
@@ -1415,11 +1415,11 @@
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "RemoteStorageEnumerateUserSubscribedFilesResult_t": {
     "fields": [
@@ -1441,7 +1441,7 @@
       {
         "field": "m_rgPublishedFileId",
         "size": 400,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_rgRTimeSubscribed",
@@ -1449,8 +1449,8 @@
         "align": 4
       }
     ],
-    "size": 616,
-    "align": 8
+    "size": 612,
+    "align": 4
   },
   "RemoteStorageUnsubscribePublishedFileResult_t": {
     "fields": [
@@ -1462,11 +1462,11 @@
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "RemoteStorageUpdatePublishedFileResult_t": {
     "fields": [
@@ -1478,7 +1478,7 @@
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_bUserNeedsToAcceptWorkshopLegalAgreement",
@@ -1486,8 +1486,8 @@
         "align": 1
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 16,
+    "align": 4
   },
   "RemoteStorageDownloadUGCResult_t": {
     "fields": [
@@ -1499,7 +1499,7 @@
       {
         "field": "m_hFile",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_nAppID",
@@ -1519,11 +1519,11 @@
       {
         "field": "m_ulSteamIDOwner",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 296,
-    "align": 8
+    "size": 288,
+    "align": 4
   },
   "RemoteStorageGetPublishedFileDetailsResult_t": {
     "fields": [
@@ -1535,7 +1535,7 @@
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_nCreatorAppID",
@@ -1560,17 +1560,17 @@
       {
         "field": "m_hFile",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_hPreviewFile",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_ulSteamIDOwner",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_rtimeCreated",
@@ -1633,8 +1633,8 @@
         "align": 1
       }
     ],
-    "size": 9760,
-    "align": 8
+    "size": 9748,
+    "align": 4
   },
   "RemoteStorageEnumerateWorkshopFilesResult_t": {
     "fields": [
@@ -1656,7 +1656,7 @@
       {
         "field": "m_rgPublishedFileId",
         "size": 400,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_rgScore",
@@ -1674,8 +1674,8 @@
         "align": 4
       }
     ],
-    "size": 624,
-    "align": 8
+    "size": 620,
+    "align": 4
   },
   "RemoteStorageGetPublishedItemVoteDetailsResult_t": {
     "fields": [
@@ -1687,7 +1687,7 @@
       {
         "field": "m_unPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_nVotesFor",
@@ -1710,15 +1710,15 @@
         "align": 4
       }
     ],
-    "size": 32,
-    "align": 8
+    "size": 28,
+    "align": 4
   },
   "RemoteStoragePublishedFileSubscribed_t": {
     "fields": [
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_nAppID",
@@ -1726,15 +1726,15 @@
         "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "RemoteStoragePublishedFileUnsubscribed_t": {
     "fields": [
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_nAppID",
@@ -1742,15 +1742,15 @@
         "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "RemoteStoragePublishedFileDeleted_t": {
     "fields": [
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_nAppID",
@@ -1758,8 +1758,8 @@
         "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "RemoteStorageUpdateUserPublishedItemVoteResult_t": {
     "fields": [
@@ -1771,11 +1771,11 @@
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "RemoteStorageUserVoteDetails_t": {
     "fields": [
@@ -1787,7 +1787,7 @@
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_eVote",
@@ -1795,8 +1795,8 @@
         "align": 4
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 16,
+    "align": 4
   },
   "RemoteStorageEnumerateUserSharedWorkshopFilesResult_t": {
     "fields": [
@@ -1818,11 +1818,11 @@
       {
         "field": "m_rgPublishedFileId",
         "size": 400,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 416,
-    "align": 8
+    "size": 412,
+    "align": 4
   },
   "RemoteStorageSetUserPublishedFileActionResult_t": {
     "fields": [
@@ -1834,7 +1834,7 @@
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_eAction",
@@ -1842,8 +1842,8 @@
         "align": 4
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 16,
+    "align": 4
   },
   "RemoteStorageEnumeratePublishedFilesByUserActionResult_t": {
     "fields": [
@@ -1870,7 +1870,7 @@
       {
         "field": "m_rgPublishedFileId",
         "size": 400,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_rgRTimeUpdated",
@@ -1879,14 +1879,14 @@
       }
     ],
     "size": 616,
-    "align": 8
+    "align": 4
   },
   "RemoteStoragePublishFileProgress_t": {
     "fields": [
       {
         "field": "m_dPercentFile",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_bPreview",
@@ -1894,15 +1894,15 @@
         "align": 1
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "RemoteStoragePublishedFileUpdated_t": {
     "fields": [
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_nAppID",
@@ -1912,11 +1912,11 @@
       {
         "field": "m_ulUnused",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 20,
+    "align": 4
   },
   "RemoteStorageFileWriteAsyncComplete_t": {
     "fields": [
@@ -1934,7 +1934,7 @@
       {
         "field": "m_hFileReadAsync",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_eResult",
@@ -1952,8 +1952,8 @@
         "align": 4
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 20,
+    "align": 4
   },
   "RemoteStorageLocalFileChange_t": {
     "fields": [],
@@ -1965,7 +1965,7 @@
       {
         "field": "m_nGameID",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_eResult",
@@ -1978,15 +1978,15 @@
         "align": 1
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 20,
+    "align": 4
   },
   "UserStatsStored_t": {
     "fields": [
       {
         "field": "m_nGameID",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_eResult",
@@ -1994,15 +1994,15 @@
         "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "UserAchievementStored_t": {
     "fields": [
       {
         "field": "m_nGameID",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_bGroupAchievement",
@@ -2025,15 +2025,15 @@
         "align": 4
       }
     ],
-    "size": 152,
-    "align": 8
+    "size": 148,
+    "align": 4
   },
   "LeaderboardFindResult_t": {
     "fields": [
       {
         "field": "m_hSteamLeaderboard",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_bLeaderboardFound",
@@ -2041,20 +2041,20 @@
         "align": 1
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "LeaderboardScoresDownloaded_t": {
     "fields": [
       {
         "field": "m_hSteamLeaderboard",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_hSteamLeaderboardEntries",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_cEntryCount",
@@ -2062,8 +2062,8 @@
         "align": 4
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 20,
+    "align": 4
   },
   "LeaderboardScoreUploaded_t": {
     "fields": [
@@ -2075,7 +2075,7 @@
       {
         "field": "m_hSteamLeaderboard",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_nScore",
@@ -2098,8 +2098,8 @@
         "align": 4
       }
     ],
-    "size": 32,
-    "align": 8
+    "size": 28,
+    "align": 4
   },
   "NumberOfCurrentPlayers_t": {
     "fields": [
@@ -2159,7 +2159,7 @@
       {
         "field": "m_nGameID",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_eResult",
@@ -2167,8 +2167,8 @@
         "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "LeaderboardUGCSet_t": {
     "fields": [
@@ -2180,18 +2180,18 @@
       {
         "field": "m_hSteamLeaderboard",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "GlobalStatsReceived_t": {
     "fields": [
       {
         "field": "m_nGameID",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_eResult",
@@ -2199,8 +2199,8 @@
         "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "DlcInstalled_t": {
     "fields": [
@@ -2254,7 +2254,7 @@
       {
         "field": "m_ulFileSize",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_FileSHA",
@@ -2267,8 +2267,8 @@
         "align": 4
       }
     ],
-    "size": 40,
-    "align": 8
+    "size": 36,
+    "align": 4
   },
   "TimedTrialStatus_t": {
     "fields": [
@@ -2502,7 +2502,7 @@
       {
         "field": "m_ulContextValue",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_bRequestSuccessful",
@@ -2520,8 +2520,8 @@
         "align": 4
       }
     ],
-    "size": 32,
-    "align": 8
+    "size": 24,
+    "align": 4
   },
   "HTTPRequestHeadersReceived_t": {
     "fields": [
@@ -2533,11 +2533,11 @@
       {
         "field": "m_ulContextValue",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "HTTPRequestDataReceived_t": {
     "fields": [
@@ -2549,7 +2549,7 @@
       {
         "field": "m_ulContextValue",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_cOffset",
@@ -2562,30 +2562,30 @@
         "align": 4
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 20,
+    "align": 4
   },
   "SteamInputDeviceConnected_t": {
     "fields": [
       {
         "field": "m_ulConnectedDeviceHandle",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
     "size": 8,
-    "align": 8
+    "align": 4
   },
   "SteamInputDeviceDisconnected_t": {
     "fields": [
       {
         "field": "m_ulDisconnectedDeviceHandle",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
     "size": 8,
-    "align": 8
+    "align": 4
   },
   "SteamInputConfigurationLoaded_t": {
     "fields": [
@@ -2597,7 +2597,7 @@
       {
         "field": "m_ulDeviceHandle",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_ulMappingCreator",
@@ -2625,8 +2625,8 @@
         "align": 1
       }
     ],
-    "size": 40,
-    "align": 8
+    "size": 32,
+    "align": 4
   },
   "SteamInputGamepadSlotChange_t": {
     "fields": [
@@ -2638,7 +2638,7 @@
       {
         "field": "m_ulDeviceHandle",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_eDeviceType",
@@ -2656,15 +2656,15 @@
         "align": 4
       }
     ],
-    "size": 32,
-    "align": 8
+    "size": 24,
+    "align": 4
   },
   "SteamUGCQueryCompleted_t": {
     "fields": [
       {
         "field": "m_handle",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_eResult",
@@ -2693,14 +2693,14 @@
       }
     ],
     "size": 280,
-    "align": 8
+    "align": 4
   },
   "SteamUGCRequestUGCDetailsResult_t": {
     "fields": [
       {
         "field": "m_details",
-        "size": 9776,
-        "align": 8
+        "size": 9764,
+        "align": 4
       },
       {
         "field": "m_bCachedData",
@@ -2708,8 +2708,8 @@
         "align": 1
       }
     ],
-    "size": 9784,
-    "align": 8
+    "size": 9768,
+    "align": 4
   },
   "CreateItemResult_t": {
     "fields": [
@@ -2721,7 +2721,7 @@
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_bUserNeedsToAcceptWorkshopLegalAgreement",
@@ -2729,8 +2729,8 @@
         "align": 1
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 16,
+    "align": 4
   },
   "SubmitItemUpdateResult_t": {
     "fields": [
@@ -2747,11 +2747,11 @@
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
     "size": 16,
-    "align": 8
+    "align": 4
   },
   "ItemInstalled_t": {
     "fields": [
@@ -2763,11 +2763,11 @@
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "DownloadItemResult_t": {
     "fields": [
@@ -2779,7 +2779,7 @@
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_eResult",
@@ -2787,15 +2787,15 @@
         "align": 4
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 16,
+    "align": 4
   },
   "UserFavoriteItemsListChanged_t": {
     "fields": [
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_eResult",
@@ -2809,14 +2809,14 @@
       }
     ],
     "size": 16,
-    "align": 8
+    "align": 4
   },
   "SetUserItemVoteResult_t": {
     "fields": [
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_eResult",
@@ -2830,14 +2830,14 @@
       }
     ],
     "size": 16,
-    "align": 8
+    "align": 4
   },
   "GetUserItemVoteResult_t": {
     "fields": [
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_eResult",
@@ -2861,7 +2861,7 @@
       }
     ],
     "size": 16,
-    "align": 8
+    "align": 4
   },
   "StartPlaytimeTrackingResult_t": {
     "fields": [
@@ -2895,16 +2895,16 @@
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_nChildPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 20,
+    "align": 4
   },
   "RemoveUGCDependencyResult_t": {
     "fields": [
@@ -2916,16 +2916,16 @@
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_nChildPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 20,
+    "align": 4
   },
   "AddAppDependencyResult_t": {
     "fields": [
@@ -2937,7 +2937,7 @@
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_nAppID",
@@ -2945,8 +2945,8 @@
         "align": 4
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 16,
+    "align": 4
   },
   "RemoveAppDependencyResult_t": {
     "fields": [
@@ -2958,7 +2958,7 @@
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_nAppID",
@@ -2966,8 +2966,8 @@
         "align": 4
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 16,
+    "align": 4
   },
   "GetAppDependenciesResult_t": {
     "fields": [
@@ -2979,7 +2979,7 @@
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_rgAppIDs",
@@ -2997,8 +2997,8 @@
         "align": 4
       }
     ],
-    "size": 152,
-    "align": 8
+    "size": 148,
+    "align": 4
   },
   "DeleteItemResult_t": {
     "fields": [
@@ -3010,11 +3010,11 @@
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "UserSubscribedItemsListChanged_t": {
     "fields": [
@@ -3116,7 +3116,7 @@
       {
         "field": "pBGRA",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "unWide",
@@ -3169,8 +3169,8 @@
         "align": 4
       }
     ],
-    "size": 56,
-    "align": 8
+    "size": 52,
+    "align": 4
   },
   "HTML_StartRequest_t": {
     "fields": [
@@ -3182,17 +3182,17 @@
       {
         "field": "pchURL",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "pchTarget",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "pchPostData",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "bIsRedirect",
@@ -3200,8 +3200,8 @@
         "align": 1
       }
     ],
-    "size": 40,
-    "align": 8
+    "size": 32,
+    "align": 4
   },
   "HTML_CloseBrowser_t": {
     "fields": [
@@ -3224,12 +3224,12 @@
       {
         "field": "pchURL",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "pchPostData",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "bIsRedirect",
@@ -3239,7 +3239,7 @@
       {
         "field": "pchPageTitle",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "bNewNavigation",
@@ -3247,8 +3247,8 @@
         "align": 1
       }
     ],
-    "size": 48,
-    "align": 8
+    "size": 36,
+    "align": 4
   },
   "HTML_FinishedRequest_t": {
     "fields": [
@@ -3260,16 +3260,16 @@
       {
         "field": "pchURL",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "pchPageTitle",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 20,
+    "align": 4
   },
   "HTML_OpenLinkInNewTab_t": {
     "fields": [
@@ -3281,11 +3281,11 @@
       {
         "field": "pchURL",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "HTML_ChangedTitle_t": {
     "fields": [
@@ -3297,11 +3297,11 @@
       {
         "field": "pchTitle",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "HTML_SearchResults_t": {
     "fields": [
@@ -3437,7 +3437,7 @@
       {
         "field": "pchURL",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "bInput",
@@ -3450,8 +3450,8 @@
         "align": 1
       }
     ],
-    "size": 32,
-    "align": 8
+    "size": 24,
+    "align": 4
   },
   "HTML_JSAlert_t": {
     "fields": [
@@ -3463,11 +3463,11 @@
       {
         "field": "pchMessage",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "HTML_JSConfirm_t": {
     "fields": [
@@ -3479,11 +3479,11 @@
       {
         "field": "pchMessage",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "HTML_FileOpenDialog_t": {
     "fields": [
@@ -3495,16 +3495,16 @@
       {
         "field": "pchTitle",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "pchInitialFile",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 20,
+    "align": 4
   },
   "HTML_NewWindow_t": {
     "fields": [
@@ -3516,7 +3516,7 @@
       {
         "field": "pchURL",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "unX",
@@ -3544,8 +3544,8 @@
         "align": 4
       }
     ],
-    "size": 40,
-    "align": 8
+    "size": 32,
+    "align": 4
   },
   "HTML_SetCursor_t": {
     "fields": [
@@ -3573,11 +3573,11 @@
       {
         "field": "pchMsg",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "HTML_ShowToolTip_t": {
     "fields": [
@@ -3589,11 +3589,11 @@
       {
         "field": "pchMsg",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "HTML_UpdateToolTip_t": {
     "fields": [
@@ -3605,11 +3605,11 @@
       {
         "field": "pchMsg",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "HTML_HideToolTip_t": {
     "fields": [
@@ -3706,16 +3706,16 @@
       {
         "field": "m_ulOrderID",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_ulTransID",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 24,
-    "align": 8
+    "size": 20,
+    "align": 4
   },
   "SteamInventoryRequestPricesResult_t": {
     "fields": [
@@ -3840,7 +3840,7 @@
       {
         "field": "m_info",
         "size": 696,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_eOldState",
@@ -3848,8 +3848,8 @@
         "align": 4
       }
     ],
-    "size": 712,
-    "align": 8
+    "size": 704,
+    "align": 4
   },
   "SteamNetAuthenticationStatus_t": {
     "fields": [
@@ -3956,7 +3956,7 @@
       {
         "field": "m_SteamID",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_pchAchievement",
@@ -3969,8 +3969,8 @@
         "align": 1
       }
     ],
-    "size": 144,
-    "align": 8
+    "size": 140,
+    "align": 4
   },
   "GSPolicyResponse_t": {
     "fields": [
@@ -4065,7 +4065,7 @@
       {
         "field": "m_ulBannedGameID",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_unBanExpires",
@@ -4073,8 +4073,8 @@
         "align": 4
       }
     ],
-    "size": 40,
-    "align": 8
+    "size": 32,
+    "align": 4
   },
   "AssociateWithClanResult_t": {
     "fields": [
@@ -4340,18 +4340,18 @@
       {
         "field": "m_ulLocationID",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "SteamParamStringArray_t": {
     "fields": [
       {
         "field": "m_ppStrings",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_nNumStrings",
@@ -4359,8 +4359,8 @@
         "align": 4
       }
     ],
-    "size": 16,
-    "align": 8
+    "size": 12,
+    "align": 4
   },
   "LeaderboardEntry_t": {
     "fields": [
@@ -4387,11 +4387,11 @@
       {
         "field": "m_hUGC",
         "size": 8,
-        "align": 8
+        "align": 4
       }
     ],
-    "size": 32,
-    "align": 8
+    "size": 28,
+    "align": 4
   },
   "P2PSessionState_t": {
     "fields": [
@@ -4659,7 +4659,7 @@
       {
         "field": "m_nPublishedFileId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_eResult",
@@ -4694,7 +4694,7 @@
       {
         "field": "m_ulSteamIDOwner",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_rtimeCreated",
@@ -4739,12 +4739,12 @@
       {
         "field": "m_hFile",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_hPreviewFile",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_pchFileName",
@@ -4787,15 +4787,15 @@
         "align": 4
       }
     ],
-    "size": 9776,
-    "align": 8
+    "size": 9764,
+    "align": 4
   },
   "SteamItemDetails_t": {
     "fields": [
       {
         "field": "m_itemId",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_iDefinition",
@@ -4814,7 +4814,7 @@
       }
     ],
     "size": 16,
-    "align": 8
+    "align": 4
   },
   "SteamNetworkingIPAddr": {
     "fields": [
@@ -4863,7 +4863,7 @@
       {
         "field": "m_nUserData",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "m_hListenSocket",
@@ -4922,7 +4922,7 @@
       }
     ],
     "size": 696,
-    "align": 8
+    "align": 4
   },
   "SteamNetConnectionRealTimeStatus_t": {
     "fields": [
@@ -4989,7 +4989,7 @@
       {
         "field": "m_usecQueueTime",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "reserved",
@@ -4998,7 +4998,7 @@
       }
     ],
     "size": 120,
-    "align": 8
+    "align": 4
   },
   "SteamNetConnectionRealTimeLaneStatus_t": {
     "fields": [
@@ -5025,7 +5025,7 @@
       {
         "field": "m_usecQueueTime",
         "size": 8,
-        "align": 8
+        "align": 4
       },
       {
         "field": "reserved",
@@ -5034,7 +5034,7 @@
       }
     ],
     "size": 64,
-    "align": 8
+    "align": 4
   },
   "SteamNetworkingMessage_t": {
     "fields": [
