@@ -2176,10 +2176,10 @@ pub const GSStatsStored_t = extern struct {
 };
 /// callbackId = 1223
 pub const SteamNetworkingFakeIPResult_t = extern struct {
-    m_eResult: EResult = EResult.k_EResultNone,
-    m_identity: SteamNetworkingIdentity,
-    m_unIP: uint32 = 0,
-    m_unPorts: [8]uint16,
+    m_eResult: EResult align(4) = EResult.k_EResultNone,
+    m_identity: SteamNetworkingIdentity align(1),
+    m_unIP: uint32 align(4) = 0,
+    m_unPorts: [8]uint16 align(2),
 
     // Constants
     pub const k_nMaxReturnPorts: i32 = 8;

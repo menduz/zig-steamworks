@@ -56,6 +56,8 @@ pub fn test_serializer(comptime value: anytype, comptime slice: []const u8) !voi
     const from_slice_debug = comptime steam.from_slice_debug(@TypeOf(value), bytes);
     const from_slice = comptime steam.from_slice(@TypeOf(value), bytes);
 
+    std.debug.print("{any}\n", .{from_slice});
+
     // ensure that both deserializers work the same regardless of alignment
     try t.expectEqualDeep(from_slice, from_slice_debug);
 
