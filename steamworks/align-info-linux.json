@@ -2186,6 +2186,27 @@
     "size": 12,
     "align": 4
   },
+  "PS3TrophiesInstalled_t": {
+    "fields": [
+      {
+        "field": "m_nGameID",
+        "size": 8,
+        "align": 4
+      },
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_ulRequiredDiskSpace",
+        "size": 8,
+        "align": 4
+      }
+    ],
+    "size": 20,
+    "align": 4
+  },
   "GlobalStatsReceived_t": {
     "fields": [
       {
@@ -4148,6 +4169,43 @@
       }
     ],
     "size": 12,
+    "align": 4
+  },
+  "GSStatsUnloaded_t": {
+    "fields": [
+      {
+        "field": "m_steamIDUser",
+        "size": 8,
+        "align": 1
+      }
+    ],
+    "size": 8,
+    "align": 1
+  },
+  "SteamNetworkingFakeIPResult_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_identity",
+        "size": 136,
+        "align": 1
+      },
+      {
+        "field": "m_unIP",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unPorts",
+        "size": 16,
+        "align": 2
+      }
+    ],
+    "size": 160,
     "align": 4
   },
   "SteamIPAddress_t": {
