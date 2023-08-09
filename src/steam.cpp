@@ -9,436 +9,221 @@ extern "C" void* CustomSteamClientGetter() { return SteamClient(); }
 
 extern "C" int steam_callback_size(int cb_id) {
 switch(cb_id) {
-  case 101: {
-    return sizeof(SteamServersConnected_t); }
-  case 102: {
-    return sizeof(SteamServerConnectFailure_t); }
-  case 103: {
-    return sizeof(SteamServersDisconnected_t); }
-  case 113: {
-    return sizeof(ClientGameServerDeny_t); }
-  case 117: {
-    return sizeof(IPCFailure_t); }
-  case 125: {
-    return sizeof(LicensesUpdated_t); }
-  case 143: {
-    return sizeof(ValidateAuthTicketResponse_t); }
-  case 152: {
-    return sizeof(MicroTxnAuthorizationResponse_t); }
-  case 154: {
-    return sizeof(EncryptedAppTicketResponse_t); }
-  case 163: {
-    return sizeof(GetAuthSessionTicketResponse_t); }
-  case 164: {
-    return sizeof(GameWebCallback_t); }
-  case 165: {
-    return sizeof(StoreAuthURLResponse_t); }
-  case 166: {
-    return sizeof(MarketEligibilityResponse_t); }
-  case 167: {
-    return sizeof(DurationControl_t); }
-  case 168: {
-    return sizeof(GetTicketForWebApiResponse_t); }
-  case 304: {
-    return sizeof(PersonaStateChange_t); }
-  case 331: {
-    return sizeof(GameOverlayActivated_t); }
-  case 332: {
-    return sizeof(GameServerChangeRequested_t); }
-  case 333: {
-    return sizeof(GameLobbyJoinRequested_t); }
-  case 334: {
-    return sizeof(AvatarImageLoaded_t); }
-  case 335: {
-    return sizeof(ClanOfficerListResponse_t); }
-  case 336: {
-    return sizeof(FriendRichPresenceUpdate_t); }
-  case 337: {
-    return sizeof(GameRichPresenceJoinRequested_t); }
-  case 338: {
-    return sizeof(GameConnectedClanChatMsg_t); }
-  case 339: {
-    return sizeof(GameConnectedChatJoin_t); }
-  case 340: {
-    return sizeof(GameConnectedChatLeave_t); }
-  case 341: {
-    return sizeof(DownloadClanActivityCountsResult_t); }
-  case 342: {
-    return sizeof(JoinClanChatRoomCompletionResult_t); }
-  case 343: {
-    return sizeof(GameConnectedFriendChatMsg_t); }
-  case 344: {
-    return sizeof(FriendsGetFollowerCount_t); }
-  case 345: {
-    return sizeof(FriendsIsFollowing_t); }
-  case 346: {
-    return sizeof(FriendsEnumerateFollowingList_t); }
-  case 347: {
-    return sizeof(SetPersonaNameResponse_t); }
-  case 348: {
-    return sizeof(UnreadChatMessagesChanged_t); }
-  case 349: {
-    return sizeof(OverlayBrowserProtocolNavigation_t); }
-  case 350: {
-    return sizeof(EquippedProfileItemsChanged_t); }
-  case 351: {
-    return sizeof(EquippedProfileItems_t); }
-  case 701: {
-    return sizeof(IPCountry_t); }
-  case 702: {
-    return sizeof(LowBatteryPower_t); }
-  case 703: {
-    return sizeof(SteamAPICallCompleted_t); }
-  case 704: {
-    return sizeof(SteamShutdown_t); }
-  case 705: {
-    return sizeof(CheckFileSignature_t); }
-  case 714: {
-    return sizeof(GamepadTextInputDismissed_t); }
-  case 736: {
-    return sizeof(AppResumingFromSuspend_t); }
-  case 738: {
-    return sizeof(FloatingGamepadTextInputDismissed_t); }
-  case 739: {
-    return sizeof(FilterTextDictionaryChanged_t); }
-  case 502: {
-    return sizeof(FavoritesListChanged_t); }
-  case 503: {
-    return sizeof(LobbyInvite_t); }
-  case 504: {
-    return sizeof(LobbyEnter_t); }
-  case 505: {
-    return sizeof(LobbyDataUpdate_t); }
-  case 506: {
-    return sizeof(LobbyChatUpdate_t); }
-  case 507: {
-    return sizeof(LobbyChatMsg_t); }
-  case 509: {
-    return sizeof(LobbyGameCreated_t); }
-  case 510: {
-    return sizeof(LobbyMatchList_t); }
-  case 512: {
-    return sizeof(LobbyKicked_t); }
-  case 513: {
-    return sizeof(LobbyCreated_t); }
-  case 515: {
-    return sizeof(PSNGameBootInviteResult_t); }
-  case 516: {
-    return sizeof(FavoritesListAccountsUpdated_t); }
-  case 5201: {
-    return sizeof(SearchForGameProgressCallback_t); }
-  case 5202: {
-    return sizeof(SearchForGameResultCallback_t); }
-  case 5211: {
-    return sizeof(RequestPlayersForGameProgressCallback_t); }
-  case 5212: {
-    return sizeof(RequestPlayersForGameResultCallback_t); }
-  case 5213: {
-    return sizeof(RequestPlayersForGameFinalResultCallback_t); }
-  case 5214: {
-    return sizeof(SubmitPlayerResultResultCallback_t); }
-  case 5215: {
-    return sizeof(EndGameResultCallback_t); }
-  case 5301: {
-    return sizeof(JoinPartyCallback_t); }
-  case 5302: {
-    return sizeof(CreateBeaconCallback_t); }
-  case 5303: {
-    return sizeof(ReservationNotificationCallback_t); }
-  case 5304: {
-    return sizeof(ChangeNumOpenSlotsCallback_t); }
-  case 5305: {
-    return sizeof(AvailableBeaconLocationsUpdated_t); }
-  case 5306: {
-    return sizeof(ActiveBeaconsUpdated_t); }
-  case 1307: {
-    return sizeof(RemoteStorageFileShareResult_t); }
-  case 1309: {
-    return sizeof(RemoteStoragePublishFileResult_t); }
-  case 1311: {
-    return sizeof(RemoteStorageDeletePublishedFileResult_t); }
-  case 1312: {
-    return sizeof(RemoteStorageEnumerateUserPublishedFilesResult_t); }
-  case 1313: {
-    return sizeof(RemoteStorageSubscribePublishedFileResult_t); }
-  case 1314: {
-    return sizeof(RemoteStorageEnumerateUserSubscribedFilesResult_t); }
-  case 1315: {
-    return sizeof(RemoteStorageUnsubscribePublishedFileResult_t); }
-  case 1316: {
-    return sizeof(RemoteStorageUpdatePublishedFileResult_t); }
-  case 1317: {
-    return sizeof(RemoteStorageDownloadUGCResult_t); }
-  case 1318: {
-    return sizeof(RemoteStorageGetPublishedFileDetailsResult_t); }
-  case 1319: {
-    return sizeof(RemoteStorageEnumerateWorkshopFilesResult_t); }
-  case 1320: {
-    return sizeof(RemoteStorageGetPublishedItemVoteDetailsResult_t); }
-  case 1321: {
-    return sizeof(RemoteStoragePublishedFileSubscribed_t); }
-  case 1322: {
-    return sizeof(RemoteStoragePublishedFileUnsubscribed_t); }
-  case 1323: {
-    return sizeof(RemoteStoragePublishedFileDeleted_t); }
-  case 1324: {
-    return sizeof(RemoteStorageUpdateUserPublishedItemVoteResult_t); }
-  case 1325: {
-    return sizeof(RemoteStorageUserVoteDetails_t); }
-  case 1326: {
-    return sizeof(RemoteStorageEnumerateUserSharedWorkshopFilesResult_t); }
-  case 1327: {
-    return sizeof(RemoteStorageSetUserPublishedFileActionResult_t); }
-  case 1328: {
-    return sizeof(RemoteStorageEnumeratePublishedFilesByUserActionResult_t); }
-  case 1329: {
-    return sizeof(RemoteStoragePublishFileProgress_t); }
-  case 1330: {
-    return sizeof(RemoteStoragePublishedFileUpdated_t); }
-  case 1331: {
-    return sizeof(RemoteStorageFileWriteAsyncComplete_t); }
-  case 1332: {
-    return sizeof(RemoteStorageFileReadAsyncComplete_t); }
-  case 1333: {
-    return sizeof(RemoteStorageLocalFileChange_t); }
-  case 1101: {
-    return sizeof(UserStatsReceived_t); }
-  case 1102: {
-    return sizeof(UserStatsStored_t); }
-  case 1103: {
-    return sizeof(UserAchievementStored_t); }
-  case 1104: {
-    return sizeof(LeaderboardFindResult_t); }
-  case 1105: {
-    return sizeof(LeaderboardScoresDownloaded_t); }
-  case 1106: {
-    return sizeof(LeaderboardScoreUploaded_t); }
-  case 1107: {
-    return sizeof(NumberOfCurrentPlayers_t); }
-  case 1108: {
-    return sizeof(UserStatsUnloaded_t); }
-  case 1109: {
-    return sizeof(UserAchievementIconFetched_t); }
-  case 1110: {
-    return sizeof(GlobalAchievementPercentagesReady_t); }
-  case 1111: {
-    return sizeof(LeaderboardUGCSet_t); }
-  case 1112: {
-    return sizeof(GlobalStatsReceived_t); }
-  case 1005: {
-    return sizeof(DlcInstalled_t); }
-  case 1014: {
-    return sizeof(NewUrlLaunchParameters_t); }
-  case 1021: {
-    return sizeof(AppProofOfPurchaseKeyResponse_t); }
-  case 1023: {
-    return sizeof(FileDetailsResult_t); }
-  case 1030: {
-    return sizeof(TimedTrialStatus_t); }
-  case 1202: {
-    return sizeof(P2PSessionRequest_t); }
-  case 1203: {
-    return sizeof(P2PSessionConnectFail_t); }
-  case 1201: {
-    return sizeof(SocketStatusCallback_t); }
-  case 2301: {
-    return sizeof(ScreenshotReady_t); }
-  case 2302: {
-    return sizeof(ScreenshotRequested_t); }
-  case 4001: {
-    return sizeof(PlaybackStatusHasChanged_t); }
-  case 4002: {
-    return sizeof(VolumeHasChanged_t); }
-  case 4101: {
-    return sizeof(MusicPlayerRemoteWillActivate_t); }
-  case 4102: {
-    return sizeof(MusicPlayerRemoteWillDeactivate_t); }
-  case 4103: {
-    return sizeof(MusicPlayerRemoteToFront_t); }
-  case 4104: {
-    return sizeof(MusicPlayerWillQuit_t); }
-  case 4105: {
-    return sizeof(MusicPlayerWantsPlay_t); }
-  case 4106: {
-    return sizeof(MusicPlayerWantsPause_t); }
-  case 4107: {
-    return sizeof(MusicPlayerWantsPlayPrevious_t); }
-  case 4108: {
-    return sizeof(MusicPlayerWantsPlayNext_t); }
-  case 4109: {
-    return sizeof(MusicPlayerWantsShuffled_t); }
-  case 4110: {
-    return sizeof(MusicPlayerWantsLooped_t); }
-  case 4011: {
-    return sizeof(MusicPlayerWantsVolume_t); }
-  case 4012: {
-    return sizeof(MusicPlayerSelectsQueueEntry_t); }
-  case 4013: {
-    return sizeof(MusicPlayerSelectsPlaylistEntry_t); }
-  case 4114: {
-    return sizeof(MusicPlayerWantsPlayingRepeatStatus_t); }
-  case 2101: {
-    return sizeof(HTTPRequestCompleted_t); }
-  case 2102: {
-    return sizeof(HTTPRequestHeadersReceived_t); }
-  case 2103: {
-    return sizeof(HTTPRequestDataReceived_t); }
-  case 2801: {
-    return sizeof(SteamInputDeviceConnected_t); }
-  case 2802: {
-    return sizeof(SteamInputDeviceDisconnected_t); }
-  case 2803: {
-    return sizeof(SteamInputConfigurationLoaded_t); }
-  case 2804: {
-    return sizeof(SteamInputGamepadSlotChange_t); }
-  case 3401: {
-    return sizeof(SteamUGCQueryCompleted_t); }
-  case 3402: {
-    return sizeof(SteamUGCRequestUGCDetailsResult_t); }
-  case 3403: {
-    return sizeof(CreateItemResult_t); }
-  case 3404: {
-    return sizeof(SubmitItemUpdateResult_t); }
-  case 3405: {
-    return sizeof(ItemInstalled_t); }
-  case 3406: {
-    return sizeof(DownloadItemResult_t); }
-  case 3407: {
-    return sizeof(UserFavoriteItemsListChanged_t); }
-  case 3408: {
-    return sizeof(SetUserItemVoteResult_t); }
-  case 3409: {
-    return sizeof(GetUserItemVoteResult_t); }
-  case 3410: {
-    return sizeof(StartPlaytimeTrackingResult_t); }
-  case 3411: {
-    return sizeof(StopPlaytimeTrackingResult_t); }
-  case 3412: {
-    return sizeof(AddUGCDependencyResult_t); }
-  case 3413: {
-    return sizeof(RemoveUGCDependencyResult_t); }
-  case 3414: {
-    return sizeof(AddAppDependencyResult_t); }
-  case 3415: {
-    return sizeof(RemoveAppDependencyResult_t); }
-  case 3416: {
-    return sizeof(GetAppDependenciesResult_t); }
-  case 3417: {
-    return sizeof(DeleteItemResult_t); }
-  case 3418: {
-    return sizeof(UserSubscribedItemsListChanged_t); }
-  case 3420: {
-    return sizeof(WorkshopEULAStatus_t); }
-  case 3901: {
-    return sizeof(SteamAppInstalled_t); }
-  case 3902: {
-    return sizeof(SteamAppUninstalled_t); }
-  case 4501: {
-    return sizeof(HTML_BrowserReady_t); }
-  case 4502: {
-    return sizeof(HTML_NeedsPaint_t); }
-  case 4503: {
-    return sizeof(HTML_StartRequest_t); }
-  case 4504: {
-    return sizeof(HTML_CloseBrowser_t); }
-  case 4505: {
-    return sizeof(HTML_URLChanged_t); }
-  case 4506: {
-    return sizeof(HTML_FinishedRequest_t); }
-  case 4507: {
-    return sizeof(HTML_OpenLinkInNewTab_t); }
-  case 4508: {
-    return sizeof(HTML_ChangedTitle_t); }
-  case 4509: {
-    return sizeof(HTML_SearchResults_t); }
-  case 4510: {
-    return sizeof(HTML_CanGoBackAndForward_t); }
-  case 4511: {
-    return sizeof(HTML_HorizontalScroll_t); }
-  case 4512: {
-    return sizeof(HTML_VerticalScroll_t); }
-  case 4513: {
-    return sizeof(HTML_LinkAtPosition_t); }
-  case 4514: {
-    return sizeof(HTML_JSAlert_t); }
-  case 4515: {
-    return sizeof(HTML_JSConfirm_t); }
-  case 4516: {
-    return sizeof(HTML_FileOpenDialog_t); }
-  case 4521: {
-    return sizeof(HTML_NewWindow_t); }
-  case 4522: {
-    return sizeof(HTML_SetCursor_t); }
-  case 4523: {
-    return sizeof(HTML_StatusText_t); }
-  case 4524: {
-    return sizeof(HTML_ShowToolTip_t); }
-  case 4525: {
-    return sizeof(HTML_UpdateToolTip_t); }
-  case 4526: {
-    return sizeof(HTML_HideToolTip_t); }
-  case 4527: {
-    return sizeof(HTML_BrowserRestarted_t); }
-  case 4700: {
-    return sizeof(SteamInventoryResultReady_t); }
-  case 4701: {
-    return sizeof(SteamInventoryFullUpdate_t); }
-  case 4702: {
-    return sizeof(SteamInventoryDefinitionUpdate_t); }
-  case 4703: {
-    return sizeof(SteamInventoryEligiblePromoItemDefIDs_t); }
-  case 4704: {
-    return sizeof(SteamInventoryStartPurchaseResult_t); }
-  case 4705: {
-    return sizeof(SteamInventoryRequestPricesResult_t); }
-  case 4611: {
-    return sizeof(GetVideoURLResult_t); }
-  case 4624: {
-    return sizeof(GetOPFSettingsResult_t); }
-  case 5001: {
-    return sizeof(SteamParentalSettingsChanged_t); }
-  case 5701: {
-    return sizeof(SteamRemotePlaySessionConnected_t); }
-  case 5702: {
-    return sizeof(SteamRemotePlaySessionDisconnected_t); }
-  case 5703: {
-    return sizeof(SteamRemotePlayTogetherGuestInvite_t); }
-  case 1251: {
-    return sizeof(SteamNetworkingMessagesSessionRequest_t); }
-  case 1252: {
-    return sizeof(SteamNetworkingMessagesSessionFailed_t); }
-  case 1221: {
-    return sizeof(SteamNetConnectionStatusChangedCallback_t); }
-  case 1222: {
-    return sizeof(SteamNetAuthenticationStatus_t); }
-  case 1281: {
-    return sizeof(SteamRelayNetworkStatus_t); }
-  case 201: {
-    return sizeof(GSClientApprove_t); }
-  case 202: {
-    return sizeof(GSClientDeny_t); }
-  case 203: {
-    return sizeof(GSClientKick_t); }
-  case 206: {
-    return sizeof(GSClientAchievementStatus_t); }
-  case 115: {
-    return sizeof(GSPolicyResponse_t); }
-  case 207: {
-    return sizeof(GSGameplayStats_t); }
-  case 208: {
-    return sizeof(GSClientGroupStatus_t); }
-  case 209: {
-    return sizeof(GSReputation_t); }
-  case 210: {
-    return sizeof(AssociateWithClanResult_t); }
-  case 211: {
-    return sizeof(ComputeNewPlayerCompatibilityResult_t); }
-  case 1800: {
-    return sizeof(GSStatsReceived_t); }
-  case 1801: {
-    return sizeof(GSStatsStored_t); }
-  // case 1223: {
-  //   return sizeof(SteamNetworkingFakeIPResult_t); }
+  case 101: return sizeof(SteamServersConnected_t);
+  case 102: return sizeof(SteamServerConnectFailure_t);
+  case 103: return sizeof(SteamServersDisconnected_t);
+  case 113: return sizeof(ClientGameServerDeny_t);
+  case 117: return sizeof(IPCFailure_t);
+  case 125: return sizeof(LicensesUpdated_t);
+  case 143: return sizeof(ValidateAuthTicketResponse_t);
+  case 152: return sizeof(MicroTxnAuthorizationResponse_t);
+  case 154: return sizeof(EncryptedAppTicketResponse_t);
+  case 163: return sizeof(GetAuthSessionTicketResponse_t);
+  case 164: return sizeof(GameWebCallback_t);
+  case 165: return sizeof(StoreAuthURLResponse_t);
+  case 166: return sizeof(MarketEligibilityResponse_t);
+  case 167: return sizeof(DurationControl_t);
+  case 168: return sizeof(GetTicketForWebApiResponse_t);
+  case 304: return sizeof(PersonaStateChange_t);
+  case 331: return sizeof(GameOverlayActivated_t);
+  case 332: return sizeof(GameServerChangeRequested_t);
+  case 333: return sizeof(GameLobbyJoinRequested_t);
+  case 334: return sizeof(AvatarImageLoaded_t);
+  case 335: return sizeof(ClanOfficerListResponse_t);
+  case 336: return sizeof(FriendRichPresenceUpdate_t);
+  case 337: return sizeof(GameRichPresenceJoinRequested_t);
+  case 338: return sizeof(GameConnectedClanChatMsg_t);
+  case 339: return sizeof(GameConnectedChatJoin_t);
+  case 340: return sizeof(GameConnectedChatLeave_t);
+  case 341: return sizeof(DownloadClanActivityCountsResult_t);
+  case 342: return sizeof(JoinClanChatRoomCompletionResult_t);
+  case 343: return sizeof(GameConnectedFriendChatMsg_t);
+  case 344: return sizeof(FriendsGetFollowerCount_t);
+  case 345: return sizeof(FriendsIsFollowing_t);
+  case 346: return sizeof(FriendsEnumerateFollowingList_t);
+  case 347: return sizeof(SetPersonaNameResponse_t);
+  case 348: return sizeof(UnreadChatMessagesChanged_t);
+  case 349: return sizeof(OverlayBrowserProtocolNavigation_t);
+  case 350: return sizeof(EquippedProfileItemsChanged_t);
+  case 351: return sizeof(EquippedProfileItems_t);
+  case 701: return sizeof(IPCountry_t);
+  case 702: return sizeof(LowBatteryPower_t);
+  case 703: return sizeof(SteamAPICallCompleted_t);
+  case 704: return sizeof(SteamShutdown_t);
+  case 705: return sizeof(CheckFileSignature_t);
+  case 714: return sizeof(GamepadTextInputDismissed_t);
+  case 736: return sizeof(AppResumingFromSuspend_t);
+  case 738: return sizeof(FloatingGamepadTextInputDismissed_t);
+  case 739: return sizeof(FilterTextDictionaryChanged_t);
+  case 502: return sizeof(FavoritesListChanged_t);
+  case 503: return sizeof(LobbyInvite_t);
+  case 504: return sizeof(LobbyEnter_t);
+  case 505: return sizeof(LobbyDataUpdate_t);
+  case 506: return sizeof(LobbyChatUpdate_t);
+  case 507: return sizeof(LobbyChatMsg_t);
+  case 509: return sizeof(LobbyGameCreated_t);
+  case 510: return sizeof(LobbyMatchList_t);
+  case 512: return sizeof(LobbyKicked_t);
+  case 513: return sizeof(LobbyCreated_t);
+  case 515: return sizeof(PSNGameBootInviteResult_t);
+  case 516: return sizeof(FavoritesListAccountsUpdated_t);
+  case 5201: return sizeof(SearchForGameProgressCallback_t);
+  case 5202: return sizeof(SearchForGameResultCallback_t);
+  case 5211: return sizeof(RequestPlayersForGameProgressCallback_t);
+  case 5212: return sizeof(RequestPlayersForGameResultCallback_t);
+  case 5213: return sizeof(RequestPlayersForGameFinalResultCallback_t);
+  case 5214: return sizeof(SubmitPlayerResultResultCallback_t);
+  case 5215: return sizeof(EndGameResultCallback_t);
+  case 5301: return sizeof(JoinPartyCallback_t);
+  case 5302: return sizeof(CreateBeaconCallback_t);
+  case 5303: return sizeof(ReservationNotificationCallback_t);
+  case 5304: return sizeof(ChangeNumOpenSlotsCallback_t);
+  case 5305: return sizeof(AvailableBeaconLocationsUpdated_t);
+  case 5306: return sizeof(ActiveBeaconsUpdated_t);
+  case 1307: return sizeof(RemoteStorageFileShareResult_t);
+  case 1309: return sizeof(RemoteStoragePublishFileResult_t);
+  case 1311: return sizeof(RemoteStorageDeletePublishedFileResult_t);
+  case 1312: return sizeof(RemoteStorageEnumerateUserPublishedFilesResult_t);
+  case 1313: return sizeof(RemoteStorageSubscribePublishedFileResult_t);
+  case 1314: return sizeof(RemoteStorageEnumerateUserSubscribedFilesResult_t);
+  case 1315: return sizeof(RemoteStorageUnsubscribePublishedFileResult_t);
+  case 1316: return sizeof(RemoteStorageUpdatePublishedFileResult_t);
+  case 1317: return sizeof(RemoteStorageDownloadUGCResult_t);
+  case 1318: return sizeof(RemoteStorageGetPublishedFileDetailsResult_t);
+  case 1319: return sizeof(RemoteStorageEnumerateWorkshopFilesResult_t);
+  case 1320: return sizeof(RemoteStorageGetPublishedItemVoteDetailsResult_t);
+  case 1321: return sizeof(RemoteStoragePublishedFileSubscribed_t);
+  case 1322: return sizeof(RemoteStoragePublishedFileUnsubscribed_t);
+  case 1323: return sizeof(RemoteStoragePublishedFileDeleted_t);
+  case 1324: return sizeof(RemoteStorageUpdateUserPublishedItemVoteResult_t);
+  case 1325: return sizeof(RemoteStorageUserVoteDetails_t);
+  case 1326: return sizeof(RemoteStorageEnumerateUserSharedWorkshopFilesResult_t);
+  case 1327: return sizeof(RemoteStorageSetUserPublishedFileActionResult_t);
+  case 1328: return sizeof(RemoteStorageEnumeratePublishedFilesByUserActionResult_t);
+  case 1329: return sizeof(RemoteStoragePublishFileProgress_t);
+  case 1330: return sizeof(RemoteStoragePublishedFileUpdated_t);
+  case 1331: return sizeof(RemoteStorageFileWriteAsyncComplete_t);
+  case 1332: return sizeof(RemoteStorageFileReadAsyncComplete_t);
+  case 1333: return sizeof(RemoteStorageLocalFileChange_t);
+  case 1101: return sizeof(UserStatsReceived_t);
+  case 1102: return sizeof(UserStatsStored_t);
+  case 1103: return sizeof(UserAchievementStored_t);
+  case 1104: return sizeof(LeaderboardFindResult_t);
+  case 1105: return sizeof(LeaderboardScoresDownloaded_t);
+  case 1106: return sizeof(LeaderboardScoreUploaded_t);
+  case 1107: return sizeof(NumberOfCurrentPlayers_t);
+  case 1108: return sizeof(UserStatsUnloaded_t);
+  case 1109: return sizeof(UserAchievementIconFetched_t);
+  case 1110: return sizeof(GlobalAchievementPercentagesReady_t);
+  case 1111: return sizeof(LeaderboardUGCSet_t);
+  case 1112: return sizeof(GlobalStatsReceived_t);
+  case 1005: return sizeof(DlcInstalled_t);
+  case 1014: return sizeof(NewUrlLaunchParameters_t);
+  case 1021: return sizeof(AppProofOfPurchaseKeyResponse_t);
+  case 1023: return sizeof(FileDetailsResult_t);
+  case 1030: return sizeof(TimedTrialStatus_t);
+  case 1202: return sizeof(P2PSessionRequest_t);
+  case 1203: return sizeof(P2PSessionConnectFail_t);
+  case 1201: return sizeof(SocketStatusCallback_t);
+  case 2301: return sizeof(ScreenshotReady_t);
+  case 2302: return sizeof(ScreenshotRequested_t);
+  case 4001: return sizeof(PlaybackStatusHasChanged_t);
+  case 4002: return sizeof(VolumeHasChanged_t);
+  case 4101: return sizeof(MusicPlayerRemoteWillActivate_t);
+  case 4102: return sizeof(MusicPlayerRemoteWillDeactivate_t);
+  case 4103: return sizeof(MusicPlayerRemoteToFront_t);
+  case 4104: return sizeof(MusicPlayerWillQuit_t);
+  case 4105: return sizeof(MusicPlayerWantsPlay_t);
+  case 4106: return sizeof(MusicPlayerWantsPause_t);
+  case 4107: return sizeof(MusicPlayerWantsPlayPrevious_t);
+  case 4108: return sizeof(MusicPlayerWantsPlayNext_t);
+  case 4109: return sizeof(MusicPlayerWantsShuffled_t);
+  case 4110: return sizeof(MusicPlayerWantsLooped_t);
+  case 4011: return sizeof(MusicPlayerWantsVolume_t);
+  case 4012: return sizeof(MusicPlayerSelectsQueueEntry_t);
+  case 4013: return sizeof(MusicPlayerSelectsPlaylistEntry_t);
+  case 4114: return sizeof(MusicPlayerWantsPlayingRepeatStatus_t);
+  case 2101: return sizeof(HTTPRequestCompleted_t);
+  case 2102: return sizeof(HTTPRequestHeadersReceived_t);
+  case 2103: return sizeof(HTTPRequestDataReceived_t);
+  case 2801: return sizeof(SteamInputDeviceConnected_t);
+  case 2802: return sizeof(SteamInputDeviceDisconnected_t);
+  case 2803: return sizeof(SteamInputConfigurationLoaded_t);
+  case 2804: return sizeof(SteamInputGamepadSlotChange_t);
+  case 3401: return sizeof(SteamUGCQueryCompleted_t);
+  case 3402: return sizeof(SteamUGCRequestUGCDetailsResult_t);
+  case 3403: return sizeof(CreateItemResult_t);
+  case 3404: return sizeof(SubmitItemUpdateResult_t);
+  case 3405: return sizeof(ItemInstalled_t);
+  case 3406: return sizeof(DownloadItemResult_t);
+  case 3407: return sizeof(UserFavoriteItemsListChanged_t);
+  case 3408: return sizeof(SetUserItemVoteResult_t);
+  case 3409: return sizeof(GetUserItemVoteResult_t);
+  case 3410: return sizeof(StartPlaytimeTrackingResult_t);
+  case 3411: return sizeof(StopPlaytimeTrackingResult_t);
+  case 3412: return sizeof(AddUGCDependencyResult_t);
+  case 3413: return sizeof(RemoveUGCDependencyResult_t);
+  case 3414: return sizeof(AddAppDependencyResult_t);
+  case 3415: return sizeof(RemoveAppDependencyResult_t);
+  case 3416: return sizeof(GetAppDependenciesResult_t);
+  case 3417: return sizeof(DeleteItemResult_t);
+  case 3418: return sizeof(UserSubscribedItemsListChanged_t);
+  case 3420: return sizeof(WorkshopEULAStatus_t);
+  case 3901: return sizeof(SteamAppInstalled_t);
+  case 3902: return sizeof(SteamAppUninstalled_t);
+  case 4501: return sizeof(HTML_BrowserReady_t);
+  case 4502: return sizeof(HTML_NeedsPaint_t);
+  case 4503: return sizeof(HTML_StartRequest_t);
+  case 4504: return sizeof(HTML_CloseBrowser_t);
+  case 4505: return sizeof(HTML_URLChanged_t);
+  case 4506: return sizeof(HTML_FinishedRequest_t);
+  case 4507: return sizeof(HTML_OpenLinkInNewTab_t);
+  case 4508: return sizeof(HTML_ChangedTitle_t);
+  case 4509: return sizeof(HTML_SearchResults_t);
+  case 4510: return sizeof(HTML_CanGoBackAndForward_t);
+  case 4511: return sizeof(HTML_HorizontalScroll_t);
+  case 4512: return sizeof(HTML_VerticalScroll_t);
+  case 4513: return sizeof(HTML_LinkAtPosition_t);
+  case 4514: return sizeof(HTML_JSAlert_t);
+  case 4515: return sizeof(HTML_JSConfirm_t);
+  case 4516: return sizeof(HTML_FileOpenDialog_t);
+  case 4521: return sizeof(HTML_NewWindow_t);
+  case 4522: return sizeof(HTML_SetCursor_t);
+  case 4523: return sizeof(HTML_StatusText_t);
+  case 4524: return sizeof(HTML_ShowToolTip_t);
+  case 4525: return sizeof(HTML_UpdateToolTip_t);
+  case 4526: return sizeof(HTML_HideToolTip_t);
+  case 4527: return sizeof(HTML_BrowserRestarted_t);
+  case 4700: return sizeof(SteamInventoryResultReady_t);
+  case 4701: return sizeof(SteamInventoryFullUpdate_t);
+  case 4702: return sizeof(SteamInventoryDefinitionUpdate_t);
+  case 4703: return sizeof(SteamInventoryEligiblePromoItemDefIDs_t);
+  case 4704: return sizeof(SteamInventoryStartPurchaseResult_t);
+  case 4705: return sizeof(SteamInventoryRequestPricesResult_t);
+  case 4611: return sizeof(GetVideoURLResult_t);
+  case 4624: return sizeof(GetOPFSettingsResult_t);
+  case 5001: return sizeof(SteamParentalSettingsChanged_t);
+  case 5701: return sizeof(SteamRemotePlaySessionConnected_t);
+  case 5702: return sizeof(SteamRemotePlaySessionDisconnected_t);
+  case 5703: return sizeof(SteamRemotePlayTogetherGuestInvite_t);
+  case 1251: return sizeof(SteamNetworkingMessagesSessionRequest_t);
+  case 1252: return sizeof(SteamNetworkingMessagesSessionFailed_t);
+  case 1221: return sizeof(SteamNetConnectionStatusChangedCallback_t);
+  case 1222: return sizeof(SteamNetAuthenticationStatus_t);
+  case 1281: return sizeof(SteamRelayNetworkStatus_t);
+  case 201: return sizeof(GSClientApprove_t);
+  case 202: return sizeof(GSClientDeny_t);
+  case 203: return sizeof(GSClientKick_t);
+  case 206: return sizeof(GSClientAchievementStatus_t);
+  case 115: return sizeof(GSPolicyResponse_t);
+  case 207: return sizeof(GSGameplayStats_t);
+  case 208: return sizeof(GSClientGroupStatus_t);
+  case 209: return sizeof(GSReputation_t);
+  case 210: return sizeof(AssociateWithClanResult_t);
+  case 211: return sizeof(ComputeNewPlayerCompatibilityResult_t);
+  case 1800: return sizeof(GSStatsReceived_t);
+  case 1801: return sizeof(GSStatsStored_t);
+  // case 1223: return sizeof(SteamNetworkingFakeIPResult_t);
   default: return 0;
 }
 }

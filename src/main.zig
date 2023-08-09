@@ -3,7 +3,8 @@ const std = @import("std");
 pub const Server = @import("server.zig");
 const builtin = @import("builtin");
 pub const CGameID = u64;
-pub const StructPlatformPackSize = if (builtin.os.tag == .windows) 8 else 4;
+const is_windows = builtin.os.tag == .windows;
+pub const StructPlatformPackSize = if (is_windows) 8 else 4;
 pub const StructPackSize = 4;
 pub const CSteamID = u64;
 pub const intptr_t = ?*anyopaque;
@@ -766,11 +767,6 @@ pub fn from_slice_debug(comptime T: anytype, slice: []const u8) T {
 
     const struct_info = @typeInfo(T).Struct;
     if (struct_info.layout == .Extern) {
-        if (!@inComptime()) std.debug.print("------------ Parsing into {s} {}\n", .{
-            @typeName(T),
-            std.fmt.fmtSliceHexLower(slice),
-        });
-
         // the following would be ideal, mostly because it performs way fewer branches
         // -> (&ret).* = @as(*T, @ptrCast(@alignCast(slice))).*;
         // but instead, we must specialize this function with an inline for to account for data types
@@ -917,15 +913,24 @@ pub const FSteamNetworkingSocketsDebugOutput = ?*const fn (ESteamNetworkingSocke
 /// callbackId = 101
 pub const SteamServersConnected_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(SteamServersConnected_t) != 1 or @alignOf(SteamServersConnected_t) != 1) @compileLog("Size or alignment of SteamServersConnected_t are mismatch.", @sizeOf(SteamServersConnected_t), @alignOf(SteamServersConnected_t));
+    }
 };
 /// callbackId = 102
 pub const SteamServerConnectFailure_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_bStillRetrying: bool align(1) = false,
+    comptime {
+        if (@sizeOf(SteamServerConnectFailure_t) != 8 or @alignOf(SteamServerConnectFailure_t) != 4) @compileLog("Size or alignment of SteamServerConnectFailure_t are mismatch.", @sizeOf(SteamServerConnectFailure_t), @alignOf(SteamServerConnectFailure_t));
+    }
 };
 /// callbackId = 103
 pub const SteamServersDisconnected_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
+    comptime {
+        if (@sizeOf(SteamServersDisconnected_t) != 4 or @alignOf(SteamServersDisconnected_t) != 4) @compileLog("Size or alignment of SteamServersDisconnected_t are mismatch.", @sizeOf(SteamServersDisconnected_t), @alignOf(SteamServersDisconnected_t));
+    }
 };
 /// callbackId = 113
 pub const ClientGameServerDeny_t = extern struct {
@@ -934,10 +939,16 @@ pub const ClientGameServerDeny_t = extern struct {
     m_usGameServerPort: uint16 align(2) = 0,
     m_bSecure: bool align(2) = false,
     m_uReason: uint32 align(4) = 0,
+    comptime {
+        if (@sizeOf(ClientGameServerDeny_t) != 16 or @alignOf(ClientGameServerDeny_t) != 4) @compileLog("Size or alignment of ClientGameServerDeny_t are mismatch.", @sizeOf(ClientGameServerDeny_t), @alignOf(ClientGameServerDeny_t));
+    }
 };
 /// callbackId = 117
 pub const IPCFailure_t = extern struct {
     m_eFailureType: uint8 align(1) = 0,
+    comptime {
+        if (@sizeOf(IPCFailure_t) != 1 or @alignOf(IPCFailure_t) != 1) @compileLog("Size or alignment of IPCFailure_t are mismatch.", @sizeOf(IPCFailure_t), @alignOf(IPCFailure_t));
+    }
 
     // Enums
 
@@ -950,35 +961,57 @@ pub const IPCFailure_t = extern struct {
 /// callbackId = 125
 pub const LicensesUpdated_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(LicensesUpdated_t) != 1 or @alignOf(LicensesUpdated_t) != 1) @compileLog("Size or alignment of LicensesUpdated_t are mismatch.", @sizeOf(LicensesUpdated_t), @alignOf(LicensesUpdated_t));
+    }
 };
 /// callbackId = 143
 pub const ValidateAuthTicketResponse_t = extern struct {
     m_SteamID: CSteamID align(1),
     m_eAuthSessionResponse: EAuthSessionResponse align(4) = EAuthSessionResponse.k_EAuthSessionResponseOK,
     m_OwnerSteamID: CSteamID align(1),
+    comptime {
+        if (@sizeOf(ValidateAuthTicketResponse_t) != 20 or @alignOf(ValidateAuthTicketResponse_t) != 4) @compileLog("Size or alignment of ValidateAuthTicketResponse_t are mismatch.", @sizeOf(ValidateAuthTicketResponse_t), @alignOf(ValidateAuthTicketResponse_t));
+    }
 };
 /// callbackId = 152
 pub const MicroTxnAuthorizationResponse_t = extern struct {
     m_unAppID: uint32 align(4) = 0,
     m_ulOrderID: uint64 align(StructPlatformPackSize) = 0,
     m_bAuthorized: bool align(1) = false,
+    comptime {
+        const size = if (is_windows) 24 else 16;
+        if (@sizeOf(MicroTxnAuthorizationResponse_t) != size or @alignOf(MicroTxnAuthorizationResponse_t) != StructPlatformPackSize) @compileLog("Size or alignment of MicroTxnAuthorizationResponse_t are mismatch.", @sizeOf(MicroTxnAuthorizationResponse_t), @alignOf(MicroTxnAuthorizationResponse_t));
+    }
 };
 /// callbackId = 154
 pub const EncryptedAppTicketResponse_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
+    comptime {
+        if (@sizeOf(EncryptedAppTicketResponse_t) != 4 or @alignOf(EncryptedAppTicketResponse_t) != 4) @compileLog("Size or alignment of EncryptedAppTicketResponse_t are mismatch.", @sizeOf(EncryptedAppTicketResponse_t), @alignOf(EncryptedAppTicketResponse_t));
+    }
 };
 /// callbackId = 163
 pub const GetAuthSessionTicketResponse_t = extern struct {
     m_hAuthTicket: HAuthTicket align(4) = 0,
     m_eResult: EResult align(4) = EResult.k_EResultNone,
+    comptime {
+        if (@sizeOf(GetAuthSessionTicketResponse_t) != 8 or @alignOf(GetAuthSessionTicketResponse_t) != 4) @compileLog("Size or alignment of GetAuthSessionTicketResponse_t are mismatch.", @sizeOf(GetAuthSessionTicketResponse_t), @alignOf(GetAuthSessionTicketResponse_t));
+    }
 };
 /// callbackId = 164
 pub const GameWebCallback_t = extern struct {
     m_szURL: [256]u8 align(1),
+    comptime {
+        if (@sizeOf(GameWebCallback_t) != 256 or @alignOf(GameWebCallback_t) != 1) @compileLog("Size or alignment of GameWebCallback_t are mismatch.", @sizeOf(GameWebCallback_t), @alignOf(GameWebCallback_t));
+    }
 };
 /// callbackId = 165
 pub const StoreAuthURLResponse_t = extern struct {
     m_szURL: [512]u8 align(1),
+    comptime {
+        if (@sizeOf(StoreAuthURLResponse_t) != 512 or @alignOf(StoreAuthURLResponse_t) != 1) @compileLog("Size or alignment of StoreAuthURLResponse_t are mismatch.", @sizeOf(StoreAuthURLResponse_t), @alignOf(StoreAuthURLResponse_t));
+    }
 };
 /// callbackId = 166
 pub const MarketEligibilityResponse_t = extern struct {
@@ -987,6 +1020,9 @@ pub const MarketEligibilityResponse_t = extern struct {
     m_rtAllowedAtTime: RTime32 align(4) = 0,
     m_cdaySteamGuardRequiredDays: i32 align(4) = 0,
     m_cdayNewDeviceCooldown: i32 align(4) = 0,
+    comptime {
+        if (@sizeOf(MarketEligibilityResponse_t) != 20 or @alignOf(MarketEligibilityResponse_t) != 4) @compileLog("Size or alignment of MarketEligibilityResponse_t are mismatch.", @sizeOf(MarketEligibilityResponse_t), @alignOf(MarketEligibilityResponse_t));
+    }
 };
 /// callbackId = 167
 pub const DurationControl_t = extern struct {
@@ -998,6 +1034,9 @@ pub const DurationControl_t = extern struct {
     m_notification: EDurationControlNotification align(4) = EDurationControlNotification.k_EDurationControlNotification_None,
     m_csecsToday: int32 align(4) = 0,
     m_csecsRemaining: int32 align(4) = 0,
+    comptime {
+        if (@sizeOf(DurationControl_t) != 32 or @alignOf(DurationControl_t) != 4) @compileLog("Size or alignment of DurationControl_t are mismatch.", @sizeOf(DurationControl_t), @alignOf(DurationControl_t));
+    }
 };
 /// callbackId = 168
 pub const GetTicketForWebApiResponse_t = extern struct {
@@ -1005,27 +1044,43 @@ pub const GetTicketForWebApiResponse_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_cubTicket: i32 align(4) = 0,
     m_rgubTicket: [2560]uint8 align(1),
+    comptime {
+        if (@sizeOf(GetTicketForWebApiResponse_t) != 2572 or @alignOf(GetTicketForWebApiResponse_t) != 4) @compileLog("Size or alignment of GetTicketForWebApiResponse_t are mismatch.", @sizeOf(GetTicketForWebApiResponse_t), @alignOf(GetTicketForWebApiResponse_t));
+    }
 };
 /// callbackId = 304
 pub const PersonaStateChange_t = extern struct {
     m_ulSteamID: CSteamID align(StructPlatformPackSize),
     m_nChangeFlags: i32 align(4) = 0,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(PersonaStateChange_t) != size or @alignOf(PersonaStateChange_t) != StructPlatformPackSize) @compileLog("Size or alignment of PersonaStateChange_t are mismatch.", @sizeOf(PersonaStateChange_t), @alignOf(PersonaStateChange_t));
+    }
 };
 /// callbackId = 331
 pub const GameOverlayActivated_t = extern struct {
     m_bActive: bool align(1) = false,
     m_bUserInitiated: bool align(1) = false,
     m_nAppID: AppId_t align(4) = 0,
+    comptime {
+        if (@sizeOf(GameOverlayActivated_t) != 8 or @alignOf(GameOverlayActivated_t) != 4) @compileLog("Size or alignment of GameOverlayActivated_t are mismatch.", @sizeOf(GameOverlayActivated_t), @alignOf(GameOverlayActivated_t));
+    }
 };
 /// callbackId = 332
 pub const GameServerChangeRequested_t = extern struct {
     m_rgchServer: [64]u8 align(1),
     m_rgchPassword: [64]u8 align(1),
+    comptime {
+        if (@sizeOf(GameServerChangeRequested_t) != 128 or @alignOf(GameServerChangeRequested_t) != 1) @compileLog("Size or alignment of GameServerChangeRequested_t are mismatch.", @sizeOf(GameServerChangeRequested_t), @alignOf(GameServerChangeRequested_t));
+    }
 };
 /// callbackId = 333
 pub const GameLobbyJoinRequested_t = extern struct {
     m_steamIDLobby: CSteamID align(1),
     m_steamIDFriend: CSteamID align(1),
+    comptime {
+        if (@sizeOf(GameLobbyJoinRequested_t) != 16 or @alignOf(GameLobbyJoinRequested_t) != 1) @compileLog("Size or alignment of GameLobbyJoinRequested_t are mismatch.", @sizeOf(GameLobbyJoinRequested_t), @alignOf(GameLobbyJoinRequested_t));
+    }
 };
 /// callbackId = 334
 pub const AvatarImageLoaded_t = extern struct {
@@ -1033,33 +1088,51 @@ pub const AvatarImageLoaded_t = extern struct {
     m_iImage: i32 align(4) = 0,
     m_iWide: i32 align(4) = 0,
     m_iTall: i32 align(4) = 0,
+    comptime {
+        if (@sizeOf(AvatarImageLoaded_t) != 20 or @alignOf(AvatarImageLoaded_t) != 4) @compileLog("Size or alignment of AvatarImageLoaded_t are mismatch.", @sizeOf(AvatarImageLoaded_t), @alignOf(AvatarImageLoaded_t));
+    }
 };
 /// callbackId = 335
 pub const ClanOfficerListResponse_t = extern struct {
     m_steamIDClan: CSteamID align(1),
     m_cOfficers: i32 align(4) = 0,
     m_bSuccess: bool align(1) = false,
+    comptime {
+        if (@sizeOf(ClanOfficerListResponse_t) != 16 or @alignOf(ClanOfficerListResponse_t) != 4) @compileLog("Size or alignment of ClanOfficerListResponse_t are mismatch.", @sizeOf(ClanOfficerListResponse_t), @alignOf(ClanOfficerListResponse_t));
+    }
 };
 /// callbackId = 336
 pub const FriendRichPresenceUpdate_t = extern struct {
     m_steamIDFriend: CSteamID align(1),
     m_nAppID: AppId_t align(4) = 0,
+    comptime {
+        if (@sizeOf(FriendRichPresenceUpdate_t) != 12 or @alignOf(FriendRichPresenceUpdate_t) != 4) @compileLog("Size or alignment of FriendRichPresenceUpdate_t are mismatch.", @sizeOf(FriendRichPresenceUpdate_t), @alignOf(FriendRichPresenceUpdate_t));
+    }
 };
 /// callbackId = 337
 pub const GameRichPresenceJoinRequested_t = extern struct {
     m_steamIDFriend: CSteamID align(1),
     m_rgchConnect: [256]u8 align(1),
+    comptime {
+        if (@sizeOf(GameRichPresenceJoinRequested_t) != 264 or @alignOf(GameRichPresenceJoinRequested_t) != 1) @compileLog("Size or alignment of GameRichPresenceJoinRequested_t are mismatch.", @sizeOf(GameRichPresenceJoinRequested_t), @alignOf(GameRichPresenceJoinRequested_t));
+    }
 };
 /// callbackId = 338
 pub const GameConnectedClanChatMsg_t = extern struct {
     m_steamIDClanChat: CSteamID align(1),
     m_steamIDUser: CSteamID align(1),
     m_iMessageID: i32 align(4) = 0,
+    comptime {
+        if (@sizeOf(GameConnectedClanChatMsg_t) != 20 or @alignOf(GameConnectedClanChatMsg_t) != 4) @compileLog("Size or alignment of GameConnectedClanChatMsg_t are mismatch.", @sizeOf(GameConnectedClanChatMsg_t), @alignOf(GameConnectedClanChatMsg_t));
+    }
 };
 /// callbackId = 339
 pub const GameConnectedChatJoin_t = extern struct {
     m_steamIDClanChat: CSteamID align(1),
     m_steamIDUser: CSteamID align(1),
+    comptime {
+        if (@sizeOf(GameConnectedChatJoin_t) != 16 or @alignOf(GameConnectedChatJoin_t) != 1) @compileLog("Size or alignment of GameConnectedChatJoin_t are mismatch.", @sizeOf(GameConnectedChatJoin_t), @alignOf(GameConnectedChatJoin_t));
+    }
 };
 /// callbackId = 340
 pub const GameConnectedChatLeave_t = extern struct {
@@ -1067,32 +1140,50 @@ pub const GameConnectedChatLeave_t = extern struct {
     m_steamIDUser: CSteamID align(1),
     m_bKicked: bool align(1) = false,
     m_bDropped: bool align(1) = false,
+    comptime {
+        if (@sizeOf(GameConnectedChatLeave_t) != 18 or @alignOf(GameConnectedChatLeave_t) != 1) @compileLog("Size or alignment of GameConnectedChatLeave_t are mismatch.", @sizeOf(GameConnectedChatLeave_t), @alignOf(GameConnectedChatLeave_t));
+    }
 };
 /// callbackId = 341
 pub const DownloadClanActivityCountsResult_t = extern struct {
     m_bSuccess: bool align(1) = false,
+    comptime {
+        if (@sizeOf(DownloadClanActivityCountsResult_t) != 1 or @alignOf(DownloadClanActivityCountsResult_t) != 1) @compileLog("Size or alignment of DownloadClanActivityCountsResult_t are mismatch.", @sizeOf(DownloadClanActivityCountsResult_t), @alignOf(DownloadClanActivityCountsResult_t));
+    }
 };
 /// callbackId = 342
 pub const JoinClanChatRoomCompletionResult_t = extern struct {
     m_steamIDClanChat: CSteamID align(1),
     m_eChatRoomEnterResponse: EChatRoomEnterResponse align(4),
+    comptime {
+        if (@sizeOf(JoinClanChatRoomCompletionResult_t) != 12 or @alignOf(JoinClanChatRoomCompletionResult_t) != 4) @compileLog("Size or alignment of JoinClanChatRoomCompletionResult_t are mismatch.", @sizeOf(JoinClanChatRoomCompletionResult_t), @alignOf(JoinClanChatRoomCompletionResult_t));
+    }
 };
 /// callbackId = 343
 pub const GameConnectedFriendChatMsg_t = extern struct {
     m_steamIDUser: CSteamID align(1),
     m_iMessageID: i32 align(4) = 0,
+    comptime {
+        if (@sizeOf(GameConnectedFriendChatMsg_t) != 12 or @alignOf(GameConnectedFriendChatMsg_t) != 4) @compileLog("Size or alignment of GameConnectedFriendChatMsg_t are mismatch.", @sizeOf(GameConnectedFriendChatMsg_t), @alignOf(GameConnectedFriendChatMsg_t));
+    }
 };
 /// callbackId = 344
 pub const FriendsGetFollowerCount_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_steamID: CSteamID align(1),
     m_nCount: i32 align(4) = 0,
+    comptime {
+        if (@sizeOf(FriendsGetFollowerCount_t) != 16 or @alignOf(FriendsGetFollowerCount_t) != 4) @compileLog("Size or alignment of FriendsGetFollowerCount_t are mismatch.", @sizeOf(FriendsGetFollowerCount_t), @alignOf(FriendsGetFollowerCount_t));
+    }
 };
 /// callbackId = 345
 pub const FriendsIsFollowing_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_steamID: CSteamID align(1),
     m_bIsFollowing: bool align(1) = false,
+    comptime {
+        if (@sizeOf(FriendsIsFollowing_t) != 16 or @alignOf(FriendsIsFollowing_t) != 4) @compileLog("Size or alignment of FriendsIsFollowing_t are mismatch.", @sizeOf(FriendsIsFollowing_t), @alignOf(FriendsIsFollowing_t));
+    }
 };
 /// callbackId = 346
 pub const FriendsEnumerateFollowingList_t = extern struct {
@@ -1100,24 +1191,39 @@ pub const FriendsEnumerateFollowingList_t = extern struct {
     m_rgSteamID: [50]CSteamID align(1),
     m_nResultsReturned: int32 align(4) = 0,
     m_nTotalResultCount: int32 align(4) = 0,
+    comptime {
+        if (@sizeOf(FriendsEnumerateFollowingList_t) != 412 or @alignOf(FriendsEnumerateFollowingList_t) != 4) @compileLog("Size or alignment of FriendsEnumerateFollowingList_t are mismatch.", @sizeOf(FriendsEnumerateFollowingList_t), @alignOf(FriendsEnumerateFollowingList_t));
+    }
 };
 /// callbackId = 347
 pub const SetPersonaNameResponse_t = extern struct {
     m_bSuccess: bool align(1) = false,
     m_bLocalSuccess: bool align(1) = false,
     m_result: EResult align(4) = EResult.k_EResultNone,
+    comptime {
+        if (@sizeOf(SetPersonaNameResponse_t) != 8 or @alignOf(SetPersonaNameResponse_t) != 4) @compileLog("Size or alignment of SetPersonaNameResponse_t are mismatch.", @sizeOf(SetPersonaNameResponse_t), @alignOf(SetPersonaNameResponse_t));
+    }
 };
 /// callbackId = 348
 pub const UnreadChatMessagesChanged_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(UnreadChatMessagesChanged_t) != 1 or @alignOf(UnreadChatMessagesChanged_t) != 1) @compileLog("Size or alignment of UnreadChatMessagesChanged_t are mismatch.", @sizeOf(UnreadChatMessagesChanged_t), @alignOf(UnreadChatMessagesChanged_t));
+    }
 };
 /// callbackId = 349
 pub const OverlayBrowserProtocolNavigation_t = extern struct {
     rgchURI: [1024]u8 align(1),
+    comptime {
+        if (@sizeOf(OverlayBrowserProtocolNavigation_t) != 1024 or @alignOf(OverlayBrowserProtocolNavigation_t) != 1) @compileLog("Size or alignment of OverlayBrowserProtocolNavigation_t are mismatch.", @sizeOf(OverlayBrowserProtocolNavigation_t), @alignOf(OverlayBrowserProtocolNavigation_t));
+    }
 };
 /// callbackId = 350
 pub const EquippedProfileItemsChanged_t = extern struct {
     m_steamID: CSteamID align(1),
+    comptime {
+        if (@sizeOf(EquippedProfileItemsChanged_t) != 8 or @alignOf(EquippedProfileItemsChanged_t) != 1) @compileLog("Size or alignment of EquippedProfileItemsChanged_t are mismatch.", @sizeOf(EquippedProfileItemsChanged_t), @alignOf(EquippedProfileItemsChanged_t));
+    }
 };
 /// callbackId = 351
 pub const EquippedProfileItems_t = extern struct {
@@ -1128,46 +1234,76 @@ pub const EquippedProfileItems_t = extern struct {
     m_bHasProfileModifier: bool align(1) = false,
     m_bHasProfileBackground: bool align(1) = false,
     m_bHasMiniProfileBackground: bool align(1) = false,
+    comptime {
+        if (@sizeOf(EquippedProfileItems_t) != 20 or @alignOf(EquippedProfileItems_t) != 4) @compileLog("Size or alignment of EquippedProfileItems_t are mismatch.", @sizeOf(EquippedProfileItems_t), @alignOf(EquippedProfileItems_t));
+    }
 };
 /// callbackId = 701
 pub const IPCountry_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(IPCountry_t) != 1 or @alignOf(IPCountry_t) != 1) @compileLog("Size or alignment of IPCountry_t are mismatch.", @sizeOf(IPCountry_t), @alignOf(IPCountry_t));
+    }
 };
 /// callbackId = 702
 pub const LowBatteryPower_t = extern struct {
     m_nMinutesBatteryLeft: uint8 align(1) = 0,
+    comptime {
+        if (@sizeOf(LowBatteryPower_t) != 1 or @alignOf(LowBatteryPower_t) != 1) @compileLog("Size or alignment of LowBatteryPower_t are mismatch.", @sizeOf(LowBatteryPower_t), @alignOf(LowBatteryPower_t));
+    }
 };
 /// callbackId = 703
 pub const SteamAPICallCompleted_t = extern struct {
     m_hAsyncCall: SteamAPICall_t align(StructPlatformPackSize) = 0,
     m_iCallback: i32 align(4) = 0,
     m_cubParam: uint32 align(4) = 0,
+    comptime {
+        if (@sizeOf(SteamAPICallCompleted_t) != 16 or @alignOf(SteamAPICallCompleted_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamAPICallCompleted_t are mismatch.", @sizeOf(SteamAPICallCompleted_t), @alignOf(SteamAPICallCompleted_t));
+    }
 };
 /// callbackId = 704
 pub const SteamShutdown_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(SteamShutdown_t) != 1 or @alignOf(SteamShutdown_t) != 1) @compileLog("Size or alignment of SteamShutdown_t are mismatch.", @sizeOf(SteamShutdown_t), @alignOf(SteamShutdown_t));
+    }
 };
 /// callbackId = 705
 pub const CheckFileSignature_t = extern struct {
     m_eCheckFileSignature: ECheckFileSignature align(4) = ECheckFileSignature.k_ECheckFileSignatureInvalidSignature,
+    comptime {
+        if (@sizeOf(CheckFileSignature_t) != 4 or @alignOf(CheckFileSignature_t) != 4) @compileLog("Size or alignment of CheckFileSignature_t are mismatch.", @sizeOf(CheckFileSignature_t), @alignOf(CheckFileSignature_t));
+    }
 };
 /// callbackId = 714
 pub const GamepadTextInputDismissed_t = extern struct {
     m_bSubmitted: bool align(1) = false,
     m_unSubmittedText: uint32 align(4) = 0,
     m_unAppID: AppId_t align(4) = 0,
+    comptime {
+        if (@sizeOf(GamepadTextInputDismissed_t) != 12 or @alignOf(GamepadTextInputDismissed_t) != 4) @compileLog("Size or alignment of GamepadTextInputDismissed_t are mismatch.", @sizeOf(GamepadTextInputDismissed_t), @alignOf(GamepadTextInputDismissed_t));
+    }
 };
 /// callbackId = 736
 pub const AppResumingFromSuspend_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(AppResumingFromSuspend_t) != 1 or @alignOf(AppResumingFromSuspend_t) != 1) @compileLog("Size or alignment of AppResumingFromSuspend_t are mismatch.", @sizeOf(AppResumingFromSuspend_t), @alignOf(AppResumingFromSuspend_t));
+    }
 };
 /// callbackId = 738
 pub const FloatingGamepadTextInputDismissed_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(FloatingGamepadTextInputDismissed_t) != 1 or @alignOf(FloatingGamepadTextInputDismissed_t) != 1) @compileLog("Size or alignment of FloatingGamepadTextInputDismissed_t are mismatch.", @sizeOf(FloatingGamepadTextInputDismissed_t), @alignOf(FloatingGamepadTextInputDismissed_t));
+    }
 };
 /// callbackId = 739
 pub const FilterTextDictionaryChanged_t = extern struct {
     m_eLanguage: i32 align(4) = 0,
+    comptime {
+        if (@sizeOf(FilterTextDictionaryChanged_t) != 4 or @alignOf(FilterTextDictionaryChanged_t) != 4) @compileLog("Size or alignment of FilterTextDictionaryChanged_t are mismatch.", @sizeOf(FilterTextDictionaryChanged_t), @alignOf(FilterTextDictionaryChanged_t));
+    }
 };
 /// callbackId = 502
 pub const FavoritesListChanged_t = extern struct {
@@ -1178,12 +1314,18 @@ pub const FavoritesListChanged_t = extern struct {
     m_nFlags: uint32 align(4) = 0,
     m_bAdd: bool align(1) = false,
     m_unAccountId: AccountID_t align(4) = 0,
+    comptime {
+        if (@sizeOf(FavoritesListChanged_t) != 28 or @alignOf(FavoritesListChanged_t) != 4) @compileLog("Size or alignment of FavoritesListChanged_t are mismatch.", @sizeOf(FavoritesListChanged_t), @alignOf(FavoritesListChanged_t));
+    }
 };
 /// callbackId = 503
 pub const LobbyInvite_t = extern struct {
     m_ulSteamIDUser: CSteamID align(StructPlatformPackSize),
     m_ulSteamIDLobby: CSteamID align(StructPlatformPackSize),
     m_ulGameID: CGameID align(StructPlatformPackSize),
+    comptime {
+        if (@sizeOf(LobbyInvite_t) != 24 or @alignOf(LobbyInvite_t) != StructPlatformPackSize) @compileLog("Size or alignment of LobbyInvite_t are mismatch.", @sizeOf(LobbyInvite_t), @alignOf(LobbyInvite_t));
+    }
 };
 /// callbackId = 504
 pub const LobbyEnter_t = extern struct {
@@ -1191,12 +1333,20 @@ pub const LobbyEnter_t = extern struct {
     m_rgfChatPermissions: uint32 align(4) = 0,
     m_bLocked: bool align(1) = false,
     m_EChatRoomEnterResponse: uint32 align(4) = 0,
+    comptime {
+        const size = if (is_windows) 24 else 20;
+        if (@sizeOf(LobbyEnter_t) != size or @alignOf(LobbyEnter_t) != StructPlatformPackSize) @compileLog("Size or alignment of LobbyEnter_t are mismatch.", @sizeOf(LobbyEnter_t), @alignOf(LobbyEnter_t));
+    }
 };
 /// callbackId = 505
 pub const LobbyDataUpdate_t = extern struct {
     m_ulSteamIDLobby: CSteamID align(StructPlatformPackSize),
     m_ulSteamIDMember: CSteamID align(StructPlatformPackSize),
     m_bSuccess: bool align(1) = false,
+    comptime {
+        const size = if (is_windows) 24 else 20;
+        if (@sizeOf(LobbyDataUpdate_t) != size or @alignOf(LobbyDataUpdate_t) != StructPlatformPackSize) @compileLog("Size or alignment of LobbyDataUpdate_t are mismatch.", @sizeOf(LobbyDataUpdate_t), @alignOf(LobbyDataUpdate_t));
+    }
 };
 /// callbackId = 506
 pub const LobbyChatUpdate_t = extern struct {
@@ -1204,6 +1354,10 @@ pub const LobbyChatUpdate_t = extern struct {
     m_ulSteamIDUserChanged: CSteamID align(StructPlatformPackSize),
     m_ulSteamIDMakingChange: CSteamID align(StructPlatformPackSize),
     m_rgfChatMemberStateChange: uint32 align(4) = 0,
+    comptime {
+        const size = if (is_windows) 32 else 28;
+        if (@sizeOf(LobbyChatUpdate_t) != size or @alignOf(LobbyChatUpdate_t) != StructPlatformPackSize) @compileLog("Size or alignment of LobbyChatUpdate_t are mismatch.", @sizeOf(LobbyChatUpdate_t), @alignOf(LobbyChatUpdate_t));
+    }
 };
 /// callbackId = 507
 pub const LobbyChatMsg_t = extern struct {
@@ -1211,6 +1365,9 @@ pub const LobbyChatMsg_t = extern struct {
     m_ulSteamIDUser: CSteamID align(StructPlatformPackSize),
     m_eChatEntryType: uint8 align(1) = 0,
     m_iChatID: uint32 align(4) = 0,
+    comptime {
+        if (@sizeOf(LobbyChatMsg_t) != 24 or @alignOf(LobbyChatMsg_t) != StructPlatformPackSize) @compileLog("Size or alignment of LobbyChatMsg_t are mismatch.", @sizeOf(LobbyChatMsg_t), @alignOf(LobbyChatMsg_t));
+    }
 };
 /// callbackId = 509
 pub const LobbyGameCreated_t = extern struct {
@@ -1218,30 +1375,50 @@ pub const LobbyGameCreated_t = extern struct {
     m_ulSteamIDGameServer: CSteamID align(StructPlatformPackSize),
     m_unIP: uint32 align(4) = 0,
     m_usPort: uint16 align(2) = 0,
+    comptime {
+        if (@sizeOf(LobbyGameCreated_t) != 24 or @alignOf(LobbyGameCreated_t) != StructPlatformPackSize) @compileLog("Size or alignment of LobbyGameCreated_t are mismatch.", @sizeOf(LobbyGameCreated_t), @alignOf(LobbyGameCreated_t));
+    }
 };
 /// callbackId = 510
 pub const LobbyMatchList_t = extern struct {
     m_nLobbiesMatching: uint32 align(4) = 0,
+    comptime {
+        if (@sizeOf(LobbyMatchList_t) != 4 or @alignOf(LobbyMatchList_t) != 4) @compileLog("Size or alignment of LobbyMatchList_t are mismatch.", @sizeOf(LobbyMatchList_t), @alignOf(LobbyMatchList_t));
+    }
 };
 /// callbackId = 512
 pub const LobbyKicked_t = extern struct {
     m_ulSteamIDLobby: CSteamID align(StructPlatformPackSize),
     m_ulSteamIDAdmin: CSteamID align(StructPlatformPackSize),
     m_bKickedDueToDisconnect: bool align(1) = false,
+    comptime {
+        const size = if (is_windows) 24 else 20;
+        if (@sizeOf(LobbyKicked_t) != size or @alignOf(LobbyKicked_t) != StructPlatformPackSize) @compileLog("Size or alignment of LobbyKicked_t are mismatch.", @sizeOf(LobbyKicked_t), @alignOf(LobbyKicked_t));
+    }
 };
 /// callbackId = 513
 pub const LobbyCreated_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_ulSteamIDLobby: CSteamID align(StructPlatformPackSize),
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(LobbyCreated_t) != size or @alignOf(LobbyCreated_t) != StructPlatformPackSize) @compileLog("Size or alignment of LobbyCreated_t are mismatch.", @sizeOf(LobbyCreated_t), @alignOf(LobbyCreated_t));
+    }
 };
 /// callbackId = 515
 pub const PSNGameBootInviteResult_t = extern struct {
     m_bGameBootInviteExists: bool align(1) = false,
     m_steamIDLobby: CSteamID align(1),
+    comptime {
+        if (@sizeOf(PSNGameBootInviteResult_t) != 9 or @alignOf(PSNGameBootInviteResult_t) != 1) @compileLog("Size or alignment of PSNGameBootInviteResult_t are mismatch.", @sizeOf(PSNGameBootInviteResult_t), @alignOf(PSNGameBootInviteResult_t));
+    }
 };
 /// callbackId = 516
 pub const FavoritesListAccountsUpdated_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
+    comptime {
+        if (@sizeOf(FavoritesListAccountsUpdated_t) != 4 or @alignOf(FavoritesListAccountsUpdated_t) != 4) @compileLog("Size or alignment of FavoritesListAccountsUpdated_t are mismatch.", @sizeOf(FavoritesListAccountsUpdated_t), @alignOf(FavoritesListAccountsUpdated_t));
+    }
 };
 /// callbackId = 5201
 pub const SearchForGameProgressCallback_t = extern struct {
@@ -1251,6 +1428,10 @@ pub const SearchForGameProgressCallback_t = extern struct {
     m_steamIDEndedSearch: CSteamID align(1),
     m_nSecondsRemainingEstimate: int32 align(4) = 0,
     m_cPlayersSearching: int32 align(4) = 0,
+    comptime {
+        const size = if (is_windows) 40 else 36;
+        if (@sizeOf(SearchForGameProgressCallback_t) != size or @alignOf(SearchForGameProgressCallback_t) != StructPlatformPackSize) @compileLog("Size or alignment of SearchForGameProgressCallback_t are mismatch.", @sizeOf(SearchForGameProgressCallback_t), @alignOf(SearchForGameProgressCallback_t));
+    }
 };
 /// callbackId = 5202
 pub const SearchForGameResultCallback_t = extern struct {
@@ -1260,11 +1441,18 @@ pub const SearchForGameResultCallback_t = extern struct {
     m_nCountAcceptedGame: int32 align(4) = 0,
     m_steamIDHost: CSteamID align(1),
     m_bFinalCallback: bool align(1) = false,
+    comptime {
+        if (@sizeOf(SearchForGameResultCallback_t) != 32 or @alignOf(SearchForGameResultCallback_t) != StructPlatformPackSize) @compileLog("Size or alignment of SearchForGameResultCallback_t are mismatch.", @sizeOf(SearchForGameResultCallback_t), @alignOf(SearchForGameResultCallback_t));
+    }
 };
 /// callbackId = 5211
 pub const RequestPlayersForGameProgressCallback_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_ullSearchID: uint64 align(StructPlatformPackSize) = 0,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(RequestPlayersForGameProgressCallback_t) != size or @alignOf(RequestPlayersForGameProgressCallback_t) != StructPlatformPackSize) @compileLog("Size or alignment of RequestPlayersForGameProgressCallback_t are mismatch.", @sizeOf(RequestPlayersForGameProgressCallback_t), @alignOf(RequestPlayersForGameProgressCallback_t));
+    }
 };
 /// callbackId = 5212
 pub const RequestPlayersForGameResultCallback_t = extern struct {
@@ -1278,6 +1466,10 @@ pub const RequestPlayersForGameResultCallback_t = extern struct {
     m_nTotalPlayersAcceptedGame: int32 align(4) = 0,
     m_nSuggestedTeamIndex: int32 align(4) = 0,
     m_ullUniqueGameID: CGameID align(StructPlatformPackSize),
+    comptime {
+        const size = if (is_windows) 64 else 56;
+        if (@sizeOf(RequestPlayersForGameResultCallback_t) != size or @alignOf(RequestPlayersForGameResultCallback_t) != StructPlatformPackSize) @compileLog("Size or alignment of RequestPlayersForGameResultCallback_t are mismatch.", @sizeOf(RequestPlayersForGameResultCallback_t), @alignOf(RequestPlayersForGameResultCallback_t));
+    }
 
     // Enums
 
@@ -1293,17 +1485,29 @@ pub const RequestPlayersForGameFinalResultCallback_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_ullSearchID: uint64 align(StructPlatformPackSize) = 0,
     m_ullUniqueGameID: CGameID align(StructPlatformPackSize),
+    comptime {
+        const size = if (is_windows) 24 else 20;
+        if (@sizeOf(RequestPlayersForGameFinalResultCallback_t) != size or @alignOf(RequestPlayersForGameFinalResultCallback_t) != StructPlatformPackSize) @compileLog("Size or alignment of RequestPlayersForGameFinalResultCallback_t are mismatch.", @sizeOf(RequestPlayersForGameFinalResultCallback_t), @alignOf(RequestPlayersForGameFinalResultCallback_t));
+    }
 };
 /// callbackId = 5214
 pub const SubmitPlayerResultResultCallback_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     ullUniqueGameID: CGameID align(StructPlatformPackSize),
     steamIDPlayer: CSteamID align(1),
+    comptime {
+        const size = if (is_windows) 24 else 20;
+        if (@sizeOf(SubmitPlayerResultResultCallback_t) != size or @alignOf(SubmitPlayerResultResultCallback_t) != StructPlatformPackSize) @compileLog("Size or alignment of SubmitPlayerResultResultCallback_t are mismatch.", @sizeOf(SubmitPlayerResultResultCallback_t), @alignOf(SubmitPlayerResultResultCallback_t));
+    }
 };
 /// callbackId = 5215
 pub const EndGameResultCallback_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     ullUniqueGameID: CGameID align(StructPlatformPackSize),
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(EndGameResultCallback_t) != size or @alignOf(EndGameResultCallback_t) != StructPlatformPackSize) @compileLog("Size or alignment of EndGameResultCallback_t are mismatch.", @sizeOf(EndGameResultCallback_t), @alignOf(EndGameResultCallback_t));
+    }
 };
 /// callbackId = 5301
 pub const JoinPartyCallback_t = extern struct {
@@ -1311,45 +1515,77 @@ pub const JoinPartyCallback_t = extern struct {
     m_ulBeaconID: PartyBeaconID_t align(StructPlatformPackSize) = 0,
     m_SteamIDBeaconOwner: CSteamID align(1),
     m_rgchConnectString: [256]u8 align(1),
+    comptime {
+        const size = if (is_windows) 280 else 276;
+        if (@sizeOf(JoinPartyCallback_t) != size or @alignOf(JoinPartyCallback_t) != StructPlatformPackSize) @compileLog("Size or alignment of JoinPartyCallback_t are mismatch.", @sizeOf(JoinPartyCallback_t), @alignOf(JoinPartyCallback_t));
+    }
 };
 /// callbackId = 5302
 pub const CreateBeaconCallback_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_ulBeaconID: PartyBeaconID_t align(StructPlatformPackSize) = 0,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(CreateBeaconCallback_t) != size or @alignOf(CreateBeaconCallback_t) != StructPlatformPackSize) @compileLog("Size or alignment of CreateBeaconCallback_t are mismatch.", @sizeOf(CreateBeaconCallback_t), @alignOf(CreateBeaconCallback_t));
+    }
 };
 /// callbackId = 5303
 pub const ReservationNotificationCallback_t = extern struct {
     m_ulBeaconID: PartyBeaconID_t align(StructPlatformPackSize) = 0,
     m_steamIDJoiner: CSteamID align(1),
+    comptime {
+        if (@sizeOf(ReservationNotificationCallback_t) != 16 or @alignOf(ReservationNotificationCallback_t) != StructPlatformPackSize) @compileLog("Size or alignment of ReservationNotificationCallback_t are mismatch.", @sizeOf(ReservationNotificationCallback_t), @alignOf(ReservationNotificationCallback_t));
+    }
 };
 /// callbackId = 5304
 pub const ChangeNumOpenSlotsCallback_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
+    comptime {
+        if (@sizeOf(ChangeNumOpenSlotsCallback_t) != 4 or @alignOf(ChangeNumOpenSlotsCallback_t) != 4) @compileLog("Size or alignment of ChangeNumOpenSlotsCallback_t are mismatch.", @sizeOf(ChangeNumOpenSlotsCallback_t), @alignOf(ChangeNumOpenSlotsCallback_t));
+    }
 };
 /// callbackId = 5305
 pub const AvailableBeaconLocationsUpdated_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(AvailableBeaconLocationsUpdated_t) != 1 or @alignOf(AvailableBeaconLocationsUpdated_t) != 1) @compileLog("Size or alignment of AvailableBeaconLocationsUpdated_t are mismatch.", @sizeOf(AvailableBeaconLocationsUpdated_t), @alignOf(AvailableBeaconLocationsUpdated_t));
+    }
 };
 /// callbackId = 5306
 pub const ActiveBeaconsUpdated_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(ActiveBeaconsUpdated_t) != 1 or @alignOf(ActiveBeaconsUpdated_t) != 1) @compileLog("Size or alignment of ActiveBeaconsUpdated_t are mismatch.", @sizeOf(ActiveBeaconsUpdated_t), @alignOf(ActiveBeaconsUpdated_t));
+    }
 };
 /// callbackId = 1307
 pub const RemoteStorageFileShareResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_hFile: UGCHandle_t align(StructPlatformPackSize) = 0,
     m_rgchFilename: [260]u8 align(1),
+    comptime {
+        const size = if (is_windows) 280 else 272;
+        if (@sizeOf(RemoteStorageFileShareResult_t) != size or @alignOf(RemoteStorageFileShareResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStorageFileShareResult_t are mismatch.", @sizeOf(RemoteStorageFileShareResult_t), @alignOf(RemoteStorageFileShareResult_t));
+    }
 };
 /// callbackId = 1309
 pub const RemoteStoragePublishFileResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
     m_bUserNeedsToAcceptWorkshopLegalAgreement: bool align(1) = false,
+    comptime {
+        const size = if (is_windows) 24 else 16;
+        if (@sizeOf(RemoteStoragePublishFileResult_t) != size or @alignOf(RemoteStoragePublishFileResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStoragePublishFileResult_t are mismatch.", @sizeOf(RemoteStoragePublishFileResult_t), @alignOf(RemoteStoragePublishFileResult_t));
+    }
 };
 /// callbackId = 1311
 pub const RemoteStorageDeletePublishedFileResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(RemoteStorageDeletePublishedFileResult_t) != size or @alignOf(RemoteStorageDeletePublishedFileResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStorageDeletePublishedFileResult_t are mismatch.", @sizeOf(RemoteStorageDeletePublishedFileResult_t), @alignOf(RemoteStorageDeletePublishedFileResult_t));
+    }
 };
 /// callbackId = 1312
 pub const RemoteStorageEnumerateUserPublishedFilesResult_t = extern struct {
@@ -1357,11 +1593,19 @@ pub const RemoteStorageEnumerateUserPublishedFilesResult_t = extern struct {
     m_nResultsReturned: int32 align(4) = 0,
     m_nTotalResultCount: int32 align(4) = 0,
     m_rgPublishedFileId: [50]PublishedFileId_t align(StructPlatformPackSize),
+    comptime {
+        const size = if (is_windows) 416 else 412;
+        if (@sizeOf(RemoteStorageEnumerateUserPublishedFilesResult_t) != size or @alignOf(RemoteStorageEnumerateUserPublishedFilesResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStorageEnumerateUserPublishedFilesResult_t are mismatch.", @sizeOf(RemoteStorageEnumerateUserPublishedFilesResult_t), @alignOf(RemoteStorageEnumerateUserPublishedFilesResult_t));
+    }
 };
 /// callbackId = 1313
 pub const RemoteStorageSubscribePublishedFileResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(RemoteStorageSubscribePublishedFileResult_t) != size or @alignOf(RemoteStorageSubscribePublishedFileResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStorageSubscribePublishedFileResult_t are mismatch.", @sizeOf(RemoteStorageSubscribePublishedFileResult_t), @alignOf(RemoteStorageSubscribePublishedFileResult_t));
+    }
 };
 /// callbackId = 1314
 pub const RemoteStorageEnumerateUserSubscribedFilesResult_t = extern struct {
@@ -1370,17 +1614,29 @@ pub const RemoteStorageEnumerateUserSubscribedFilesResult_t = extern struct {
     m_nTotalResultCount: int32 align(4) = 0,
     m_rgPublishedFileId: [50]PublishedFileId_t align(StructPlatformPackSize),
     m_rgRTimeSubscribed: [50]uint32 align(4),
+    comptime {
+        const size = if (is_windows) 616 else 612;
+        if (@sizeOf(RemoteStorageEnumerateUserSubscribedFilesResult_t) != size or @alignOf(RemoteStorageEnumerateUserSubscribedFilesResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStorageEnumerateUserSubscribedFilesResult_t are mismatch.", @sizeOf(RemoteStorageEnumerateUserSubscribedFilesResult_t), @alignOf(RemoteStorageEnumerateUserSubscribedFilesResult_t));
+    }
 };
 /// callbackId = 1315
 pub const RemoteStorageUnsubscribePublishedFileResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(RemoteStorageUnsubscribePublishedFileResult_t) != size or @alignOf(RemoteStorageUnsubscribePublishedFileResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStorageUnsubscribePublishedFileResult_t are mismatch.", @sizeOf(RemoteStorageUnsubscribePublishedFileResult_t), @alignOf(RemoteStorageUnsubscribePublishedFileResult_t));
+    }
 };
 /// callbackId = 1316
 pub const RemoteStorageUpdatePublishedFileResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
     m_bUserNeedsToAcceptWorkshopLegalAgreement: bool align(1) = false,
+    comptime {
+        const size = if (is_windows) 24 else 16;
+        if (@sizeOf(RemoteStorageUpdatePublishedFileResult_t) != size or @alignOf(RemoteStorageUpdatePublishedFileResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStorageUpdatePublishedFileResult_t are mismatch.", @sizeOf(RemoteStorageUpdatePublishedFileResult_t), @alignOf(RemoteStorageUpdatePublishedFileResult_t));
+    }
 };
 /// callbackId = 1317
 pub const RemoteStorageDownloadUGCResult_t = extern struct {
@@ -1390,6 +1646,10 @@ pub const RemoteStorageDownloadUGCResult_t = extern struct {
     m_nSizeInBytes: int32 align(4) = 0,
     m_pchFileName: [260]u8 align(1),
     m_ulSteamIDOwner: CSteamID align(StructPlatformPackSize),
+    comptime {
+        const size = if (is_windows) 296 else 288;
+        if (@sizeOf(RemoteStorageDownloadUGCResult_t) != size or @alignOf(RemoteStorageDownloadUGCResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStorageDownloadUGCResult_t are mismatch.", @sizeOf(RemoteStorageDownloadUGCResult_t), @alignOf(RemoteStorageDownloadUGCResult_t));
+    }
 };
 /// callbackId = 1318
 pub const RemoteStorageGetPublishedFileDetailsResult_t = extern struct {
@@ -1414,6 +1674,10 @@ pub const RemoteStorageGetPublishedFileDetailsResult_t = extern struct {
     m_rgchURL: [256]u8 align(1),
     m_eFileType: EWorkshopFileType align(4) = EWorkshopFileType.k_EWorkshopFileTypeFirst,
     m_bAcceptedForUse: bool align(1) = false,
+    comptime {
+        const size = if (is_windows) 9760 else 9748;
+        if (@sizeOf(RemoteStorageGetPublishedFileDetailsResult_t) != size or @alignOf(RemoteStorageGetPublishedFileDetailsResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStorageGetPublishedFileDetailsResult_t are mismatch.", @sizeOf(RemoteStorageGetPublishedFileDetailsResult_t), @alignOf(RemoteStorageGetPublishedFileDetailsResult_t));
+    }
 };
 /// callbackId = 1319
 pub const RemoteStorageEnumerateWorkshopFilesResult_t = extern struct {
@@ -1424,6 +1688,10 @@ pub const RemoteStorageEnumerateWorkshopFilesResult_t = extern struct {
     m_rgScore: [50]f32 align(4),
     m_nAppId: AppId_t align(4) = 0,
     m_unStartIndex: uint32 align(4) = 0,
+    comptime {
+        const size = if (is_windows) 624 else 620;
+        if (@sizeOf(RemoteStorageEnumerateWorkshopFilesResult_t) != size or @alignOf(RemoteStorageEnumerateWorkshopFilesResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStorageEnumerateWorkshopFilesResult_t are mismatch.", @sizeOf(RemoteStorageEnumerateWorkshopFilesResult_t), @alignOf(RemoteStorageEnumerateWorkshopFilesResult_t));
+    }
 };
 /// callbackId = 1320
 pub const RemoteStorageGetPublishedItemVoteDetailsResult_t = extern struct {
@@ -1433,32 +1701,56 @@ pub const RemoteStorageGetPublishedItemVoteDetailsResult_t = extern struct {
     m_nVotesAgainst: int32 align(4) = 0,
     m_nReports: int32 align(4) = 0,
     m_fScore: f32 align(4) = 0,
+    comptime {
+        const size = if (is_windows) 32 else 28;
+        if (@sizeOf(RemoteStorageGetPublishedItemVoteDetailsResult_t) != size or @alignOf(RemoteStorageGetPublishedItemVoteDetailsResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStorageGetPublishedItemVoteDetailsResult_t are mismatch.", @sizeOf(RemoteStorageGetPublishedItemVoteDetailsResult_t), @alignOf(RemoteStorageGetPublishedItemVoteDetailsResult_t));
+    }
 };
 /// callbackId = 1321
 pub const RemoteStoragePublishedFileSubscribed_t = extern struct {
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
     m_nAppID: AppId_t align(4) = 0,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(RemoteStoragePublishedFileSubscribed_t) != size or @alignOf(RemoteStoragePublishedFileSubscribed_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStoragePublishedFileSubscribed_t are mismatch.", @sizeOf(RemoteStoragePublishedFileSubscribed_t), @alignOf(RemoteStoragePublishedFileSubscribed_t));
+    }
 };
 /// callbackId = 1322
 pub const RemoteStoragePublishedFileUnsubscribed_t = extern struct {
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
     m_nAppID: AppId_t align(4) = 0,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(RemoteStoragePublishedFileUnsubscribed_t) != size or @alignOf(RemoteStoragePublishedFileUnsubscribed_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStoragePublishedFileUnsubscribed_t are mismatch.", @sizeOf(RemoteStoragePublishedFileUnsubscribed_t), @alignOf(RemoteStoragePublishedFileUnsubscribed_t));
+    }
 };
 /// callbackId = 1323
 pub const RemoteStoragePublishedFileDeleted_t = extern struct {
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
     m_nAppID: AppId_t align(4) = 0,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(RemoteStoragePublishedFileDeleted_t) != size or @alignOf(RemoteStoragePublishedFileDeleted_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStoragePublishedFileDeleted_t are mismatch.", @sizeOf(RemoteStoragePublishedFileDeleted_t), @alignOf(RemoteStoragePublishedFileDeleted_t));
+    }
 };
 /// callbackId = 1324
 pub const RemoteStorageUpdateUserPublishedItemVoteResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(RemoteStorageUpdateUserPublishedItemVoteResult_t) != size or @alignOf(RemoteStorageUpdateUserPublishedItemVoteResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStorageUpdateUserPublishedItemVoteResult_t are mismatch.", @sizeOf(RemoteStorageUpdateUserPublishedItemVoteResult_t), @alignOf(RemoteStorageUpdateUserPublishedItemVoteResult_t));
+    }
 };
 /// callbackId = 1325
 pub const RemoteStorageUserVoteDetails_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
     m_eVote: EWorkshopVote align(4) = EWorkshopVote.k_EWorkshopVoteUnvoted,
+    comptime {
+        const size = if (is_windows) 24 else 16;
+        if (@sizeOf(RemoteStorageUserVoteDetails_t) != size or @alignOf(RemoteStorageUserVoteDetails_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStorageUserVoteDetails_t are mismatch.", @sizeOf(RemoteStorageUserVoteDetails_t), @alignOf(RemoteStorageUserVoteDetails_t));
+    }
 };
 /// callbackId = 1326
 pub const RemoteStorageEnumerateUserSharedWorkshopFilesResult_t = extern struct {
@@ -1466,12 +1758,20 @@ pub const RemoteStorageEnumerateUserSharedWorkshopFilesResult_t = extern struct 
     m_nResultsReturned: int32 align(4) = 0,
     m_nTotalResultCount: int32 align(4) = 0,
     m_rgPublishedFileId: [50]PublishedFileId_t align(StructPlatformPackSize),
+    comptime {
+        const size = if (is_windows) 416 else 412;
+        if (@sizeOf(RemoteStorageEnumerateUserSharedWorkshopFilesResult_t) != size or @alignOf(RemoteStorageEnumerateUserSharedWorkshopFilesResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStorageEnumerateUserSharedWorkshopFilesResult_t are mismatch.", @sizeOf(RemoteStorageEnumerateUserSharedWorkshopFilesResult_t), @alignOf(RemoteStorageEnumerateUserSharedWorkshopFilesResult_t));
+    }
 };
 /// callbackId = 1327
 pub const RemoteStorageSetUserPublishedFileActionResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
     m_eAction: EWorkshopFileAction align(4) = EWorkshopFileAction.k_EWorkshopFileActionPlayed,
+    comptime {
+        const size = if (is_windows) 24 else 16;
+        if (@sizeOf(RemoteStorageSetUserPublishedFileActionResult_t) != size or @alignOf(RemoteStorageSetUserPublishedFileActionResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStorageSetUserPublishedFileActionResult_t are mismatch.", @sizeOf(RemoteStorageSetUserPublishedFileActionResult_t), @alignOf(RemoteStorageSetUserPublishedFileActionResult_t));
+    }
 };
 /// callbackId = 1328
 pub const RemoteStorageEnumeratePublishedFilesByUserActionResult_t = extern struct {
@@ -1481,21 +1781,35 @@ pub const RemoteStorageEnumeratePublishedFilesByUserActionResult_t = extern stru
     m_nTotalResultCount: int32 align(4) = 0,
     m_rgPublishedFileId: [50]PublishedFileId_t align(StructPlatformPackSize),
     m_rgRTimeUpdated: [50]uint32 align(4),
+    comptime {
+        if (@sizeOf(RemoteStorageEnumeratePublishedFilesByUserActionResult_t) != 616 or @alignOf(RemoteStorageEnumeratePublishedFilesByUserActionResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStorageEnumeratePublishedFilesByUserActionResult_t are mismatch.", @sizeOf(RemoteStorageEnumeratePublishedFilesByUserActionResult_t), @alignOf(RemoteStorageEnumeratePublishedFilesByUserActionResult_t));
+    }
 };
 /// callbackId = 1329
 pub const RemoteStoragePublishFileProgress_t = extern struct {
     m_dPercentFile: f64 align(StructPlatformPackSize) = 0,
     m_bPreview: bool align(1) = false,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(RemoteStoragePublishFileProgress_t) != size or @alignOf(RemoteStoragePublishFileProgress_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStoragePublishFileProgress_t are mismatch.", @sizeOf(RemoteStoragePublishFileProgress_t), @alignOf(RemoteStoragePublishFileProgress_t));
+    }
 };
 /// callbackId = 1330
 pub const RemoteStoragePublishedFileUpdated_t = extern struct {
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
     m_nAppID: AppId_t align(4) = 0,
     m_ulUnused: uint64 align(StructPlatformPackSize) = 0,
+    comptime {
+        const size = if (is_windows) 24 else 20;
+        if (@sizeOf(RemoteStoragePublishedFileUpdated_t) != size or @alignOf(RemoteStoragePublishedFileUpdated_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStoragePublishedFileUpdated_t are mismatch.", @sizeOf(RemoteStoragePublishedFileUpdated_t), @alignOf(RemoteStoragePublishedFileUpdated_t));
+    }
 };
 /// callbackId = 1331
 pub const RemoteStorageFileWriteAsyncComplete_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
+    comptime {
+        if (@sizeOf(RemoteStorageFileWriteAsyncComplete_t) != 4 or @alignOf(RemoteStorageFileWriteAsyncComplete_t) != 4) @compileLog("Size or alignment of RemoteStorageFileWriteAsyncComplete_t are mismatch.", @sizeOf(RemoteStorageFileWriteAsyncComplete_t), @alignOf(RemoteStorageFileWriteAsyncComplete_t));
+    }
 };
 /// callbackId = 1332
 pub const RemoteStorageFileReadAsyncComplete_t = extern struct {
@@ -1503,21 +1817,36 @@ pub const RemoteStorageFileReadAsyncComplete_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_nOffset: uint32 align(4) = 0,
     m_cubRead: uint32 align(4) = 0,
+    comptime {
+        const size = if (is_windows) 24 else 20;
+        if (@sizeOf(RemoteStorageFileReadAsyncComplete_t) != size or @alignOf(RemoteStorageFileReadAsyncComplete_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoteStorageFileReadAsyncComplete_t are mismatch.", @sizeOf(RemoteStorageFileReadAsyncComplete_t), @alignOf(RemoteStorageFileReadAsyncComplete_t));
+    }
 };
 /// callbackId = 1333
 pub const RemoteStorageLocalFileChange_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(RemoteStorageLocalFileChange_t) != 1 or @alignOf(RemoteStorageLocalFileChange_t) != 1) @compileLog("Size or alignment of RemoteStorageLocalFileChange_t are mismatch.", @sizeOf(RemoteStorageLocalFileChange_t), @alignOf(RemoteStorageLocalFileChange_t));
+    }
 };
 /// callbackId = 1101
 pub const UserStatsReceived_t = extern struct {
     m_nGameID: CGameID align(StructPlatformPackSize),
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_steamIDUser: CSteamID align(1),
+    comptime {
+        const size = if (is_windows) 24 else 20;
+        if (@sizeOf(UserStatsReceived_t) != size or @alignOf(UserStatsReceived_t) != StructPlatformPackSize) @compileLog("Size or alignment of UserStatsReceived_t are mismatch.", @sizeOf(UserStatsReceived_t), @alignOf(UserStatsReceived_t));
+    }
 };
 /// callbackId = 1102
 pub const UserStatsStored_t = extern struct {
     m_nGameID: CGameID align(StructPlatformPackSize),
     m_eResult: EResult align(4) = EResult.k_EResultNone,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(UserStatsStored_t) != size or @alignOf(UserStatsStored_t) != StructPlatformPackSize) @compileLog("Size or alignment of UserStatsStored_t are mismatch.", @sizeOf(UserStatsStored_t), @alignOf(UserStatsStored_t));
+    }
 };
 /// callbackId = 1103
 pub const UserAchievementStored_t = extern struct {
@@ -1526,17 +1855,29 @@ pub const UserAchievementStored_t = extern struct {
     m_rgchAchievementName: [128]u8 align(1),
     m_nCurProgress: uint32 align(4) = 0,
     m_nMaxProgress: uint32 align(4) = 0,
+    comptime {
+        const size = if (is_windows) 152 else 148;
+        if (@sizeOf(UserAchievementStored_t) != size or @alignOf(UserAchievementStored_t) != StructPlatformPackSize) @compileLog("Size or alignment of UserAchievementStored_t are mismatch.", @sizeOf(UserAchievementStored_t), @alignOf(UserAchievementStored_t));
+    }
 };
 /// callbackId = 1104
 pub const LeaderboardFindResult_t = extern struct {
     m_hSteamLeaderboard: SteamLeaderboard_t align(StructPlatformPackSize) = 0,
     m_bLeaderboardFound: bool align(1) = false,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(LeaderboardFindResult_t) != size or @alignOf(LeaderboardFindResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of LeaderboardFindResult_t are mismatch.", @sizeOf(LeaderboardFindResult_t), @alignOf(LeaderboardFindResult_t));
+    }
 };
 /// callbackId = 1105
 pub const LeaderboardScoresDownloaded_t = extern struct {
     m_hSteamLeaderboard: SteamLeaderboard_t align(StructPlatformPackSize) = 0,
     m_hSteamLeaderboardEntries: SteamLeaderboardEntries_t align(StructPlatformPackSize) = 0,
     m_cEntryCount: i32 align(4) = 0,
+    comptime {
+        const size = if (is_windows) 24 else 20;
+        if (@sizeOf(LeaderboardScoresDownloaded_t) != size or @alignOf(LeaderboardScoresDownloaded_t) != StructPlatformPackSize) @compileLog("Size or alignment of LeaderboardScoresDownloaded_t are mismatch.", @sizeOf(LeaderboardScoresDownloaded_t), @alignOf(LeaderboardScoresDownloaded_t));
+    }
 };
 /// callbackId = 1106
 pub const LeaderboardScoreUploaded_t = extern struct {
@@ -1546,15 +1887,25 @@ pub const LeaderboardScoreUploaded_t = extern struct {
     m_bScoreChanged: bool align(1) = false,
     m_nGlobalRankNew: i32 align(4) = 0,
     m_nGlobalRankPrevious: i32 align(4) = 0,
+    comptime {
+        const size = if (is_windows) 32 else 28;
+        if (@sizeOf(LeaderboardScoreUploaded_t) != size or @alignOf(LeaderboardScoreUploaded_t) != StructPlatformPackSize) @compileLog("Size or alignment of LeaderboardScoreUploaded_t are mismatch.", @sizeOf(LeaderboardScoreUploaded_t), @alignOf(LeaderboardScoreUploaded_t));
+    }
 };
 /// callbackId = 1107
 pub const NumberOfCurrentPlayers_t = extern struct {
     m_bSuccess: bool align(1) = false,
     m_cPlayers: int32 align(4) = 0,
+    comptime {
+        if (@sizeOf(NumberOfCurrentPlayers_t) != 8 or @alignOf(NumberOfCurrentPlayers_t) != 4) @compileLog("Size or alignment of NumberOfCurrentPlayers_t are mismatch.", @sizeOf(NumberOfCurrentPlayers_t), @alignOf(NumberOfCurrentPlayers_t));
+    }
 };
 /// callbackId = 1108
 pub const UserStatsUnloaded_t = extern struct {
     m_steamIDUser: CSteamID align(1),
+    comptime {
+        if (@sizeOf(UserStatsUnloaded_t) != 8 or @alignOf(UserStatsUnloaded_t) != 1) @compileLog("Size or alignment of UserStatsUnloaded_t are mismatch.", @sizeOf(UserStatsUnloaded_t), @alignOf(UserStatsUnloaded_t));
+    }
 };
 /// callbackId = 1109
 pub const UserAchievementIconFetched_t = extern struct {
@@ -1562,29 +1913,50 @@ pub const UserAchievementIconFetched_t = extern struct {
     m_rgchAchievementName: [128]u8 align(1),
     m_bAchieved: bool align(1) = false,
     m_nIconHandle: i32 align(4) = 0,
+    comptime {
+        if (@sizeOf(UserAchievementIconFetched_t) != 144 or @alignOf(UserAchievementIconFetched_t) != 4) @compileLog("Size or alignment of UserAchievementIconFetched_t are mismatch.", @sizeOf(UserAchievementIconFetched_t), @alignOf(UserAchievementIconFetched_t));
+    }
 };
 /// callbackId = 1110
 pub const GlobalAchievementPercentagesReady_t = extern struct {
     m_nGameID: CGameID align(StructPlatformPackSize),
     m_eResult: EResult align(4) = EResult.k_EResultNone,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(GlobalAchievementPercentagesReady_t) != size or @alignOf(GlobalAchievementPercentagesReady_t) != StructPlatformPackSize) @compileLog("Size or alignment of GlobalAchievementPercentagesReady_t are mismatch.", @sizeOf(GlobalAchievementPercentagesReady_t), @alignOf(GlobalAchievementPercentagesReady_t));
+    }
 };
 /// callbackId = 1111
 pub const LeaderboardUGCSet_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_hSteamLeaderboard: SteamLeaderboard_t align(StructPlatformPackSize) = 0,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(LeaderboardUGCSet_t) != size or @alignOf(LeaderboardUGCSet_t) != StructPlatformPackSize) @compileLog("Size or alignment of LeaderboardUGCSet_t are mismatch.", @sizeOf(LeaderboardUGCSet_t), @alignOf(LeaderboardUGCSet_t));
+    }
 };
 /// callbackId = 1112
 pub const GlobalStatsReceived_t = extern struct {
     m_nGameID: CGameID align(StructPlatformPackSize),
     m_eResult: EResult align(4) = EResult.k_EResultNone,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(GlobalStatsReceived_t) != size or @alignOf(GlobalStatsReceived_t) != StructPlatformPackSize) @compileLog("Size or alignment of GlobalStatsReceived_t are mismatch.", @sizeOf(GlobalStatsReceived_t), @alignOf(GlobalStatsReceived_t));
+    }
 };
 /// callbackId = 1005
 pub const DlcInstalled_t = extern struct {
     m_nAppID: AppId_t align(4) = 0,
+    comptime {
+        if (@sizeOf(DlcInstalled_t) != 4 or @alignOf(DlcInstalled_t) != 4) @compileLog("Size or alignment of DlcInstalled_t are mismatch.", @sizeOf(DlcInstalled_t), @alignOf(DlcInstalled_t));
+    }
 };
 /// callbackId = 1014
 pub const NewUrlLaunchParameters_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(NewUrlLaunchParameters_t) != 1 or @alignOf(NewUrlLaunchParameters_t) != 1) @compileLog("Size or alignment of NewUrlLaunchParameters_t are mismatch.", @sizeOf(NewUrlLaunchParameters_t), @alignOf(NewUrlLaunchParameters_t));
+    }
 };
 /// callbackId = 1021
 pub const AppProofOfPurchaseKeyResponse_t = extern struct {
@@ -1592,6 +1964,9 @@ pub const AppProofOfPurchaseKeyResponse_t = extern struct {
     m_nAppID: uint32 align(4) = 0,
     m_cchKeyLength: uint32 align(4) = 0,
     m_rgchKey: [240]u8 align(1),
+    comptime {
+        if (@sizeOf(AppProofOfPurchaseKeyResponse_t) != 252 or @alignOf(AppProofOfPurchaseKeyResponse_t) != 4) @compileLog("Size or alignment of AppProofOfPurchaseKeyResponse_t are mismatch.", @sizeOf(AppProofOfPurchaseKeyResponse_t), @alignOf(AppProofOfPurchaseKeyResponse_t));
+    }
 };
 /// callbackId = 1023
 pub const FileDetailsResult_t = extern struct {
@@ -1599,6 +1974,10 @@ pub const FileDetailsResult_t = extern struct {
     m_ulFileSize: uint64 align(StructPlatformPackSize) = 0,
     m_FileSHA: [20]uint8 align(1),
     m_unFlags: uint32 align(4) = 0,
+    comptime {
+        const size = if (is_windows) 40 else 36;
+        if (@sizeOf(FileDetailsResult_t) != size or @alignOf(FileDetailsResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of FileDetailsResult_t are mismatch.", @sizeOf(FileDetailsResult_t), @alignOf(FileDetailsResult_t));
+    }
 };
 /// callbackId = 1030
 pub const TimedTrialStatus_t = extern struct {
@@ -1606,15 +1985,24 @@ pub const TimedTrialStatus_t = extern struct {
     m_bIsOffline: bool align(1) = false,
     m_unSecondsAllowed: uint32 align(4) = 0,
     m_unSecondsPlayed: uint32 align(4) = 0,
+    comptime {
+        if (@sizeOf(TimedTrialStatus_t) != 16 or @alignOf(TimedTrialStatus_t) != 4) @compileLog("Size or alignment of TimedTrialStatus_t are mismatch.", @sizeOf(TimedTrialStatus_t), @alignOf(TimedTrialStatus_t));
+    }
 };
 /// callbackId = 1202
 pub const P2PSessionRequest_t = extern struct {
     m_steamIDRemote: CSteamID align(1),
+    comptime {
+        if (@sizeOf(P2PSessionRequest_t) != 8 or @alignOf(P2PSessionRequest_t) != 1) @compileLog("Size or alignment of P2PSessionRequest_t are mismatch.", @sizeOf(P2PSessionRequest_t), @alignOf(P2PSessionRequest_t));
+    }
 };
 /// callbackId = 1203
 pub const P2PSessionConnectFail_t = extern struct {
     m_steamIDRemote: CSteamID align(1),
     m_eP2PSessionError: uint8 align(1) = 0,
+    comptime {
+        if (@sizeOf(P2PSessionConnectFail_t) != 9 or @alignOf(P2PSessionConnectFail_t) != 1) @compileLog("Size or alignment of P2PSessionConnectFail_t are mismatch.", @sizeOf(P2PSessionConnectFail_t), @alignOf(P2PSessionConnectFail_t));
+    }
 };
 /// callbackId = 1201
 pub const SocketStatusCallback_t = extern struct {
@@ -1622,79 +2010,136 @@ pub const SocketStatusCallback_t = extern struct {
     m_hListenSocket: SNetListenSocket_t align(4) = 0,
     m_steamIDRemote: CSteamID align(1),
     m_eSNetSocketState: i32 align(4) = 0,
+    comptime {
+        if (@sizeOf(SocketStatusCallback_t) != 20 or @alignOf(SocketStatusCallback_t) != 4) @compileLog("Size or alignment of SocketStatusCallback_t are mismatch.", @sizeOf(SocketStatusCallback_t), @alignOf(SocketStatusCallback_t));
+    }
 };
 /// callbackId = 2301
 pub const ScreenshotReady_t = extern struct {
     m_hLocal: ScreenshotHandle align(4) = 0,
     m_eResult: EResult align(4) = EResult.k_EResultNone,
+    comptime {
+        if (@sizeOf(ScreenshotReady_t) != 8 or @alignOf(ScreenshotReady_t) != 4) @compileLog("Size or alignment of ScreenshotReady_t are mismatch.", @sizeOf(ScreenshotReady_t), @alignOf(ScreenshotReady_t));
+    }
 };
 /// callbackId = 2302
 pub const ScreenshotRequested_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(ScreenshotRequested_t) != 1 or @alignOf(ScreenshotRequested_t) != 1) @compileLog("Size or alignment of ScreenshotRequested_t are mismatch.", @sizeOf(ScreenshotRequested_t), @alignOf(ScreenshotRequested_t));
+    }
 };
 /// callbackId = 4001
 pub const PlaybackStatusHasChanged_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(PlaybackStatusHasChanged_t) != 1 or @alignOf(PlaybackStatusHasChanged_t) != 1) @compileLog("Size or alignment of PlaybackStatusHasChanged_t are mismatch.", @sizeOf(PlaybackStatusHasChanged_t), @alignOf(PlaybackStatusHasChanged_t));
+    }
 };
 /// callbackId = 4002
 pub const VolumeHasChanged_t = extern struct {
     m_flNewVolume: f32 align(4) = 0,
+    comptime {
+        if (@sizeOf(VolumeHasChanged_t) != 4 or @alignOf(VolumeHasChanged_t) != 4) @compileLog("Size or alignment of VolumeHasChanged_t are mismatch.", @sizeOf(VolumeHasChanged_t), @alignOf(VolumeHasChanged_t));
+    }
 };
 /// callbackId = 4101
 pub const MusicPlayerRemoteWillActivate_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(MusicPlayerRemoteWillActivate_t) != 1 or @alignOf(MusicPlayerRemoteWillActivate_t) != 1) @compileLog("Size or alignment of MusicPlayerRemoteWillActivate_t are mismatch.", @sizeOf(MusicPlayerRemoteWillActivate_t), @alignOf(MusicPlayerRemoteWillActivate_t));
+    }
 };
 /// callbackId = 4102
 pub const MusicPlayerRemoteWillDeactivate_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(MusicPlayerRemoteWillDeactivate_t) != 1 or @alignOf(MusicPlayerRemoteWillDeactivate_t) != 1) @compileLog("Size or alignment of MusicPlayerRemoteWillDeactivate_t are mismatch.", @sizeOf(MusicPlayerRemoteWillDeactivate_t), @alignOf(MusicPlayerRemoteWillDeactivate_t));
+    }
 };
 /// callbackId = 4103
 pub const MusicPlayerRemoteToFront_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(MusicPlayerRemoteToFront_t) != 1 or @alignOf(MusicPlayerRemoteToFront_t) != 1) @compileLog("Size or alignment of MusicPlayerRemoteToFront_t are mismatch.", @sizeOf(MusicPlayerRemoteToFront_t), @alignOf(MusicPlayerRemoteToFront_t));
+    }
 };
 /// callbackId = 4104
 pub const MusicPlayerWillQuit_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(MusicPlayerWillQuit_t) != 1 or @alignOf(MusicPlayerWillQuit_t) != 1) @compileLog("Size or alignment of MusicPlayerWillQuit_t are mismatch.", @sizeOf(MusicPlayerWillQuit_t), @alignOf(MusicPlayerWillQuit_t));
+    }
 };
 /// callbackId = 4105
 pub const MusicPlayerWantsPlay_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(MusicPlayerWantsPlay_t) != 1 or @alignOf(MusicPlayerWantsPlay_t) != 1) @compileLog("Size or alignment of MusicPlayerWantsPlay_t are mismatch.", @sizeOf(MusicPlayerWantsPlay_t), @alignOf(MusicPlayerWantsPlay_t));
+    }
 };
 /// callbackId = 4106
 pub const MusicPlayerWantsPause_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(MusicPlayerWantsPause_t) != 1 or @alignOf(MusicPlayerWantsPause_t) != 1) @compileLog("Size or alignment of MusicPlayerWantsPause_t are mismatch.", @sizeOf(MusicPlayerWantsPause_t), @alignOf(MusicPlayerWantsPause_t));
+    }
 };
 /// callbackId = 4107
 pub const MusicPlayerWantsPlayPrevious_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(MusicPlayerWantsPlayPrevious_t) != 1 or @alignOf(MusicPlayerWantsPlayPrevious_t) != 1) @compileLog("Size or alignment of MusicPlayerWantsPlayPrevious_t are mismatch.", @sizeOf(MusicPlayerWantsPlayPrevious_t), @alignOf(MusicPlayerWantsPlayPrevious_t));
+    }
 };
 /// callbackId = 4108
 pub const MusicPlayerWantsPlayNext_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(MusicPlayerWantsPlayNext_t) != 1 or @alignOf(MusicPlayerWantsPlayNext_t) != 1) @compileLog("Size or alignment of MusicPlayerWantsPlayNext_t are mismatch.", @sizeOf(MusicPlayerWantsPlayNext_t), @alignOf(MusicPlayerWantsPlayNext_t));
+    }
 };
 /// callbackId = 4109
 pub const MusicPlayerWantsShuffled_t = extern struct {
     m_bShuffled: bool align(1) = false,
+    comptime {
+        if (@sizeOf(MusicPlayerWantsShuffled_t) != 1 or @alignOf(MusicPlayerWantsShuffled_t) != 1) @compileLog("Size or alignment of MusicPlayerWantsShuffled_t are mismatch.", @sizeOf(MusicPlayerWantsShuffled_t), @alignOf(MusicPlayerWantsShuffled_t));
+    }
 };
 /// callbackId = 4110
 pub const MusicPlayerWantsLooped_t = extern struct {
     m_bLooped: bool align(1) = false,
+    comptime {
+        if (@sizeOf(MusicPlayerWantsLooped_t) != 1 or @alignOf(MusicPlayerWantsLooped_t) != 1) @compileLog("Size or alignment of MusicPlayerWantsLooped_t are mismatch.", @sizeOf(MusicPlayerWantsLooped_t), @alignOf(MusicPlayerWantsLooped_t));
+    }
 };
 /// callbackId = 4011
 pub const MusicPlayerWantsVolume_t = extern struct {
     m_flNewVolume: f32 align(4) = 0,
+    comptime {
+        if (@sizeOf(MusicPlayerWantsVolume_t) != 4 or @alignOf(MusicPlayerWantsVolume_t) != 4) @compileLog("Size or alignment of MusicPlayerWantsVolume_t are mismatch.", @sizeOf(MusicPlayerWantsVolume_t), @alignOf(MusicPlayerWantsVolume_t));
+    }
 };
 /// callbackId = 4012
 pub const MusicPlayerSelectsQueueEntry_t = extern struct {
     nID: i32 align(4) = 0,
+    comptime {
+        if (@sizeOf(MusicPlayerSelectsQueueEntry_t) != 4 or @alignOf(MusicPlayerSelectsQueueEntry_t) != 4) @compileLog("Size or alignment of MusicPlayerSelectsQueueEntry_t are mismatch.", @sizeOf(MusicPlayerSelectsQueueEntry_t), @alignOf(MusicPlayerSelectsQueueEntry_t));
+    }
 };
 /// callbackId = 4013
 pub const MusicPlayerSelectsPlaylistEntry_t = extern struct {
     nID: i32 align(4) = 0,
+    comptime {
+        if (@sizeOf(MusicPlayerSelectsPlaylistEntry_t) != 4 or @alignOf(MusicPlayerSelectsPlaylistEntry_t) != 4) @compileLog("Size or alignment of MusicPlayerSelectsPlaylistEntry_t are mismatch.", @sizeOf(MusicPlayerSelectsPlaylistEntry_t), @alignOf(MusicPlayerSelectsPlaylistEntry_t));
+    }
 };
 /// callbackId = 4114
 pub const MusicPlayerWantsPlayingRepeatStatus_t = extern struct {
     m_nPlayingRepeatStatus: i32 align(4) = 0,
+    comptime {
+        if (@sizeOf(MusicPlayerWantsPlayingRepeatStatus_t) != 4 or @alignOf(MusicPlayerWantsPlayingRepeatStatus_t) != 4) @compileLog("Size or alignment of MusicPlayerWantsPlayingRepeatStatus_t are mismatch.", @sizeOf(MusicPlayerWantsPlayingRepeatStatus_t), @alignOf(MusicPlayerWantsPlayingRepeatStatus_t));
+    }
 };
 /// callbackId = 2101
 pub const HTTPRequestCompleted_t = extern struct {
@@ -1703,11 +2148,19 @@ pub const HTTPRequestCompleted_t = extern struct {
     m_bRequestSuccessful: bool align(1) = false,
     m_eStatusCode: EHTTPStatusCode align(4) = EHTTPStatusCode.k_EHTTPStatusCodeInvalid,
     m_unBodySize: uint32 align(4) = 0,
+    comptime {
+        const size = if (is_windows) 32 else 24;
+        if (@sizeOf(HTTPRequestCompleted_t) != size or @alignOf(HTTPRequestCompleted_t) != StructPlatformPackSize) @compileLog("Size or alignment of HTTPRequestCompleted_t are mismatch.", @sizeOf(HTTPRequestCompleted_t), @alignOf(HTTPRequestCompleted_t));
+    }
 };
 /// callbackId = 2102
 pub const HTTPRequestHeadersReceived_t = extern struct {
     m_hRequest: HTTPRequestHandle align(4) = 0,
     m_ulContextValue: uint64 align(StructPlatformPackSize) = 0,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(HTTPRequestHeadersReceived_t) != size or @alignOf(HTTPRequestHeadersReceived_t) != StructPlatformPackSize) @compileLog("Size or alignment of HTTPRequestHeadersReceived_t are mismatch.", @sizeOf(HTTPRequestHeadersReceived_t), @alignOf(HTTPRequestHeadersReceived_t));
+    }
 };
 /// callbackId = 2103
 pub const HTTPRequestDataReceived_t = extern struct {
@@ -1715,14 +2168,24 @@ pub const HTTPRequestDataReceived_t = extern struct {
     m_ulContextValue: uint64 align(StructPlatformPackSize) = 0,
     m_cOffset: uint32 align(4) = 0,
     m_cBytesReceived: uint32 align(4) = 0,
+    comptime {
+        const size = if (is_windows) 24 else 20;
+        if (@sizeOf(HTTPRequestDataReceived_t) != size or @alignOf(HTTPRequestDataReceived_t) != StructPlatformPackSize) @compileLog("Size or alignment of HTTPRequestDataReceived_t are mismatch.", @sizeOf(HTTPRequestDataReceived_t), @alignOf(HTTPRequestDataReceived_t));
+    }
 };
 /// callbackId = 2801
 pub const SteamInputDeviceConnected_t = extern struct {
     m_ulConnectedDeviceHandle: InputHandle_t align(StructPlatformPackSize) = 0,
+    comptime {
+        if (@sizeOf(SteamInputDeviceConnected_t) != 8 or @alignOf(SteamInputDeviceConnected_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamInputDeviceConnected_t are mismatch.", @sizeOf(SteamInputDeviceConnected_t), @alignOf(SteamInputDeviceConnected_t));
+    }
 };
 /// callbackId = 2802
 pub const SteamInputDeviceDisconnected_t = extern struct {
     m_ulDisconnectedDeviceHandle: InputHandle_t align(StructPlatformPackSize) = 0,
+    comptime {
+        if (@sizeOf(SteamInputDeviceDisconnected_t) != 8 or @alignOf(SteamInputDeviceDisconnected_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamInputDeviceDisconnected_t are mismatch.", @sizeOf(SteamInputDeviceDisconnected_t), @alignOf(SteamInputDeviceDisconnected_t));
+    }
 };
 /// callbackId = 2803
 pub const SteamInputConfigurationLoaded_t = extern struct {
@@ -1733,6 +2196,10 @@ pub const SteamInputConfigurationLoaded_t = extern struct {
     m_unMinorRevision: uint32 align(4) = 0,
     m_bUsesSteamInputAPI: bool align(1) = false,
     m_bUsesGamepadAPI: bool align(1) = false,
+    comptime {
+        const size = if (is_windows) 40 else 32;
+        if (@sizeOf(SteamInputConfigurationLoaded_t) != size or @alignOf(SteamInputConfigurationLoaded_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamInputConfigurationLoaded_t are mismatch.", @sizeOf(SteamInputConfigurationLoaded_t), @alignOf(SteamInputConfigurationLoaded_t));
+    }
 };
 /// callbackId = 2804
 pub const SteamInputGamepadSlotChange_t = extern struct {
@@ -1741,6 +2208,10 @@ pub const SteamInputGamepadSlotChange_t = extern struct {
     m_eDeviceType: ESteamInputType align(4) = ESteamInputType.k_ESteamInputType_Unknown,
     m_nOldGamepadSlot: i32 align(4) = 0,
     m_nNewGamepadSlot: i32 align(4) = 0,
+    comptime {
+        const size = if (is_windows) 32 else 24;
+        if (@sizeOf(SteamInputGamepadSlotChange_t) != size or @alignOf(SteamInputGamepadSlotChange_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamInputGamepadSlotChange_t are mismatch.", @sizeOf(SteamInputGamepadSlotChange_t), @alignOf(SteamInputGamepadSlotChange_t));
+    }
 };
 /// callbackId = 3401
 pub const SteamUGCQueryCompleted_t = extern struct {
@@ -1750,46 +2221,74 @@ pub const SteamUGCQueryCompleted_t = extern struct {
     m_unTotalMatchingResults: uint32 align(4) = 0,
     m_bCachedData: bool align(1) = false,
     m_rgchNextCursor: [256]u8 align(1),
+    comptime {
+        if (@sizeOf(SteamUGCQueryCompleted_t) != 280 or @alignOf(SteamUGCQueryCompleted_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamUGCQueryCompleted_t are mismatch.", @sizeOf(SteamUGCQueryCompleted_t), @alignOf(SteamUGCQueryCompleted_t));
+    }
 };
 /// callbackId = 3402
 pub const SteamUGCRequestUGCDetailsResult_t = extern struct {
     m_details: SteamUGCDetails_t align(StructPlatformPackSize),
     m_bCachedData: bool align(1) = false,
+    comptime {
+        const size = if (is_windows) 9784 else 9768;
+        if (@sizeOf(SteamUGCRequestUGCDetailsResult_t) != size or @alignOf(SteamUGCRequestUGCDetailsResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamUGCRequestUGCDetailsResult_t are mismatch.", @sizeOf(SteamUGCRequestUGCDetailsResult_t), @alignOf(SteamUGCRequestUGCDetailsResult_t));
+    }
 };
 /// callbackId = 3403
 pub const CreateItemResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
     m_bUserNeedsToAcceptWorkshopLegalAgreement: bool align(1) = false,
+    comptime {
+        const size = if (is_windows) 24 else 16;
+        if (@sizeOf(CreateItemResult_t) != size or @alignOf(CreateItemResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of CreateItemResult_t are mismatch.", @sizeOf(CreateItemResult_t), @alignOf(CreateItemResult_t));
+    }
 };
 /// callbackId = 3404
 pub const SubmitItemUpdateResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_bUserNeedsToAcceptWorkshopLegalAgreement: bool align(1) = false,
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
+    comptime {
+        if (@sizeOf(SubmitItemUpdateResult_t) != 16 or @alignOf(SubmitItemUpdateResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of SubmitItemUpdateResult_t are mismatch.", @sizeOf(SubmitItemUpdateResult_t), @alignOf(SubmitItemUpdateResult_t));
+    }
 };
 /// callbackId = 3405
 pub const ItemInstalled_t = extern struct {
     m_unAppID: AppId_t align(4) = 0,
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(ItemInstalled_t) != size or @alignOf(ItemInstalled_t) != StructPlatformPackSize) @compileLog("Size or alignment of ItemInstalled_t are mismatch.", @sizeOf(ItemInstalled_t), @alignOf(ItemInstalled_t));
+    }
 };
 /// callbackId = 3406
 pub const DownloadItemResult_t = extern struct {
     m_unAppID: AppId_t align(4) = 0,
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
     m_eResult: EResult align(4) = EResult.k_EResultNone,
+    comptime {
+        const size = if (is_windows) 24 else 16;
+        if (@sizeOf(DownloadItemResult_t) != size or @alignOf(DownloadItemResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of DownloadItemResult_t are mismatch.", @sizeOf(DownloadItemResult_t), @alignOf(DownloadItemResult_t));
+    }
 };
 /// callbackId = 3407
 pub const UserFavoriteItemsListChanged_t = extern struct {
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_bWasAddRequest: bool align(1) = false,
+    comptime {
+        if (@sizeOf(UserFavoriteItemsListChanged_t) != 16 or @alignOf(UserFavoriteItemsListChanged_t) != StructPlatformPackSize) @compileLog("Size or alignment of UserFavoriteItemsListChanged_t are mismatch.", @sizeOf(UserFavoriteItemsListChanged_t), @alignOf(UserFavoriteItemsListChanged_t));
+    }
 };
 /// callbackId = 3408
 pub const SetUserItemVoteResult_t = extern struct {
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_bVoteUp: bool align(1) = false,
+    comptime {
+        if (@sizeOf(SetUserItemVoteResult_t) != 16 or @alignOf(SetUserItemVoteResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of SetUserItemVoteResult_t are mismatch.", @sizeOf(SetUserItemVoteResult_t), @alignOf(SetUserItemVoteResult_t));
+    }
 };
 /// callbackId = 3409
 pub const GetUserItemVoteResult_t = extern struct {
@@ -1798,38 +2297,63 @@ pub const GetUserItemVoteResult_t = extern struct {
     m_bVotedUp: bool align(1) = false,
     m_bVotedDown: bool align(1) = false,
     m_bVoteSkipped: bool align(1) = false,
+    comptime {
+        if (@sizeOf(GetUserItemVoteResult_t) != 16 or @alignOf(GetUserItemVoteResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of GetUserItemVoteResult_t are mismatch.", @sizeOf(GetUserItemVoteResult_t), @alignOf(GetUserItemVoteResult_t));
+    }
 };
 /// callbackId = 3410
 pub const StartPlaytimeTrackingResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
+    comptime {
+        if (@sizeOf(StartPlaytimeTrackingResult_t) != 4 or @alignOf(StartPlaytimeTrackingResult_t) != 4) @compileLog("Size or alignment of StartPlaytimeTrackingResult_t are mismatch.", @sizeOf(StartPlaytimeTrackingResult_t), @alignOf(StartPlaytimeTrackingResult_t));
+    }
 };
 /// callbackId = 3411
 pub const StopPlaytimeTrackingResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
+    comptime {
+        if (@sizeOf(StopPlaytimeTrackingResult_t) != 4 or @alignOf(StopPlaytimeTrackingResult_t) != 4) @compileLog("Size or alignment of StopPlaytimeTrackingResult_t are mismatch.", @sizeOf(StopPlaytimeTrackingResult_t), @alignOf(StopPlaytimeTrackingResult_t));
+    }
 };
 /// callbackId = 3412
 pub const AddUGCDependencyResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
     m_nChildPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
+    comptime {
+        const size = if (is_windows) 24 else 20;
+        if (@sizeOf(AddUGCDependencyResult_t) != size or @alignOf(AddUGCDependencyResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of AddUGCDependencyResult_t are mismatch.", @sizeOf(AddUGCDependencyResult_t), @alignOf(AddUGCDependencyResult_t));
+    }
 };
 /// callbackId = 3413
 pub const RemoveUGCDependencyResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
     m_nChildPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
+    comptime {
+        const size = if (is_windows) 24 else 20;
+        if (@sizeOf(RemoveUGCDependencyResult_t) != size or @alignOf(RemoveUGCDependencyResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoveUGCDependencyResult_t are mismatch.", @sizeOf(RemoveUGCDependencyResult_t), @alignOf(RemoveUGCDependencyResult_t));
+    }
 };
 /// callbackId = 3414
 pub const AddAppDependencyResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
     m_nAppID: AppId_t align(4) = 0,
+    comptime {
+        const size = if (is_windows) 24 else 16;
+        if (@sizeOf(AddAppDependencyResult_t) != size or @alignOf(AddAppDependencyResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of AddAppDependencyResult_t are mismatch.", @sizeOf(AddAppDependencyResult_t), @alignOf(AddAppDependencyResult_t));
+    }
 };
 /// callbackId = 3415
 pub const RemoveAppDependencyResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
     m_nAppID: AppId_t align(4) = 0,
+    comptime {
+        const size = if (is_windows) 24 else 16;
+        if (@sizeOf(RemoveAppDependencyResult_t) != size or @alignOf(RemoveAppDependencyResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of RemoveAppDependencyResult_t are mismatch.", @sizeOf(RemoveAppDependencyResult_t), @alignOf(RemoveAppDependencyResult_t));
+    }
 };
 /// callbackId = 3416
 pub const GetAppDependenciesResult_t = extern struct {
@@ -1838,15 +2362,26 @@ pub const GetAppDependenciesResult_t = extern struct {
     m_rgAppIDs: [32]AppId_t align(4),
     m_nNumAppDependencies: uint32 align(4) = 0,
     m_nTotalNumAppDependencies: uint32 align(4) = 0,
+    comptime {
+        const size = if (is_windows) 152 else 148;
+        if (@sizeOf(GetAppDependenciesResult_t) != size or @alignOf(GetAppDependenciesResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of GetAppDependenciesResult_t are mismatch.", @sizeOf(GetAppDependenciesResult_t), @alignOf(GetAppDependenciesResult_t));
+    }
 };
 /// callbackId = 3417
 pub const DeleteItemResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(DeleteItemResult_t) != size or @alignOf(DeleteItemResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of DeleteItemResult_t are mismatch.", @sizeOf(DeleteItemResult_t), @alignOf(DeleteItemResult_t));
+    }
 };
 /// callbackId = 3418
 pub const UserSubscribedItemsListChanged_t = extern struct {
     m_nAppID: AppId_t align(4) = 0,
+    comptime {
+        if (@sizeOf(UserSubscribedItemsListChanged_t) != 4 or @alignOf(UserSubscribedItemsListChanged_t) != 4) @compileLog("Size or alignment of UserSubscribedItemsListChanged_t are mismatch.", @sizeOf(UserSubscribedItemsListChanged_t), @alignOf(UserSubscribedItemsListChanged_t));
+    }
 };
 /// callbackId = 3420
 pub const WorkshopEULAStatus_t = extern struct {
@@ -1856,20 +2391,32 @@ pub const WorkshopEULAStatus_t = extern struct {
     m_rtAction: RTime32 align(4) = 0,
     m_bAccepted: bool align(1) = false,
     m_bNeedsAction: bool align(1) = false,
+    comptime {
+        if (@sizeOf(WorkshopEULAStatus_t) != 20 or @alignOf(WorkshopEULAStatus_t) != 4) @compileLog("Size or alignment of WorkshopEULAStatus_t are mismatch.", @sizeOf(WorkshopEULAStatus_t), @alignOf(WorkshopEULAStatus_t));
+    }
 };
 /// callbackId = 3901
 pub const SteamAppInstalled_t = extern struct {
     m_nAppID: AppId_t align(4) = 0,
     m_iInstallFolderIndex: i32 align(4) = 0,
+    comptime {
+        if (@sizeOf(SteamAppInstalled_t) != 8 or @alignOf(SteamAppInstalled_t) != 4) @compileLog("Size or alignment of SteamAppInstalled_t are mismatch.", @sizeOf(SteamAppInstalled_t), @alignOf(SteamAppInstalled_t));
+    }
 };
 /// callbackId = 3902
 pub const SteamAppUninstalled_t = extern struct {
     m_nAppID: AppId_t align(4) = 0,
     m_iInstallFolderIndex: i32 align(4) = 0,
+    comptime {
+        if (@sizeOf(SteamAppUninstalled_t) != 8 or @alignOf(SteamAppUninstalled_t) != 4) @compileLog("Size or alignment of SteamAppUninstalled_t are mismatch.", @sizeOf(SteamAppUninstalled_t), @alignOf(SteamAppUninstalled_t));
+    }
 };
 /// callbackId = 4501
 pub const HTML_BrowserReady_t = extern struct {
     unBrowserHandle: HHTMLBrowser align(4) = 0,
+    comptime {
+        if (@sizeOf(HTML_BrowserReady_t) != 4 or @alignOf(HTML_BrowserReady_t) != 4) @compileLog("Size or alignment of HTML_BrowserReady_t are mismatch.", @sizeOf(HTML_BrowserReady_t), @alignOf(HTML_BrowserReady_t));
+    }
 };
 /// callbackId = 4502
 pub const HTML_NeedsPaint_t = extern struct {
@@ -1885,6 +2432,10 @@ pub const HTML_NeedsPaint_t = extern struct {
     unScrollY: uint32 align(4) = 0,
     flPageScale: f32 align(4) = 0,
     unPageSerial: uint32 align(4) = 0,
+    comptime {
+        const size = if (is_windows) 56 else 52;
+        if (@sizeOf(HTML_NeedsPaint_t) != size or @alignOf(HTML_NeedsPaint_t) != StructPlatformPackSize) @compileLog("Size or alignment of HTML_NeedsPaint_t are mismatch.", @sizeOf(HTML_NeedsPaint_t), @alignOf(HTML_NeedsPaint_t));
+    }
 };
 /// callbackId = 4503
 pub const HTML_StartRequest_t = extern struct {
@@ -1893,10 +2444,17 @@ pub const HTML_StartRequest_t = extern struct {
     pchTarget: [*c]const u8 align(StructPlatformPackSize) = null,
     pchPostData: [*c]const u8 align(StructPlatformPackSize) = null,
     bIsRedirect: bool align(1) = false,
+    comptime {
+        const size = if (is_windows) 40 else 32;
+        if (@sizeOf(HTML_StartRequest_t) != size or @alignOf(HTML_StartRequest_t) != StructPlatformPackSize) @compileLog("Size or alignment of HTML_StartRequest_t are mismatch.", @sizeOf(HTML_StartRequest_t), @alignOf(HTML_StartRequest_t));
+    }
 };
 /// callbackId = 4504
 pub const HTML_CloseBrowser_t = extern struct {
     unBrowserHandle: HHTMLBrowser align(4) = 0,
+    comptime {
+        if (@sizeOf(HTML_CloseBrowser_t) != 4 or @alignOf(HTML_CloseBrowser_t) != 4) @compileLog("Size or alignment of HTML_CloseBrowser_t are mismatch.", @sizeOf(HTML_CloseBrowser_t), @alignOf(HTML_CloseBrowser_t));
+    }
 };
 /// callbackId = 4505
 pub const HTML_URLChanged_t = extern struct {
@@ -1906,34 +2464,56 @@ pub const HTML_URLChanged_t = extern struct {
     bIsRedirect: bool align(1) = false,
     pchPageTitle: [*c]const u8 align(StructPlatformPackSize) = null,
     bNewNavigation: bool align(1) = false,
+    comptime {
+        const size = if (is_windows) 48 else 36;
+        if (@sizeOf(HTML_URLChanged_t) != size or @alignOf(HTML_URLChanged_t) != StructPlatformPackSize) @compileLog("Size or alignment of HTML_URLChanged_t are mismatch.", @sizeOf(HTML_URLChanged_t), @alignOf(HTML_URLChanged_t));
+    }
 };
 /// callbackId = 4506
 pub const HTML_FinishedRequest_t = extern struct {
     unBrowserHandle: HHTMLBrowser align(4) = 0,
     pchURL: [*c]const u8 align(StructPlatformPackSize) = null,
     pchPageTitle: [*c]const u8 align(StructPlatformPackSize) = null,
+    comptime {
+        const size = if (is_windows) 24 else 20;
+        if (@sizeOf(HTML_FinishedRequest_t) != size or @alignOf(HTML_FinishedRequest_t) != StructPlatformPackSize) @compileLog("Size or alignment of HTML_FinishedRequest_t are mismatch.", @sizeOf(HTML_FinishedRequest_t), @alignOf(HTML_FinishedRequest_t));
+    }
 };
 /// callbackId = 4507
 pub const HTML_OpenLinkInNewTab_t = extern struct {
     unBrowserHandle: HHTMLBrowser align(4) = 0,
     pchURL: [*c]const u8 align(StructPlatformPackSize) = null,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(HTML_OpenLinkInNewTab_t) != size or @alignOf(HTML_OpenLinkInNewTab_t) != StructPlatformPackSize) @compileLog("Size or alignment of HTML_OpenLinkInNewTab_t are mismatch.", @sizeOf(HTML_OpenLinkInNewTab_t), @alignOf(HTML_OpenLinkInNewTab_t));
+    }
 };
 /// callbackId = 4508
 pub const HTML_ChangedTitle_t = extern struct {
     unBrowserHandle: HHTMLBrowser align(4) = 0,
     pchTitle: [*c]const u8 align(StructPlatformPackSize) = null,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(HTML_ChangedTitle_t) != size or @alignOf(HTML_ChangedTitle_t) != StructPlatformPackSize) @compileLog("Size or alignment of HTML_ChangedTitle_t are mismatch.", @sizeOf(HTML_ChangedTitle_t), @alignOf(HTML_ChangedTitle_t));
+    }
 };
 /// callbackId = 4509
 pub const HTML_SearchResults_t = extern struct {
     unBrowserHandle: HHTMLBrowser align(4) = 0,
     unResults: uint32 align(4) = 0,
     unCurrentMatch: uint32 align(4) = 0,
+    comptime {
+        if (@sizeOf(HTML_SearchResults_t) != 12 or @alignOf(HTML_SearchResults_t) != 4) @compileLog("Size or alignment of HTML_SearchResults_t are mismatch.", @sizeOf(HTML_SearchResults_t), @alignOf(HTML_SearchResults_t));
+    }
 };
 /// callbackId = 4510
 pub const HTML_CanGoBackAndForward_t = extern struct {
     unBrowserHandle: HHTMLBrowser align(4) = 0,
     bCanGoBack: bool align(1) = false,
     bCanGoForward: bool align(1) = false,
+    comptime {
+        if (@sizeOf(HTML_CanGoBackAndForward_t) != 8 or @alignOf(HTML_CanGoBackAndForward_t) != 4) @compileLog("Size or alignment of HTML_CanGoBackAndForward_t are mismatch.", @sizeOf(HTML_CanGoBackAndForward_t), @alignOf(HTML_CanGoBackAndForward_t));
+    }
 };
 /// callbackId = 4511
 pub const HTML_HorizontalScroll_t = extern struct {
@@ -1943,6 +2523,9 @@ pub const HTML_HorizontalScroll_t = extern struct {
     flPageScale: f32 align(4) = 0,
     bVisible: bool align(1) = false,
     unPageSize: uint32 align(4) = 0,
+    comptime {
+        if (@sizeOf(HTML_HorizontalScroll_t) != 24 or @alignOf(HTML_HorizontalScroll_t) != 4) @compileLog("Size or alignment of HTML_HorizontalScroll_t are mismatch.", @sizeOf(HTML_HorizontalScroll_t), @alignOf(HTML_HorizontalScroll_t));
+    }
 };
 /// callbackId = 4512
 pub const HTML_VerticalScroll_t = extern struct {
@@ -1952,6 +2535,9 @@ pub const HTML_VerticalScroll_t = extern struct {
     flPageScale: f32 align(4) = 0,
     bVisible: bool align(1) = false,
     unPageSize: uint32 align(4) = 0,
+    comptime {
+        if (@sizeOf(HTML_VerticalScroll_t) != 24 or @alignOf(HTML_VerticalScroll_t) != 4) @compileLog("Size or alignment of HTML_VerticalScroll_t are mismatch.", @sizeOf(HTML_VerticalScroll_t), @alignOf(HTML_VerticalScroll_t));
+    }
 };
 /// callbackId = 4513
 pub const HTML_LinkAtPosition_t = extern struct {
@@ -1961,22 +2547,38 @@ pub const HTML_LinkAtPosition_t = extern struct {
     pchURL: [*c]const u8 align(StructPlatformPackSize) = null,
     bInput: bool align(1) = false,
     bLiveLink: bool align(1) = false,
+    comptime {
+        const size = if (is_windows) 32 else 24;
+        if (@sizeOf(HTML_LinkAtPosition_t) != size or @alignOf(HTML_LinkAtPosition_t) != StructPlatformPackSize) @compileLog("Size or alignment of HTML_LinkAtPosition_t are mismatch.", @sizeOf(HTML_LinkAtPosition_t), @alignOf(HTML_LinkAtPosition_t));
+    }
 };
 /// callbackId = 4514
 pub const HTML_JSAlert_t = extern struct {
     unBrowserHandle: HHTMLBrowser align(4) = 0,
     pchMessage: [*c]const u8 align(StructPlatformPackSize) = null,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(HTML_JSAlert_t) != size or @alignOf(HTML_JSAlert_t) != StructPlatformPackSize) @compileLog("Size or alignment of HTML_JSAlert_t are mismatch.", @sizeOf(HTML_JSAlert_t), @alignOf(HTML_JSAlert_t));
+    }
 };
 /// callbackId = 4515
 pub const HTML_JSConfirm_t = extern struct {
     unBrowserHandle: HHTMLBrowser align(4) = 0,
     pchMessage: [*c]const u8 align(StructPlatformPackSize) = null,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(HTML_JSConfirm_t) != size or @alignOf(HTML_JSConfirm_t) != StructPlatformPackSize) @compileLog("Size or alignment of HTML_JSConfirm_t are mismatch.", @sizeOf(HTML_JSConfirm_t), @alignOf(HTML_JSConfirm_t));
+    }
 };
 /// callbackId = 4516
 pub const HTML_FileOpenDialog_t = extern struct {
     unBrowserHandle: HHTMLBrowser align(4) = 0,
     pchTitle: [*c]const u8 align(StructPlatformPackSize) = null,
     pchInitialFile: [*c]const u8 align(StructPlatformPackSize) = null,
+    comptime {
+        const size = if (is_windows) 24 else 20;
+        if (@sizeOf(HTML_FileOpenDialog_t) != size or @alignOf(HTML_FileOpenDialog_t) != StructPlatformPackSize) @compileLog("Size or alignment of HTML_FileOpenDialog_t are mismatch.", @sizeOf(HTML_FileOpenDialog_t), @alignOf(HTML_FileOpenDialog_t));
+    }
 };
 /// callbackId = 4521
 pub const HTML_NewWindow_t = extern struct {
@@ -1987,48 +2589,82 @@ pub const HTML_NewWindow_t = extern struct {
     unWide: uint32 align(4) = 0,
     unTall: uint32 align(4) = 0,
     unNewWindow_BrowserHandle_IGNORE: HHTMLBrowser align(4) = 0,
+    comptime {
+        const size = if (is_windows) 40 else 32;
+        if (@sizeOf(HTML_NewWindow_t) != size or @alignOf(HTML_NewWindow_t) != StructPlatformPackSize) @compileLog("Size or alignment of HTML_NewWindow_t are mismatch.", @sizeOf(HTML_NewWindow_t), @alignOf(HTML_NewWindow_t));
+    }
 };
 /// callbackId = 4522
 pub const HTML_SetCursor_t = extern struct {
     unBrowserHandle: HHTMLBrowser align(4) = 0,
     eMouseCursor: uint32 align(4) = 0,
+    comptime {
+        if (@sizeOf(HTML_SetCursor_t) != 8 or @alignOf(HTML_SetCursor_t) != 4) @compileLog("Size or alignment of HTML_SetCursor_t are mismatch.", @sizeOf(HTML_SetCursor_t), @alignOf(HTML_SetCursor_t));
+    }
 };
 /// callbackId = 4523
 pub const HTML_StatusText_t = extern struct {
     unBrowserHandle: HHTMLBrowser align(4) = 0,
     pchMsg: [*c]const u8 align(StructPlatformPackSize) = null,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(HTML_StatusText_t) != size or @alignOf(HTML_StatusText_t) != StructPlatformPackSize) @compileLog("Size or alignment of HTML_StatusText_t are mismatch.", @sizeOf(HTML_StatusText_t), @alignOf(HTML_StatusText_t));
+    }
 };
 /// callbackId = 4524
 pub const HTML_ShowToolTip_t = extern struct {
     unBrowserHandle: HHTMLBrowser align(4) = 0,
     pchMsg: [*c]const u8 align(StructPlatformPackSize) = null,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(HTML_ShowToolTip_t) != size or @alignOf(HTML_ShowToolTip_t) != StructPlatformPackSize) @compileLog("Size or alignment of HTML_ShowToolTip_t are mismatch.", @sizeOf(HTML_ShowToolTip_t), @alignOf(HTML_ShowToolTip_t));
+    }
 };
 /// callbackId = 4525
 pub const HTML_UpdateToolTip_t = extern struct {
     unBrowserHandle: HHTMLBrowser align(4) = 0,
     pchMsg: [*c]const u8 align(StructPlatformPackSize) = null,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(HTML_UpdateToolTip_t) != size or @alignOf(HTML_UpdateToolTip_t) != StructPlatformPackSize) @compileLog("Size or alignment of HTML_UpdateToolTip_t are mismatch.", @sizeOf(HTML_UpdateToolTip_t), @alignOf(HTML_UpdateToolTip_t));
+    }
 };
 /// callbackId = 4526
 pub const HTML_HideToolTip_t = extern struct {
     unBrowserHandle: HHTMLBrowser align(4) = 0,
+    comptime {
+        if (@sizeOf(HTML_HideToolTip_t) != 4 or @alignOf(HTML_HideToolTip_t) != 4) @compileLog("Size or alignment of HTML_HideToolTip_t are mismatch.", @sizeOf(HTML_HideToolTip_t), @alignOf(HTML_HideToolTip_t));
+    }
 };
 /// callbackId = 4527
 pub const HTML_BrowserRestarted_t = extern struct {
     unBrowserHandle: HHTMLBrowser align(4) = 0,
     unOldBrowserHandle: HHTMLBrowser align(4) = 0,
+    comptime {
+        if (@sizeOf(HTML_BrowserRestarted_t) != 8 or @alignOf(HTML_BrowserRestarted_t) != 4) @compileLog("Size or alignment of HTML_BrowserRestarted_t are mismatch.", @sizeOf(HTML_BrowserRestarted_t), @alignOf(HTML_BrowserRestarted_t));
+    }
 };
 /// callbackId = 4700
 pub const SteamInventoryResultReady_t = extern struct {
     m_handle: SteamInventoryResult_t align(4) = 0,
     m_result: EResult align(4) = EResult.k_EResultNone,
+    comptime {
+        if (@sizeOf(SteamInventoryResultReady_t) != 8 or @alignOf(SteamInventoryResultReady_t) != 4) @compileLog("Size or alignment of SteamInventoryResultReady_t are mismatch.", @sizeOf(SteamInventoryResultReady_t), @alignOf(SteamInventoryResultReady_t));
+    }
 };
 /// callbackId = 4701
 pub const SteamInventoryFullUpdate_t = extern struct {
     m_handle: SteamInventoryResult_t align(4) = 0,
+    comptime {
+        if (@sizeOf(SteamInventoryFullUpdate_t) != 4 or @alignOf(SteamInventoryFullUpdate_t) != 4) @compileLog("Size or alignment of SteamInventoryFullUpdate_t are mismatch.", @sizeOf(SteamInventoryFullUpdate_t), @alignOf(SteamInventoryFullUpdate_t));
+    }
 };
 /// callbackId = 4702
 pub const SteamInventoryDefinitionUpdate_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(SteamInventoryDefinitionUpdate_t) != 1 or @alignOf(SteamInventoryDefinitionUpdate_t) != 1) @compileLog("Size or alignment of SteamInventoryDefinitionUpdate_t are mismatch.", @sizeOf(SteamInventoryDefinitionUpdate_t), @alignOf(SteamInventoryDefinitionUpdate_t));
+    }
 };
 /// callbackId = 4703
 pub const SteamInventoryEligiblePromoItemDefIDs_t = extern struct {
@@ -2036,63 +2672,104 @@ pub const SteamInventoryEligiblePromoItemDefIDs_t = extern struct {
     m_steamID: CSteamID align(1),
     m_numEligiblePromoItemDefs: i32 align(4) = 0,
     m_bCachedData: bool align(1) = false,
+    comptime {
+        if (@sizeOf(SteamInventoryEligiblePromoItemDefIDs_t) != 20 or @alignOf(SteamInventoryEligiblePromoItemDefIDs_t) != 4) @compileLog("Size or alignment of SteamInventoryEligiblePromoItemDefIDs_t are mismatch.", @sizeOf(SteamInventoryEligiblePromoItemDefIDs_t), @alignOf(SteamInventoryEligiblePromoItemDefIDs_t));
+    }
 };
 /// callbackId = 4704
 pub const SteamInventoryStartPurchaseResult_t = extern struct {
     m_result: EResult align(4) = EResult.k_EResultNone,
     m_ulOrderID: uint64 align(StructPlatformPackSize) = 0,
     m_ulTransID: uint64 align(StructPlatformPackSize) = 0,
+    comptime {
+        const size = if (is_windows) 24 else 20;
+        if (@sizeOf(SteamInventoryStartPurchaseResult_t) != size or @alignOf(SteamInventoryStartPurchaseResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamInventoryStartPurchaseResult_t are mismatch.", @sizeOf(SteamInventoryStartPurchaseResult_t), @alignOf(SteamInventoryStartPurchaseResult_t));
+    }
 };
 /// callbackId = 4705
 pub const SteamInventoryRequestPricesResult_t = extern struct {
     m_result: EResult align(4) = EResult.k_EResultNone,
     m_rgchCurrency: [4]u8 align(1),
+    comptime {
+        if (@sizeOf(SteamInventoryRequestPricesResult_t) != 8 or @alignOf(SteamInventoryRequestPricesResult_t) != 4) @compileLog("Size or alignment of SteamInventoryRequestPricesResult_t are mismatch.", @sizeOf(SteamInventoryRequestPricesResult_t), @alignOf(SteamInventoryRequestPricesResult_t));
+    }
 };
 /// callbackId = 4611
 pub const GetVideoURLResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_unVideoAppID: AppId_t align(4) = 0,
     m_rgchURL: [256]u8 align(1),
+    comptime {
+        if (@sizeOf(GetVideoURLResult_t) != 264 or @alignOf(GetVideoURLResult_t) != 4) @compileLog("Size or alignment of GetVideoURLResult_t are mismatch.", @sizeOf(GetVideoURLResult_t), @alignOf(GetVideoURLResult_t));
+    }
 };
 /// callbackId = 4624
 pub const GetOPFSettingsResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_unVideoAppID: AppId_t align(4) = 0,
+    comptime {
+        if (@sizeOf(GetOPFSettingsResult_t) != 8 or @alignOf(GetOPFSettingsResult_t) != 4) @compileLog("Size or alignment of GetOPFSettingsResult_t are mismatch.", @sizeOf(GetOPFSettingsResult_t), @alignOf(GetOPFSettingsResult_t));
+    }
 };
 /// callbackId = 5001
 pub const SteamParentalSettingsChanged_t = extern struct {
     padding: u8,
+    comptime {
+        if (@sizeOf(SteamParentalSettingsChanged_t) != 1 or @alignOf(SteamParentalSettingsChanged_t) != 1) @compileLog("Size or alignment of SteamParentalSettingsChanged_t are mismatch.", @sizeOf(SteamParentalSettingsChanged_t), @alignOf(SteamParentalSettingsChanged_t));
+    }
 };
 /// callbackId = 5701
 pub const SteamRemotePlaySessionConnected_t = extern struct {
     m_unSessionID: RemotePlaySessionID_t align(4) = 0,
+    comptime {
+        if (@sizeOf(SteamRemotePlaySessionConnected_t) != 4 or @alignOf(SteamRemotePlaySessionConnected_t) != 4) @compileLog("Size or alignment of SteamRemotePlaySessionConnected_t are mismatch.", @sizeOf(SteamRemotePlaySessionConnected_t), @alignOf(SteamRemotePlaySessionConnected_t));
+    }
 };
 /// callbackId = 5702
 pub const SteamRemotePlaySessionDisconnected_t = extern struct {
     m_unSessionID: RemotePlaySessionID_t align(4) = 0,
+    comptime {
+        if (@sizeOf(SteamRemotePlaySessionDisconnected_t) != 4 or @alignOf(SteamRemotePlaySessionDisconnected_t) != 4) @compileLog("Size or alignment of SteamRemotePlaySessionDisconnected_t are mismatch.", @sizeOf(SteamRemotePlaySessionDisconnected_t), @alignOf(SteamRemotePlaySessionDisconnected_t));
+    }
 };
 /// callbackId = 5703
 pub const SteamRemotePlayTogetherGuestInvite_t = extern struct {
     m_szConnectURL: [1024]u8 align(1),
+    comptime {
+        if (@sizeOf(SteamRemotePlayTogetherGuestInvite_t) != 1024 or @alignOf(SteamRemotePlayTogetherGuestInvite_t) != 1) @compileLog("Size or alignment of SteamRemotePlayTogetherGuestInvite_t are mismatch.", @sizeOf(SteamRemotePlayTogetherGuestInvite_t), @alignOf(SteamRemotePlayTogetherGuestInvite_t));
+    }
 };
 /// callbackId = 1251
 pub const SteamNetworkingMessagesSessionRequest_t = extern struct {
     m_identityRemote: SteamNetworkingIdentity align(1),
+    comptime {
+        if (@sizeOf(SteamNetworkingMessagesSessionRequest_t) != 136 or @alignOf(SteamNetworkingMessagesSessionRequest_t) != 1) @compileLog("Size or alignment of SteamNetworkingMessagesSessionRequest_t are mismatch.", @sizeOf(SteamNetworkingMessagesSessionRequest_t), @alignOf(SteamNetworkingMessagesSessionRequest_t));
+    }
 };
 /// callbackId = 1252
 pub const SteamNetworkingMessagesSessionFailed_t = extern struct {
     m_info: SteamNetConnectionInfo_t align(1),
+    comptime {
+        if (@sizeOf(SteamNetworkingMessagesSessionFailed_t) != 696 or @alignOf(SteamNetworkingMessagesSessionFailed_t) != 1) @compileLog("Size or alignment of SteamNetworkingMessagesSessionFailed_t are mismatch.", @sizeOf(SteamNetworkingMessagesSessionFailed_t), @alignOf(SteamNetworkingMessagesSessionFailed_t));
+    }
 };
 /// callbackId = 1221
 pub const SteamNetConnectionStatusChangedCallback_t = extern struct {
     m_hConn: HSteamNetConnection align(4) = 0,
     m_info: SteamNetConnectionInfo_t align(StructPlatformPackSize),
     m_eOldState: ESteamNetworkingConnectionState align(4) = ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_None,
+    comptime {
+        const size = if (is_windows) 712 else 704;
+        if (@sizeOf(SteamNetConnectionStatusChangedCallback_t) != size or @alignOf(SteamNetConnectionStatusChangedCallback_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamNetConnectionStatusChangedCallback_t are mismatch.", @sizeOf(SteamNetConnectionStatusChangedCallback_t), @alignOf(SteamNetConnectionStatusChangedCallback_t));
+    }
 };
 /// callbackId = 1222
 pub const SteamNetAuthenticationStatus_t = extern struct {
     m_eAvail: ESteamNetworkingAvailability align(4) = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Unknown,
     m_debugMsg: [256]u8 align(1),
+    comptime {
+        if (@sizeOf(SteamNetAuthenticationStatus_t) != 260 or @alignOf(SteamNetAuthenticationStatus_t) != 4) @compileLog("Size or alignment of SteamNetAuthenticationStatus_t are mismatch.", @sizeOf(SteamNetAuthenticationStatus_t), @alignOf(SteamNetAuthenticationStatus_t));
+    }
 };
 /// callbackId = 1281
 pub const SteamRelayNetworkStatus_t = extern struct {
@@ -2101,32 +2778,51 @@ pub const SteamRelayNetworkStatus_t = extern struct {
     m_eAvailNetworkConfig: ESteamNetworkingAvailability align(4) = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Unknown,
     m_eAvailAnyRelay: ESteamNetworkingAvailability align(4) = ESteamNetworkingAvailability.k_ESteamNetworkingAvailability_Unknown,
     m_debugMsg: [256]u8 align(1),
+    comptime {
+        if (@sizeOf(SteamRelayNetworkStatus_t) != 272 or @alignOf(SteamRelayNetworkStatus_t) != 4) @compileLog("Size or alignment of SteamRelayNetworkStatus_t are mismatch.", @sizeOf(SteamRelayNetworkStatus_t), @alignOf(SteamRelayNetworkStatus_t));
+    }
 };
 /// callbackId = 201
 pub const GSClientApprove_t = extern struct {
     m_SteamID: CSteamID align(1),
     m_OwnerSteamID: CSteamID align(1),
+    comptime {
+        if (@sizeOf(GSClientApprove_t) != 16 or @alignOf(GSClientApprove_t) != 1) @compileLog("Size or alignment of GSClientApprove_t are mismatch.", @sizeOf(GSClientApprove_t), @alignOf(GSClientApprove_t));
+    }
 };
 /// callbackId = 202
 pub const GSClientDeny_t = extern struct {
     m_SteamID: CSteamID align(1),
     m_eDenyReason: EDenyReason align(4) = EDenyReason.k_EDenyInvalid,
     m_rgchOptionalText: [128]u8 align(1),
+    comptime {
+        if (@sizeOf(GSClientDeny_t) != 140 or @alignOf(GSClientDeny_t) != 4) @compileLog("Size or alignment of GSClientDeny_t are mismatch.", @sizeOf(GSClientDeny_t), @alignOf(GSClientDeny_t));
+    }
 };
 /// callbackId = 203
 pub const GSClientKick_t = extern struct {
     m_SteamID: CSteamID align(1),
     m_eDenyReason: EDenyReason align(4) = EDenyReason.k_EDenyInvalid,
+    comptime {
+        if (@sizeOf(GSClientKick_t) != 12 or @alignOf(GSClientKick_t) != 4) @compileLog("Size or alignment of GSClientKick_t are mismatch.", @sizeOf(GSClientKick_t), @alignOf(GSClientKick_t));
+    }
 };
 /// callbackId = 206
 pub const GSClientAchievementStatus_t = extern struct {
     m_SteamID: CSteamID align(StructPlatformPackSize),
     m_pchAchievement: [128]u8 align(1),
     m_bUnlocked: bool align(1) = false,
+    comptime {
+        const size = if (is_windows) 144 else 140;
+        if (@sizeOf(GSClientAchievementStatus_t) != size or @alignOf(GSClientAchievementStatus_t) != StructPlatformPackSize) @compileLog("Size or alignment of GSClientAchievementStatus_t are mismatch.", @sizeOf(GSClientAchievementStatus_t), @alignOf(GSClientAchievementStatus_t));
+    }
 };
 /// callbackId = 115
 pub const GSPolicyResponse_t = extern struct {
     m_bSecure: bool align(1) = false,
+    comptime {
+        if (@sizeOf(GSPolicyResponse_t) != 1 or @alignOf(GSPolicyResponse_t) != 1) @compileLog("Size or alignment of GSPolicyResponse_t are mismatch.", @sizeOf(GSPolicyResponse_t), @alignOf(GSPolicyResponse_t));
+    }
 };
 /// callbackId = 207
 pub const GSGameplayStats_t = extern struct {
@@ -2134,6 +2830,9 @@ pub const GSGameplayStats_t = extern struct {
     m_nRank: int32 align(4) = 0,
     m_unTotalConnects: uint32 align(4) = 0,
     m_unTotalMinutesPlayed: uint32 align(4) = 0,
+    comptime {
+        if (@sizeOf(GSGameplayStats_t) != 16 or @alignOf(GSGameplayStats_t) != 4) @compileLog("Size or alignment of GSGameplayStats_t are mismatch.", @sizeOf(GSGameplayStats_t), @alignOf(GSGameplayStats_t));
+    }
 };
 /// callbackId = 208
 pub const GSClientGroupStatus_t = extern struct {
@@ -2141,6 +2840,9 @@ pub const GSClientGroupStatus_t = extern struct {
     m_SteamIDGroup: CSteamID align(1),
     m_bMember: bool align(1) = false,
     m_bOfficer: bool align(1) = false,
+    comptime {
+        if (@sizeOf(GSClientGroupStatus_t) != 18 or @alignOf(GSClientGroupStatus_t) != 1) @compileLog("Size or alignment of GSClientGroupStatus_t are mismatch.", @sizeOf(GSClientGroupStatus_t), @alignOf(GSClientGroupStatus_t));
+    }
 };
 /// callbackId = 209
 pub const GSReputation_t = extern struct {
@@ -2151,10 +2853,17 @@ pub const GSReputation_t = extern struct {
     m_usBannedPort: uint16 align(2) = 0,
     m_ulBannedGameID: CGameID align(StructPlatformPackSize),
     m_unBanExpires: uint32 align(4) = 0,
+    comptime {
+        const size = if (is_windows) 40 else 32;
+        if (@sizeOf(GSReputation_t) != size or @alignOf(GSReputation_t) != StructPlatformPackSize) @compileLog("Size or alignment of GSReputation_t are mismatch.", @sizeOf(GSReputation_t), @alignOf(GSReputation_t));
+    }
 };
 /// callbackId = 210
 pub const AssociateWithClanResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
+    comptime {
+        if (@sizeOf(AssociateWithClanResult_t) != 4 or @alignOf(AssociateWithClanResult_t) != 4) @compileLog("Size or alignment of AssociateWithClanResult_t are mismatch.", @sizeOf(AssociateWithClanResult_t), @alignOf(AssociateWithClanResult_t));
+    }
 };
 /// callbackId = 211
 pub const ComputeNewPlayerCompatibilityResult_t = extern struct {
@@ -2163,16 +2872,25 @@ pub const ComputeNewPlayerCompatibilityResult_t = extern struct {
     m_cPlayersThatCandidateDoesntLike: i32 align(4) = 0,
     m_cClanPlayersThatDontLikeCandidate: i32 align(4) = 0,
     m_SteamIDCandidate: CSteamID align(1),
+    comptime {
+        if (@sizeOf(ComputeNewPlayerCompatibilityResult_t) != 24 or @alignOf(ComputeNewPlayerCompatibilityResult_t) != 4) @compileLog("Size or alignment of ComputeNewPlayerCompatibilityResult_t are mismatch.", @sizeOf(ComputeNewPlayerCompatibilityResult_t), @alignOf(ComputeNewPlayerCompatibilityResult_t));
+    }
 };
 /// callbackId = 1800
 pub const GSStatsReceived_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_steamIDUser: CSteamID align(1),
+    comptime {
+        if (@sizeOf(GSStatsReceived_t) != 12 or @alignOf(GSStatsReceived_t) != 4) @compileLog("Size or alignment of GSStatsReceived_t are mismatch.", @sizeOf(GSStatsReceived_t), @alignOf(GSStatsReceived_t));
+    }
 };
 /// callbackId = 1801
 pub const GSStatsStored_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     m_steamIDUser: CSteamID align(1),
+    comptime {
+        if (@sizeOf(GSStatsStored_t) != 12 or @alignOf(GSStatsStored_t) != 4) @compileLog("Size or alignment of GSStatsStored_t are mismatch.", @sizeOf(GSStatsStored_t), @alignOf(GSStatsStored_t));
+    }
 };
 /// callbackId = 1223
 pub const SteamNetworkingFakeIPResult_t = extern struct {
@@ -2180,6 +2898,9 @@ pub const SteamNetworkingFakeIPResult_t = extern struct {
     m_identity: SteamNetworkingIdentity align(1),
     m_unIP: uint32 align(4) = 0,
     m_unPorts: [8]uint16 align(2),
+    comptime {
+        if (@sizeOf(SteamNetworkingFakeIPResult_t) != 160 or @alignOf(SteamNetworkingFakeIPResult_t) != 4) @compileLog("Size or alignment of SteamNetworkingFakeIPResult_t are mismatch.", @sizeOf(SteamNetworkingFakeIPResult_t), @alignOf(SteamNetworkingFakeIPResult_t));
+    }
 
     // Constants
     pub const k_nMaxReturnPorts: i32 = 8;
@@ -4443,6 +5164,9 @@ pub const EServerMode = enum(c_int) {
 pub const SteamIPAddress_t = extern struct {
     m_rgubIPv6: [16]uint8 align(1),
     m_eType: ESteamIPType align(1) = ESteamIPType.k_ESteamIPTypeIPv4,
+    comptime {
+        if (@sizeOf(SteamIPAddress_t) != 20 or @alignOf(SteamIPAddress_t) != 1) @compileLog("Size or alignment of SteamIPAddress_t are mismatch.", @sizeOf(SteamIPAddress_t), @alignOf(SteamIPAddress_t));
+    }
     // methods
     const Self = @This();
     pub fn IsSet(self: *Self) bool {
@@ -4458,10 +5182,16 @@ pub const FriendGameInfo_t = extern struct {
     m_usGamePort: uint16 align(2) = 0,
     m_usQueryPort: uint16 align(2) = 0,
     m_steamIDLobby: CSteamID align(1),
+    comptime {
+        if (@sizeOf(FriendGameInfo_t) != 24 or @alignOf(FriendGameInfo_t) != 4) @compileLog("Size or alignment of FriendGameInfo_t are mismatch.", @sizeOf(FriendGameInfo_t), @alignOf(FriendGameInfo_t));
+    }
 };
 pub const MatchMakingKeyValuePair_t = extern struct {
     m_szKey: [256]u8 align(1),
     m_szValue: [256]u8 align(1),
+    comptime {
+        if (@sizeOf(MatchMakingKeyValuePair_t) != 512 or @alignOf(MatchMakingKeyValuePair_t) != 1) @compileLog("Size or alignment of MatchMakingKeyValuePair_t are mismatch.", @sizeOf(MatchMakingKeyValuePair_t), @alignOf(MatchMakingKeyValuePair_t));
+    }
     // methods
     const Self = @This();
     pub fn Construct(self: *Self) void {
@@ -4475,6 +5205,9 @@ pub const servernetadr_t = extern struct {
     m_usConnectionPort: uint16 align(2) = 0,
     m_usQueryPort: uint16 align(2) = 0,
     m_unIP: uint32 align(4) = 0,
+    comptime {
+        if (@sizeOf(servernetadr_t) != 8 or @alignOf(servernetadr_t) != 4) @compileLog("Size or alignment of servernetadr_t are mismatch.", @sizeOf(servernetadr_t), @alignOf(servernetadr_t));
+    }
     // methods
     const Self = @This();
     pub fn Construct(self: *Self) void {
@@ -4558,6 +5291,9 @@ pub const gameserveritem_t = extern struct {
     m_szServerName: [64]u8 align(1),
     m_szGameTags: [128]u8 align(1),
     m_steamID: CSteamID align(1),
+    comptime {
+        if (@sizeOf(gameserveritem_t) != 372 or @alignOf(gameserveritem_t) != 4) @compileLog("Size or alignment of gameserveritem_t are mismatch.", @sizeOf(gameserveritem_t), @alignOf(gameserveritem_t));
+    }
     // methods
     const Self = @This();
     pub fn Construct(self: *Self) void {
@@ -4580,10 +5316,18 @@ extern fn SteamAPI_gameserveritem_t_SetName(self: ?*anyopaque, pName: [*c]const 
 pub const SteamPartyBeaconLocation_t = extern struct {
     m_eType: ESteamPartyBeaconLocationType align(4) = ESteamPartyBeaconLocationType.k_ESteamPartyBeaconLocationType_Invalid,
     m_ulLocationID: uint64 align(StructPlatformPackSize) = 0,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(SteamPartyBeaconLocation_t) != size or @alignOf(SteamPartyBeaconLocation_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamPartyBeaconLocation_t are mismatch.", @sizeOf(SteamPartyBeaconLocation_t), @alignOf(SteamPartyBeaconLocation_t));
+    }
 };
 pub const SteamParamStringArray_t = extern struct {
     m_ppStrings: [*c][*c]const u8 align(StructPlatformPackSize) = null,
     m_nNumStrings: int32 align(4) = 0,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(SteamParamStringArray_t) != size or @alignOf(SteamParamStringArray_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamParamStringArray_t are mismatch.", @sizeOf(SteamParamStringArray_t), @alignOf(SteamParamStringArray_t));
+    }
 };
 pub const LeaderboardEntry_t = extern struct {
     m_steamIDUser: CSteamID align(1),
@@ -4591,6 +5335,10 @@ pub const LeaderboardEntry_t = extern struct {
     m_nScore: int32 align(4) = 0,
     m_cDetails: int32 align(4) = 0,
     m_hUGC: UGCHandle_t align(StructPlatformPackSize) = 0,
+    comptime {
+        const size = if (is_windows) 32 else 28;
+        if (@sizeOf(LeaderboardEntry_t) != size or @alignOf(LeaderboardEntry_t) != StructPlatformPackSize) @compileLog("Size or alignment of LeaderboardEntry_t are mismatch.", @sizeOf(LeaderboardEntry_t), @alignOf(LeaderboardEntry_t));
+    }
 };
 pub const P2PSessionState_t = extern struct {
     m_bConnectionActive: bool align(1) = false,
@@ -4601,16 +5349,25 @@ pub const P2PSessionState_t = extern struct {
     m_nPacketsQueuedForSend: int32 align(4) = 0,
     m_nRemoteIP: uint32 align(4) = 0,
     m_nRemotePort: uint16 align(2) = 0,
+    comptime {
+        if (@sizeOf(P2PSessionState_t) != 20 or @alignOf(P2PSessionState_t) != 4) @compileLog("Size or alignment of P2PSessionState_t are mismatch.", @sizeOf(P2PSessionState_t), @alignOf(P2PSessionState_t));
+    }
 };
 pub const InputAnalogActionData_t = extern struct {
     eMode: EInputSourceMode align(1) = EInputSourceMode.k_EInputSourceMode_None,
     x: f32 align(1) = 0,
     y: f32 align(1) = 0,
     bActive: bool align(1) = false,
+    comptime {
+        if (@sizeOf(InputAnalogActionData_t) != 13 or @alignOf(InputAnalogActionData_t) != 1) @compileLog("Size or alignment of InputAnalogActionData_t are mismatch.", @sizeOf(InputAnalogActionData_t), @alignOf(InputAnalogActionData_t));
+    }
 };
 pub const InputDigitalActionData_t = extern struct {
     bState: bool align(1) = false,
     bActive: bool align(1) = false,
+    comptime {
+        if (@sizeOf(InputDigitalActionData_t) != 2 or @alignOf(InputDigitalActionData_t) != 1) @compileLog("Size or alignment of InputDigitalActionData_t are mismatch.", @sizeOf(InputDigitalActionData_t), @alignOf(InputDigitalActionData_t));
+    }
 };
 pub const InputMotionData_t = extern struct {
     rotQuatX: f32 align(1) = 0,
@@ -4623,6 +5380,9 @@ pub const InputMotionData_t = extern struct {
     rotVelX: f32 align(1) = 0,
     rotVelY: f32 align(1) = 0,
     rotVelZ: f32 align(1) = 0,
+    comptime {
+        if (@sizeOf(InputMotionData_t) != 40 or @alignOf(InputMotionData_t) != 1) @compileLog("Size or alignment of InputMotionData_t are mismatch.", @sizeOf(InputMotionData_t), @alignOf(InputMotionData_t));
+    }
 };
 pub const InputMotionDataV2_t = extern struct {
     driftCorrectedQuatX: f32 align(1) = 0,
@@ -4643,11 +5403,17 @@ pub const InputMotionDataV2_t = extern struct {
     degreesPerSecondX: f32 align(1) = 0,
     degreesPerSecondY: f32 align(1) = 0,
     degreesPerSecondZ: f32 align(1) = 0,
+    comptime {
+        if (@sizeOf(InputMotionDataV2_t) != 72 or @alignOf(InputMotionDataV2_t) != 1) @compileLog("Size or alignment of InputMotionDataV2_t are mismatch.", @sizeOf(InputMotionDataV2_t), @alignOf(InputMotionDataV2_t));
+    }
 };
 pub const SteamInputActionEvent_t = extern struct {
     controllerHandle: InputHandle_t align(1) = 0,
     eEventType: ESteamInputActionEventType align(1) = ESteamInputActionEventType.ESteamInputActionEventType_DigitalAction,
     analogAction: DigitalAnalogAction_t align(1),
+    comptime {
+        if (@sizeOf(SteamInputActionEvent_t) != 33 or @alignOf(SteamInputActionEvent_t) != 1) @compileLog("Size or alignment of SteamInputActionEvent_t are mismatch.", @sizeOf(SteamInputActionEvent_t), @alignOf(SteamInputActionEvent_t));
+    }
 };
 pub const SteamUGCDetails_t = extern struct {
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
@@ -4676,16 +5442,26 @@ pub const SteamUGCDetails_t = extern struct {
     m_unVotesDown: uint32 align(4) = 0,
     m_flScore: f32 align(4) = 0,
     m_unNumChildren: uint32 align(4) = 0,
+    comptime {
+        const size = if (is_windows) 9776 else 9764;
+        if (@sizeOf(SteamUGCDetails_t) != size or @alignOf(SteamUGCDetails_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamUGCDetails_t are mismatch.", @sizeOf(SteamUGCDetails_t), @alignOf(SteamUGCDetails_t));
+    }
 };
 pub const SteamItemDetails_t = extern struct {
     m_itemId: SteamItemInstanceID_t align(StructPlatformPackSize) = 0,
     m_iDefinition: SteamItemDef_t align(4) = 0,
     m_unQuantity: uint16 align(2) = 0,
     m_unFlags: uint16 align(2) = 0,
+    comptime {
+        if (@sizeOf(SteamItemDetails_t) != 16 or @alignOf(SteamItemDetails_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamItemDetails_t are mismatch.", @sizeOf(SteamItemDetails_t), @alignOf(SteamItemDetails_t));
+    }
 };
 pub const SteamNetworkingIPAddr = extern struct {
     m_ipv6: [16]uint8 align(1),
     m_port: uint16 align(1) = 0,
+    comptime {
+        if (@sizeOf(SteamNetworkingIPAddr) != 18 or @alignOf(SteamNetworkingIPAddr) != 1) @compileLog("Size or alignment of SteamNetworkingIPAddr are mismatch.", @sizeOf(SteamNetworkingIPAddr), @alignOf(SteamNetworkingIPAddr));
+    }
 
     // Constants
     pub const k_cchMaxString: i32 = 48;
@@ -4762,6 +5538,9 @@ pub const SteamNetworkingIdentity = extern struct {
     m_eType: ESteamNetworkingIdentityType align(1) = ESteamNetworkingIdentityType.k_ESteamNetworkingIdentityType_Invalid,
     m_cbSize: i32 align(1) = 0,
     m_szUnknownRawString: [128]u8 align(1),
+    comptime {
+        if (@sizeOf(SteamNetworkingIdentity) != 136 or @alignOf(SteamNetworkingIdentity) != 1) @compileLog("Size or alignment of SteamNetworkingIdentity are mismatch.", @sizeOf(SteamNetworkingIdentity), @alignOf(SteamNetworkingIdentity));
+    }
 
     // Constants
     pub const k_cchMaxString: i32 = 128;
@@ -4921,6 +5700,9 @@ pub const SteamNetConnectionInfo_t = extern struct {
     m_szConnectionDescription: [128]u8 align(1),
     m_nFlags: i32 align(4) = 0,
     reserved: [63]uint32 align(4),
+    comptime {
+        if (@sizeOf(SteamNetConnectionInfo_t) != 696 or @alignOf(SteamNetConnectionInfo_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamNetConnectionInfo_t are mismatch.", @sizeOf(SteamNetConnectionInfo_t), @alignOf(SteamNetConnectionInfo_t));
+    }
 };
 pub const SteamNetConnectionRealTimeStatus_t = extern struct {
     m_eState: ESteamNetworkingConnectionState align(4) = ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_None,
@@ -4937,6 +5719,9 @@ pub const SteamNetConnectionRealTimeStatus_t = extern struct {
     m_cbSentUnackedReliable: i32 align(4) = 0,
     m_usecQueueTime: SteamNetworkingMicroseconds align(StructPlatformPackSize) = 0,
     reserved: [16]uint32 align(4),
+    comptime {
+        if (@sizeOf(SteamNetConnectionRealTimeStatus_t) != 120 or @alignOf(SteamNetConnectionRealTimeStatus_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamNetConnectionRealTimeStatus_t are mismatch.", @sizeOf(SteamNetConnectionRealTimeStatus_t), @alignOf(SteamNetConnectionRealTimeStatus_t));
+    }
 };
 pub const SteamNetConnectionRealTimeLaneStatus_t = extern struct {
     m_cbPendingUnreliable: i32 align(4) = 0,
@@ -4945,6 +5730,9 @@ pub const SteamNetConnectionRealTimeLaneStatus_t = extern struct {
     _reservePad1: i32 align(4) = 0,
     m_usecQueueTime: SteamNetworkingMicroseconds align(StructPlatformPackSize) = 0,
     reserved: [10]uint32 align(4),
+    comptime {
+        if (@sizeOf(SteamNetConnectionRealTimeLaneStatus_t) != 64 or @alignOf(SteamNetConnectionRealTimeLaneStatus_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamNetConnectionRealTimeLaneStatus_t are mismatch.", @sizeOf(SteamNetConnectionRealTimeLaneStatus_t), @alignOf(SteamNetConnectionRealTimeLaneStatus_t));
+    }
 };
 pub const SteamNetworkingMessage_t = extern struct {
     m_pData: ?*anyopaque align(8) = null,
@@ -4961,6 +5749,9 @@ pub const SteamNetworkingMessage_t = extern struct {
     m_nUserData: int64 align(8) = 0,
     m_idxLane: uint16 align(2) = 0,
     _pad1__: uint16 align(2) = 0,
+    comptime {
+        if (@sizeOf(SteamNetworkingMessage_t) != 216 or @alignOf(SteamNetworkingMessage_t) != 8) @compileLog("Size or alignment of SteamNetworkingMessage_t are mismatch.", @sizeOf(SteamNetworkingMessage_t), @alignOf(SteamNetworkingMessage_t));
+    }
     // methods
     const Self = @This();
     pub fn Release(self: *Self) void {
@@ -4972,11 +5763,17 @@ pub const SteamNetworkingMessage_t = extern struct {
 extern fn SteamAPI_SteamNetworkingMessage_t_Release(self: ?*anyopaque) callconv(.C) void;
 pub const SteamNetworkPingLocation_t = extern struct {
     m_data: [512]uint8 align(1),
+    comptime {
+        if (@sizeOf(SteamNetworkPingLocation_t) != 512 or @alignOf(SteamNetworkPingLocation_t) != 1) @compileLog("Size or alignment of SteamNetworkPingLocation_t are mismatch.", @sizeOf(SteamNetworkPingLocation_t), @alignOf(SteamNetworkPingLocation_t));
+    }
 };
 pub const SteamNetworkingConfigValue_t = extern struct {
     m_eValue: ESteamNetworkingConfigValue align(4) = ESteamNetworkingConfigValue.k_ESteamNetworkingConfig_Invalid,
     m_eDataType: ESteamNetworkingConfigDataType align(4),
     m_int64: i64 align(8) = 0,
+    comptime {
+        if (@sizeOf(SteamNetworkingConfigValue_t) != 16 or @alignOf(SteamNetworkingConfigValue_t) != 8) @compileLog("Size or alignment of SteamNetworkingConfigValue_t are mismatch.", @sizeOf(SteamNetworkingConfigValue_t), @alignOf(SteamNetworkingConfigValue_t));
+    }
     // methods
     const Self = @This();
     pub fn SetInt32(self: *Self, eVal: ESteamNetworkingConfigValue, data: i32) void {
@@ -5009,6 +5806,9 @@ extern fn SteamAPI_SteamNetworkingConfigValue_t_SetString(self: ?*anyopaque, eVa
 pub const SteamDatagramHostedAddress = extern struct {
     m_cbSize: i32 align(4) = 0,
     m_data: [128]u8 align(1),
+    comptime {
+        if (@sizeOf(SteamDatagramHostedAddress) != 132 or @alignOf(SteamDatagramHostedAddress) != 4) @compileLog("Size or alignment of SteamDatagramHostedAddress are mismatch.", @sizeOf(SteamDatagramHostedAddress), @alignOf(SteamDatagramHostedAddress));
+    }
     // methods
     const Self = @This();
     pub fn Clear(self: *Self) void {
@@ -5035,6 +5835,9 @@ pub const SteamDatagramGameCoordinatorServerLogin = extern struct {
     m_rtime: RTime32 align(4) = 0,
     m_cbAppData: i32 align(4) = 0,
     m_appData: [2048]u8 align(1),
+    comptime {
+        if (@sizeOf(SteamDatagramGameCoordinatorServerLogin) != 2328 or @alignOf(SteamDatagramGameCoordinatorServerLogin) != 4) @compileLog("Size or alignment of SteamDatagramGameCoordinatorServerLogin are mismatch.", @sizeOf(SteamDatagramGameCoordinatorServerLogin), @alignOf(SteamDatagramGameCoordinatorServerLogin));
+    }
 };
 
 // Interfaces

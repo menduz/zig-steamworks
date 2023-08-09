@@ -1,5 +1,5 @@
 LEVEL := Debug
-TARGET := aarch64-macos-none
+TARGET := native
 
 ZIG := /usr/local/lib/zig/lib
 
@@ -11,7 +11,7 @@ build: build-source
 build-source:
 	node generate.js steamworks/public/steam/steam_api.json
 	zig fmt src
-	zig build test -freference-trace --verbose --summary all
+	zig build test -freference-trace --verbose --summary all -Dtarget=$(TARGET) --verbose-link
 
 test-docker:
 	node generate.js steamworks/public/steam/steam_api.json

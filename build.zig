@@ -1,29 +1,25 @@
 const std = @import("std");
 const builtin = @import("builtin");
-const steam_linker = @import("./linker.zig");
 
 // TODO(build-system): this is needed because lib2.linkLibrary(lib)
 // will not add the library path transitively to lib3.linkLibrary(lib2)
 pub fn addLibraryPath(compile: *std.build.CompileStep) void {
-    if (compile.target.os_tag != null) {
-        if (compile.target.os_tag.? == .macos) {
-            compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = sdkPath("/steamworks/redistributable_bin/osx/libsteam_api.dylib") }, "libsteam_api.dylib").step);
-            compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = sdkPath("/steamworks/public/steam/lib/osx/libsdkencryptedappticket.dylib") }, "libsdkencryptedappticket.dylib").step);
-            compile.addLibraryPath(.{ .path = sdkPath("/steamworks/public/steam/lib/osx") });
-            compile.addLibraryPath(.{ .path = sdkPath("/steamworks/redistributable_bin/osx") });
-        } else if (compile.target.os_tag.? == .linux) {
-            compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = "steamworks/redistributable_bin/linux64/libsteam_api.so" }, "libsteam_api.so").step);
-            compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = "steamworks/public/steam/lib/linux64/libsdkencryptedappticket.so" }, "libsdkencryptedappticket.so").step);
-            compile.addLibraryPath(.{ .path = sdkPath("/steamworks/public/steam/lib/linux64") });
-            compile.addLibraryPath(.{ .path = sdkPath("/steamworks/redistributable_bin/linux64") });
-        } else if (compile.target.os_tag.? == .windows) {
-            compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = "steamworks/public/steam/lib/win64/sdkencryptedappticket64.dll" }, "sdkencryptedappticket64.dll").step);
-            compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = "steamworks/redistributable_bin/win64/steam_api64.dll" }, "steam_api64.dll").step);
-            compile.addLibraryPath(.{ .path = sdkPath("/steamworks/public/steam/lib/win64") });
-            compile.addLibraryPath(.{ .path = sdkPath("/steamworks/redistributable_bin/win64") });
-        }
+    if (compile.target.os_tag != null and compile.target.os_tag.? == .macos) {
+        compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = sdkPath("/steamworks/redistributable_bin/osx/libsteam_api.dylib") }, "libsteam_api.dylib").step);
+        compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = sdkPath("/steamworks/public/steam/lib/osx/libsdkencryptedappticket.dylib") }, "libsdkencryptedappticket.dylib").step);
+        compile.addLibraryPath(.{ .path = sdkPath("/steamworks/public/steam/lib/osx") });
+        compile.addLibraryPath(.{ .path = sdkPath("/steamworks/redistributable_bin/osx") });
+    } else if (compile.target.os_tag != null and compile.target.os_tag.? == .windows) {
+        compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = sdkPath("/steamworks/public/steam/lib/win64/sdkencryptedappticket64.dll") }, "sdkencryptedappticket64.dll").step);
+        compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = sdkPath("/steamworks/redistributable_bin/win64/steam_api64.dll") }, "steam_api64.dll").step);
+        compile.addLibraryPath(.{ .path = sdkPath("/steamworks/public/steam/lib/win64") });
+        compile.addLibraryPath(.{ .path = sdkPath("/steamworks/redistributable_bin/win64") });
     } else {
-        std.debug.panic("Invalid target {any}\n", .{compile.target});
+        compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = sdkPath("/steamworks/redistributable_bin/linux64/libsteam_api.so") }, "libsteam_api.so").step);
+        compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = sdkPath("/steamworks/public/steam/lib/linux64/libsdkencryptedappticket.so") }, "libsdkencryptedappticket.so").step);
+        compile.addLibraryPath(.{ .path = sdkPath("/steamworks/public/steam/lib/linux64") });
+        compile.addLibraryPath(.{ .path = sdkPath("/steamworks/redistributable_bin/linux64") });
+        // instructs the binary to load libraries from the local path
     }
 }
 
@@ -73,7 +69,7 @@ pub fn build(b: *std.Build) !void {
 
     addLibraryPath(lib);
 
-    if (lib.target.os_tag.? == .windows) {
+    if (lib.target.os_tag != null and lib.target.os_tag.? == .windows) {
         lib.linkSystemLibraryNeeded("sdkencryptedappticket64");
         lib.linkSystemLibraryNeeded("steam_api64");
     } else {
@@ -114,8 +110,6 @@ fn build_example_project(b: *std.Build, module: *std.Build.Module, target: std.z
     b.installArtifact(test_exe);
     test_exe.addModule("steamworks", module);
     test_exe.linkLibrary(lib);
-
-    try steam_linker.copy(comptime steam_linker.thisDir() ++ "/src", "zig-out/bin", "steam_appid.txt");
 }
 
 fn build_aux_cli(b: *std.Build, target: std.zig.CrossTarget, optimize: std.builtin.Mode, lib: *std.build.Step.Compile) !void {
@@ -161,8 +155,15 @@ fn test_step(b: *std.Build, module: *std.Build.Module, target: std.zig.CrossTarg
 
     addLibraryPath(main_tests);
 
+    if (main_tests.target.os_tag == null or main_tests.target.os_tag.? == .linux) {
+        // since .so files are not copied to the test binary folder, we specify an extra rpath for these
+        main_tests.addRPath(.{ .path = sdkPath("/steamworks/public/steam/lib/linux64") });
+        main_tests.addRPath(.{ .path = sdkPath("/steamworks/redistributable_bin/linux64") });
+    }
+
     var run_unit_tests = b.addRunArtifact(main_tests);
     run_unit_tests.cwd = b.exe_dir;
+    run_unit_tests.step.dependOn(&b.addInstallBinFile(.{ .path = sdkPath("/src/steam_appid.txt") }, "steam_appid.txt").step);
 
     var run_step = b.step("test", "Run the app");
     run_step.dependOn(&run_unit_tests.step);

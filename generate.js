@@ -19,69 +19,6 @@ const cpp = [
 
 const cpp_last = []
 
-const g_CustomPackSize = {
-  // // Callbacks
-  // // "SteamNetworkingMessage_t": "1",
-
-
-  // "AvatarImageLoaded_t": "4",
-  // "FriendRichPresenceUpdate_t": "4",
-  // "GameConnectedClanChatMsg_t": "4",
-  // "SteamInputConfigurationLoaded_t": "2",
-  // "LowBatteryPower_t": "1",
-  // "GameOverlayActivated_t": "2",
-  // "ClientGameServerDeny_t": "1",
-  // "GSPolicyResponse_t": "1",
-  // "GameConnectedChatLeave_t": "1",
-  // "JoinClanChatRoomCompletionResult_t": "4",
-  // "GameConnectedFriendChatMsg_t": "4",
-  // "FriendsGetFollowerCount_t": "4",
-  // "FriendsIsFollowing_t": "4",
-  // "FriendGameInfo_t": "1",
-  // "FriendsEnumerateFollowingList_t": "4",
-  // "GSClientDeny_t": "4",
-  // "GSClientKick_t": "4",
-  // "LobbyChatMsg_t": "4",
-  // "GSClientGroupStatus_t": "1",
-  // "GSStatsReceived_t": "4",
-  // "GSStatsStored_t": "4",
-  // "P2PSessionConnectFail_t": "1",
-  // "SocketStatusCallback_t": "4",
-
-  // "LobbyCreated_t": "4",
-
-
-  "SteamNetworkingIPAddr": "1",
-  // "SteamNetConnectionInfo_t": "2",
-  // "SteamAPICallCompleted_t": "4",
-
-  // // Structs
-  "InputAnalogActionData_t": "1",
-  "InputDigitalActionData_t": "1",
-  "InputMotionData_t": "1",
-  "SteamIPAddress_t": 1,
-
-  "SteamNetworkingMessagesSessionRequest_t": "1",
-  "SteamNetworkingMessagesSessionFailed_t": "1",
-  "SteamNetworkingIdentity": "1",
-
-  // CSteamID: 1,
-  PartyBeaconID_t: 8,
-  uint64: 8,
-  UGCHandle_t: 8,
-  InputHandle_t: 8,
-  CGameID: 8,
-  uint16: 2,
-  bool: 1,
-  u8: 1,
-
-  EResult: 4,
-  RemotePlaySessionID_t: 4,
-  SteamInventoryResult_t: 4,
-  m_nAppID: 4
-}
-
-
 function getStructAlignment(struct, field) {
   const structName = struct.struct;
 
@@ -124,7 +61,8 @@ out.push(`const std = @import("std");`)
 out.push(`pub const Server = @import("server.zig");`)
 out.push(`const builtin = @import("builtin");`)
 out.push(`pub const CGameID = u64;`)
-out.push(`pub const StructPlatformPackSize = if (builtin.os.tag == .windows) 8 else 4;`)
+out.push(`const is_windows = builtin.os.tag == .windows;`)
+out.push(`pub const StructPlatformPackSize = if (is_windows) 8 else 4;`)
 out.push(`pub const StructPackSize = 4;`)
 out.push(`pub const CSteamID = u64;`)
 out.push(`pub const intptr_t = ?*anyopaque;`)
@@ -248,12 +186,6 @@ pub fn from_slice(comptime T: anytype, slice: []const u8) T {
     
     const struct_info = @typeInfo(T).Struct;
     if (struct_info.layout == .Extern) {
-      
-      if(!@inComptime()) std.debug.print("------------ Parsing into {s} {}\\n", .{
-        @typeName(T),
-        std.fmt.fmtSliceHexLower(slice),
-      });
-      
       // the following would be ideal, mostly because it performs way fewer branches
       // -> (&ret).* = @as(*T, @ptrCast(@alignCast(slice))).*;
       // but instead, we must specialize this function with an inline for to account for data types
@@ -336,13 +268,7 @@ pub fn SteamClient() ISteamClient {
   cpp_last.push(`switch(cb_id) {`)
   data.callback_structs.forEach(_ => {
     const comment = deny_list.includes(_.struct) ? '// ' : ''
-    cpp_last.push(`  ${comment}case ${_.callback_id}: {`)
-    // cpp_last.push(`  ${comment}  struct ${_.struct}    *p_foo = 0;`)
-    // cpp_last.push(`  ${comment}  std::fprintf(stderr, "\\nStruct ${_.struct}\\n");`)
-    // _.fields.forEach(f => {
-    //   cpp_last.push(`  ${comment}  std::fprintf(stderr, "  ${f.fieldname} size: %d align: %d\\n", sizeof(p_foo->${f.fieldname}), alignof(p_foo->${f.fieldname}));`)
-    // })
-    cpp_last.push(`  ${comment}  return sizeof(${_.struct}); }`)
+    cpp_last.push(`  ${comment}case ${_.callback_id}: return sizeof(${_.struct});`)
   })
   cpp_last.push(`  default: return 0;`)
   cpp_last.push(`}`)
@@ -656,24 +582,7 @@ function printStruct(struct) {
 
   struct.fields.forEach(patchType)
 
-  // cpp.push(`typedef struct aligned_${structName} aligned_${structName};`)
-
-  // cpp_last.push(`typedef struct aligned_${structName} {`)
-
-  // struct.fields.forEach(_ => {
-  //   if(_.fieldtype.includes('(*)')){
-  //     cpp_last.push(`  ` + _.fieldtype.replace('(*)', `(*${_.fieldname})`) + ';')
-  //   } else {
-  //   const type = alignedFieldName(_.fieldtype)
-  //   const array = arrayPartOfField(_.fieldtype)
-  //   cpp_last.push(`  ${type}\t${_.fieldname}${array};`)
-  //   }
-  // });
-
-  // cpp_last.push(`} aligned_${structName};\n`)
-
   out.push(`pub const ${structName} = extern struct {`)
-
 
   struct.fields.forEach(field => {
     const type = convertType(field.fieldtype)
@@ -687,6 +596,26 @@ function printStruct(struct) {
     out.push(`  padding: u8,`)
   }
 
+  const win = winAlign[structName]
+  const unix = unixAlign[structName]
+
+  out.push(`comptime {`)
+  let size = win.size
+  let alignment = win.align
+  if (win.size != unix.size) {
+    size = 'size'
+    out.push(`  const size = if (is_windows) ${win.size} else ${unix.size};`)
+  }
+  if (win.align != unix.align) {
+    if (win.align == 8 && unix.align == 4) {
+      alignment = 'StructPlatformPackSize'
+    } else {
+      alignment = 'alignment'
+      out.push(`  const alignment = if (is_windows) ${win.align} else ${unix.align};`)
+    }
+  }
+  out.push(`  if (@sizeOf(${structName}) != ${size} or @alignOf(${structName}) != ${alignment}) @compileLog("Size or alignment of ${structName} are mismatch.", @sizeOf(${structName}), @alignOf(${structName}));`)
+  out.push(`}`)
   struct.consts && printConsts(struct.consts);
   struct.enums && printEnums(struct.enums)
 
