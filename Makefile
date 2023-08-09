@@ -17,6 +17,10 @@ test-docker:
 	node generate.js steamworks/public/steam/steam_api.json
 	zig fmt src
 	zig build run -freference-trace --verbose --summary all
+test-docker1:
+	node generate.js steamworks/public/steam/steam_api.json
+	zig fmt src
+	zig build -Dtarget=$(TARGET)
 
 cross:
 	@$(MAKE) build TARGET=aarch64-macos-none 

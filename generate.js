@@ -239,8 +239,8 @@ test {
 }
 
 pub const DigitalAnalogAction_t = extern struct {
-  actionHandle: InputAnalogActionHandle_t,
-  analogActionData: InputAnalogActionData_t,
+  actionHandle: InputAnalogActionHandle_t align(1),
+  analogActionData: InputAnalogActionData_t align(1),
 };
 
 /// Fetch the next pending callback on the given pipe, if any.  If a callback is available, true is returned
@@ -419,54 +419,92 @@ function printEnums(enums) {
 
 printEnums(data.enums)
 
-function printStructMethods(structName, data) {
-  if (data && data.length) {
-    out.push(`// methods`)
-    out.push(`const Self = @This();`)
-    data.forEach(_ => {
-      const originalParams = getParams(_.params)
 
-      const [, fnName] = _.methodname_flat.split(structName + '_')
+function transformParameters(fn) {
+  for (const param of fn.params) {
 
-      if (fnName && /^[a-z0-9_]+$/i.test(fnName)) {
-        out.push(`pub fn ${fnName}(${['self: *Self', ...originalParams].join(', ')}) ${convertType(_.returntype)} {`)
-        out.push(` return ${_.methodname_flat}(${['@ptrCast(?*anyopaque, self)', ..._.params.map(p => paramName(p.paramname))].join(', ')});`)
-        out.push(`}\n`)
+    // detect that a field should be an array
+    let prefix = /^(p(v|ch?|sz|ub)?)[A-Z]/g
+    const matches_prefix = prefix.exec(param.paramname)
+
+    if (matches_prefix) {
+      const paramNameWithoutPrefix = param.paramname.substring(matches_prefix[1].length)
+      const countParam = fn.params.find(_ => (
+        param.array_count && _.paramname == param.array_count ||
+        _.paramname.startsWith('cub' + paramNameWithoutPrefix) ||
+        _.paramname.startsWith('cch' + paramNameWithoutPrefix) ||
+        _.paramname.startsWith('cbMax' + paramNameWithoutPrefix) ||
+        _.paramname.startsWith('cb' + paramNameWithoutPrefix)
+      ))
+
+      param.zero_slice = matches_prefix[1].includes('z')
+
+      const is_pointer_to_pointer = param.paramtype.split(/\*/g).length > 2
+
+      if (param.paramtype.endsWith('*') && !is_pointer_to_pointer) {
+        param.is_slice = true
+        param.code_replacement = `${param.paramname}.ptr`
       }
-    })
+
+      if (countParam && countParam.paramtype.includes('*') == false) {
+        param.is_slice = true
+        let expr = `${param.paramname}.len`
+        if (countParam.paramtype != 'usize') {
+          countParam.code_replacement = `@intCast(${expr})`
+        } else {
+          countParam.code_replacement = expr
+        }
+        countParam.calculated = true;
+        
+      } else if (param.zero_slice) {
+        param.is_slice = true
+      }
+    }
   }
 }
 
-function printMethods(structName, data) {
-  if (data && data.length) {
-    out.push(`// methods`)
-    out.push(`const Self = @This();`)
-    data.forEach(_ => {
-      const originalParams = getParams(_.params)
+/// converts parameters to a zig-friendly representation
+function getParamsAdapted(params) {
+  return params.filter(_ => !_.calculated).map(p => {
+    const n = paramName(p.paramname)
+    const t = convertTypeAdapted(p)
 
-      const [, fnName] = _.methodname_flat.split(structName + '_')
+    if (t == 'SteamNetworkingErrMsg')
+      return `${n}: [*c]u8`
 
-      if (fnName && /^[a-z0-9_]+$/i.test(fnName)) {
-        out.push(`pub fn ${fnName}(${['self: Self', ...originalParams].join(', ')}) ${convertType(_.returntype)} {`)
-        out.push(` return ${_.methodname_flat}(${['self.ptr', ..._.params.map(p => paramName(p.paramname))].join(', ')});`)
-        out.push(`}\n`)
-      }
-    })
-  }
+    return `${n}: ${t}`
+  })
 }
 
-function printMethods(structName, data) {
+function printStructMethods(structName, data, module) {
   if (data && data.length) {
     out.push(`// methods`)
     out.push(`const Self = @This();`)
     data.forEach(_ => {
-      const originalParams = getParams(_.params)
+      transformParameters(_)
+
+      const originalParams = getParamsAdapted(_.params)
 
       const [, fnName] = _.methodname_flat.split(structName + '_')
 
+      const self = module ? "*const Self" : "*Self";
+
       if (fnName && /^[a-z0-9_]+$/i.test(fnName)) {
-        out.push(`pub fn ${fnName}(${['self: Self', ...originalParams].join(', ')}) ${convertType(_.returntype)} {`)
-        out.push(` return ${_.methodname_flat}(${['self.ptr', ..._.params.map(p => paramName(p.paramname))].join(', ')});`)
+        out.push(`pub fn ${fnName}(${[`self: ${self}`, ...originalParams].join(', ')}) ${convertType(_.returntype)} {`)
+
+        let ptr = module ? 'self.ptr' : '@as(?*anyopaque, @ptrCast(self))'
+
+        let args = [ptr]
+
+        for (const p of _.params) {
+          if (p.code_replacement) {
+            args.push(p.code_replacement)
+          } else {
+            args.push(paramName(p.paramname))
+          }
+        }
+
+        out.push(` return ${_.methodname_flat}(${args.join(', ')});`)
         out.push(`}\n`)
       }
     })
@@ -619,7 +657,7 @@ function printStruct(struct) {
   struct.consts && printConsts(struct.consts);
   struct.enums && printEnums(struct.enums)
 
-  printStructMethods(structName, struct.methods)
+  printStructMethods(structName, struct.methods, false)
 
   out.push('};')
   printFns(structName, struct.methods)
@@ -646,10 +684,62 @@ data.interfaces.forEach(_ => {
   out.push(`ptr: ?*anyopaque,`)
 
   _.enums && printEnums(_.enums)
-  printMethods(_.classname, _.methods)
+  printStructMethods(_.classname, _.methods, true)
   out.push('};')
   printFns(_.classname, _.methods)
 })
+
+function convertTypeAdapted(param, fn) {
+  const t = param.paramtype
+  if (t === undefined) return '@compileError("check logs")'
+
+  { // char[123]
+    const slice = /([a-z0-9_]+)\s*\[(\d+)\]/i
+    const r = slice.exec(t)
+    if (r) {
+      return `[${r[2]}]${convertType(r[1])}`
+    }
+  }
+
+  if (data.enums.some(_ => _.enumname === t))
+    return `${t}`;
+
+  { // const servernetadr_t *
+    const slice = /^const ([0-9a-z_]+)\s*(\*|&)$/i
+    const r = slice.exec(t)
+    if (r) {
+      let new_type = convertType(r[1])
+      if (new_type == 'void') new_type = 'u8'
+      if (param.is_slice) {
+        if (param.zero_slice) {
+          return `[:0]const ${new_type}`
+        } else {
+          return `[]const ${new_type}`
+        }
+      }
+      return `*const ${new_type}`
+    }
+  }
+
+  { // servernetadr_t *
+    const slice = /^([0-9a-z_]+)\s*(\*|&)$/i
+    const r = slice.exec(t)
+    if (r) {
+      let new_type = convertType(r[1])
+      if (new_type == 'void') new_type = 'u8'
+      if (param.is_slice) {
+        if (param.zero_slice) {
+          return `[:0] ${new_type}`
+        } else {
+          return `[] ${new_type}`
+        }
+      }
+      return `* ${new_type}`
+    }
+  }
+  return convertType(param.paramtype);
+}
+
 
 function convertType(t, isFnSignature) {
   if (t === undefined) return 'void!'
@@ -730,14 +820,14 @@ function convertType(t, isFnSignature) {
     const slice = /^const ([0-9a-z_]+)\s*&$/i
     const r = slice.exec(t)
     if (r) {
-      return `${convertType(r[1])}`
+      return `[*c]const ${convertType(r[1])}`
     }
   }
   { //servernetadr_t &
     const slice = /^([0-9a-z_]+)\s*&$/i
     const r = slice.exec(t)
     if (r) {
-      return `${convertType(r[1])}`
+      return `[*c]${convertType(r[1])}`
     }
   }
   { // servernetadr_t *

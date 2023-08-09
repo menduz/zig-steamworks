@@ -8,7 +8,11 @@ const u = @import("tests-utils.zig");
 
 comptime {
     u.assert_type_size(u.ValvePackingSentinel_t, 24);
-    // u.assert_type_size(steam.RemoteStorageEnumerateUserSubscribedFilesResult_t, (1 + 1 + 1 + 50 + 100) * 4);
+    u.assert_type_size(steam.RemoteStorageEnumerateUserSubscribedFilesResult_t, (1 + 1 + 1 + 50 + 100) * 4);
+}
+
+test "process declarations recursively" {
+    std.testing.refAllDeclsRecursive(steam);
 }
 
 test {

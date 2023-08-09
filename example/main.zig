@@ -11,10 +11,10 @@ pub fn SteamAPIDebugTextHook(nSeverity: c_int, pchDebugText: [*c]const u8) callc
 
 /// get an authentication ticket for our user
 fn authTicket(identity: *steam.SteamNetworkingIdentity) !void {
-    var rgchToken: *[2048]u8 = try allocator.create([2048]u8);
+    var rgchToken: []u8 = try allocator.alloc(u8, 2048);
     var unTokenLen: c_uint = 0;
-    var m_hAuthTicket = steam.SteamUser().GetAuthSessionTicket(rgchToken, 2048, &unTokenLen, identity);
-    std.debug.print("GetAuthSessionTicket={} len={} token={s}", .{ m_hAuthTicket, unTokenLen, rgchToken });
+    var m_hAuthTicket = steam.SteamUser().GetAuthSessionTicket(rgchToken, &unTokenLen, identity);
+    std.debug.print("GetAuthSessionTicket={} len={} token={s:0}\n", .{ m_hAuthTicket, unTokenLen, rgchToken });
 }
 
 pub fn main() !void {
@@ -50,7 +50,7 @@ pub fn main() !void {
 
     sock.GetFakeIP(0, pInfo);
     std.debug.print("GetFakeIP: {}\n", .{pInfo});
-    if (!pInfo.m_identity.IsEqualTo(pInfo.m_identity)) @panic("not equal");
+    if (!pInfo.m_identity.IsEqualTo(&pInfo.m_identity)) @panic("not equal");
 
     if (steam.SteamUser().BLoggedOn()) {
         std.debug.print("Current username: {s}\n", .{steam.SteamFriends().GetPersonaName()});
@@ -68,4 +68,22 @@ pub fn main() !void {
     std.debug.print("GetIdentity={} {}\n", .{ r, pIdentity });
 
     try authTicket(pIdentity);
+
+    var utils = steam.SteamNetworkingUtils_SteamAPI();
+
+    var addr: steam.SteamNetworkingIPAddr = .{
+        .m_ipv6 = [_]u8{0} ** 16,
+        .m_port = 0,
+    };
+    var addr2: steam.SteamNetworkingIPAddr = .{
+        .m_ipv6 = [_]u8{ 0, 17, 0, 187, 0, 204, 0, 0, 0, 0, 0, 0, 0, 9, 0, 9 },
+        .m_port = 0,
+    };
+    if (!utils.SteamNetworkingIPAddr_ParseString(&addr, "11:bb:cc::9:9")) {
+        @panic("ParseString failed");
+    }
+    std.debug.print("Parsed address: {any}\n", .{addr});
+    if (!addr.IsEqualTo(&addr2)) {
+        @panic("Addr is equal failed");
+    }
 }

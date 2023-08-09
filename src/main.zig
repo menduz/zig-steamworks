@@ -820,8 +820,8 @@ test {
 }
 
 pub const DigitalAnalogAction_t = extern struct {
-    actionHandle: InputAnalogActionHandle_t,
-    analogActionData: InputAnalogActionData_t,
+    actionHandle: InputAnalogActionHandle_t align(1),
+    analogActionData: InputAnalogActionData_t align(1),
 };
 
 /// Fetch the next pending callback on the given pipe, if any.  If a callback is available, true is returned
@@ -5250,11 +5250,11 @@ pub const servernetadr_t = extern struct {
         return SteamAPI_servernetadr_t_GetQueryAddressString(@as(?*anyopaque, @ptrCast(self)));
     }
 
-    pub fn IsLessThan(self: *Self, netadr: servernetadr_t) bool {
+    pub fn IsLessThan(self: *Self, netadr: *const servernetadr_t) bool {
         return SteamAPI_servernetadr_t_IsLessThan(@as(?*anyopaque, @ptrCast(self)), netadr);
     }
 
-    pub fn Assign(self: *Self, that: servernetadr_t) void {
+    pub fn Assign(self: *Self, that: *const servernetadr_t) void {
         return SteamAPI_servernetadr_t_Assign(@as(?*anyopaque, @ptrCast(self)), that);
     }
 };
@@ -5270,8 +5270,8 @@ extern fn SteamAPI_servernetadr_t_GetIP(self: ?*anyopaque) callconv(.C) uint32;
 extern fn SteamAPI_servernetadr_t_SetIP(self: ?*anyopaque, unIP: uint32) callconv(.C) void;
 extern fn SteamAPI_servernetadr_t_GetConnectionAddressString(self: ?*anyopaque) callconv(.C) [*c]const u8;
 extern fn SteamAPI_servernetadr_t_GetQueryAddressString(self: ?*anyopaque) callconv(.C) [*c]const u8;
-extern fn SteamAPI_servernetadr_t_IsLessThan(self: ?*anyopaque, netadr: servernetadr_t) callconv(.C) bool;
-extern fn SteamAPI_servernetadr_t_Assign(self: ?*anyopaque, that: servernetadr_t) callconv(.C) void;
+extern fn SteamAPI_servernetadr_t_IsLessThan(self: ?*anyopaque, netadr: [*c]const servernetadr_t) callconv(.C) bool;
+extern fn SteamAPI_servernetadr_t_Assign(self: ?*anyopaque, that: [*c]const servernetadr_t) callconv(.C) void;
 pub const gameserveritem_t = extern struct {
     m_NetAdr: servernetadr_t align(4),
     m_nPing: i32 align(4) = 0,
@@ -5304,8 +5304,8 @@ pub const gameserveritem_t = extern struct {
         return SteamAPI_gameserveritem_t_GetName(@as(?*anyopaque, @ptrCast(self)));
     }
 
-    pub fn SetName(self: *Self, pName: [*c]const u8) void {
-        return SteamAPI_gameserveritem_t_SetName(@as(?*anyopaque, @ptrCast(self)), pName);
+    pub fn SetName(self: *Self, pName: []const u8) void {
+        return SteamAPI_gameserveritem_t_SetName(@as(?*anyopaque, @ptrCast(self)), pName.ptr);
     }
 };
 
@@ -5475,7 +5475,7 @@ pub const SteamNetworkingIPAddr = extern struct {
         return SteamAPI_SteamNetworkingIPAddr_IsIPv6AllZeros(@as(?*anyopaque, @ptrCast(self)));
     }
 
-    pub fn SetIPv6(self: *Self, ipv6: [*c]const uint8, nPort: uint16) void {
+    pub fn SetIPv6(self: *Self, ipv6: *const uint8, nPort: uint16) void {
         return SteamAPI_SteamNetworkingIPAddr_SetIPv6(@as(?*anyopaque, @ptrCast(self)), ipv6, nPort);
     }
 
@@ -5499,15 +5499,15 @@ pub const SteamNetworkingIPAddr = extern struct {
         return SteamAPI_SteamNetworkingIPAddr_IsLocalHost(@as(?*anyopaque, @ptrCast(self)));
     }
 
-    pub fn ToString(self: *Self, buf: [*c]u8, cbBuf: uint32, bWithPort: bool) void {
+    pub fn ToString(self: *Self, buf: *u8, cbBuf: uint32, bWithPort: bool) void {
         return SteamAPI_SteamNetworkingIPAddr_ToString(@as(?*anyopaque, @ptrCast(self)), buf, cbBuf, bWithPort);
     }
 
-    pub fn ParseString(self: *Self, pszStr: [*c]const u8) bool {
-        return SteamAPI_SteamNetworkingIPAddr_ParseString(@as(?*anyopaque, @ptrCast(self)), pszStr);
+    pub fn ParseString(self: *Self, pszStr: [:0]const u8) bool {
+        return SteamAPI_SteamNetworkingIPAddr_ParseString(@as(?*anyopaque, @ptrCast(self)), pszStr.ptr);
     }
 
-    pub fn IsEqualTo(self: *Self, x: SteamNetworkingIPAddr) bool {
+    pub fn IsEqualTo(self: *Self, x: *const SteamNetworkingIPAddr) bool {
         return SteamAPI_SteamNetworkingIPAddr_IsEqualTo(@as(?*anyopaque, @ptrCast(self)), x);
     }
 
@@ -5531,7 +5531,7 @@ extern fn SteamAPI_SteamNetworkingIPAddr_SetIPv6LocalHost(self: ?*anyopaque, nPo
 extern fn SteamAPI_SteamNetworkingIPAddr_IsLocalHost(self: ?*anyopaque) callconv(.C) bool;
 extern fn SteamAPI_SteamNetworkingIPAddr_ToString(self: ?*anyopaque, buf: [*c]u8, cbBuf: uint32, bWithPort: bool) callconv(.C) void;
 extern fn SteamAPI_SteamNetworkingIPAddr_ParseString(self: ?*anyopaque, pszStr: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_SteamNetworkingIPAddr_IsEqualTo(self: ?*anyopaque, x: SteamNetworkingIPAddr) callconv(.C) bool;
+extern fn SteamAPI_SteamNetworkingIPAddr_IsEqualTo(self: ?*anyopaque, x: [*c]const SteamNetworkingIPAddr) callconv(.C) bool;
 extern fn SteamAPI_SteamNetworkingIPAddr_GetFakeIPType(self: ?*anyopaque) callconv(.C) ESteamNetworkingFakeIPType;
 extern fn SteamAPI_SteamNetworkingIPAddr_IsFakeIP(self: ?*anyopaque) callconv(.C) bool;
 pub const SteamNetworkingIdentity = extern struct {
@@ -5573,8 +5573,8 @@ pub const SteamNetworkingIdentity = extern struct {
         return SteamAPI_SteamNetworkingIdentity_GetSteamID64(@as(?*anyopaque, @ptrCast(self)));
     }
 
-    pub fn SetXboxPairwiseID(self: *Self, pszString: [*c]const u8) bool {
-        return SteamAPI_SteamNetworkingIdentity_SetXboxPairwiseID(@as(?*anyopaque, @ptrCast(self)), pszString);
+    pub fn SetXboxPairwiseID(self: *Self, pszString: [:0]const u8) bool {
+        return SteamAPI_SteamNetworkingIdentity_SetXboxPairwiseID(@as(?*anyopaque, @ptrCast(self)), pszString.ptr);
     }
 
     pub fn GetXboxPairwiseID(self: *Self) [*c]const u8 {
@@ -5597,7 +5597,7 @@ pub const SteamNetworkingIdentity = extern struct {
         return SteamAPI_SteamNetworkingIdentity_GetStadiaID(@as(?*anyopaque, @ptrCast(self)));
     }
 
-    pub fn SetIPAddr(self: *Self, addr: SteamNetworkingIPAddr) void {
+    pub fn SetIPAddr(self: *Self, addr: *const SteamNetworkingIPAddr) void {
         return SteamAPI_SteamNetworkingIdentity_SetIPAddr(@as(?*anyopaque, @ptrCast(self)), addr);
     }
 
@@ -5629,32 +5629,32 @@ pub const SteamNetworkingIdentity = extern struct {
         return SteamAPI_SteamNetworkingIdentity_IsLocalHost(@as(?*anyopaque, @ptrCast(self)));
     }
 
-    pub fn SetGenericString(self: *Self, pszString: [*c]const u8) bool {
-        return SteamAPI_SteamNetworkingIdentity_SetGenericString(@as(?*anyopaque, @ptrCast(self)), pszString);
+    pub fn SetGenericString(self: *Self, pszString: [:0]const u8) bool {
+        return SteamAPI_SteamNetworkingIdentity_SetGenericString(@as(?*anyopaque, @ptrCast(self)), pszString.ptr);
     }
 
     pub fn GetGenericString(self: *Self) [*c]const u8 {
         return SteamAPI_SteamNetworkingIdentity_GetGenericString(@as(?*anyopaque, @ptrCast(self)));
     }
 
-    pub fn SetGenericBytes(self: *Self, data: ?*const anyopaque, cbLen: uint32) bool {
+    pub fn SetGenericBytes(self: *Self, data: *const u8, cbLen: uint32) bool {
         return SteamAPI_SteamNetworkingIdentity_SetGenericBytes(@as(?*anyopaque, @ptrCast(self)), data, cbLen);
     }
 
-    pub fn GetGenericBytes(self: *Self, cbLen: i32) [*c]const uint8 {
+    pub fn GetGenericBytes(self: *Self, cbLen: *i32) [*c]const uint8 {
         return SteamAPI_SteamNetworkingIdentity_GetGenericBytes(@as(?*anyopaque, @ptrCast(self)), cbLen);
     }
 
-    pub fn IsEqualTo(self: *Self, x: SteamNetworkingIdentity) bool {
+    pub fn IsEqualTo(self: *Self, x: *const SteamNetworkingIdentity) bool {
         return SteamAPI_SteamNetworkingIdentity_IsEqualTo(@as(?*anyopaque, @ptrCast(self)), x);
     }
 
-    pub fn ToString(self: *Self, buf: [*c]u8, cbBuf: uint32) void {
+    pub fn ToString(self: *Self, buf: *u8, cbBuf: uint32) void {
         return SteamAPI_SteamNetworkingIdentity_ToString(@as(?*anyopaque, @ptrCast(self)), buf, cbBuf);
     }
 
-    pub fn ParseString(self: *Self, pszStr: [*c]const u8) bool {
-        return SteamAPI_SteamNetworkingIdentity_ParseString(@as(?*anyopaque, @ptrCast(self)), pszStr);
+    pub fn ParseString(self: *Self, pszStr: [:0]const u8) bool {
+        return SteamAPI_SteamNetworkingIdentity_ParseString(@as(?*anyopaque, @ptrCast(self)), pszStr.ptr);
     }
 };
 
@@ -5671,7 +5671,7 @@ extern fn SteamAPI_SteamNetworkingIdentity_SetPSNID(self: ?*anyopaque, id: uint6
 extern fn SteamAPI_SteamNetworkingIdentity_GetPSNID(self: ?*anyopaque) callconv(.C) uint64;
 extern fn SteamAPI_SteamNetworkingIdentity_SetStadiaID(self: ?*anyopaque, id: uint64) callconv(.C) void;
 extern fn SteamAPI_SteamNetworkingIdentity_GetStadiaID(self: ?*anyopaque) callconv(.C) uint64;
-extern fn SteamAPI_SteamNetworkingIdentity_SetIPAddr(self: ?*anyopaque, addr: SteamNetworkingIPAddr) callconv(.C) void;
+extern fn SteamAPI_SteamNetworkingIdentity_SetIPAddr(self: ?*anyopaque, addr: [*c]const SteamNetworkingIPAddr) callconv(.C) void;
 extern fn SteamAPI_SteamNetworkingIdentity_GetIPAddr(self: ?*anyopaque) callconv(.C) [*c]const SteamNetworkingIPAddr;
 extern fn SteamAPI_SteamNetworkingIdentity_SetIPv4Addr(self: ?*anyopaque, nIPv4: uint32, nPort: uint16) callconv(.C) void;
 extern fn SteamAPI_SteamNetworkingIdentity_GetIPv4(self: ?*anyopaque) callconv(.C) uint32;
@@ -5682,8 +5682,8 @@ extern fn SteamAPI_SteamNetworkingIdentity_IsLocalHost(self: ?*anyopaque) callco
 extern fn SteamAPI_SteamNetworkingIdentity_SetGenericString(self: ?*anyopaque, pszString: [*c]const u8) callconv(.C) bool;
 extern fn SteamAPI_SteamNetworkingIdentity_GetGenericString(self: ?*anyopaque) callconv(.C) [*c]const u8;
 extern fn SteamAPI_SteamNetworkingIdentity_SetGenericBytes(self: ?*anyopaque, data: ?*const anyopaque, cbLen: uint32) callconv(.C) bool;
-extern fn SteamAPI_SteamNetworkingIdentity_GetGenericBytes(self: ?*anyopaque, cbLen: i32) callconv(.C) [*c]const uint8;
-extern fn SteamAPI_SteamNetworkingIdentity_IsEqualTo(self: ?*anyopaque, x: SteamNetworkingIdentity) callconv(.C) bool;
+extern fn SteamAPI_SteamNetworkingIdentity_GetGenericBytes(self: ?*anyopaque, cbLen: [*c]i32) callconv(.C) [*c]const uint8;
+extern fn SteamAPI_SteamNetworkingIdentity_IsEqualTo(self: ?*anyopaque, x: [*c]const SteamNetworkingIdentity) callconv(.C) bool;
 extern fn SteamAPI_SteamNetworkingIdentity_ToString(self: ?*anyopaque, buf: [*c]u8, cbBuf: uint32) callconv(.C) void;
 extern fn SteamAPI_SteamNetworkingIdentity_ParseString(self: ?*anyopaque, pszStr: [*c]const u8) callconv(.C) bool;
 pub const SteamNetConnectionInfo_t = extern struct {
@@ -5788,11 +5788,11 @@ pub const SteamNetworkingConfigValue_t = extern struct {
         return SteamAPI_SteamNetworkingConfigValue_t_SetFloat(@as(?*anyopaque, @ptrCast(self)), eVal, data);
     }
 
-    pub fn SetPtr(self: *Self, eVal: ESteamNetworkingConfigValue, data: ?*anyopaque) void {
+    pub fn SetPtr(self: *Self, eVal: ESteamNetworkingConfigValue, data: *u8) void {
         return SteamAPI_SteamNetworkingConfigValue_t_SetPtr(@as(?*anyopaque, @ptrCast(self)), eVal, data);
     }
 
-    pub fn SetString(self: *Self, eVal: ESteamNetworkingConfigValue, data: [*c]const u8) void {
+    pub fn SetString(self: *Self, eVal: ESteamNetworkingConfigValue, data: *const u8) void {
         return SteamAPI_SteamNetworkingConfigValue_t_SetString(@as(?*anyopaque, @ptrCast(self)), eVal, data);
     }
 };
@@ -5846,148 +5846,148 @@ pub const ISteamClient = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn CreateSteamPipe(self: Self) HSteamPipe {
+    pub fn CreateSteamPipe(self: *const Self) HSteamPipe {
         return SteamAPI_ISteamClient_CreateSteamPipe(self.ptr);
     }
 
-    pub fn BReleaseSteamPipe(self: Self, hSteamPipe: HSteamPipe) bool {
+    pub fn BReleaseSteamPipe(self: *const Self, hSteamPipe: HSteamPipe) bool {
         return SteamAPI_ISteamClient_BReleaseSteamPipe(self.ptr, hSteamPipe);
     }
 
-    pub fn ConnectToGlobalUser(self: Self, hSteamPipe: HSteamPipe) HSteamUser {
+    pub fn ConnectToGlobalUser(self: *const Self, hSteamPipe: HSteamPipe) HSteamUser {
         return SteamAPI_ISteamClient_ConnectToGlobalUser(self.ptr, hSteamPipe);
     }
 
-    pub fn CreateLocalUser(self: Self, phSteamPipe: [*c]HSteamPipe, eAccountType: EAccountType) HSteamUser {
+    pub fn CreateLocalUser(self: *const Self, phSteamPipe: *HSteamPipe, eAccountType: EAccountType) HSteamUser {
         return SteamAPI_ISteamClient_CreateLocalUser(self.ptr, phSteamPipe, eAccountType);
     }
 
-    pub fn ReleaseUser(self: Self, hSteamPipe: HSteamPipe, hUser: HSteamUser) void {
+    pub fn ReleaseUser(self: *const Self, hSteamPipe: HSteamPipe, hUser: HSteamUser) void {
         return SteamAPI_ISteamClient_ReleaseUser(self.ptr, hSteamPipe, hUser);
     }
 
-    pub fn GetISteamUser(self: Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamUser {
-        return SteamAPI_ISteamClient_GetISteamUser(self.ptr, hSteamUser, hSteamPipe, pchVersion);
+    pub fn GetISteamUser(self: *const Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamUser {
+        return SteamAPI_ISteamClient_GetISteamUser(self.ptr, hSteamUser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamGameServer(self: Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamGameServer {
-        return SteamAPI_ISteamClient_GetISteamGameServer(self.ptr, hSteamUser, hSteamPipe, pchVersion);
+    pub fn GetISteamGameServer(self: *const Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamGameServer {
+        return SteamAPI_ISteamClient_GetISteamGameServer(self.ptr, hSteamUser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn SetLocalIPBinding(self: Self, unIP: SteamIPAddress_t, usPort: uint16) void {
+    pub fn SetLocalIPBinding(self: *const Self, unIP: *const SteamIPAddress_t, usPort: uint16) void {
         return SteamAPI_ISteamClient_SetLocalIPBinding(self.ptr, unIP, usPort);
     }
 
-    pub fn GetISteamFriends(self: Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamFriends {
-        return SteamAPI_ISteamClient_GetISteamFriends(self.ptr, hSteamUser, hSteamPipe, pchVersion);
+    pub fn GetISteamFriends(self: *const Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamFriends {
+        return SteamAPI_ISteamClient_GetISteamFriends(self.ptr, hSteamUser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamUtils(self: Self, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamUtils {
-        return SteamAPI_ISteamClient_GetISteamUtils(self.ptr, hSteamPipe, pchVersion);
+    pub fn GetISteamUtils(self: *const Self, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamUtils {
+        return SteamAPI_ISteamClient_GetISteamUtils(self.ptr, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamMatchmaking(self: Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamMatchmaking {
-        return SteamAPI_ISteamClient_GetISteamMatchmaking(self.ptr, hSteamUser, hSteamPipe, pchVersion);
+    pub fn GetISteamMatchmaking(self: *const Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamMatchmaking {
+        return SteamAPI_ISteamClient_GetISteamMatchmaking(self.ptr, hSteamUser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamMatchmakingServers(self: Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamMatchmakingServers {
-        return SteamAPI_ISteamClient_GetISteamMatchmakingServers(self.ptr, hSteamUser, hSteamPipe, pchVersion);
+    pub fn GetISteamMatchmakingServers(self: *const Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamMatchmakingServers {
+        return SteamAPI_ISteamClient_GetISteamMatchmakingServers(self.ptr, hSteamUser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamGenericInterface(self: Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) ?*anyopaque {
-        return SteamAPI_ISteamClient_GetISteamGenericInterface(self.ptr, hSteamUser, hSteamPipe, pchVersion);
+    pub fn GetISteamGenericInterface(self: *const Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) ?*anyopaque {
+        return SteamAPI_ISteamClient_GetISteamGenericInterface(self.ptr, hSteamUser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamUserStats(self: Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamUserStats {
-        return SteamAPI_ISteamClient_GetISteamUserStats(self.ptr, hSteamUser, hSteamPipe, pchVersion);
+    pub fn GetISteamUserStats(self: *const Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamUserStats {
+        return SteamAPI_ISteamClient_GetISteamUserStats(self.ptr, hSteamUser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamGameServerStats(self: Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamGameServerStats {
-        return SteamAPI_ISteamClient_GetISteamGameServerStats(self.ptr, hSteamuser, hSteamPipe, pchVersion);
+    pub fn GetISteamGameServerStats(self: *const Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamGameServerStats {
+        return SteamAPI_ISteamClient_GetISteamGameServerStats(self.ptr, hSteamuser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamApps(self: Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamApps {
-        return SteamAPI_ISteamClient_GetISteamApps(self.ptr, hSteamUser, hSteamPipe, pchVersion);
+    pub fn GetISteamApps(self: *const Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamApps {
+        return SteamAPI_ISteamClient_GetISteamApps(self.ptr, hSteamUser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamNetworking(self: Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamNetworking {
-        return SteamAPI_ISteamClient_GetISteamNetworking(self.ptr, hSteamUser, hSteamPipe, pchVersion);
+    pub fn GetISteamNetworking(self: *const Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamNetworking {
+        return SteamAPI_ISteamClient_GetISteamNetworking(self.ptr, hSteamUser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamRemoteStorage(self: Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamRemoteStorage {
-        return SteamAPI_ISteamClient_GetISteamRemoteStorage(self.ptr, hSteamuser, hSteamPipe, pchVersion);
+    pub fn GetISteamRemoteStorage(self: *const Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamRemoteStorage {
+        return SteamAPI_ISteamClient_GetISteamRemoteStorage(self.ptr, hSteamuser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamScreenshots(self: Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamScreenshots {
-        return SteamAPI_ISteamClient_GetISteamScreenshots(self.ptr, hSteamuser, hSteamPipe, pchVersion);
+    pub fn GetISteamScreenshots(self: *const Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamScreenshots {
+        return SteamAPI_ISteamClient_GetISteamScreenshots(self.ptr, hSteamuser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamGameSearch(self: Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamGameSearch {
-        return SteamAPI_ISteamClient_GetISteamGameSearch(self.ptr, hSteamuser, hSteamPipe, pchVersion);
+    pub fn GetISteamGameSearch(self: *const Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamGameSearch {
+        return SteamAPI_ISteamClient_GetISteamGameSearch(self.ptr, hSteamuser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetIPCCallCount(self: Self) uint32 {
+    pub fn GetIPCCallCount(self: *const Self) uint32 {
         return SteamAPI_ISteamClient_GetIPCCallCount(self.ptr);
     }
 
-    pub fn SetWarningMessageHook(self: Self, pFunction: SteamAPIWarningMessageHook_t) void {
+    pub fn SetWarningMessageHook(self: *const Self, pFunction: SteamAPIWarningMessageHook_t) void {
         return SteamAPI_ISteamClient_SetWarningMessageHook(self.ptr, pFunction);
     }
 
-    pub fn BShutdownIfAllPipesClosed(self: Self) bool {
+    pub fn BShutdownIfAllPipesClosed(self: *const Self) bool {
         return SteamAPI_ISteamClient_BShutdownIfAllPipesClosed(self.ptr);
     }
 
-    pub fn GetISteamHTTP(self: Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamHTTP {
-        return SteamAPI_ISteamClient_GetISteamHTTP(self.ptr, hSteamuser, hSteamPipe, pchVersion);
+    pub fn GetISteamHTTP(self: *const Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamHTTP {
+        return SteamAPI_ISteamClient_GetISteamHTTP(self.ptr, hSteamuser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamController(self: Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamController {
-        return SteamAPI_ISteamClient_GetISteamController(self.ptr, hSteamUser, hSteamPipe, pchVersion);
+    pub fn GetISteamController(self: *const Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamController {
+        return SteamAPI_ISteamClient_GetISteamController(self.ptr, hSteamUser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamUGC(self: Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamUGC {
-        return SteamAPI_ISteamClient_GetISteamUGC(self.ptr, hSteamUser, hSteamPipe, pchVersion);
+    pub fn GetISteamUGC(self: *const Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamUGC {
+        return SteamAPI_ISteamClient_GetISteamUGC(self.ptr, hSteamUser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamAppList(self: Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamAppList {
-        return SteamAPI_ISteamClient_GetISteamAppList(self.ptr, hSteamUser, hSteamPipe, pchVersion);
+    pub fn GetISteamAppList(self: *const Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamAppList {
+        return SteamAPI_ISteamClient_GetISteamAppList(self.ptr, hSteamUser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamMusic(self: Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamMusic {
-        return SteamAPI_ISteamClient_GetISteamMusic(self.ptr, hSteamuser, hSteamPipe, pchVersion);
+    pub fn GetISteamMusic(self: *const Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamMusic {
+        return SteamAPI_ISteamClient_GetISteamMusic(self.ptr, hSteamuser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamMusicRemote(self: Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamMusicRemote {
-        return SteamAPI_ISteamClient_GetISteamMusicRemote(self.ptr, hSteamuser, hSteamPipe, pchVersion);
+    pub fn GetISteamMusicRemote(self: *const Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamMusicRemote {
+        return SteamAPI_ISteamClient_GetISteamMusicRemote(self.ptr, hSteamuser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamHTMLSurface(self: Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamHTMLSurface {
-        return SteamAPI_ISteamClient_GetISteamHTMLSurface(self.ptr, hSteamuser, hSteamPipe, pchVersion);
+    pub fn GetISteamHTMLSurface(self: *const Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamHTMLSurface {
+        return SteamAPI_ISteamClient_GetISteamHTMLSurface(self.ptr, hSteamuser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamInventory(self: Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamInventory {
-        return SteamAPI_ISteamClient_GetISteamInventory(self.ptr, hSteamuser, hSteamPipe, pchVersion);
+    pub fn GetISteamInventory(self: *const Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamInventory {
+        return SteamAPI_ISteamClient_GetISteamInventory(self.ptr, hSteamuser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamVideo(self: Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamVideo {
-        return SteamAPI_ISteamClient_GetISteamVideo(self.ptr, hSteamuser, hSteamPipe, pchVersion);
+    pub fn GetISteamVideo(self: *const Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamVideo {
+        return SteamAPI_ISteamClient_GetISteamVideo(self.ptr, hSteamuser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamParentalSettings(self: Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamParentalSettings {
-        return SteamAPI_ISteamClient_GetISteamParentalSettings(self.ptr, hSteamuser, hSteamPipe, pchVersion);
+    pub fn GetISteamParentalSettings(self: *const Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamParentalSettings {
+        return SteamAPI_ISteamClient_GetISteamParentalSettings(self.ptr, hSteamuser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamInput(self: Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamInput {
-        return SteamAPI_ISteamClient_GetISteamInput(self.ptr, hSteamUser, hSteamPipe, pchVersion);
+    pub fn GetISteamInput(self: *const Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamInput {
+        return SteamAPI_ISteamClient_GetISteamInput(self.ptr, hSteamUser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamParties(self: Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamParties {
-        return SteamAPI_ISteamClient_GetISteamParties(self.ptr, hSteamUser, hSteamPipe, pchVersion);
+    pub fn GetISteamParties(self: *const Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamParties {
+        return SteamAPI_ISteamClient_GetISteamParties(self.ptr, hSteamUser, hSteamPipe, pchVersion.ptr);
     }
 
-    pub fn GetISteamRemotePlay(self: Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) [*c]ISteamRemotePlay {
-        return SteamAPI_ISteamClient_GetISteamRemotePlay(self.ptr, hSteamUser, hSteamPipe, pchVersion);
+    pub fn GetISteamRemotePlay(self: *const Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: []const u8) [*c]ISteamRemotePlay {
+        return SteamAPI_ISteamClient_GetISteamRemotePlay(self.ptr, hSteamUser, hSteamPipe, pchVersion.ptr);
     }
 };
 
@@ -5999,7 +5999,7 @@ extern fn SteamAPI_ISteamClient_CreateLocalUser(self: ?*anyopaque, phSteamPipe: 
 extern fn SteamAPI_ISteamClient_ReleaseUser(self: ?*anyopaque, hSteamPipe: HSteamPipe, hUser: HSteamUser) callconv(.C) void;
 extern fn SteamAPI_ISteamClient_GetISteamUser(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamUser;
 extern fn SteamAPI_ISteamClient_GetISteamGameServer(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamGameServer;
-extern fn SteamAPI_ISteamClient_SetLocalIPBinding(self: ?*anyopaque, unIP: SteamIPAddress_t, usPort: uint16) callconv(.C) void;
+extern fn SteamAPI_ISteamClient_SetLocalIPBinding(self: ?*anyopaque, unIP: [*c]const SteamIPAddress_t, usPort: uint16) callconv(.C) void;
 extern fn SteamAPI_ISteamClient_GetISteamFriends(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamFriends;
 extern fn SteamAPI_ISteamClient_GetISteamUtils(self: ?*anyopaque, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamUtils;
 extern fn SteamAPI_ISteamClient_GetISteamMatchmaking(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamMatchmaking;
@@ -6038,135 +6038,135 @@ pub const ISteamUser = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn GetHSteamUser(self: Self) HSteamUser {
+    pub fn GetHSteamUser(self: *const Self) HSteamUser {
         return SteamAPI_ISteamUser_GetHSteamUser(self.ptr);
     }
 
-    pub fn BLoggedOn(self: Self) bool {
+    pub fn BLoggedOn(self: *const Self) bool {
         return SteamAPI_ISteamUser_BLoggedOn(self.ptr);
     }
 
-    pub fn GetSteamID(self: Self) CSteamID {
+    pub fn GetSteamID(self: *const Self) CSteamID {
         return SteamAPI_ISteamUser_GetSteamID(self.ptr);
     }
 
-    pub fn InitiateGameConnection_DEPRECATED(self: Self, pAuthBlob: ?*anyopaque, cbMaxAuthBlob: i32, steamIDGameServer: CSteamID, unIPServer: uint32, usPortServer: uint16, bSecure: bool) i32 {
-        return SteamAPI_ISteamUser_InitiateGameConnection_DEPRECATED(self.ptr, pAuthBlob, cbMaxAuthBlob, steamIDGameServer, unIPServer, usPortServer, bSecure);
+    pub fn InitiateGameConnection_DEPRECATED(self: *const Self, pAuthBlob: []u8, steamIDGameServer: CSteamID, unIPServer: uint32, usPortServer: uint16, bSecure: bool) i32 {
+        return SteamAPI_ISteamUser_InitiateGameConnection_DEPRECATED(self.ptr, pAuthBlob.ptr, @intCast(pAuthBlob.len), steamIDGameServer, unIPServer, usPortServer, bSecure);
     }
 
-    pub fn TerminateGameConnection_DEPRECATED(self: Self, unIPServer: uint32, usPortServer: uint16) void {
+    pub fn TerminateGameConnection_DEPRECATED(self: *const Self, unIPServer: uint32, usPortServer: uint16) void {
         return SteamAPI_ISteamUser_TerminateGameConnection_DEPRECATED(self.ptr, unIPServer, usPortServer);
     }
 
-    pub fn TrackAppUsageEvent(self: Self, gameID: CGameID, eAppUsageEvent: i32, pchExtraInfo: [*c]const u8) void {
-        return SteamAPI_ISteamUser_TrackAppUsageEvent(self.ptr, gameID, eAppUsageEvent, pchExtraInfo);
+    pub fn TrackAppUsageEvent(self: *const Self, gameID: CGameID, eAppUsageEvent: i32, pchExtraInfo: []const u8) void {
+        return SteamAPI_ISteamUser_TrackAppUsageEvent(self.ptr, gameID, eAppUsageEvent, pchExtraInfo.ptr);
     }
 
-    pub fn GetUserDataFolder(self: Self, pchBuffer: [*c]u8, cubBuffer: i32) bool {
-        return SteamAPI_ISteamUser_GetUserDataFolder(self.ptr, pchBuffer, cubBuffer);
+    pub fn GetUserDataFolder(self: *const Self, pchBuffer: []u8) bool {
+        return SteamAPI_ISteamUser_GetUserDataFolder(self.ptr, pchBuffer.ptr, @intCast(pchBuffer.len));
     }
 
-    pub fn StartVoiceRecording(self: Self) void {
+    pub fn StartVoiceRecording(self: *const Self) void {
         return SteamAPI_ISteamUser_StartVoiceRecording(self.ptr);
     }
 
-    pub fn StopVoiceRecording(self: Self) void {
+    pub fn StopVoiceRecording(self: *const Self) void {
         return SteamAPI_ISteamUser_StopVoiceRecording(self.ptr);
     }
 
-    pub fn GetAvailableVoice(self: Self, pcbCompressed: [*c]uint32, pcbUncompressed_Deprecated: [*c]uint32, nUncompressedVoiceDesiredSampleRate_Deprecated: uint32) EVoiceResult {
+    pub fn GetAvailableVoice(self: *const Self, pcbCompressed: *uint32, pcbUncompressed_Deprecated: *uint32, nUncompressedVoiceDesiredSampleRate_Deprecated: uint32) EVoiceResult {
         return SteamAPI_ISteamUser_GetAvailableVoice(self.ptr, pcbCompressed, pcbUncompressed_Deprecated, nUncompressedVoiceDesiredSampleRate_Deprecated);
     }
 
-    pub fn GetVoice(self: Self, bWantCompressed: bool, pDestBuffer: ?*anyopaque, cbDestBufferSize: uint32, nBytesWritten: [*c]uint32, bWantUncompressed_Deprecated: bool, pUncompressedDestBuffer_Deprecated: ?*anyopaque, cbUncompressedDestBufferSize_Deprecated: uint32, nUncompressBytesWritten_Deprecated: [*c]uint32, nUncompressedVoiceDesiredSampleRate_Deprecated: uint32) EVoiceResult {
-        return SteamAPI_ISteamUser_GetVoice(self.ptr, bWantCompressed, pDestBuffer, cbDestBufferSize, nBytesWritten, bWantUncompressed_Deprecated, pUncompressedDestBuffer_Deprecated, cbUncompressedDestBufferSize_Deprecated, nUncompressBytesWritten_Deprecated, nUncompressedVoiceDesiredSampleRate_Deprecated);
+    pub fn GetVoice(self: *const Self, bWantCompressed: bool, pDestBuffer: []u8, nBytesWritten: *uint32, bWantUncompressed_Deprecated: bool, pUncompressedDestBuffer_Deprecated: []u8, cbUncompressedDestBufferSize_Deprecated: uint32, nUncompressBytesWritten_Deprecated: *uint32, nUncompressedVoiceDesiredSampleRate_Deprecated: uint32) EVoiceResult {
+        return SteamAPI_ISteamUser_GetVoice(self.ptr, bWantCompressed, pDestBuffer.ptr, @intCast(pDestBuffer.len), nBytesWritten, bWantUncompressed_Deprecated, pUncompressedDestBuffer_Deprecated.ptr, cbUncompressedDestBufferSize_Deprecated, nUncompressBytesWritten_Deprecated, nUncompressedVoiceDesiredSampleRate_Deprecated);
     }
 
-    pub fn DecompressVoice(self: Self, pCompressed: ?*const anyopaque, cbCompressed: uint32, pDestBuffer: ?*anyopaque, cbDestBufferSize: uint32, nBytesWritten: [*c]uint32, nDesiredSampleRate: uint32) EVoiceResult {
-        return SteamAPI_ISteamUser_DecompressVoice(self.ptr, pCompressed, cbCompressed, pDestBuffer, cbDestBufferSize, nBytesWritten, nDesiredSampleRate);
+    pub fn DecompressVoice(self: *const Self, pCompressed: []const u8, pDestBuffer: []u8, nBytesWritten: *uint32, nDesiredSampleRate: uint32) EVoiceResult {
+        return SteamAPI_ISteamUser_DecompressVoice(self.ptr, pCompressed.ptr, @intCast(pCompressed.len), pDestBuffer.ptr, @intCast(pDestBuffer.len), nBytesWritten, nDesiredSampleRate);
     }
 
-    pub fn GetVoiceOptimalSampleRate(self: Self) uint32 {
+    pub fn GetVoiceOptimalSampleRate(self: *const Self) uint32 {
         return SteamAPI_ISteamUser_GetVoiceOptimalSampleRate(self.ptr);
     }
 
-    pub fn GetAuthSessionTicket(self: Self, pTicket: ?*anyopaque, cbMaxTicket: i32, pcbTicket: [*c]uint32, pSteamNetworkingIdentity: [*c]const SteamNetworkingIdentity) HAuthTicket {
-        return SteamAPI_ISteamUser_GetAuthSessionTicket(self.ptr, pTicket, cbMaxTicket, pcbTicket, pSteamNetworkingIdentity);
+    pub fn GetAuthSessionTicket(self: *const Self, pTicket: []u8, pcbTicket: *uint32, pSteamNetworkingIdentity: []const SteamNetworkingIdentity) HAuthTicket {
+        return SteamAPI_ISteamUser_GetAuthSessionTicket(self.ptr, pTicket.ptr, @intCast(pTicket.len), pcbTicket, pSteamNetworkingIdentity.ptr);
     }
 
-    pub fn GetAuthTicketForWebApi(self: Self, pchIdentity: [*c]const u8) HAuthTicket {
-        return SteamAPI_ISteamUser_GetAuthTicketForWebApi(self.ptr, pchIdentity);
+    pub fn GetAuthTicketForWebApi(self: *const Self, pchIdentity: []const u8) HAuthTicket {
+        return SteamAPI_ISteamUser_GetAuthTicketForWebApi(self.ptr, pchIdentity.ptr);
     }
 
-    pub fn BeginAuthSession(self: Self, pAuthTicket: ?*const anyopaque, cbAuthTicket: i32, steamID: CSteamID) EBeginAuthSessionResult {
-        return SteamAPI_ISteamUser_BeginAuthSession(self.ptr, pAuthTicket, cbAuthTicket, steamID);
+    pub fn BeginAuthSession(self: *const Self, pAuthTicket: []const u8, steamID: CSteamID) EBeginAuthSessionResult {
+        return SteamAPI_ISteamUser_BeginAuthSession(self.ptr, pAuthTicket.ptr, @intCast(pAuthTicket.len), steamID);
     }
 
-    pub fn EndAuthSession(self: Self, steamID: CSteamID) void {
+    pub fn EndAuthSession(self: *const Self, steamID: CSteamID) void {
         return SteamAPI_ISteamUser_EndAuthSession(self.ptr, steamID);
     }
 
-    pub fn CancelAuthTicket(self: Self, hAuthTicket: HAuthTicket) void {
+    pub fn CancelAuthTicket(self: *const Self, hAuthTicket: HAuthTicket) void {
         return SteamAPI_ISteamUser_CancelAuthTicket(self.ptr, hAuthTicket);
     }
 
-    pub fn UserHasLicenseForApp(self: Self, steamID: CSteamID, appID: AppId_t) EUserHasLicenseForAppResult {
+    pub fn UserHasLicenseForApp(self: *const Self, steamID: CSteamID, appID: AppId_t) EUserHasLicenseForAppResult {
         return SteamAPI_ISteamUser_UserHasLicenseForApp(self.ptr, steamID, appID);
     }
 
-    pub fn BIsBehindNAT(self: Self) bool {
+    pub fn BIsBehindNAT(self: *const Self) bool {
         return SteamAPI_ISteamUser_BIsBehindNAT(self.ptr);
     }
 
-    pub fn AdvertiseGame(self: Self, steamIDGameServer: CSteamID, unIPServer: uint32, usPortServer: uint16) void {
+    pub fn AdvertiseGame(self: *const Self, steamIDGameServer: CSteamID, unIPServer: uint32, usPortServer: uint16) void {
         return SteamAPI_ISteamUser_AdvertiseGame(self.ptr, steamIDGameServer, unIPServer, usPortServer);
     }
 
-    pub fn RequestEncryptedAppTicket(self: Self, pDataToInclude: ?*anyopaque, cbDataToInclude: i32) SteamAPICall_t {
-        return SteamAPI_ISteamUser_RequestEncryptedAppTicket(self.ptr, pDataToInclude, cbDataToInclude);
+    pub fn RequestEncryptedAppTicket(self: *const Self, pDataToInclude: []u8) SteamAPICall_t {
+        return SteamAPI_ISteamUser_RequestEncryptedAppTicket(self.ptr, pDataToInclude.ptr, @intCast(pDataToInclude.len));
     }
 
-    pub fn GetEncryptedAppTicket(self: Self, pTicket: ?*anyopaque, cbMaxTicket: i32, pcbTicket: [*c]uint32) bool {
-        return SteamAPI_ISteamUser_GetEncryptedAppTicket(self.ptr, pTicket, cbMaxTicket, pcbTicket);
+    pub fn GetEncryptedAppTicket(self: *const Self, pTicket: []u8, pcbTicket: *uint32) bool {
+        return SteamAPI_ISteamUser_GetEncryptedAppTicket(self.ptr, pTicket.ptr, @intCast(pTicket.len), pcbTicket);
     }
 
-    pub fn GetGameBadgeLevel(self: Self, nSeries: i32, bFoil: bool) i32 {
+    pub fn GetGameBadgeLevel(self: *const Self, nSeries: i32, bFoil: bool) i32 {
         return SteamAPI_ISteamUser_GetGameBadgeLevel(self.ptr, nSeries, bFoil);
     }
 
-    pub fn GetPlayerSteamLevel(self: Self) i32 {
+    pub fn GetPlayerSteamLevel(self: *const Self) i32 {
         return SteamAPI_ISteamUser_GetPlayerSteamLevel(self.ptr);
     }
 
-    pub fn RequestStoreAuthURL(self: Self, pchRedirectURL: [*c]const u8) SteamAPICall_t {
-        return SteamAPI_ISteamUser_RequestStoreAuthURL(self.ptr, pchRedirectURL);
+    pub fn RequestStoreAuthURL(self: *const Self, pchRedirectURL: []const u8) SteamAPICall_t {
+        return SteamAPI_ISteamUser_RequestStoreAuthURL(self.ptr, pchRedirectURL.ptr);
     }
 
-    pub fn BIsPhoneVerified(self: Self) bool {
+    pub fn BIsPhoneVerified(self: *const Self) bool {
         return SteamAPI_ISteamUser_BIsPhoneVerified(self.ptr);
     }
 
-    pub fn BIsTwoFactorEnabled(self: Self) bool {
+    pub fn BIsTwoFactorEnabled(self: *const Self) bool {
         return SteamAPI_ISteamUser_BIsTwoFactorEnabled(self.ptr);
     }
 
-    pub fn BIsPhoneIdentifying(self: Self) bool {
+    pub fn BIsPhoneIdentifying(self: *const Self) bool {
         return SteamAPI_ISteamUser_BIsPhoneIdentifying(self.ptr);
     }
 
-    pub fn BIsPhoneRequiringVerification(self: Self) bool {
+    pub fn BIsPhoneRequiringVerification(self: *const Self) bool {
         return SteamAPI_ISteamUser_BIsPhoneRequiringVerification(self.ptr);
     }
 
-    pub fn GetMarketEligibility(self: Self) SteamAPICall_t {
+    pub fn GetMarketEligibility(self: *const Self) SteamAPICall_t {
         return SteamAPI_ISteamUser_GetMarketEligibility(self.ptr);
     }
 
-    pub fn GetDurationControl(self: Self) SteamAPICall_t {
+    pub fn GetDurationControl(self: *const Self) SteamAPICall_t {
         return SteamAPI_ISteamUser_GetDurationControl(self.ptr);
     }
 
-    pub fn BSetDurationControlOnlineState(self: Self, eNewState: EDurationControlOnlineState) bool {
+    pub fn BSetDurationControlOnlineState(self: *const Self, eNewState: EDurationControlOnlineState) bool {
         return SteamAPI_ISteamUser_BSetDurationControlOnlineState(self.ptr, eNewState);
     }
 };
@@ -6215,323 +6215,323 @@ pub const ISteamFriends = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn GetPersonaName(self: Self) [*c]const u8 {
+    pub fn GetPersonaName(self: *const Self) [*c]const u8 {
         return SteamAPI_ISteamFriends_GetPersonaName(self.ptr);
     }
 
-    pub fn SetPersonaName(self: Self, pchPersonaName: [*c]const u8) SteamAPICall_t {
-        return SteamAPI_ISteamFriends_SetPersonaName(self.ptr, pchPersonaName);
+    pub fn SetPersonaName(self: *const Self, pchPersonaName: []const u8) SteamAPICall_t {
+        return SteamAPI_ISteamFriends_SetPersonaName(self.ptr, pchPersonaName.ptr);
     }
 
-    pub fn GetPersonaState(self: Self) EPersonaState {
+    pub fn GetPersonaState(self: *const Self) EPersonaState {
         return SteamAPI_ISteamFriends_GetPersonaState(self.ptr);
     }
 
-    pub fn GetFriendCount(self: Self, iFriendFlags: i32) i32 {
+    pub fn GetFriendCount(self: *const Self, iFriendFlags: i32) i32 {
         return SteamAPI_ISteamFriends_GetFriendCount(self.ptr, iFriendFlags);
     }
 
-    pub fn GetFriendByIndex(self: Self, iFriend: i32, iFriendFlags: i32) CSteamID {
+    pub fn GetFriendByIndex(self: *const Self, iFriend: i32, iFriendFlags: i32) CSteamID {
         return SteamAPI_ISteamFriends_GetFriendByIndex(self.ptr, iFriend, iFriendFlags);
     }
 
-    pub fn GetFriendRelationship(self: Self, steamIDFriend: CSteamID) EFriendRelationship {
+    pub fn GetFriendRelationship(self: *const Self, steamIDFriend: CSteamID) EFriendRelationship {
         return SteamAPI_ISteamFriends_GetFriendRelationship(self.ptr, steamIDFriend);
     }
 
-    pub fn GetFriendPersonaState(self: Self, steamIDFriend: CSteamID) EPersonaState {
+    pub fn GetFriendPersonaState(self: *const Self, steamIDFriend: CSteamID) EPersonaState {
         return SteamAPI_ISteamFriends_GetFriendPersonaState(self.ptr, steamIDFriend);
     }
 
-    pub fn GetFriendPersonaName(self: Self, steamIDFriend: CSteamID) [*c]const u8 {
+    pub fn GetFriendPersonaName(self: *const Self, steamIDFriend: CSteamID) [*c]const u8 {
         return SteamAPI_ISteamFriends_GetFriendPersonaName(self.ptr, steamIDFriend);
     }
 
-    pub fn GetFriendGamePlayed(self: Self, steamIDFriend: CSteamID, pFriendGameInfo: [*c]FriendGameInfo_t) bool {
-        return SteamAPI_ISteamFriends_GetFriendGamePlayed(self.ptr, steamIDFriend, pFriendGameInfo);
+    pub fn GetFriendGamePlayed(self: *const Self, steamIDFriend: CSteamID, pFriendGameInfo: []FriendGameInfo_t) bool {
+        return SteamAPI_ISteamFriends_GetFriendGamePlayed(self.ptr, steamIDFriend, pFriendGameInfo.ptr);
     }
 
-    pub fn GetFriendPersonaNameHistory(self: Self, steamIDFriend: CSteamID, iPersonaName: i32) [*c]const u8 {
+    pub fn GetFriendPersonaNameHistory(self: *const Self, steamIDFriend: CSteamID, iPersonaName: i32) [*c]const u8 {
         return SteamAPI_ISteamFriends_GetFriendPersonaNameHistory(self.ptr, steamIDFriend, iPersonaName);
     }
 
-    pub fn GetFriendSteamLevel(self: Self, steamIDFriend: CSteamID) i32 {
+    pub fn GetFriendSteamLevel(self: *const Self, steamIDFriend: CSteamID) i32 {
         return SteamAPI_ISteamFriends_GetFriendSteamLevel(self.ptr, steamIDFriend);
     }
 
-    pub fn GetPlayerNickname(self: Self, steamIDPlayer: CSteamID) [*c]const u8 {
+    pub fn GetPlayerNickname(self: *const Self, steamIDPlayer: CSteamID) [*c]const u8 {
         return SteamAPI_ISteamFriends_GetPlayerNickname(self.ptr, steamIDPlayer);
     }
 
-    pub fn GetFriendsGroupCount(self: Self) i32 {
+    pub fn GetFriendsGroupCount(self: *const Self) i32 {
         return SteamAPI_ISteamFriends_GetFriendsGroupCount(self.ptr);
     }
 
-    pub fn GetFriendsGroupIDByIndex(self: Self, iFG: i32) FriendsGroupID_t {
+    pub fn GetFriendsGroupIDByIndex(self: *const Self, iFG: i32) FriendsGroupID_t {
         return SteamAPI_ISteamFriends_GetFriendsGroupIDByIndex(self.ptr, iFG);
     }
 
-    pub fn GetFriendsGroupName(self: Self, friendsGroupID: FriendsGroupID_t) [*c]const u8 {
+    pub fn GetFriendsGroupName(self: *const Self, friendsGroupID: FriendsGroupID_t) [*c]const u8 {
         return SteamAPI_ISteamFriends_GetFriendsGroupName(self.ptr, friendsGroupID);
     }
 
-    pub fn GetFriendsGroupMembersCount(self: Self, friendsGroupID: FriendsGroupID_t) i32 {
+    pub fn GetFriendsGroupMembersCount(self: *const Self, friendsGroupID: FriendsGroupID_t) i32 {
         return SteamAPI_ISteamFriends_GetFriendsGroupMembersCount(self.ptr, friendsGroupID);
     }
 
-    pub fn GetFriendsGroupMembersList(self: Self, friendsGroupID: FriendsGroupID_t, pOutSteamIDMembers: [*c]CSteamID, nMembersCount: i32) void {
-        return SteamAPI_ISteamFriends_GetFriendsGroupMembersList(self.ptr, friendsGroupID, pOutSteamIDMembers, nMembersCount);
+    pub fn GetFriendsGroupMembersList(self: *const Self, friendsGroupID: FriendsGroupID_t, pOutSteamIDMembers: []CSteamID, nMembersCount: i32) void {
+        return SteamAPI_ISteamFriends_GetFriendsGroupMembersList(self.ptr, friendsGroupID, pOutSteamIDMembers.ptr, nMembersCount);
     }
 
-    pub fn HasFriend(self: Self, steamIDFriend: CSteamID, iFriendFlags: i32) bool {
+    pub fn HasFriend(self: *const Self, steamIDFriend: CSteamID, iFriendFlags: i32) bool {
         return SteamAPI_ISteamFriends_HasFriend(self.ptr, steamIDFriend, iFriendFlags);
     }
 
-    pub fn GetClanCount(self: Self) i32 {
+    pub fn GetClanCount(self: *const Self) i32 {
         return SteamAPI_ISteamFriends_GetClanCount(self.ptr);
     }
 
-    pub fn GetClanByIndex(self: Self, iClan: i32) CSteamID {
+    pub fn GetClanByIndex(self: *const Self, iClan: i32) CSteamID {
         return SteamAPI_ISteamFriends_GetClanByIndex(self.ptr, iClan);
     }
 
-    pub fn GetClanName(self: Self, steamIDClan: CSteamID) [*c]const u8 {
+    pub fn GetClanName(self: *const Self, steamIDClan: CSteamID) [*c]const u8 {
         return SteamAPI_ISteamFriends_GetClanName(self.ptr, steamIDClan);
     }
 
-    pub fn GetClanTag(self: Self, steamIDClan: CSteamID) [*c]const u8 {
+    pub fn GetClanTag(self: *const Self, steamIDClan: CSteamID) [*c]const u8 {
         return SteamAPI_ISteamFriends_GetClanTag(self.ptr, steamIDClan);
     }
 
-    pub fn GetClanActivityCounts(self: Self, steamIDClan: CSteamID, pnOnline: [*c]i32, pnInGame: [*c]i32, pnChatting: [*c]i32) bool {
+    pub fn GetClanActivityCounts(self: *const Self, steamIDClan: CSteamID, pnOnline: *i32, pnInGame: *i32, pnChatting: *i32) bool {
         return SteamAPI_ISteamFriends_GetClanActivityCounts(self.ptr, steamIDClan, pnOnline, pnInGame, pnChatting);
     }
 
-    pub fn DownloadClanActivityCounts(self: Self, psteamIDClans: [*c]CSteamID, cClansToRequest: i32) SteamAPICall_t {
+    pub fn DownloadClanActivityCounts(self: *const Self, psteamIDClans: *CSteamID, cClansToRequest: i32) SteamAPICall_t {
         return SteamAPI_ISteamFriends_DownloadClanActivityCounts(self.ptr, psteamIDClans, cClansToRequest);
     }
 
-    pub fn GetFriendCountFromSource(self: Self, steamIDSource: CSteamID) i32 {
+    pub fn GetFriendCountFromSource(self: *const Self, steamIDSource: CSteamID) i32 {
         return SteamAPI_ISteamFriends_GetFriendCountFromSource(self.ptr, steamIDSource);
     }
 
-    pub fn GetFriendFromSourceByIndex(self: Self, steamIDSource: CSteamID, iFriend: i32) CSteamID {
+    pub fn GetFriendFromSourceByIndex(self: *const Self, steamIDSource: CSteamID, iFriend: i32) CSteamID {
         return SteamAPI_ISteamFriends_GetFriendFromSourceByIndex(self.ptr, steamIDSource, iFriend);
     }
 
-    pub fn IsUserInSource(self: Self, steamIDUser: CSteamID, steamIDSource: CSteamID) bool {
+    pub fn IsUserInSource(self: *const Self, steamIDUser: CSteamID, steamIDSource: CSteamID) bool {
         return SteamAPI_ISteamFriends_IsUserInSource(self.ptr, steamIDUser, steamIDSource);
     }
 
-    pub fn SetInGameVoiceSpeaking(self: Self, steamIDUser: CSteamID, bSpeaking: bool) void {
+    pub fn SetInGameVoiceSpeaking(self: *const Self, steamIDUser: CSteamID, bSpeaking: bool) void {
         return SteamAPI_ISteamFriends_SetInGameVoiceSpeaking(self.ptr, steamIDUser, bSpeaking);
     }
 
-    pub fn ActivateGameOverlay(self: Self, pchDialog: [*c]const u8) void {
-        return SteamAPI_ISteamFriends_ActivateGameOverlay(self.ptr, pchDialog);
+    pub fn ActivateGameOverlay(self: *const Self, pchDialog: []const u8) void {
+        return SteamAPI_ISteamFriends_ActivateGameOverlay(self.ptr, pchDialog.ptr);
     }
 
-    pub fn ActivateGameOverlayToUser(self: Self, pchDialog: [*c]const u8, steamID: CSteamID) void {
-        return SteamAPI_ISteamFriends_ActivateGameOverlayToUser(self.ptr, pchDialog, steamID);
+    pub fn ActivateGameOverlayToUser(self: *const Self, pchDialog: []const u8, steamID: CSteamID) void {
+        return SteamAPI_ISteamFriends_ActivateGameOverlayToUser(self.ptr, pchDialog.ptr, steamID);
     }
 
-    pub fn ActivateGameOverlayToWebPage(self: Self, pchURL: [*c]const u8, eMode: EActivateGameOverlayToWebPageMode) void {
-        return SteamAPI_ISteamFriends_ActivateGameOverlayToWebPage(self.ptr, pchURL, eMode);
+    pub fn ActivateGameOverlayToWebPage(self: *const Self, pchURL: []const u8, eMode: EActivateGameOverlayToWebPageMode) void {
+        return SteamAPI_ISteamFriends_ActivateGameOverlayToWebPage(self.ptr, pchURL.ptr, eMode);
     }
 
-    pub fn ActivateGameOverlayToStore(self: Self, nAppID: AppId_t, eFlag: EOverlayToStoreFlag) void {
+    pub fn ActivateGameOverlayToStore(self: *const Self, nAppID: AppId_t, eFlag: EOverlayToStoreFlag) void {
         return SteamAPI_ISteamFriends_ActivateGameOverlayToStore(self.ptr, nAppID, eFlag);
     }
 
-    pub fn SetPlayedWith(self: Self, steamIDUserPlayedWith: CSteamID) void {
+    pub fn SetPlayedWith(self: *const Self, steamIDUserPlayedWith: CSteamID) void {
         return SteamAPI_ISteamFriends_SetPlayedWith(self.ptr, steamIDUserPlayedWith);
     }
 
-    pub fn ActivateGameOverlayInviteDialog(self: Self, steamIDLobby: CSteamID) void {
+    pub fn ActivateGameOverlayInviteDialog(self: *const Self, steamIDLobby: CSteamID) void {
         return SteamAPI_ISteamFriends_ActivateGameOverlayInviteDialog(self.ptr, steamIDLobby);
     }
 
-    pub fn GetSmallFriendAvatar(self: Self, steamIDFriend: CSteamID) i32 {
+    pub fn GetSmallFriendAvatar(self: *const Self, steamIDFriend: CSteamID) i32 {
         return SteamAPI_ISteamFriends_GetSmallFriendAvatar(self.ptr, steamIDFriend);
     }
 
-    pub fn GetMediumFriendAvatar(self: Self, steamIDFriend: CSteamID) i32 {
+    pub fn GetMediumFriendAvatar(self: *const Self, steamIDFriend: CSteamID) i32 {
         return SteamAPI_ISteamFriends_GetMediumFriendAvatar(self.ptr, steamIDFriend);
     }
 
-    pub fn GetLargeFriendAvatar(self: Self, steamIDFriend: CSteamID) i32 {
+    pub fn GetLargeFriendAvatar(self: *const Self, steamIDFriend: CSteamID) i32 {
         return SteamAPI_ISteamFriends_GetLargeFriendAvatar(self.ptr, steamIDFriend);
     }
 
-    pub fn RequestUserInformation(self: Self, steamIDUser: CSteamID, bRequireNameOnly: bool) bool {
+    pub fn RequestUserInformation(self: *const Self, steamIDUser: CSteamID, bRequireNameOnly: bool) bool {
         return SteamAPI_ISteamFriends_RequestUserInformation(self.ptr, steamIDUser, bRequireNameOnly);
     }
 
-    pub fn RequestClanOfficerList(self: Self, steamIDClan: CSteamID) SteamAPICall_t {
+    pub fn RequestClanOfficerList(self: *const Self, steamIDClan: CSteamID) SteamAPICall_t {
         return SteamAPI_ISteamFriends_RequestClanOfficerList(self.ptr, steamIDClan);
     }
 
-    pub fn GetClanOwner(self: Self, steamIDClan: CSteamID) CSteamID {
+    pub fn GetClanOwner(self: *const Self, steamIDClan: CSteamID) CSteamID {
         return SteamAPI_ISteamFriends_GetClanOwner(self.ptr, steamIDClan);
     }
 
-    pub fn GetClanOfficerCount(self: Self, steamIDClan: CSteamID) i32 {
+    pub fn GetClanOfficerCount(self: *const Self, steamIDClan: CSteamID) i32 {
         return SteamAPI_ISteamFriends_GetClanOfficerCount(self.ptr, steamIDClan);
     }
 
-    pub fn GetClanOfficerByIndex(self: Self, steamIDClan: CSteamID, iOfficer: i32) CSteamID {
+    pub fn GetClanOfficerByIndex(self: *const Self, steamIDClan: CSteamID, iOfficer: i32) CSteamID {
         return SteamAPI_ISteamFriends_GetClanOfficerByIndex(self.ptr, steamIDClan, iOfficer);
     }
 
-    pub fn GetUserRestrictions(self: Self) uint32 {
+    pub fn GetUserRestrictions(self: *const Self) uint32 {
         return SteamAPI_ISteamFriends_GetUserRestrictions(self.ptr);
     }
 
-    pub fn SetRichPresence(self: Self, pchKey: [*c]const u8, pchValue: [*c]const u8) bool {
-        return SteamAPI_ISteamFriends_SetRichPresence(self.ptr, pchKey, pchValue);
+    pub fn SetRichPresence(self: *const Self, pchKey: []const u8, pchValue: []const u8) bool {
+        return SteamAPI_ISteamFriends_SetRichPresence(self.ptr, pchKey.ptr, pchValue.ptr);
     }
 
-    pub fn ClearRichPresence(self: Self) void {
+    pub fn ClearRichPresence(self: *const Self) void {
         return SteamAPI_ISteamFriends_ClearRichPresence(self.ptr);
     }
 
-    pub fn GetFriendRichPresence(self: Self, steamIDFriend: CSteamID, pchKey: [*c]const u8) [*c]const u8 {
-        return SteamAPI_ISteamFriends_GetFriendRichPresence(self.ptr, steamIDFriend, pchKey);
+    pub fn GetFriendRichPresence(self: *const Self, steamIDFriend: CSteamID, pchKey: []const u8) [*c]const u8 {
+        return SteamAPI_ISteamFriends_GetFriendRichPresence(self.ptr, steamIDFriend, pchKey.ptr);
     }
 
-    pub fn GetFriendRichPresenceKeyCount(self: Self, steamIDFriend: CSteamID) i32 {
+    pub fn GetFriendRichPresenceKeyCount(self: *const Self, steamIDFriend: CSteamID) i32 {
         return SteamAPI_ISteamFriends_GetFriendRichPresenceKeyCount(self.ptr, steamIDFriend);
     }
 
-    pub fn GetFriendRichPresenceKeyByIndex(self: Self, steamIDFriend: CSteamID, iKey: i32) [*c]const u8 {
+    pub fn GetFriendRichPresenceKeyByIndex(self: *const Self, steamIDFriend: CSteamID, iKey: i32) [*c]const u8 {
         return SteamAPI_ISteamFriends_GetFriendRichPresenceKeyByIndex(self.ptr, steamIDFriend, iKey);
     }
 
-    pub fn RequestFriendRichPresence(self: Self, steamIDFriend: CSteamID) void {
+    pub fn RequestFriendRichPresence(self: *const Self, steamIDFriend: CSteamID) void {
         return SteamAPI_ISteamFriends_RequestFriendRichPresence(self.ptr, steamIDFriend);
     }
 
-    pub fn InviteUserToGame(self: Self, steamIDFriend: CSteamID, pchConnectString: [*c]const u8) bool {
-        return SteamAPI_ISteamFriends_InviteUserToGame(self.ptr, steamIDFriend, pchConnectString);
+    pub fn InviteUserToGame(self: *const Self, steamIDFriend: CSteamID, pchConnectString: []const u8) bool {
+        return SteamAPI_ISteamFriends_InviteUserToGame(self.ptr, steamIDFriend, pchConnectString.ptr);
     }
 
-    pub fn GetCoplayFriendCount(self: Self) i32 {
+    pub fn GetCoplayFriendCount(self: *const Self) i32 {
         return SteamAPI_ISteamFriends_GetCoplayFriendCount(self.ptr);
     }
 
-    pub fn GetCoplayFriend(self: Self, iCoplayFriend: i32) CSteamID {
+    pub fn GetCoplayFriend(self: *const Self, iCoplayFriend: i32) CSteamID {
         return SteamAPI_ISteamFriends_GetCoplayFriend(self.ptr, iCoplayFriend);
     }
 
-    pub fn GetFriendCoplayTime(self: Self, steamIDFriend: CSteamID) i32 {
+    pub fn GetFriendCoplayTime(self: *const Self, steamIDFriend: CSteamID) i32 {
         return SteamAPI_ISteamFriends_GetFriendCoplayTime(self.ptr, steamIDFriend);
     }
 
-    pub fn GetFriendCoplayGame(self: Self, steamIDFriend: CSteamID) AppId_t {
+    pub fn GetFriendCoplayGame(self: *const Self, steamIDFriend: CSteamID) AppId_t {
         return SteamAPI_ISteamFriends_GetFriendCoplayGame(self.ptr, steamIDFriend);
     }
 
-    pub fn JoinClanChatRoom(self: Self, steamIDClan: CSteamID) SteamAPICall_t {
+    pub fn JoinClanChatRoom(self: *const Self, steamIDClan: CSteamID) SteamAPICall_t {
         return SteamAPI_ISteamFriends_JoinClanChatRoom(self.ptr, steamIDClan);
     }
 
-    pub fn LeaveClanChatRoom(self: Self, steamIDClan: CSteamID) bool {
+    pub fn LeaveClanChatRoom(self: *const Self, steamIDClan: CSteamID) bool {
         return SteamAPI_ISteamFriends_LeaveClanChatRoom(self.ptr, steamIDClan);
     }
 
-    pub fn GetClanChatMemberCount(self: Self, steamIDClan: CSteamID) i32 {
+    pub fn GetClanChatMemberCount(self: *const Self, steamIDClan: CSteamID) i32 {
         return SteamAPI_ISteamFriends_GetClanChatMemberCount(self.ptr, steamIDClan);
     }
 
-    pub fn GetChatMemberByIndex(self: Self, steamIDClan: CSteamID, iUser: i32) CSteamID {
+    pub fn GetChatMemberByIndex(self: *const Self, steamIDClan: CSteamID, iUser: i32) CSteamID {
         return SteamAPI_ISteamFriends_GetChatMemberByIndex(self.ptr, steamIDClan, iUser);
     }
 
-    pub fn SendClanChatMessage(self: Self, steamIDClanChat: CSteamID, pchText: [*c]const u8) bool {
-        return SteamAPI_ISteamFriends_SendClanChatMessage(self.ptr, steamIDClanChat, pchText);
+    pub fn SendClanChatMessage(self: *const Self, steamIDClanChat: CSteamID, pchText: []const u8) bool {
+        return SteamAPI_ISteamFriends_SendClanChatMessage(self.ptr, steamIDClanChat, pchText.ptr);
     }
 
-    pub fn GetClanChatMessage(self: Self, steamIDClanChat: CSteamID, iMessage: i32, prgchText: ?*anyopaque, cchTextMax: i32, peChatEntryType: [*c]EChatEntryType, psteamidChatter: [*c]CSteamID) i32 {
+    pub fn GetClanChatMessage(self: *const Self, steamIDClanChat: CSteamID, iMessage: i32, prgchText: *u8, cchTextMax: i32, peChatEntryType: *EChatEntryType, psteamidChatter: *CSteamID) i32 {
         return SteamAPI_ISteamFriends_GetClanChatMessage(self.ptr, steamIDClanChat, iMessage, prgchText, cchTextMax, peChatEntryType, psteamidChatter);
     }
 
-    pub fn IsClanChatAdmin(self: Self, steamIDClanChat: CSteamID, steamIDUser: CSteamID) bool {
+    pub fn IsClanChatAdmin(self: *const Self, steamIDClanChat: CSteamID, steamIDUser: CSteamID) bool {
         return SteamAPI_ISteamFriends_IsClanChatAdmin(self.ptr, steamIDClanChat, steamIDUser);
     }
 
-    pub fn IsClanChatWindowOpenInSteam(self: Self, steamIDClanChat: CSteamID) bool {
+    pub fn IsClanChatWindowOpenInSteam(self: *const Self, steamIDClanChat: CSteamID) bool {
         return SteamAPI_ISteamFriends_IsClanChatWindowOpenInSteam(self.ptr, steamIDClanChat);
     }
 
-    pub fn OpenClanChatWindowInSteam(self: Self, steamIDClanChat: CSteamID) bool {
+    pub fn OpenClanChatWindowInSteam(self: *const Self, steamIDClanChat: CSteamID) bool {
         return SteamAPI_ISteamFriends_OpenClanChatWindowInSteam(self.ptr, steamIDClanChat);
     }
 
-    pub fn CloseClanChatWindowInSteam(self: Self, steamIDClanChat: CSteamID) bool {
+    pub fn CloseClanChatWindowInSteam(self: *const Self, steamIDClanChat: CSteamID) bool {
         return SteamAPI_ISteamFriends_CloseClanChatWindowInSteam(self.ptr, steamIDClanChat);
     }
 
-    pub fn SetListenForFriendsMessages(self: Self, bInterceptEnabled: bool) bool {
+    pub fn SetListenForFriendsMessages(self: *const Self, bInterceptEnabled: bool) bool {
         return SteamAPI_ISteamFriends_SetListenForFriendsMessages(self.ptr, bInterceptEnabled);
     }
 
-    pub fn ReplyToFriendMessage(self: Self, steamIDFriend: CSteamID, pchMsgToSend: [*c]const u8) bool {
-        return SteamAPI_ISteamFriends_ReplyToFriendMessage(self.ptr, steamIDFriend, pchMsgToSend);
+    pub fn ReplyToFriendMessage(self: *const Self, steamIDFriend: CSteamID, pchMsgToSend: []const u8) bool {
+        return SteamAPI_ISteamFriends_ReplyToFriendMessage(self.ptr, steamIDFriend, pchMsgToSend.ptr);
     }
 
-    pub fn GetFriendMessage(self: Self, steamIDFriend: CSteamID, iMessageID: i32, pvData: ?*anyopaque, cubData: i32, peChatEntryType: [*c]EChatEntryType) i32 {
-        return SteamAPI_ISteamFriends_GetFriendMessage(self.ptr, steamIDFriend, iMessageID, pvData, cubData, peChatEntryType);
+    pub fn GetFriendMessage(self: *const Self, steamIDFriend: CSteamID, iMessageID: i32, pvData: []u8, peChatEntryType: *EChatEntryType) i32 {
+        return SteamAPI_ISteamFriends_GetFriendMessage(self.ptr, steamIDFriend, iMessageID, pvData.ptr, @intCast(pvData.len), peChatEntryType);
     }
 
-    pub fn GetFollowerCount(self: Self, steamID: CSteamID) SteamAPICall_t {
+    pub fn GetFollowerCount(self: *const Self, steamID: CSteamID) SteamAPICall_t {
         return SteamAPI_ISteamFriends_GetFollowerCount(self.ptr, steamID);
     }
 
-    pub fn IsFollowing(self: Self, steamID: CSteamID) SteamAPICall_t {
+    pub fn IsFollowing(self: *const Self, steamID: CSteamID) SteamAPICall_t {
         return SteamAPI_ISteamFriends_IsFollowing(self.ptr, steamID);
     }
 
-    pub fn EnumerateFollowingList(self: Self, unStartIndex: uint32) SteamAPICall_t {
+    pub fn EnumerateFollowingList(self: *const Self, unStartIndex: uint32) SteamAPICall_t {
         return SteamAPI_ISteamFriends_EnumerateFollowingList(self.ptr, unStartIndex);
     }
 
-    pub fn IsClanPublic(self: Self, steamIDClan: CSteamID) bool {
+    pub fn IsClanPublic(self: *const Self, steamIDClan: CSteamID) bool {
         return SteamAPI_ISteamFriends_IsClanPublic(self.ptr, steamIDClan);
     }
 
-    pub fn IsClanOfficialGameGroup(self: Self, steamIDClan: CSteamID) bool {
+    pub fn IsClanOfficialGameGroup(self: *const Self, steamIDClan: CSteamID) bool {
         return SteamAPI_ISteamFriends_IsClanOfficialGameGroup(self.ptr, steamIDClan);
     }
 
-    pub fn GetNumChatsWithUnreadPriorityMessages(self: Self) i32 {
+    pub fn GetNumChatsWithUnreadPriorityMessages(self: *const Self) i32 {
         return SteamAPI_ISteamFriends_GetNumChatsWithUnreadPriorityMessages(self.ptr);
     }
 
-    pub fn ActivateGameOverlayRemotePlayTogetherInviteDialog(self: Self, steamIDLobby: CSteamID) void {
+    pub fn ActivateGameOverlayRemotePlayTogetherInviteDialog(self: *const Self, steamIDLobby: CSteamID) void {
         return SteamAPI_ISteamFriends_ActivateGameOverlayRemotePlayTogetherInviteDialog(self.ptr, steamIDLobby);
     }
 
-    pub fn RegisterProtocolInOverlayBrowser(self: Self, pchProtocol: [*c]const u8) bool {
-        return SteamAPI_ISteamFriends_RegisterProtocolInOverlayBrowser(self.ptr, pchProtocol);
+    pub fn RegisterProtocolInOverlayBrowser(self: *const Self, pchProtocol: []const u8) bool {
+        return SteamAPI_ISteamFriends_RegisterProtocolInOverlayBrowser(self.ptr, pchProtocol.ptr);
     }
 
-    pub fn ActivateGameOverlayInviteDialogConnectString(self: Self, pchConnectString: [*c]const u8) void {
-        return SteamAPI_ISteamFriends_ActivateGameOverlayInviteDialogConnectString(self.ptr, pchConnectString);
+    pub fn ActivateGameOverlayInviteDialogConnectString(self: *const Self, pchConnectString: []const u8) void {
+        return SteamAPI_ISteamFriends_ActivateGameOverlayInviteDialogConnectString(self.ptr, pchConnectString.ptr);
     }
 
-    pub fn RequestEquippedProfileItems(self: Self, steamID: CSteamID) SteamAPICall_t {
+    pub fn RequestEquippedProfileItems(self: *const Self, steamID: CSteamID) SteamAPICall_t {
         return SteamAPI_ISteamFriends_RequestEquippedProfileItems(self.ptr, steamID);
     }
 
-    pub fn BHasEquippedProfileItem(self: Self, steamID: CSteamID, itemType: ECommunityProfileItemType) bool {
+    pub fn BHasEquippedProfileItem(self: *const Self, steamID: CSteamID, itemType: ECommunityProfileItemType) bool {
         return SteamAPI_ISteamFriends_BHasEquippedProfileItem(self.ptr, steamID, itemType);
     }
 
-    pub fn GetProfileItemPropertyString(self: Self, steamID: CSteamID, itemType: ECommunityProfileItemType, prop: ECommunityProfileItemProperty) [*c]const u8 {
+    pub fn GetProfileItemPropertyString(self: *const Self, steamID: CSteamID, itemType: ECommunityProfileItemType, prop: ECommunityProfileItemProperty) [*c]const u8 {
         return SteamAPI_ISteamFriends_GetProfileItemPropertyString(self.ptr, steamID, itemType, prop);
     }
 
-    pub fn GetProfileItemPropertyUint(self: Self, steamID: CSteamID, itemType: ECommunityProfileItemType, prop: ECommunityProfileItemProperty) uint32 {
+    pub fn GetProfileItemPropertyUint(self: *const Self, steamID: CSteamID, itemType: ECommunityProfileItemType, prop: ECommunityProfileItemProperty) uint32 {
         return SteamAPI_ISteamFriends_GetProfileItemPropertyUint(self.ptr, steamID, itemType, prop);
     }
 };
@@ -6632,147 +6632,147 @@ pub const ISteamUtils = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn GetSecondsSinceAppActive(self: Self) uint32 {
+    pub fn GetSecondsSinceAppActive(self: *const Self) uint32 {
         return SteamAPI_ISteamUtils_GetSecondsSinceAppActive(self.ptr);
     }
 
-    pub fn GetSecondsSinceComputerActive(self: Self) uint32 {
+    pub fn GetSecondsSinceComputerActive(self: *const Self) uint32 {
         return SteamAPI_ISteamUtils_GetSecondsSinceComputerActive(self.ptr);
     }
 
-    pub fn GetConnectedUniverse(self: Self) EUniverse {
+    pub fn GetConnectedUniverse(self: *const Self) EUniverse {
         return SteamAPI_ISteamUtils_GetConnectedUniverse(self.ptr);
     }
 
-    pub fn GetServerRealTime(self: Self) uint32 {
+    pub fn GetServerRealTime(self: *const Self) uint32 {
         return SteamAPI_ISteamUtils_GetServerRealTime(self.ptr);
     }
 
-    pub fn GetIPCountry(self: Self) [*c]const u8 {
+    pub fn GetIPCountry(self: *const Self) [*c]const u8 {
         return SteamAPI_ISteamUtils_GetIPCountry(self.ptr);
     }
 
-    pub fn GetImageSize(self: Self, iImage: i32, pnWidth: [*c]uint32, pnHeight: [*c]uint32) bool {
+    pub fn GetImageSize(self: *const Self, iImage: i32, pnWidth: *uint32, pnHeight: *uint32) bool {
         return SteamAPI_ISteamUtils_GetImageSize(self.ptr, iImage, pnWidth, pnHeight);
     }
 
-    pub fn GetImageRGBA(self: Self, iImage: i32, pubDest: [*c]uint8, nDestBufferSize: i32) bool {
-        return SteamAPI_ISteamUtils_GetImageRGBA(self.ptr, iImage, pubDest, nDestBufferSize);
+    pub fn GetImageRGBA(self: *const Self, iImage: i32, pubDest: []uint8, nDestBufferSize: i32) bool {
+        return SteamAPI_ISteamUtils_GetImageRGBA(self.ptr, iImage, pubDest.ptr, nDestBufferSize);
     }
 
-    pub fn GetCurrentBatteryPower(self: Self) uint8 {
+    pub fn GetCurrentBatteryPower(self: *const Self) uint8 {
         return SteamAPI_ISteamUtils_GetCurrentBatteryPower(self.ptr);
     }
 
-    pub fn GetAppID(self: Self) uint32 {
+    pub fn GetAppID(self: *const Self) uint32 {
         return SteamAPI_ISteamUtils_GetAppID(self.ptr);
     }
 
-    pub fn SetOverlayNotificationPosition(self: Self, eNotificationPosition: ENotificationPosition) void {
+    pub fn SetOverlayNotificationPosition(self: *const Self, eNotificationPosition: ENotificationPosition) void {
         return SteamAPI_ISteamUtils_SetOverlayNotificationPosition(self.ptr, eNotificationPosition);
     }
 
-    pub fn IsAPICallCompleted(self: Self, hSteamAPICall: SteamAPICall_t, pbFailed: [*c]bool) bool {
+    pub fn IsAPICallCompleted(self: *const Self, hSteamAPICall: SteamAPICall_t, pbFailed: *bool) bool {
         return SteamAPI_ISteamUtils_IsAPICallCompleted(self.ptr, hSteamAPICall, pbFailed);
     }
 
-    pub fn GetAPICallFailureReason(self: Self, hSteamAPICall: SteamAPICall_t) ESteamAPICallFailure {
+    pub fn GetAPICallFailureReason(self: *const Self, hSteamAPICall: SteamAPICall_t) ESteamAPICallFailure {
         return SteamAPI_ISteamUtils_GetAPICallFailureReason(self.ptr, hSteamAPICall);
     }
 
-    pub fn GetAPICallResult(self: Self, hSteamAPICall: SteamAPICall_t, pCallback: ?*anyopaque, cubCallback: i32, iCallbackExpected: i32, pbFailed: [*c]bool) bool {
-        return SteamAPI_ISteamUtils_GetAPICallResult(self.ptr, hSteamAPICall, pCallback, cubCallback, iCallbackExpected, pbFailed);
+    pub fn GetAPICallResult(self: *const Self, hSteamAPICall: SteamAPICall_t, pCallback: []u8, iCallbackExpected: i32, pbFailed: *bool) bool {
+        return SteamAPI_ISteamUtils_GetAPICallResult(self.ptr, hSteamAPICall, pCallback.ptr, @intCast(pCallback.len), iCallbackExpected, pbFailed);
     }
 
-    pub fn GetIPCCallCount(self: Self) uint32 {
+    pub fn GetIPCCallCount(self: *const Self) uint32 {
         return SteamAPI_ISteamUtils_GetIPCCallCount(self.ptr);
     }
 
-    pub fn SetWarningMessageHook(self: Self, pFunction: SteamAPIWarningMessageHook_t) void {
+    pub fn SetWarningMessageHook(self: *const Self, pFunction: SteamAPIWarningMessageHook_t) void {
         return SteamAPI_ISteamUtils_SetWarningMessageHook(self.ptr, pFunction);
     }
 
-    pub fn IsOverlayEnabled(self: Self) bool {
+    pub fn IsOverlayEnabled(self: *const Self) bool {
         return SteamAPI_ISteamUtils_IsOverlayEnabled(self.ptr);
     }
 
-    pub fn BOverlayNeedsPresent(self: Self) bool {
+    pub fn BOverlayNeedsPresent(self: *const Self) bool {
         return SteamAPI_ISteamUtils_BOverlayNeedsPresent(self.ptr);
     }
 
-    pub fn CheckFileSignature(self: Self, szFileName: [*c]const u8) SteamAPICall_t {
+    pub fn CheckFileSignature(self: *const Self, szFileName: *const u8) SteamAPICall_t {
         return SteamAPI_ISteamUtils_CheckFileSignature(self.ptr, szFileName);
     }
 
-    pub fn ShowGamepadTextInput(self: Self, eInputMode: EGamepadTextInputMode, eLineInputMode: EGamepadTextInputLineMode, pchDescription: [*c]const u8, unCharMax: uint32, pchExistingText: [*c]const u8) bool {
-        return SteamAPI_ISteamUtils_ShowGamepadTextInput(self.ptr, eInputMode, eLineInputMode, pchDescription, unCharMax, pchExistingText);
+    pub fn ShowGamepadTextInput(self: *const Self, eInputMode: EGamepadTextInputMode, eLineInputMode: EGamepadTextInputLineMode, pchDescription: []const u8, unCharMax: uint32, pchExistingText: []const u8) bool {
+        return SteamAPI_ISteamUtils_ShowGamepadTextInput(self.ptr, eInputMode, eLineInputMode, pchDescription.ptr, unCharMax, pchExistingText.ptr);
     }
 
-    pub fn GetEnteredGamepadTextLength(self: Self) uint32 {
+    pub fn GetEnteredGamepadTextLength(self: *const Self) uint32 {
         return SteamAPI_ISteamUtils_GetEnteredGamepadTextLength(self.ptr);
     }
 
-    pub fn GetEnteredGamepadTextInput(self: Self, pchText: [*c]u8, cchText: uint32) bool {
-        return SteamAPI_ISteamUtils_GetEnteredGamepadTextInput(self.ptr, pchText, cchText);
+    pub fn GetEnteredGamepadTextInput(self: *const Self, pchText: []u8) bool {
+        return SteamAPI_ISteamUtils_GetEnteredGamepadTextInput(self.ptr, pchText.ptr, @intCast(pchText.len));
     }
 
-    pub fn GetSteamUILanguage(self: Self) [*c]const u8 {
+    pub fn GetSteamUILanguage(self: *const Self) [*c]const u8 {
         return SteamAPI_ISteamUtils_GetSteamUILanguage(self.ptr);
     }
 
-    pub fn IsSteamRunningInVR(self: Self) bool {
+    pub fn IsSteamRunningInVR(self: *const Self) bool {
         return SteamAPI_ISteamUtils_IsSteamRunningInVR(self.ptr);
     }
 
-    pub fn SetOverlayNotificationInset(self: Self, nHorizontalInset: i32, nVerticalInset: i32) void {
+    pub fn SetOverlayNotificationInset(self: *const Self, nHorizontalInset: i32, nVerticalInset: i32) void {
         return SteamAPI_ISteamUtils_SetOverlayNotificationInset(self.ptr, nHorizontalInset, nVerticalInset);
     }
 
-    pub fn IsSteamInBigPictureMode(self: Self) bool {
+    pub fn IsSteamInBigPictureMode(self: *const Self) bool {
         return SteamAPI_ISteamUtils_IsSteamInBigPictureMode(self.ptr);
     }
 
-    pub fn StartVRDashboard(self: Self) void {
+    pub fn StartVRDashboard(self: *const Self) void {
         return SteamAPI_ISteamUtils_StartVRDashboard(self.ptr);
     }
 
-    pub fn IsVRHeadsetStreamingEnabled(self: Self) bool {
+    pub fn IsVRHeadsetStreamingEnabled(self: *const Self) bool {
         return SteamAPI_ISteamUtils_IsVRHeadsetStreamingEnabled(self.ptr);
     }
 
-    pub fn SetVRHeadsetStreamingEnabled(self: Self, bEnabled: bool) void {
+    pub fn SetVRHeadsetStreamingEnabled(self: *const Self, bEnabled: bool) void {
         return SteamAPI_ISteamUtils_SetVRHeadsetStreamingEnabled(self.ptr, bEnabled);
     }
 
-    pub fn IsSteamChinaLauncher(self: Self) bool {
+    pub fn IsSteamChinaLauncher(self: *const Self) bool {
         return SteamAPI_ISteamUtils_IsSteamChinaLauncher(self.ptr);
     }
 
-    pub fn InitFilterText(self: Self, unFilterOptions: uint32) bool {
+    pub fn InitFilterText(self: *const Self, unFilterOptions: uint32) bool {
         return SteamAPI_ISteamUtils_InitFilterText(self.ptr, unFilterOptions);
     }
 
-    pub fn FilterText(self: Self, eContext: ETextFilteringContext, sourceSteamID: CSteamID, pchInputMessage: [*c]const u8, pchOutFilteredText: [*c]u8, nByteSizeOutFilteredText: uint32) i32 {
-        return SteamAPI_ISteamUtils_FilterText(self.ptr, eContext, sourceSteamID, pchInputMessage, pchOutFilteredText, nByteSizeOutFilteredText);
+    pub fn FilterText(self: *const Self, eContext: ETextFilteringContext, sourceSteamID: CSteamID, pchInputMessage: []const u8, pchOutFilteredText: []u8, nByteSizeOutFilteredText: uint32) i32 {
+        return SteamAPI_ISteamUtils_FilterText(self.ptr, eContext, sourceSteamID, pchInputMessage.ptr, pchOutFilteredText.ptr, nByteSizeOutFilteredText);
     }
 
-    pub fn GetIPv6ConnectivityState(self: Self, eProtocol: ESteamIPv6ConnectivityProtocol) ESteamIPv6ConnectivityState {
+    pub fn GetIPv6ConnectivityState(self: *const Self, eProtocol: ESteamIPv6ConnectivityProtocol) ESteamIPv6ConnectivityState {
         return SteamAPI_ISteamUtils_GetIPv6ConnectivityState(self.ptr, eProtocol);
     }
 
-    pub fn IsSteamRunningOnSteamDeck(self: Self) bool {
+    pub fn IsSteamRunningOnSteamDeck(self: *const Self) bool {
         return SteamAPI_ISteamUtils_IsSteamRunningOnSteamDeck(self.ptr);
     }
 
-    pub fn ShowFloatingGamepadTextInput(self: Self, eKeyboardMode: EFloatingGamepadTextInputMode, nTextFieldXPosition: i32, nTextFieldYPosition: i32, nTextFieldWidth: i32, nTextFieldHeight: i32) bool {
+    pub fn ShowFloatingGamepadTextInput(self: *const Self, eKeyboardMode: EFloatingGamepadTextInputMode, nTextFieldXPosition: i32, nTextFieldYPosition: i32, nTextFieldWidth: i32, nTextFieldHeight: i32) bool {
         return SteamAPI_ISteamUtils_ShowFloatingGamepadTextInput(self.ptr, eKeyboardMode, nTextFieldXPosition, nTextFieldYPosition, nTextFieldWidth, nTextFieldHeight);
     }
 
-    pub fn SetGameLauncherMode(self: Self, bLauncherMode: bool) void {
+    pub fn SetGameLauncherMode(self: *const Self, bLauncherMode: bool) void {
         return SteamAPI_ISteamUtils_SetGameLauncherMode(self.ptr, bLauncherMode);
     }
 
-    pub fn DismissFloatingGamepadTextInput(self: Self) bool {
+    pub fn DismissFloatingGamepadTextInput(self: *const Self) bool {
         return SteamAPI_ISteamUtils_DismissFloatingGamepadTextInput(self.ptr);
     }
 };
@@ -6824,155 +6824,155 @@ pub const ISteamMatchmaking = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn GetFavoriteGameCount(self: Self) i32 {
+    pub fn GetFavoriteGameCount(self: *const Self) i32 {
         return SteamAPI_ISteamMatchmaking_GetFavoriteGameCount(self.ptr);
     }
 
-    pub fn GetFavoriteGame(self: Self, iGame: i32, pnAppID: [*c]AppId_t, pnIP: [*c]uint32, pnConnPort: [*c]uint16, pnQueryPort: [*c]uint16, punFlags: [*c]uint32, pRTime32LastPlayedOnServer: [*c]uint32) bool {
-        return SteamAPI_ISteamMatchmaking_GetFavoriteGame(self.ptr, iGame, pnAppID, pnIP, pnConnPort, pnQueryPort, punFlags, pRTime32LastPlayedOnServer);
+    pub fn GetFavoriteGame(self: *const Self, iGame: i32, pnAppID: *AppId_t, pnIP: *uint32, pnConnPort: *uint16, pnQueryPort: *uint16, punFlags: *uint32, pRTime32LastPlayedOnServer: []uint32) bool {
+        return SteamAPI_ISteamMatchmaking_GetFavoriteGame(self.ptr, iGame, pnAppID, pnIP, pnConnPort, pnQueryPort, punFlags, pRTime32LastPlayedOnServer.ptr);
     }
 
-    pub fn AddFavoriteGame(self: Self, nAppID: AppId_t, nIP: uint32, nConnPort: uint16, nQueryPort: uint16, unFlags: uint32, rTime32LastPlayedOnServer: uint32) i32 {
+    pub fn AddFavoriteGame(self: *const Self, nAppID: AppId_t, nIP: uint32, nConnPort: uint16, nQueryPort: uint16, unFlags: uint32, rTime32LastPlayedOnServer: uint32) i32 {
         return SteamAPI_ISteamMatchmaking_AddFavoriteGame(self.ptr, nAppID, nIP, nConnPort, nQueryPort, unFlags, rTime32LastPlayedOnServer);
     }
 
-    pub fn RemoveFavoriteGame(self: Self, nAppID: AppId_t, nIP: uint32, nConnPort: uint16, nQueryPort: uint16, unFlags: uint32) bool {
+    pub fn RemoveFavoriteGame(self: *const Self, nAppID: AppId_t, nIP: uint32, nConnPort: uint16, nQueryPort: uint16, unFlags: uint32) bool {
         return SteamAPI_ISteamMatchmaking_RemoveFavoriteGame(self.ptr, nAppID, nIP, nConnPort, nQueryPort, unFlags);
     }
 
-    pub fn RequestLobbyList(self: Self) SteamAPICall_t {
+    pub fn RequestLobbyList(self: *const Self) SteamAPICall_t {
         return SteamAPI_ISteamMatchmaking_RequestLobbyList(self.ptr);
     }
 
-    pub fn AddRequestLobbyListStringFilter(self: Self, pchKeyToMatch: [*c]const u8, pchValueToMatch: [*c]const u8, eComparisonType: ELobbyComparison) void {
-        return SteamAPI_ISteamMatchmaking_AddRequestLobbyListStringFilter(self.ptr, pchKeyToMatch, pchValueToMatch, eComparisonType);
+    pub fn AddRequestLobbyListStringFilter(self: *const Self, pchKeyToMatch: []const u8, pchValueToMatch: []const u8, eComparisonType: ELobbyComparison) void {
+        return SteamAPI_ISteamMatchmaking_AddRequestLobbyListStringFilter(self.ptr, pchKeyToMatch.ptr, pchValueToMatch.ptr, eComparisonType);
     }
 
-    pub fn AddRequestLobbyListNumericalFilter(self: Self, pchKeyToMatch: [*c]const u8, nValueToMatch: i32, eComparisonType: ELobbyComparison) void {
-        return SteamAPI_ISteamMatchmaking_AddRequestLobbyListNumericalFilter(self.ptr, pchKeyToMatch, nValueToMatch, eComparisonType);
+    pub fn AddRequestLobbyListNumericalFilter(self: *const Self, pchKeyToMatch: []const u8, nValueToMatch: i32, eComparisonType: ELobbyComparison) void {
+        return SteamAPI_ISteamMatchmaking_AddRequestLobbyListNumericalFilter(self.ptr, pchKeyToMatch.ptr, nValueToMatch, eComparisonType);
     }
 
-    pub fn AddRequestLobbyListNearValueFilter(self: Self, pchKeyToMatch: [*c]const u8, nValueToBeCloseTo: i32) void {
-        return SteamAPI_ISteamMatchmaking_AddRequestLobbyListNearValueFilter(self.ptr, pchKeyToMatch, nValueToBeCloseTo);
+    pub fn AddRequestLobbyListNearValueFilter(self: *const Self, pchKeyToMatch: []const u8, nValueToBeCloseTo: i32) void {
+        return SteamAPI_ISteamMatchmaking_AddRequestLobbyListNearValueFilter(self.ptr, pchKeyToMatch.ptr, nValueToBeCloseTo);
     }
 
-    pub fn AddRequestLobbyListFilterSlotsAvailable(self: Self, nSlotsAvailable: i32) void {
+    pub fn AddRequestLobbyListFilterSlotsAvailable(self: *const Self, nSlotsAvailable: i32) void {
         return SteamAPI_ISteamMatchmaking_AddRequestLobbyListFilterSlotsAvailable(self.ptr, nSlotsAvailable);
     }
 
-    pub fn AddRequestLobbyListDistanceFilter(self: Self, eLobbyDistanceFilter: ELobbyDistanceFilter) void {
+    pub fn AddRequestLobbyListDistanceFilter(self: *const Self, eLobbyDistanceFilter: ELobbyDistanceFilter) void {
         return SteamAPI_ISteamMatchmaking_AddRequestLobbyListDistanceFilter(self.ptr, eLobbyDistanceFilter);
     }
 
-    pub fn AddRequestLobbyListResultCountFilter(self: Self, cMaxResults: i32) void {
+    pub fn AddRequestLobbyListResultCountFilter(self: *const Self, cMaxResults: i32) void {
         return SteamAPI_ISteamMatchmaking_AddRequestLobbyListResultCountFilter(self.ptr, cMaxResults);
     }
 
-    pub fn AddRequestLobbyListCompatibleMembersFilter(self: Self, steamIDLobby: CSteamID) void {
+    pub fn AddRequestLobbyListCompatibleMembersFilter(self: *const Self, steamIDLobby: CSteamID) void {
         return SteamAPI_ISteamMatchmaking_AddRequestLobbyListCompatibleMembersFilter(self.ptr, steamIDLobby);
     }
 
-    pub fn GetLobbyByIndex(self: Self, iLobby: i32) CSteamID {
+    pub fn GetLobbyByIndex(self: *const Self, iLobby: i32) CSteamID {
         return SteamAPI_ISteamMatchmaking_GetLobbyByIndex(self.ptr, iLobby);
     }
 
-    pub fn CreateLobby(self: Self, eLobbyType: ELobbyType, cMaxMembers: i32) SteamAPICall_t {
+    pub fn CreateLobby(self: *const Self, eLobbyType: ELobbyType, cMaxMembers: i32) SteamAPICall_t {
         return SteamAPI_ISteamMatchmaking_CreateLobby(self.ptr, eLobbyType, cMaxMembers);
     }
 
-    pub fn JoinLobby(self: Self, steamIDLobby: CSteamID) SteamAPICall_t {
+    pub fn JoinLobby(self: *const Self, steamIDLobby: CSteamID) SteamAPICall_t {
         return SteamAPI_ISteamMatchmaking_JoinLobby(self.ptr, steamIDLobby);
     }
 
-    pub fn LeaveLobby(self: Self, steamIDLobby: CSteamID) void {
+    pub fn LeaveLobby(self: *const Self, steamIDLobby: CSteamID) void {
         return SteamAPI_ISteamMatchmaking_LeaveLobby(self.ptr, steamIDLobby);
     }
 
-    pub fn InviteUserToLobby(self: Self, steamIDLobby: CSteamID, steamIDInvitee: CSteamID) bool {
+    pub fn InviteUserToLobby(self: *const Self, steamIDLobby: CSteamID, steamIDInvitee: CSteamID) bool {
         return SteamAPI_ISteamMatchmaking_InviteUserToLobby(self.ptr, steamIDLobby, steamIDInvitee);
     }
 
-    pub fn GetNumLobbyMembers(self: Self, steamIDLobby: CSteamID) i32 {
+    pub fn GetNumLobbyMembers(self: *const Self, steamIDLobby: CSteamID) i32 {
         return SteamAPI_ISteamMatchmaking_GetNumLobbyMembers(self.ptr, steamIDLobby);
     }
 
-    pub fn GetLobbyMemberByIndex(self: Self, steamIDLobby: CSteamID, iMember: i32) CSteamID {
+    pub fn GetLobbyMemberByIndex(self: *const Self, steamIDLobby: CSteamID, iMember: i32) CSteamID {
         return SteamAPI_ISteamMatchmaking_GetLobbyMemberByIndex(self.ptr, steamIDLobby, iMember);
     }
 
-    pub fn GetLobbyData(self: Self, steamIDLobby: CSteamID, pchKey: [*c]const u8) [*c]const u8 {
-        return SteamAPI_ISteamMatchmaking_GetLobbyData(self.ptr, steamIDLobby, pchKey);
+    pub fn GetLobbyData(self: *const Self, steamIDLobby: CSteamID, pchKey: []const u8) [*c]const u8 {
+        return SteamAPI_ISteamMatchmaking_GetLobbyData(self.ptr, steamIDLobby, pchKey.ptr);
     }
 
-    pub fn SetLobbyData(self: Self, steamIDLobby: CSteamID, pchKey: [*c]const u8, pchValue: [*c]const u8) bool {
-        return SteamAPI_ISteamMatchmaking_SetLobbyData(self.ptr, steamIDLobby, pchKey, pchValue);
+    pub fn SetLobbyData(self: *const Self, steamIDLobby: CSteamID, pchKey: []const u8, pchValue: []const u8) bool {
+        return SteamAPI_ISteamMatchmaking_SetLobbyData(self.ptr, steamIDLobby, pchKey.ptr, pchValue.ptr);
     }
 
-    pub fn GetLobbyDataCount(self: Self, steamIDLobby: CSteamID) i32 {
+    pub fn GetLobbyDataCount(self: *const Self, steamIDLobby: CSteamID) i32 {
         return SteamAPI_ISteamMatchmaking_GetLobbyDataCount(self.ptr, steamIDLobby);
     }
 
-    pub fn GetLobbyDataByIndex(self: Self, steamIDLobby: CSteamID, iLobbyData: i32, pchKey: [*c]u8, cchKeyBufferSize: i32, pchValue: [*c]u8, cchValueBufferSize: i32) bool {
-        return SteamAPI_ISteamMatchmaking_GetLobbyDataByIndex(self.ptr, steamIDLobby, iLobbyData, pchKey, cchKeyBufferSize, pchValue, cchValueBufferSize);
+    pub fn GetLobbyDataByIndex(self: *const Self, steamIDLobby: CSteamID, iLobbyData: i32, pchKey: []u8, pchValue: []u8) bool {
+        return SteamAPI_ISteamMatchmaking_GetLobbyDataByIndex(self.ptr, steamIDLobby, iLobbyData, pchKey.ptr, @intCast(pchKey.len), pchValue.ptr, @intCast(pchValue.len));
     }
 
-    pub fn DeleteLobbyData(self: Self, steamIDLobby: CSteamID, pchKey: [*c]const u8) bool {
-        return SteamAPI_ISteamMatchmaking_DeleteLobbyData(self.ptr, steamIDLobby, pchKey);
+    pub fn DeleteLobbyData(self: *const Self, steamIDLobby: CSteamID, pchKey: []const u8) bool {
+        return SteamAPI_ISteamMatchmaking_DeleteLobbyData(self.ptr, steamIDLobby, pchKey.ptr);
     }
 
-    pub fn GetLobbyMemberData(self: Self, steamIDLobby: CSteamID, steamIDUser: CSteamID, pchKey: [*c]const u8) [*c]const u8 {
-        return SteamAPI_ISteamMatchmaking_GetLobbyMemberData(self.ptr, steamIDLobby, steamIDUser, pchKey);
+    pub fn GetLobbyMemberData(self: *const Self, steamIDLobby: CSteamID, steamIDUser: CSteamID, pchKey: []const u8) [*c]const u8 {
+        return SteamAPI_ISteamMatchmaking_GetLobbyMemberData(self.ptr, steamIDLobby, steamIDUser, pchKey.ptr);
     }
 
-    pub fn SetLobbyMemberData(self: Self, steamIDLobby: CSteamID, pchKey: [*c]const u8, pchValue: [*c]const u8) void {
-        return SteamAPI_ISteamMatchmaking_SetLobbyMemberData(self.ptr, steamIDLobby, pchKey, pchValue);
+    pub fn SetLobbyMemberData(self: *const Self, steamIDLobby: CSteamID, pchKey: []const u8, pchValue: []const u8) void {
+        return SteamAPI_ISteamMatchmaking_SetLobbyMemberData(self.ptr, steamIDLobby, pchKey.ptr, pchValue.ptr);
     }
 
-    pub fn SendLobbyChatMsg(self: Self, steamIDLobby: CSteamID, pvMsgBody: ?*const anyopaque, cubMsgBody: i32) bool {
-        return SteamAPI_ISteamMatchmaking_SendLobbyChatMsg(self.ptr, steamIDLobby, pvMsgBody, cubMsgBody);
+    pub fn SendLobbyChatMsg(self: *const Self, steamIDLobby: CSteamID, pvMsgBody: []const u8) bool {
+        return SteamAPI_ISteamMatchmaking_SendLobbyChatMsg(self.ptr, steamIDLobby, pvMsgBody.ptr, @intCast(pvMsgBody.len));
     }
 
-    pub fn GetLobbyChatEntry(self: Self, steamIDLobby: CSteamID, iChatID: i32, pSteamIDUser: [*c]CSteamID, pvData: ?*anyopaque, cubData: i32, peChatEntryType: [*c]EChatEntryType) i32 {
-        return SteamAPI_ISteamMatchmaking_GetLobbyChatEntry(self.ptr, steamIDLobby, iChatID, pSteamIDUser, pvData, cubData, peChatEntryType);
+    pub fn GetLobbyChatEntry(self: *const Self, steamIDLobby: CSteamID, iChatID: i32, pSteamIDUser: []CSteamID, pvData: []u8, peChatEntryType: *EChatEntryType) i32 {
+        return SteamAPI_ISteamMatchmaking_GetLobbyChatEntry(self.ptr, steamIDLobby, iChatID, pSteamIDUser.ptr, pvData.ptr, @intCast(pvData.len), peChatEntryType);
     }
 
-    pub fn RequestLobbyData(self: Self, steamIDLobby: CSteamID) bool {
+    pub fn RequestLobbyData(self: *const Self, steamIDLobby: CSteamID) bool {
         return SteamAPI_ISteamMatchmaking_RequestLobbyData(self.ptr, steamIDLobby);
     }
 
-    pub fn SetLobbyGameServer(self: Self, steamIDLobby: CSteamID, unGameServerIP: uint32, unGameServerPort: uint16, steamIDGameServer: CSteamID) void {
+    pub fn SetLobbyGameServer(self: *const Self, steamIDLobby: CSteamID, unGameServerIP: uint32, unGameServerPort: uint16, steamIDGameServer: CSteamID) void {
         return SteamAPI_ISteamMatchmaking_SetLobbyGameServer(self.ptr, steamIDLobby, unGameServerIP, unGameServerPort, steamIDGameServer);
     }
 
-    pub fn GetLobbyGameServer(self: Self, steamIDLobby: CSteamID, punGameServerIP: [*c]uint32, punGameServerPort: [*c]uint16, psteamIDGameServer: [*c]CSteamID) bool {
+    pub fn GetLobbyGameServer(self: *const Self, steamIDLobby: CSteamID, punGameServerIP: *uint32, punGameServerPort: *uint16, psteamIDGameServer: *CSteamID) bool {
         return SteamAPI_ISteamMatchmaking_GetLobbyGameServer(self.ptr, steamIDLobby, punGameServerIP, punGameServerPort, psteamIDGameServer);
     }
 
-    pub fn SetLobbyMemberLimit(self: Self, steamIDLobby: CSteamID, cMaxMembers: i32) bool {
+    pub fn SetLobbyMemberLimit(self: *const Self, steamIDLobby: CSteamID, cMaxMembers: i32) bool {
         return SteamAPI_ISteamMatchmaking_SetLobbyMemberLimit(self.ptr, steamIDLobby, cMaxMembers);
     }
 
-    pub fn GetLobbyMemberLimit(self: Self, steamIDLobby: CSteamID) i32 {
+    pub fn GetLobbyMemberLimit(self: *const Self, steamIDLobby: CSteamID) i32 {
         return SteamAPI_ISteamMatchmaking_GetLobbyMemberLimit(self.ptr, steamIDLobby);
     }
 
-    pub fn SetLobbyType(self: Self, steamIDLobby: CSteamID, eLobbyType: ELobbyType) bool {
+    pub fn SetLobbyType(self: *const Self, steamIDLobby: CSteamID, eLobbyType: ELobbyType) bool {
         return SteamAPI_ISteamMatchmaking_SetLobbyType(self.ptr, steamIDLobby, eLobbyType);
     }
 
-    pub fn SetLobbyJoinable(self: Self, steamIDLobby: CSteamID, bLobbyJoinable: bool) bool {
+    pub fn SetLobbyJoinable(self: *const Self, steamIDLobby: CSteamID, bLobbyJoinable: bool) bool {
         return SteamAPI_ISteamMatchmaking_SetLobbyJoinable(self.ptr, steamIDLobby, bLobbyJoinable);
     }
 
-    pub fn GetLobbyOwner(self: Self, steamIDLobby: CSteamID) CSteamID {
+    pub fn GetLobbyOwner(self: *const Self, steamIDLobby: CSteamID) CSteamID {
         return SteamAPI_ISteamMatchmaking_GetLobbyOwner(self.ptr, steamIDLobby);
     }
 
-    pub fn SetLobbyOwner(self: Self, steamIDLobby: CSteamID, steamIDNewOwner: CSteamID) bool {
+    pub fn SetLobbyOwner(self: *const Self, steamIDLobby: CSteamID, steamIDNewOwner: CSteamID) bool {
         return SteamAPI_ISteamMatchmaking_SetLobbyOwner(self.ptr, steamIDLobby, steamIDNewOwner);
     }
 
-    pub fn SetLinkedLobby(self: Self, steamIDLobby: CSteamID, steamIDLobbyDependent: CSteamID) bool {
+    pub fn SetLinkedLobby(self: *const Self, steamIDLobby: CSteamID, steamIDLobbyDependent: CSteamID) bool {
         return SteamAPI_ISteamMatchmaking_SetLinkedLobby(self.ptr, steamIDLobby, steamIDLobbyDependent);
     }
 };
@@ -7021,15 +7021,15 @@ pub const ISteamMatchmakingServerListResponse = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn ServerResponded(self: Self, hRequest: HServerListRequest, iServer: i32) void {
+    pub fn ServerResponded(self: *const Self, hRequest: HServerListRequest, iServer: i32) void {
         return SteamAPI_ISteamMatchmakingServerListResponse_ServerResponded(self.ptr, hRequest, iServer);
     }
 
-    pub fn ServerFailedToRespond(self: Self, hRequest: HServerListRequest, iServer: i32) void {
+    pub fn ServerFailedToRespond(self: *const Self, hRequest: HServerListRequest, iServer: i32) void {
         return SteamAPI_ISteamMatchmakingServerListResponse_ServerFailedToRespond(self.ptr, hRequest, iServer);
     }
 
-    pub fn RefreshComplete(self: Self, hRequest: HServerListRequest, response: EMatchMakingServerResponse) void {
+    pub fn RefreshComplete(self: *const Self, hRequest: HServerListRequest, response: EMatchMakingServerResponse) void {
         return SteamAPI_ISteamMatchmakingServerListResponse_RefreshComplete(self.ptr, hRequest, response);
     }
 };
@@ -7043,32 +7043,32 @@ pub const ISteamMatchmakingPingResponse = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn ServerResponded(self: Self, server: gameserveritem_t) void {
+    pub fn ServerResponded(self: *const Self, server: *gameserveritem_t) void {
         return SteamAPI_ISteamMatchmakingPingResponse_ServerResponded(self.ptr, server);
     }
 
-    pub fn ServerFailedToRespond(self: Self) void {
+    pub fn ServerFailedToRespond(self: *const Self) void {
         return SteamAPI_ISteamMatchmakingPingResponse_ServerFailedToRespond(self.ptr);
     }
 };
 
 // static functions
-extern fn SteamAPI_ISteamMatchmakingPingResponse_ServerResponded(self: ?*anyopaque, server: gameserveritem_t) callconv(.C) void;
+extern fn SteamAPI_ISteamMatchmakingPingResponse_ServerResponded(self: ?*anyopaque, server: [*c]gameserveritem_t) callconv(.C) void;
 extern fn SteamAPI_ISteamMatchmakingPingResponse_ServerFailedToRespond(self: ?*anyopaque) callconv(.C) void;
 
 pub const ISteamMatchmakingPlayersResponse = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn AddPlayerToList(self: Self, pchName: [*c]const u8, nScore: i32, flTimePlayed: f32) void {
-        return SteamAPI_ISteamMatchmakingPlayersResponse_AddPlayerToList(self.ptr, pchName, nScore, flTimePlayed);
+    pub fn AddPlayerToList(self: *const Self, pchName: []const u8, nScore: i32, flTimePlayed: f32) void {
+        return SteamAPI_ISteamMatchmakingPlayersResponse_AddPlayerToList(self.ptr, pchName.ptr, nScore, flTimePlayed);
     }
 
-    pub fn PlayersFailedToRespond(self: Self) void {
+    pub fn PlayersFailedToRespond(self: *const Self) void {
         return SteamAPI_ISteamMatchmakingPlayersResponse_PlayersFailedToRespond(self.ptr);
     }
 
-    pub fn PlayersRefreshComplete(self: Self) void {
+    pub fn PlayersRefreshComplete(self: *const Self) void {
         return SteamAPI_ISteamMatchmakingPlayersResponse_PlayersRefreshComplete(self.ptr);
     }
 };
@@ -7082,15 +7082,15 @@ pub const ISteamMatchmakingRulesResponse = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn RulesResponded(self: Self, pchRule: [*c]const u8, pchValue: [*c]const u8) void {
-        return SteamAPI_ISteamMatchmakingRulesResponse_RulesResponded(self.ptr, pchRule, pchValue);
+    pub fn RulesResponded(self: *const Self, pchRule: []const u8, pchValue: []const u8) void {
+        return SteamAPI_ISteamMatchmakingRulesResponse_RulesResponded(self.ptr, pchRule.ptr, pchValue.ptr);
     }
 
-    pub fn RulesFailedToRespond(self: Self) void {
+    pub fn RulesFailedToRespond(self: *const Self) void {
         return SteamAPI_ISteamMatchmakingRulesResponse_RulesFailedToRespond(self.ptr);
     }
 
-    pub fn RulesRefreshComplete(self: Self) void {
+    pub fn RulesRefreshComplete(self: *const Self) void {
         return SteamAPI_ISteamMatchmakingRulesResponse_RulesRefreshComplete(self.ptr);
     }
 };
@@ -7109,71 +7109,71 @@ pub const ISteamMatchmakingServers = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn RequestInternetServerList(self: Self, iApp: AppId_t, ppchFilters: [*c][*c]MatchMakingKeyValuePair_t, nFilters: uint32, pRequestServersResponse: [*c]ISteamMatchmakingServerListResponse) HServerListRequest {
-        return SteamAPI_ISteamMatchmakingServers_RequestInternetServerList(self.ptr, iApp, ppchFilters, nFilters, pRequestServersResponse);
+    pub fn RequestInternetServerList(self: *const Self, iApp: AppId_t, ppchFilters: [*c][*c]MatchMakingKeyValuePair_t, nFilters: uint32, pRequestServersResponse: []ISteamMatchmakingServerListResponse) HServerListRequest {
+        return SteamAPI_ISteamMatchmakingServers_RequestInternetServerList(self.ptr, iApp, ppchFilters, nFilters, pRequestServersResponse.ptr);
     }
 
-    pub fn RequestLANServerList(self: Self, iApp: AppId_t, pRequestServersResponse: [*c]ISteamMatchmakingServerListResponse) HServerListRequest {
-        return SteamAPI_ISteamMatchmakingServers_RequestLANServerList(self.ptr, iApp, pRequestServersResponse);
+    pub fn RequestLANServerList(self: *const Self, iApp: AppId_t, pRequestServersResponse: []ISteamMatchmakingServerListResponse) HServerListRequest {
+        return SteamAPI_ISteamMatchmakingServers_RequestLANServerList(self.ptr, iApp, pRequestServersResponse.ptr);
     }
 
-    pub fn RequestFriendsServerList(self: Self, iApp: AppId_t, ppchFilters: [*c][*c]MatchMakingKeyValuePair_t, nFilters: uint32, pRequestServersResponse: [*c]ISteamMatchmakingServerListResponse) HServerListRequest {
-        return SteamAPI_ISteamMatchmakingServers_RequestFriendsServerList(self.ptr, iApp, ppchFilters, nFilters, pRequestServersResponse);
+    pub fn RequestFriendsServerList(self: *const Self, iApp: AppId_t, ppchFilters: [*c][*c]MatchMakingKeyValuePair_t, nFilters: uint32, pRequestServersResponse: []ISteamMatchmakingServerListResponse) HServerListRequest {
+        return SteamAPI_ISteamMatchmakingServers_RequestFriendsServerList(self.ptr, iApp, ppchFilters, nFilters, pRequestServersResponse.ptr);
     }
 
-    pub fn RequestFavoritesServerList(self: Self, iApp: AppId_t, ppchFilters: [*c][*c]MatchMakingKeyValuePair_t, nFilters: uint32, pRequestServersResponse: [*c]ISteamMatchmakingServerListResponse) HServerListRequest {
-        return SteamAPI_ISteamMatchmakingServers_RequestFavoritesServerList(self.ptr, iApp, ppchFilters, nFilters, pRequestServersResponse);
+    pub fn RequestFavoritesServerList(self: *const Self, iApp: AppId_t, ppchFilters: [*c][*c]MatchMakingKeyValuePair_t, nFilters: uint32, pRequestServersResponse: []ISteamMatchmakingServerListResponse) HServerListRequest {
+        return SteamAPI_ISteamMatchmakingServers_RequestFavoritesServerList(self.ptr, iApp, ppchFilters, nFilters, pRequestServersResponse.ptr);
     }
 
-    pub fn RequestHistoryServerList(self: Self, iApp: AppId_t, ppchFilters: [*c][*c]MatchMakingKeyValuePair_t, nFilters: uint32, pRequestServersResponse: [*c]ISteamMatchmakingServerListResponse) HServerListRequest {
-        return SteamAPI_ISteamMatchmakingServers_RequestHistoryServerList(self.ptr, iApp, ppchFilters, nFilters, pRequestServersResponse);
+    pub fn RequestHistoryServerList(self: *const Self, iApp: AppId_t, ppchFilters: [*c][*c]MatchMakingKeyValuePair_t, nFilters: uint32, pRequestServersResponse: []ISteamMatchmakingServerListResponse) HServerListRequest {
+        return SteamAPI_ISteamMatchmakingServers_RequestHistoryServerList(self.ptr, iApp, ppchFilters, nFilters, pRequestServersResponse.ptr);
     }
 
-    pub fn RequestSpectatorServerList(self: Self, iApp: AppId_t, ppchFilters: [*c][*c]MatchMakingKeyValuePair_t, nFilters: uint32, pRequestServersResponse: [*c]ISteamMatchmakingServerListResponse) HServerListRequest {
-        return SteamAPI_ISteamMatchmakingServers_RequestSpectatorServerList(self.ptr, iApp, ppchFilters, nFilters, pRequestServersResponse);
+    pub fn RequestSpectatorServerList(self: *const Self, iApp: AppId_t, ppchFilters: [*c][*c]MatchMakingKeyValuePair_t, nFilters: uint32, pRequestServersResponse: []ISteamMatchmakingServerListResponse) HServerListRequest {
+        return SteamAPI_ISteamMatchmakingServers_RequestSpectatorServerList(self.ptr, iApp, ppchFilters, nFilters, pRequestServersResponse.ptr);
     }
 
-    pub fn ReleaseRequest(self: Self, hServerListRequest: HServerListRequest) void {
+    pub fn ReleaseRequest(self: *const Self, hServerListRequest: HServerListRequest) void {
         return SteamAPI_ISteamMatchmakingServers_ReleaseRequest(self.ptr, hServerListRequest);
     }
 
-    pub fn GetServerDetails(self: Self, hRequest: HServerListRequest, iServer: i32) [*c]gameserveritem_t {
+    pub fn GetServerDetails(self: *const Self, hRequest: HServerListRequest, iServer: i32) [*c]gameserveritem_t {
         return SteamAPI_ISteamMatchmakingServers_GetServerDetails(self.ptr, hRequest, iServer);
     }
 
-    pub fn CancelQuery(self: Self, hRequest: HServerListRequest) void {
+    pub fn CancelQuery(self: *const Self, hRequest: HServerListRequest) void {
         return SteamAPI_ISteamMatchmakingServers_CancelQuery(self.ptr, hRequest);
     }
 
-    pub fn RefreshQuery(self: Self, hRequest: HServerListRequest) void {
+    pub fn RefreshQuery(self: *const Self, hRequest: HServerListRequest) void {
         return SteamAPI_ISteamMatchmakingServers_RefreshQuery(self.ptr, hRequest);
     }
 
-    pub fn IsRefreshing(self: Self, hRequest: HServerListRequest) bool {
+    pub fn IsRefreshing(self: *const Self, hRequest: HServerListRequest) bool {
         return SteamAPI_ISteamMatchmakingServers_IsRefreshing(self.ptr, hRequest);
     }
 
-    pub fn GetServerCount(self: Self, hRequest: HServerListRequest) i32 {
+    pub fn GetServerCount(self: *const Self, hRequest: HServerListRequest) i32 {
         return SteamAPI_ISteamMatchmakingServers_GetServerCount(self.ptr, hRequest);
     }
 
-    pub fn RefreshServer(self: Self, hRequest: HServerListRequest, iServer: i32) void {
+    pub fn RefreshServer(self: *const Self, hRequest: HServerListRequest, iServer: i32) void {
         return SteamAPI_ISteamMatchmakingServers_RefreshServer(self.ptr, hRequest, iServer);
     }
 
-    pub fn PingServer(self: Self, unIP: uint32, usPort: uint16, pRequestServersResponse: [*c]ISteamMatchmakingPingResponse) HServerQuery {
-        return SteamAPI_ISteamMatchmakingServers_PingServer(self.ptr, unIP, usPort, pRequestServersResponse);
+    pub fn PingServer(self: *const Self, unIP: uint32, usPort: uint16, pRequestServersResponse: []ISteamMatchmakingPingResponse) HServerQuery {
+        return SteamAPI_ISteamMatchmakingServers_PingServer(self.ptr, unIP, usPort, pRequestServersResponse.ptr);
     }
 
-    pub fn PlayerDetails(self: Self, unIP: uint32, usPort: uint16, pRequestServersResponse: [*c]ISteamMatchmakingPlayersResponse) HServerQuery {
-        return SteamAPI_ISteamMatchmakingServers_PlayerDetails(self.ptr, unIP, usPort, pRequestServersResponse);
+    pub fn PlayerDetails(self: *const Self, unIP: uint32, usPort: uint16, pRequestServersResponse: []ISteamMatchmakingPlayersResponse) HServerQuery {
+        return SteamAPI_ISteamMatchmakingServers_PlayerDetails(self.ptr, unIP, usPort, pRequestServersResponse.ptr);
     }
 
-    pub fn ServerRules(self: Self, unIP: uint32, usPort: uint16, pRequestServersResponse: [*c]ISteamMatchmakingRulesResponse) HServerQuery {
-        return SteamAPI_ISteamMatchmakingServers_ServerRules(self.ptr, unIP, usPort, pRequestServersResponse);
+    pub fn ServerRules(self: *const Self, unIP: uint32, usPort: uint16, pRequestServersResponse: []ISteamMatchmakingRulesResponse) HServerQuery {
+        return SteamAPI_ISteamMatchmakingServers_ServerRules(self.ptr, unIP, usPort, pRequestServersResponse.ptr);
     }
 
-    pub fn CancelServerQuery(self: Self, hServerQuery: HServerQuery) void {
+    pub fn CancelServerQuery(self: *const Self, hServerQuery: HServerQuery) void {
         return SteamAPI_ISteamMatchmakingServers_CancelServerQuery(self.ptr, hServerQuery);
     }
 };
@@ -7206,59 +7206,59 @@ pub const ISteamGameSearch = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn AddGameSearchParams(self: Self, pchKeyToFind: [*c]const u8, pchValuesToFind: [*c]const u8) EGameSearchErrorCode_t {
-        return SteamAPI_ISteamGameSearch_AddGameSearchParams(self.ptr, pchKeyToFind, pchValuesToFind);
+    pub fn AddGameSearchParams(self: *const Self, pchKeyToFind: []const u8, pchValuesToFind: []const u8) EGameSearchErrorCode_t {
+        return SteamAPI_ISteamGameSearch_AddGameSearchParams(self.ptr, pchKeyToFind.ptr, pchValuesToFind.ptr);
     }
 
-    pub fn SearchForGameWithLobby(self: Self, steamIDLobby: CSteamID, nPlayerMin: i32, nPlayerMax: i32) EGameSearchErrorCode_t {
+    pub fn SearchForGameWithLobby(self: *const Self, steamIDLobby: CSteamID, nPlayerMin: i32, nPlayerMax: i32) EGameSearchErrorCode_t {
         return SteamAPI_ISteamGameSearch_SearchForGameWithLobby(self.ptr, steamIDLobby, nPlayerMin, nPlayerMax);
     }
 
-    pub fn SearchForGameSolo(self: Self, nPlayerMin: i32, nPlayerMax: i32) EGameSearchErrorCode_t {
+    pub fn SearchForGameSolo(self: *const Self, nPlayerMin: i32, nPlayerMax: i32) EGameSearchErrorCode_t {
         return SteamAPI_ISteamGameSearch_SearchForGameSolo(self.ptr, nPlayerMin, nPlayerMax);
     }
 
-    pub fn AcceptGame(self: Self) EGameSearchErrorCode_t {
+    pub fn AcceptGame(self: *const Self) EGameSearchErrorCode_t {
         return SteamAPI_ISteamGameSearch_AcceptGame(self.ptr);
     }
 
-    pub fn DeclineGame(self: Self) EGameSearchErrorCode_t {
+    pub fn DeclineGame(self: *const Self) EGameSearchErrorCode_t {
         return SteamAPI_ISteamGameSearch_DeclineGame(self.ptr);
     }
 
-    pub fn RetrieveConnectionDetails(self: Self, steamIDHost: CSteamID, pchConnectionDetails: [*c]u8, cubConnectionDetails: i32) EGameSearchErrorCode_t {
-        return SteamAPI_ISteamGameSearch_RetrieveConnectionDetails(self.ptr, steamIDHost, pchConnectionDetails, cubConnectionDetails);
+    pub fn RetrieveConnectionDetails(self: *const Self, steamIDHost: CSteamID, pchConnectionDetails: []u8) EGameSearchErrorCode_t {
+        return SteamAPI_ISteamGameSearch_RetrieveConnectionDetails(self.ptr, steamIDHost, pchConnectionDetails.ptr, @intCast(pchConnectionDetails.len));
     }
 
-    pub fn EndGameSearch(self: Self) EGameSearchErrorCode_t {
+    pub fn EndGameSearch(self: *const Self) EGameSearchErrorCode_t {
         return SteamAPI_ISteamGameSearch_EndGameSearch(self.ptr);
     }
 
-    pub fn SetGameHostParams(self: Self, pchKey: [*c]const u8, pchValue: [*c]const u8) EGameSearchErrorCode_t {
-        return SteamAPI_ISteamGameSearch_SetGameHostParams(self.ptr, pchKey, pchValue);
+    pub fn SetGameHostParams(self: *const Self, pchKey: []const u8, pchValue: []const u8) EGameSearchErrorCode_t {
+        return SteamAPI_ISteamGameSearch_SetGameHostParams(self.ptr, pchKey.ptr, pchValue.ptr);
     }
 
-    pub fn SetConnectionDetails(self: Self, pchConnectionDetails: [*c]const u8, cubConnectionDetails: i32) EGameSearchErrorCode_t {
-        return SteamAPI_ISteamGameSearch_SetConnectionDetails(self.ptr, pchConnectionDetails, cubConnectionDetails);
+    pub fn SetConnectionDetails(self: *const Self, pchConnectionDetails: []const u8) EGameSearchErrorCode_t {
+        return SteamAPI_ISteamGameSearch_SetConnectionDetails(self.ptr, pchConnectionDetails.ptr, @intCast(pchConnectionDetails.len));
     }
 
-    pub fn RequestPlayersForGame(self: Self, nPlayerMin: i32, nPlayerMax: i32, nMaxTeamSize: i32) EGameSearchErrorCode_t {
+    pub fn RequestPlayersForGame(self: *const Self, nPlayerMin: i32, nPlayerMax: i32, nMaxTeamSize: i32) EGameSearchErrorCode_t {
         return SteamAPI_ISteamGameSearch_RequestPlayersForGame(self.ptr, nPlayerMin, nPlayerMax, nMaxTeamSize);
     }
 
-    pub fn HostConfirmGameStart(self: Self, ullUniqueGameID: uint64) EGameSearchErrorCode_t {
+    pub fn HostConfirmGameStart(self: *const Self, ullUniqueGameID: uint64) EGameSearchErrorCode_t {
         return SteamAPI_ISteamGameSearch_HostConfirmGameStart(self.ptr, ullUniqueGameID);
     }
 
-    pub fn CancelRequestPlayersForGame(self: Self) EGameSearchErrorCode_t {
+    pub fn CancelRequestPlayersForGame(self: *const Self) EGameSearchErrorCode_t {
         return SteamAPI_ISteamGameSearch_CancelRequestPlayersForGame(self.ptr);
     }
 
-    pub fn SubmitPlayerResult(self: Self, ullUniqueGameID: uint64, steamIDPlayer: CSteamID, EPlayerResult: EPlayerResult_t) EGameSearchErrorCode_t {
+    pub fn SubmitPlayerResult(self: *const Self, ullUniqueGameID: uint64, steamIDPlayer: CSteamID, EPlayerResult: EPlayerResult_t) EGameSearchErrorCode_t {
         return SteamAPI_ISteamGameSearch_SubmitPlayerResult(self.ptr, ullUniqueGameID, steamIDPlayer, EPlayerResult);
     }
 
-    pub fn EndGame(self: Self, ullUniqueGameID: uint64) EGameSearchErrorCode_t {
+    pub fn EndGame(self: *const Self, ullUniqueGameID: uint64) EGameSearchErrorCode_t {
         return SteamAPI_ISteamGameSearch_EndGame(self.ptr, ullUniqueGameID);
     }
 };
@@ -7288,52 +7288,52 @@ pub const ISteamParties = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn GetNumActiveBeacons(self: Self) uint32 {
+    pub fn GetNumActiveBeacons(self: *const Self) uint32 {
         return SteamAPI_ISteamParties_GetNumActiveBeacons(self.ptr);
     }
 
-    pub fn GetBeaconByIndex(self: Self, unIndex: uint32) PartyBeaconID_t {
+    pub fn GetBeaconByIndex(self: *const Self, unIndex: uint32) PartyBeaconID_t {
         return SteamAPI_ISteamParties_GetBeaconByIndex(self.ptr, unIndex);
     }
 
-    pub fn GetBeaconDetails(self: Self, ulBeaconID: PartyBeaconID_t, pSteamIDBeaconOwner: [*c]CSteamID, pLocation: [*c]SteamPartyBeaconLocation_t, pchMetadata: [*c]u8, cchMetadata: i32) bool {
-        return SteamAPI_ISteamParties_GetBeaconDetails(self.ptr, ulBeaconID, pSteamIDBeaconOwner, pLocation, pchMetadata, cchMetadata);
+    pub fn GetBeaconDetails(self: *const Self, ulBeaconID: PartyBeaconID_t, pSteamIDBeaconOwner: []CSteamID, pLocation: []SteamPartyBeaconLocation_t, pchMetadata: []u8) bool {
+        return SteamAPI_ISteamParties_GetBeaconDetails(self.ptr, ulBeaconID, pSteamIDBeaconOwner.ptr, pLocation.ptr, pchMetadata.ptr, @intCast(pchMetadata.len));
     }
 
-    pub fn JoinParty(self: Self, ulBeaconID: PartyBeaconID_t) SteamAPICall_t {
+    pub fn JoinParty(self: *const Self, ulBeaconID: PartyBeaconID_t) SteamAPICall_t {
         return SteamAPI_ISteamParties_JoinParty(self.ptr, ulBeaconID);
     }
 
-    pub fn GetNumAvailableBeaconLocations(self: Self, puNumLocations: [*c]uint32) bool {
+    pub fn GetNumAvailableBeaconLocations(self: *const Self, puNumLocations: *uint32) bool {
         return SteamAPI_ISteamParties_GetNumAvailableBeaconLocations(self.ptr, puNumLocations);
     }
 
-    pub fn GetAvailableBeaconLocations(self: Self, pLocationList: [*c]SteamPartyBeaconLocation_t, uMaxNumLocations: uint32) bool {
-        return SteamAPI_ISteamParties_GetAvailableBeaconLocations(self.ptr, pLocationList, uMaxNumLocations);
+    pub fn GetAvailableBeaconLocations(self: *const Self, pLocationList: []SteamPartyBeaconLocation_t, uMaxNumLocations: uint32) bool {
+        return SteamAPI_ISteamParties_GetAvailableBeaconLocations(self.ptr, pLocationList.ptr, uMaxNumLocations);
     }
 
-    pub fn CreateBeacon(self: Self, unOpenSlots: uint32, pBeaconLocation: [*c]SteamPartyBeaconLocation_t, pchConnectString: [*c]const u8, pchMetadata: [*c]const u8) SteamAPICall_t {
-        return SteamAPI_ISteamParties_CreateBeacon(self.ptr, unOpenSlots, pBeaconLocation, pchConnectString, pchMetadata);
+    pub fn CreateBeacon(self: *const Self, unOpenSlots: uint32, pBeaconLocation: []SteamPartyBeaconLocation_t, pchConnectString: []const u8, pchMetadata: []const u8) SteamAPICall_t {
+        return SteamAPI_ISteamParties_CreateBeacon(self.ptr, unOpenSlots, pBeaconLocation.ptr, pchConnectString.ptr, pchMetadata.ptr);
     }
 
-    pub fn OnReservationCompleted(self: Self, ulBeacon: PartyBeaconID_t, steamIDUser: CSteamID) void {
+    pub fn OnReservationCompleted(self: *const Self, ulBeacon: PartyBeaconID_t, steamIDUser: CSteamID) void {
         return SteamAPI_ISteamParties_OnReservationCompleted(self.ptr, ulBeacon, steamIDUser);
     }
 
-    pub fn CancelReservation(self: Self, ulBeacon: PartyBeaconID_t, steamIDUser: CSteamID) void {
+    pub fn CancelReservation(self: *const Self, ulBeacon: PartyBeaconID_t, steamIDUser: CSteamID) void {
         return SteamAPI_ISteamParties_CancelReservation(self.ptr, ulBeacon, steamIDUser);
     }
 
-    pub fn ChangeNumOpenSlots(self: Self, ulBeacon: PartyBeaconID_t, unOpenSlots: uint32) SteamAPICall_t {
+    pub fn ChangeNumOpenSlots(self: *const Self, ulBeacon: PartyBeaconID_t, unOpenSlots: uint32) SteamAPICall_t {
         return SteamAPI_ISteamParties_ChangeNumOpenSlots(self.ptr, ulBeacon, unOpenSlots);
     }
 
-    pub fn DestroyBeacon(self: Self, ulBeacon: PartyBeaconID_t) bool {
+    pub fn DestroyBeacon(self: *const Self, ulBeacon: PartyBeaconID_t) bool {
         return SteamAPI_ISteamParties_DestroyBeacon(self.ptr, ulBeacon);
     }
 
-    pub fn GetBeaconLocationData(self: Self, BeaconLocation: SteamPartyBeaconLocation_t, eData: ESteamPartyBeaconLocationData, pchDataStringOut: [*c]u8, cchDataStringOut: i32) bool {
-        return SteamAPI_ISteamParties_GetBeaconLocationData(self.ptr, BeaconLocation, eData, pchDataStringOut, cchDataStringOut);
+    pub fn GetBeaconLocationData(self: *const Self, BeaconLocation: SteamPartyBeaconLocation_t, eData: ESteamPartyBeaconLocationData, pchDataStringOut: []u8) bool {
+        return SteamAPI_ISteamParties_GetBeaconLocationData(self.ptr, BeaconLocation, eData, pchDataStringOut.ptr, @intCast(pchDataStringOut.len));
     }
 };
 
@@ -7360,239 +7360,239 @@ pub const ISteamRemoteStorage = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn FileWrite(self: Self, pchFile: [*c]const u8, pvData: ?*const anyopaque, cubData: int32) bool {
-        return SteamAPI_ISteamRemoteStorage_FileWrite(self.ptr, pchFile, pvData, cubData);
+    pub fn FileWrite(self: *const Self, pchFile: []const u8, pvData: []const u8) bool {
+        return SteamAPI_ISteamRemoteStorage_FileWrite(self.ptr, pchFile.ptr, pvData.ptr, @intCast(pvData.len));
     }
 
-    pub fn FileRead(self: Self, pchFile: [*c]const u8, pvData: ?*anyopaque, cubDataToRead: int32) int32 {
-        return SteamAPI_ISteamRemoteStorage_FileRead(self.ptr, pchFile, pvData, cubDataToRead);
+    pub fn FileRead(self: *const Self, pchFile: []const u8, pvData: []u8) int32 {
+        return SteamAPI_ISteamRemoteStorage_FileRead(self.ptr, pchFile.ptr, pvData.ptr, @intCast(pvData.len));
     }
 
-    pub fn FileWriteAsync(self: Self, pchFile: [*c]const u8, pvData: ?*const anyopaque, cubData: uint32) SteamAPICall_t {
-        return SteamAPI_ISteamRemoteStorage_FileWriteAsync(self.ptr, pchFile, pvData, cubData);
+    pub fn FileWriteAsync(self: *const Self, pchFile: []const u8, pvData: []const u8) SteamAPICall_t {
+        return SteamAPI_ISteamRemoteStorage_FileWriteAsync(self.ptr, pchFile.ptr, pvData.ptr, @intCast(pvData.len));
     }
 
-    pub fn FileReadAsync(self: Self, pchFile: [*c]const u8, nOffset: uint32, cubToRead: uint32) SteamAPICall_t {
-        return SteamAPI_ISteamRemoteStorage_FileReadAsync(self.ptr, pchFile, nOffset, cubToRead);
+    pub fn FileReadAsync(self: *const Self, pchFile: []const u8, nOffset: uint32, cubToRead: uint32) SteamAPICall_t {
+        return SteamAPI_ISteamRemoteStorage_FileReadAsync(self.ptr, pchFile.ptr, nOffset, cubToRead);
     }
 
-    pub fn FileReadAsyncComplete(self: Self, hReadCall: SteamAPICall_t, pvBuffer: ?*anyopaque, cubToRead: uint32) bool {
-        return SteamAPI_ISteamRemoteStorage_FileReadAsyncComplete(self.ptr, hReadCall, pvBuffer, cubToRead);
+    pub fn FileReadAsyncComplete(self: *const Self, hReadCall: SteamAPICall_t, pvBuffer: []u8, cubToRead: uint32) bool {
+        return SteamAPI_ISteamRemoteStorage_FileReadAsyncComplete(self.ptr, hReadCall, pvBuffer.ptr, cubToRead);
     }
 
-    pub fn FileForget(self: Self, pchFile: [*c]const u8) bool {
-        return SteamAPI_ISteamRemoteStorage_FileForget(self.ptr, pchFile);
+    pub fn FileForget(self: *const Self, pchFile: []const u8) bool {
+        return SteamAPI_ISteamRemoteStorage_FileForget(self.ptr, pchFile.ptr);
     }
 
-    pub fn FileDelete(self: Self, pchFile: [*c]const u8) bool {
-        return SteamAPI_ISteamRemoteStorage_FileDelete(self.ptr, pchFile);
+    pub fn FileDelete(self: *const Self, pchFile: []const u8) bool {
+        return SteamAPI_ISteamRemoteStorage_FileDelete(self.ptr, pchFile.ptr);
     }
 
-    pub fn FileShare(self: Self, pchFile: [*c]const u8) SteamAPICall_t {
-        return SteamAPI_ISteamRemoteStorage_FileShare(self.ptr, pchFile);
+    pub fn FileShare(self: *const Self, pchFile: []const u8) SteamAPICall_t {
+        return SteamAPI_ISteamRemoteStorage_FileShare(self.ptr, pchFile.ptr);
     }
 
-    pub fn SetSyncPlatforms(self: Self, pchFile: [*c]const u8, eRemoteStoragePlatform: ERemoteStoragePlatform) bool {
-        return SteamAPI_ISteamRemoteStorage_SetSyncPlatforms(self.ptr, pchFile, eRemoteStoragePlatform);
+    pub fn SetSyncPlatforms(self: *const Self, pchFile: []const u8, eRemoteStoragePlatform: ERemoteStoragePlatform) bool {
+        return SteamAPI_ISteamRemoteStorage_SetSyncPlatforms(self.ptr, pchFile.ptr, eRemoteStoragePlatform);
     }
 
-    pub fn FileWriteStreamOpen(self: Self, pchFile: [*c]const u8) UGCFileWriteStreamHandle_t {
-        return SteamAPI_ISteamRemoteStorage_FileWriteStreamOpen(self.ptr, pchFile);
+    pub fn FileWriteStreamOpen(self: *const Self, pchFile: []const u8) UGCFileWriteStreamHandle_t {
+        return SteamAPI_ISteamRemoteStorage_FileWriteStreamOpen(self.ptr, pchFile.ptr);
     }
 
-    pub fn FileWriteStreamWriteChunk(self: Self, writeHandle: UGCFileWriteStreamHandle_t, pvData: ?*const anyopaque, cubData: int32) bool {
-        return SteamAPI_ISteamRemoteStorage_FileWriteStreamWriteChunk(self.ptr, writeHandle, pvData, cubData);
+    pub fn FileWriteStreamWriteChunk(self: *const Self, writeHandle: UGCFileWriteStreamHandle_t, pvData: []const u8) bool {
+        return SteamAPI_ISteamRemoteStorage_FileWriteStreamWriteChunk(self.ptr, writeHandle, pvData.ptr, @intCast(pvData.len));
     }
 
-    pub fn FileWriteStreamClose(self: Self, writeHandle: UGCFileWriteStreamHandle_t) bool {
+    pub fn FileWriteStreamClose(self: *const Self, writeHandle: UGCFileWriteStreamHandle_t) bool {
         return SteamAPI_ISteamRemoteStorage_FileWriteStreamClose(self.ptr, writeHandle);
     }
 
-    pub fn FileWriteStreamCancel(self: Self, writeHandle: UGCFileWriteStreamHandle_t) bool {
+    pub fn FileWriteStreamCancel(self: *const Self, writeHandle: UGCFileWriteStreamHandle_t) bool {
         return SteamAPI_ISteamRemoteStorage_FileWriteStreamCancel(self.ptr, writeHandle);
     }
 
-    pub fn FileExists(self: Self, pchFile: [*c]const u8) bool {
-        return SteamAPI_ISteamRemoteStorage_FileExists(self.ptr, pchFile);
+    pub fn FileExists(self: *const Self, pchFile: []const u8) bool {
+        return SteamAPI_ISteamRemoteStorage_FileExists(self.ptr, pchFile.ptr);
     }
 
-    pub fn FilePersisted(self: Self, pchFile: [*c]const u8) bool {
-        return SteamAPI_ISteamRemoteStorage_FilePersisted(self.ptr, pchFile);
+    pub fn FilePersisted(self: *const Self, pchFile: []const u8) bool {
+        return SteamAPI_ISteamRemoteStorage_FilePersisted(self.ptr, pchFile.ptr);
     }
 
-    pub fn GetFileSize(self: Self, pchFile: [*c]const u8) int32 {
-        return SteamAPI_ISteamRemoteStorage_GetFileSize(self.ptr, pchFile);
+    pub fn GetFileSize(self: *const Self, pchFile: []const u8) int32 {
+        return SteamAPI_ISteamRemoteStorage_GetFileSize(self.ptr, pchFile.ptr);
     }
 
-    pub fn GetFileTimestamp(self: Self, pchFile: [*c]const u8) int64 {
-        return SteamAPI_ISteamRemoteStorage_GetFileTimestamp(self.ptr, pchFile);
+    pub fn GetFileTimestamp(self: *const Self, pchFile: []const u8) int64 {
+        return SteamAPI_ISteamRemoteStorage_GetFileTimestamp(self.ptr, pchFile.ptr);
     }
 
-    pub fn GetSyncPlatforms(self: Self, pchFile: [*c]const u8) ERemoteStoragePlatform {
-        return SteamAPI_ISteamRemoteStorage_GetSyncPlatforms(self.ptr, pchFile);
+    pub fn GetSyncPlatforms(self: *const Self, pchFile: []const u8) ERemoteStoragePlatform {
+        return SteamAPI_ISteamRemoteStorage_GetSyncPlatforms(self.ptr, pchFile.ptr);
     }
 
-    pub fn GetFileCount(self: Self) int32 {
+    pub fn GetFileCount(self: *const Self) int32 {
         return SteamAPI_ISteamRemoteStorage_GetFileCount(self.ptr);
     }
 
-    pub fn GetFileNameAndSize(self: Self, iFile: i32, pnFileSizeInBytes: [*c]int32) [*c]const u8 {
+    pub fn GetFileNameAndSize(self: *const Self, iFile: i32, pnFileSizeInBytes: *int32) [*c]const u8 {
         return SteamAPI_ISteamRemoteStorage_GetFileNameAndSize(self.ptr, iFile, pnFileSizeInBytes);
     }
 
-    pub fn GetQuota(self: Self, pnTotalBytes: [*c]uint64, puAvailableBytes: [*c]uint64) bool {
+    pub fn GetQuota(self: *const Self, pnTotalBytes: *uint64, puAvailableBytes: *uint64) bool {
         return SteamAPI_ISteamRemoteStorage_GetQuota(self.ptr, pnTotalBytes, puAvailableBytes);
     }
 
-    pub fn IsCloudEnabledForAccount(self: Self) bool {
+    pub fn IsCloudEnabledForAccount(self: *const Self) bool {
         return SteamAPI_ISteamRemoteStorage_IsCloudEnabledForAccount(self.ptr);
     }
 
-    pub fn IsCloudEnabledForApp(self: Self) bool {
+    pub fn IsCloudEnabledForApp(self: *const Self) bool {
         return SteamAPI_ISteamRemoteStorage_IsCloudEnabledForApp(self.ptr);
     }
 
-    pub fn SetCloudEnabledForApp(self: Self, bEnabled: bool) void {
+    pub fn SetCloudEnabledForApp(self: *const Self, bEnabled: bool) void {
         return SteamAPI_ISteamRemoteStorage_SetCloudEnabledForApp(self.ptr, bEnabled);
     }
 
-    pub fn UGCDownload(self: Self, hContent: UGCHandle_t, unPriority: uint32) SteamAPICall_t {
+    pub fn UGCDownload(self: *const Self, hContent: UGCHandle_t, unPriority: uint32) SteamAPICall_t {
         return SteamAPI_ISteamRemoteStorage_UGCDownload(self.ptr, hContent, unPriority);
     }
 
-    pub fn GetUGCDownloadProgress(self: Self, hContent: UGCHandle_t, pnBytesDownloaded: [*c]int32, pnBytesExpected: [*c]int32) bool {
+    pub fn GetUGCDownloadProgress(self: *const Self, hContent: UGCHandle_t, pnBytesDownloaded: *int32, pnBytesExpected: *int32) bool {
         return SteamAPI_ISteamRemoteStorage_GetUGCDownloadProgress(self.ptr, hContent, pnBytesDownloaded, pnBytesExpected);
     }
 
-    pub fn GetUGCDetails(self: Self, hContent: UGCHandle_t, pnAppID: [*c]AppId_t, ppchName: [*c][*c]u8, pnFileSizeInBytes: [*c]int32, pSteamIDOwner: [*c]CSteamID) bool {
-        return SteamAPI_ISteamRemoteStorage_GetUGCDetails(self.ptr, hContent, pnAppID, ppchName, pnFileSizeInBytes, pSteamIDOwner);
+    pub fn GetUGCDetails(self: *const Self, hContent: UGCHandle_t, pnAppID: *AppId_t, ppchName: [*c][*c]u8, pnFileSizeInBytes: *int32, pSteamIDOwner: []CSteamID) bool {
+        return SteamAPI_ISteamRemoteStorage_GetUGCDetails(self.ptr, hContent, pnAppID, ppchName, pnFileSizeInBytes, pSteamIDOwner.ptr);
     }
 
-    pub fn UGCRead(self: Self, hContent: UGCHandle_t, pvData: ?*anyopaque, cubDataToRead: int32, cOffset: uint32, eAction: EUGCReadAction) int32 {
-        return SteamAPI_ISteamRemoteStorage_UGCRead(self.ptr, hContent, pvData, cubDataToRead, cOffset, eAction);
+    pub fn UGCRead(self: *const Self, hContent: UGCHandle_t, pvData: []u8, cOffset: uint32, eAction: EUGCReadAction) int32 {
+        return SteamAPI_ISteamRemoteStorage_UGCRead(self.ptr, hContent, pvData.ptr, @intCast(pvData.len), cOffset, eAction);
     }
 
-    pub fn GetCachedUGCCount(self: Self) int32 {
+    pub fn GetCachedUGCCount(self: *const Self) int32 {
         return SteamAPI_ISteamRemoteStorage_GetCachedUGCCount(self.ptr);
     }
 
-    pub fn GetCachedUGCHandle(self: Self, iCachedContent: int32) UGCHandle_t {
+    pub fn GetCachedUGCHandle(self: *const Self, iCachedContent: int32) UGCHandle_t {
         return SteamAPI_ISteamRemoteStorage_GetCachedUGCHandle(self.ptr, iCachedContent);
     }
 
-    pub fn PublishWorkshopFile(self: Self, pchFile: [*c]const u8, pchPreviewFile: [*c]const u8, nConsumerAppId: AppId_t, pchTitle: [*c]const u8, pchDescription: [*c]const u8, eVisibility: ERemoteStoragePublishedFileVisibility, pTags: [*c]SteamParamStringArray_t, eWorkshopFileType: EWorkshopFileType) SteamAPICall_t {
-        return SteamAPI_ISteamRemoteStorage_PublishWorkshopFile(self.ptr, pchFile, pchPreviewFile, nConsumerAppId, pchTitle, pchDescription, eVisibility, pTags, eWorkshopFileType);
+    pub fn PublishWorkshopFile(self: *const Self, pchFile: []const u8, pchPreviewFile: []const u8, nConsumerAppId: AppId_t, pchTitle: []const u8, pchDescription: []const u8, eVisibility: ERemoteStoragePublishedFileVisibility, pTags: []SteamParamStringArray_t, eWorkshopFileType: EWorkshopFileType) SteamAPICall_t {
+        return SteamAPI_ISteamRemoteStorage_PublishWorkshopFile(self.ptr, pchFile.ptr, pchPreviewFile.ptr, nConsumerAppId, pchTitle.ptr, pchDescription.ptr, eVisibility, pTags.ptr, eWorkshopFileType);
     }
 
-    pub fn CreatePublishedFileUpdateRequest(self: Self, unPublishedFileId: PublishedFileId_t) PublishedFileUpdateHandle_t {
+    pub fn CreatePublishedFileUpdateRequest(self: *const Self, unPublishedFileId: PublishedFileId_t) PublishedFileUpdateHandle_t {
         return SteamAPI_ISteamRemoteStorage_CreatePublishedFileUpdateRequest(self.ptr, unPublishedFileId);
     }
 
-    pub fn UpdatePublishedFileFile(self: Self, updateHandle: PublishedFileUpdateHandle_t, pchFile: [*c]const u8) bool {
-        return SteamAPI_ISteamRemoteStorage_UpdatePublishedFileFile(self.ptr, updateHandle, pchFile);
+    pub fn UpdatePublishedFileFile(self: *const Self, updateHandle: PublishedFileUpdateHandle_t, pchFile: []const u8) bool {
+        return SteamAPI_ISteamRemoteStorage_UpdatePublishedFileFile(self.ptr, updateHandle, pchFile.ptr);
     }
 
-    pub fn UpdatePublishedFilePreviewFile(self: Self, updateHandle: PublishedFileUpdateHandle_t, pchPreviewFile: [*c]const u8) bool {
-        return SteamAPI_ISteamRemoteStorage_UpdatePublishedFilePreviewFile(self.ptr, updateHandle, pchPreviewFile);
+    pub fn UpdatePublishedFilePreviewFile(self: *const Self, updateHandle: PublishedFileUpdateHandle_t, pchPreviewFile: []const u8) bool {
+        return SteamAPI_ISteamRemoteStorage_UpdatePublishedFilePreviewFile(self.ptr, updateHandle, pchPreviewFile.ptr);
     }
 
-    pub fn UpdatePublishedFileTitle(self: Self, updateHandle: PublishedFileUpdateHandle_t, pchTitle: [*c]const u8) bool {
-        return SteamAPI_ISteamRemoteStorage_UpdatePublishedFileTitle(self.ptr, updateHandle, pchTitle);
+    pub fn UpdatePublishedFileTitle(self: *const Self, updateHandle: PublishedFileUpdateHandle_t, pchTitle: []const u8) bool {
+        return SteamAPI_ISteamRemoteStorage_UpdatePublishedFileTitle(self.ptr, updateHandle, pchTitle.ptr);
     }
 
-    pub fn UpdatePublishedFileDescription(self: Self, updateHandle: PublishedFileUpdateHandle_t, pchDescription: [*c]const u8) bool {
-        return SteamAPI_ISteamRemoteStorage_UpdatePublishedFileDescription(self.ptr, updateHandle, pchDescription);
+    pub fn UpdatePublishedFileDescription(self: *const Self, updateHandle: PublishedFileUpdateHandle_t, pchDescription: []const u8) bool {
+        return SteamAPI_ISteamRemoteStorage_UpdatePublishedFileDescription(self.ptr, updateHandle, pchDescription.ptr);
     }
 
-    pub fn UpdatePublishedFileVisibility(self: Self, updateHandle: PublishedFileUpdateHandle_t, eVisibility: ERemoteStoragePublishedFileVisibility) bool {
+    pub fn UpdatePublishedFileVisibility(self: *const Self, updateHandle: PublishedFileUpdateHandle_t, eVisibility: ERemoteStoragePublishedFileVisibility) bool {
         return SteamAPI_ISteamRemoteStorage_UpdatePublishedFileVisibility(self.ptr, updateHandle, eVisibility);
     }
 
-    pub fn UpdatePublishedFileTags(self: Self, updateHandle: PublishedFileUpdateHandle_t, pTags: [*c]SteamParamStringArray_t) bool {
-        return SteamAPI_ISteamRemoteStorage_UpdatePublishedFileTags(self.ptr, updateHandle, pTags);
+    pub fn UpdatePublishedFileTags(self: *const Self, updateHandle: PublishedFileUpdateHandle_t, pTags: []SteamParamStringArray_t) bool {
+        return SteamAPI_ISteamRemoteStorage_UpdatePublishedFileTags(self.ptr, updateHandle, pTags.ptr);
     }
 
-    pub fn CommitPublishedFileUpdate(self: Self, updateHandle: PublishedFileUpdateHandle_t) SteamAPICall_t {
+    pub fn CommitPublishedFileUpdate(self: *const Self, updateHandle: PublishedFileUpdateHandle_t) SteamAPICall_t {
         return SteamAPI_ISteamRemoteStorage_CommitPublishedFileUpdate(self.ptr, updateHandle);
     }
 
-    pub fn GetPublishedFileDetails(self: Self, unPublishedFileId: PublishedFileId_t, unMaxSecondsOld: uint32) SteamAPICall_t {
+    pub fn GetPublishedFileDetails(self: *const Self, unPublishedFileId: PublishedFileId_t, unMaxSecondsOld: uint32) SteamAPICall_t {
         return SteamAPI_ISteamRemoteStorage_GetPublishedFileDetails(self.ptr, unPublishedFileId, unMaxSecondsOld);
     }
 
-    pub fn DeletePublishedFile(self: Self, unPublishedFileId: PublishedFileId_t) SteamAPICall_t {
+    pub fn DeletePublishedFile(self: *const Self, unPublishedFileId: PublishedFileId_t) SteamAPICall_t {
         return SteamAPI_ISteamRemoteStorage_DeletePublishedFile(self.ptr, unPublishedFileId);
     }
 
-    pub fn EnumerateUserPublishedFiles(self: Self, unStartIndex: uint32) SteamAPICall_t {
+    pub fn EnumerateUserPublishedFiles(self: *const Self, unStartIndex: uint32) SteamAPICall_t {
         return SteamAPI_ISteamRemoteStorage_EnumerateUserPublishedFiles(self.ptr, unStartIndex);
     }
 
-    pub fn SubscribePublishedFile(self: Self, unPublishedFileId: PublishedFileId_t) SteamAPICall_t {
+    pub fn SubscribePublishedFile(self: *const Self, unPublishedFileId: PublishedFileId_t) SteamAPICall_t {
         return SteamAPI_ISteamRemoteStorage_SubscribePublishedFile(self.ptr, unPublishedFileId);
     }
 
-    pub fn EnumerateUserSubscribedFiles(self: Self, unStartIndex: uint32) SteamAPICall_t {
+    pub fn EnumerateUserSubscribedFiles(self: *const Self, unStartIndex: uint32) SteamAPICall_t {
         return SteamAPI_ISteamRemoteStorage_EnumerateUserSubscribedFiles(self.ptr, unStartIndex);
     }
 
-    pub fn UnsubscribePublishedFile(self: Self, unPublishedFileId: PublishedFileId_t) SteamAPICall_t {
+    pub fn UnsubscribePublishedFile(self: *const Self, unPublishedFileId: PublishedFileId_t) SteamAPICall_t {
         return SteamAPI_ISteamRemoteStorage_UnsubscribePublishedFile(self.ptr, unPublishedFileId);
     }
 
-    pub fn UpdatePublishedFileSetChangeDescription(self: Self, updateHandle: PublishedFileUpdateHandle_t, pchChangeDescription: [*c]const u8) bool {
-        return SteamAPI_ISteamRemoteStorage_UpdatePublishedFileSetChangeDescription(self.ptr, updateHandle, pchChangeDescription);
+    pub fn UpdatePublishedFileSetChangeDescription(self: *const Self, updateHandle: PublishedFileUpdateHandle_t, pchChangeDescription: []const u8) bool {
+        return SteamAPI_ISteamRemoteStorage_UpdatePublishedFileSetChangeDescription(self.ptr, updateHandle, pchChangeDescription.ptr);
     }
 
-    pub fn GetPublishedItemVoteDetails(self: Self, unPublishedFileId: PublishedFileId_t) SteamAPICall_t {
+    pub fn GetPublishedItemVoteDetails(self: *const Self, unPublishedFileId: PublishedFileId_t) SteamAPICall_t {
         return SteamAPI_ISteamRemoteStorage_GetPublishedItemVoteDetails(self.ptr, unPublishedFileId);
     }
 
-    pub fn UpdateUserPublishedItemVote(self: Self, unPublishedFileId: PublishedFileId_t, bVoteUp: bool) SteamAPICall_t {
+    pub fn UpdateUserPublishedItemVote(self: *const Self, unPublishedFileId: PublishedFileId_t, bVoteUp: bool) SteamAPICall_t {
         return SteamAPI_ISteamRemoteStorage_UpdateUserPublishedItemVote(self.ptr, unPublishedFileId, bVoteUp);
     }
 
-    pub fn GetUserPublishedItemVoteDetails(self: Self, unPublishedFileId: PublishedFileId_t) SteamAPICall_t {
+    pub fn GetUserPublishedItemVoteDetails(self: *const Self, unPublishedFileId: PublishedFileId_t) SteamAPICall_t {
         return SteamAPI_ISteamRemoteStorage_GetUserPublishedItemVoteDetails(self.ptr, unPublishedFileId);
     }
 
-    pub fn EnumerateUserSharedWorkshopFiles(self: Self, steamId: CSteamID, unStartIndex: uint32, pRequiredTags: [*c]SteamParamStringArray_t, pExcludedTags: [*c]SteamParamStringArray_t) SteamAPICall_t {
-        return SteamAPI_ISteamRemoteStorage_EnumerateUserSharedWorkshopFiles(self.ptr, steamId, unStartIndex, pRequiredTags, pExcludedTags);
+    pub fn EnumerateUserSharedWorkshopFiles(self: *const Self, steamId: CSteamID, unStartIndex: uint32, pRequiredTags: []SteamParamStringArray_t, pExcludedTags: []SteamParamStringArray_t) SteamAPICall_t {
+        return SteamAPI_ISteamRemoteStorage_EnumerateUserSharedWorkshopFiles(self.ptr, steamId, unStartIndex, pRequiredTags.ptr, pExcludedTags.ptr);
     }
 
-    pub fn PublishVideo(self: Self, eVideoProvider: EWorkshopVideoProvider, pchVideoAccount: [*c]const u8, pchVideoIdentifier: [*c]const u8, pchPreviewFile: [*c]const u8, nConsumerAppId: AppId_t, pchTitle: [*c]const u8, pchDescription: [*c]const u8, eVisibility: ERemoteStoragePublishedFileVisibility, pTags: [*c]SteamParamStringArray_t) SteamAPICall_t {
-        return SteamAPI_ISteamRemoteStorage_PublishVideo(self.ptr, eVideoProvider, pchVideoAccount, pchVideoIdentifier, pchPreviewFile, nConsumerAppId, pchTitle, pchDescription, eVisibility, pTags);
+    pub fn PublishVideo(self: *const Self, eVideoProvider: EWorkshopVideoProvider, pchVideoAccount: []const u8, pchVideoIdentifier: []const u8, pchPreviewFile: []const u8, nConsumerAppId: AppId_t, pchTitle: []const u8, pchDescription: []const u8, eVisibility: ERemoteStoragePublishedFileVisibility, pTags: []SteamParamStringArray_t) SteamAPICall_t {
+        return SteamAPI_ISteamRemoteStorage_PublishVideo(self.ptr, eVideoProvider, pchVideoAccount.ptr, pchVideoIdentifier.ptr, pchPreviewFile.ptr, nConsumerAppId, pchTitle.ptr, pchDescription.ptr, eVisibility, pTags.ptr);
     }
 
-    pub fn SetUserPublishedFileAction(self: Self, unPublishedFileId: PublishedFileId_t, eAction: EWorkshopFileAction) SteamAPICall_t {
+    pub fn SetUserPublishedFileAction(self: *const Self, unPublishedFileId: PublishedFileId_t, eAction: EWorkshopFileAction) SteamAPICall_t {
         return SteamAPI_ISteamRemoteStorage_SetUserPublishedFileAction(self.ptr, unPublishedFileId, eAction);
     }
 
-    pub fn EnumeratePublishedFilesByUserAction(self: Self, eAction: EWorkshopFileAction, unStartIndex: uint32) SteamAPICall_t {
+    pub fn EnumeratePublishedFilesByUserAction(self: *const Self, eAction: EWorkshopFileAction, unStartIndex: uint32) SteamAPICall_t {
         return SteamAPI_ISteamRemoteStorage_EnumeratePublishedFilesByUserAction(self.ptr, eAction, unStartIndex);
     }
 
-    pub fn EnumeratePublishedWorkshopFiles(self: Self, eEnumerationType: EWorkshopEnumerationType, unStartIndex: uint32, unCount: uint32, unDays: uint32, pTags: [*c]SteamParamStringArray_t, pUserTags: [*c]SteamParamStringArray_t) SteamAPICall_t {
-        return SteamAPI_ISteamRemoteStorage_EnumeratePublishedWorkshopFiles(self.ptr, eEnumerationType, unStartIndex, unCount, unDays, pTags, pUserTags);
+    pub fn EnumeratePublishedWorkshopFiles(self: *const Self, eEnumerationType: EWorkshopEnumerationType, unStartIndex: uint32, unCount: uint32, unDays: uint32, pTags: []SteamParamStringArray_t, pUserTags: []SteamParamStringArray_t) SteamAPICall_t {
+        return SteamAPI_ISteamRemoteStorage_EnumeratePublishedWorkshopFiles(self.ptr, eEnumerationType, unStartIndex, unCount, unDays, pTags.ptr, pUserTags.ptr);
     }
 
-    pub fn UGCDownloadToLocation(self: Self, hContent: UGCHandle_t, pchLocation: [*c]const u8, unPriority: uint32) SteamAPICall_t {
-        return SteamAPI_ISteamRemoteStorage_UGCDownloadToLocation(self.ptr, hContent, pchLocation, unPriority);
+    pub fn UGCDownloadToLocation(self: *const Self, hContent: UGCHandle_t, pchLocation: []const u8, unPriority: uint32) SteamAPICall_t {
+        return SteamAPI_ISteamRemoteStorage_UGCDownloadToLocation(self.ptr, hContent, pchLocation.ptr, unPriority);
     }
 
-    pub fn GetLocalFileChangeCount(self: Self) int32 {
+    pub fn GetLocalFileChangeCount(self: *const Self) int32 {
         return SteamAPI_ISteamRemoteStorage_GetLocalFileChangeCount(self.ptr);
     }
 
-    pub fn GetLocalFileChange(self: Self, iFile: i32, pEChangeType: [*c]ERemoteStorageLocalFileChange, pEFilePathType: [*c]ERemoteStorageFilePathType) [*c]const u8 {
-        return SteamAPI_ISteamRemoteStorage_GetLocalFileChange(self.ptr, iFile, pEChangeType, pEFilePathType);
+    pub fn GetLocalFileChange(self: *const Self, iFile: i32, pEChangeType: []ERemoteStorageLocalFileChange, pEFilePathType: []ERemoteStorageFilePathType) [*c]const u8 {
+        return SteamAPI_ISteamRemoteStorage_GetLocalFileChange(self.ptr, iFile, pEChangeType.ptr, pEFilePathType.ptr);
     }
 
-    pub fn BeginFileWriteBatch(self: Self) bool {
+    pub fn BeginFileWriteBatch(self: *const Self) bool {
         return SteamAPI_ISteamRemoteStorage_BeginFileWriteBatch(self.ptr);
     }
 
-    pub fn EndFileWriteBatch(self: Self) bool {
+    pub fn EndFileWriteBatch(self: *const Self) bool {
         return SteamAPI_ISteamRemoteStorage_EndFileWriteBatch(self.ptr);
     }
 };
@@ -7667,184 +7667,184 @@ pub const ISteamUserStats = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn RequestCurrentStats(self: Self) bool {
+    pub fn RequestCurrentStats(self: *const Self) bool {
         return SteamAPI_ISteamUserStats_RequestCurrentStats(self.ptr);
     }
 
-    pub fn GetStatInt32(self: Self, pchName: [*c]const u8, pData: [*c]int32) bool {
-        return SteamAPI_ISteamUserStats_GetStatInt32(self.ptr, pchName, pData);
+    pub fn GetStatInt32(self: *const Self, pchName: []const u8, pData: []int32) bool {
+        return SteamAPI_ISteamUserStats_GetStatInt32(self.ptr, pchName.ptr, pData.ptr);
     }
 
-    pub fn GetStatFloat(self: Self, pchName: [*c]const u8, pData: [*c]f32) bool {
-        return SteamAPI_ISteamUserStats_GetStatFloat(self.ptr, pchName, pData);
+    pub fn GetStatFloat(self: *const Self, pchName: []const u8, pData: []f32) bool {
+        return SteamAPI_ISteamUserStats_GetStatFloat(self.ptr, pchName.ptr, pData.ptr);
     }
 
-    pub fn SetStatInt32(self: Self, pchName: [*c]const u8, nData: int32) bool {
-        return SteamAPI_ISteamUserStats_SetStatInt32(self.ptr, pchName, nData);
+    pub fn SetStatInt32(self: *const Self, pchName: []const u8, nData: int32) bool {
+        return SteamAPI_ISteamUserStats_SetStatInt32(self.ptr, pchName.ptr, nData);
     }
 
-    pub fn SetStatFloat(self: Self, pchName: [*c]const u8, fData: f32) bool {
-        return SteamAPI_ISteamUserStats_SetStatFloat(self.ptr, pchName, fData);
+    pub fn SetStatFloat(self: *const Self, pchName: []const u8, fData: f32) bool {
+        return SteamAPI_ISteamUserStats_SetStatFloat(self.ptr, pchName.ptr, fData);
     }
 
-    pub fn UpdateAvgRateStat(self: Self, pchName: [*c]const u8, flCountThisSession: f32, dSessionLength: f64) bool {
-        return SteamAPI_ISteamUserStats_UpdateAvgRateStat(self.ptr, pchName, flCountThisSession, dSessionLength);
+    pub fn UpdateAvgRateStat(self: *const Self, pchName: []const u8, flCountThisSession: f32, dSessionLength: f64) bool {
+        return SteamAPI_ISteamUserStats_UpdateAvgRateStat(self.ptr, pchName.ptr, flCountThisSession, dSessionLength);
     }
 
-    pub fn GetAchievement(self: Self, pchName: [*c]const u8, pbAchieved: [*c]bool) bool {
-        return SteamAPI_ISteamUserStats_GetAchievement(self.ptr, pchName, pbAchieved);
+    pub fn GetAchievement(self: *const Self, pchName: []const u8, pbAchieved: *bool) bool {
+        return SteamAPI_ISteamUserStats_GetAchievement(self.ptr, pchName.ptr, pbAchieved);
     }
 
-    pub fn SetAchievement(self: Self, pchName: [*c]const u8) bool {
-        return SteamAPI_ISteamUserStats_SetAchievement(self.ptr, pchName);
+    pub fn SetAchievement(self: *const Self, pchName: []const u8) bool {
+        return SteamAPI_ISteamUserStats_SetAchievement(self.ptr, pchName.ptr);
     }
 
-    pub fn ClearAchievement(self: Self, pchName: [*c]const u8) bool {
-        return SteamAPI_ISteamUserStats_ClearAchievement(self.ptr, pchName);
+    pub fn ClearAchievement(self: *const Self, pchName: []const u8) bool {
+        return SteamAPI_ISteamUserStats_ClearAchievement(self.ptr, pchName.ptr);
     }
 
-    pub fn GetAchievementAndUnlockTime(self: Self, pchName: [*c]const u8, pbAchieved: [*c]bool, punUnlockTime: [*c]uint32) bool {
-        return SteamAPI_ISteamUserStats_GetAchievementAndUnlockTime(self.ptr, pchName, pbAchieved, punUnlockTime);
+    pub fn GetAchievementAndUnlockTime(self: *const Self, pchName: []const u8, pbAchieved: *bool, punUnlockTime: *uint32) bool {
+        return SteamAPI_ISteamUserStats_GetAchievementAndUnlockTime(self.ptr, pchName.ptr, pbAchieved, punUnlockTime);
     }
 
-    pub fn StoreStats(self: Self) bool {
+    pub fn StoreStats(self: *const Self) bool {
         return SteamAPI_ISteamUserStats_StoreStats(self.ptr);
     }
 
-    pub fn GetAchievementIcon(self: Self, pchName: [*c]const u8) i32 {
-        return SteamAPI_ISteamUserStats_GetAchievementIcon(self.ptr, pchName);
+    pub fn GetAchievementIcon(self: *const Self, pchName: []const u8) i32 {
+        return SteamAPI_ISteamUserStats_GetAchievementIcon(self.ptr, pchName.ptr);
     }
 
-    pub fn GetAchievementDisplayAttribute(self: Self, pchName: [*c]const u8, pchKey: [*c]const u8) [*c]const u8 {
-        return SteamAPI_ISteamUserStats_GetAchievementDisplayAttribute(self.ptr, pchName, pchKey);
+    pub fn GetAchievementDisplayAttribute(self: *const Self, pchName: []const u8, pchKey: []const u8) [*c]const u8 {
+        return SteamAPI_ISteamUserStats_GetAchievementDisplayAttribute(self.ptr, pchName.ptr, pchKey.ptr);
     }
 
-    pub fn IndicateAchievementProgress(self: Self, pchName: [*c]const u8, nCurProgress: uint32, nMaxProgress: uint32) bool {
-        return SteamAPI_ISteamUserStats_IndicateAchievementProgress(self.ptr, pchName, nCurProgress, nMaxProgress);
+    pub fn IndicateAchievementProgress(self: *const Self, pchName: []const u8, nCurProgress: uint32, nMaxProgress: uint32) bool {
+        return SteamAPI_ISteamUserStats_IndicateAchievementProgress(self.ptr, pchName.ptr, nCurProgress, nMaxProgress);
     }
 
-    pub fn GetNumAchievements(self: Self) uint32 {
+    pub fn GetNumAchievements(self: *const Self) uint32 {
         return SteamAPI_ISteamUserStats_GetNumAchievements(self.ptr);
     }
 
-    pub fn GetAchievementName(self: Self, iAchievement: uint32) [*c]const u8 {
+    pub fn GetAchievementName(self: *const Self, iAchievement: uint32) [*c]const u8 {
         return SteamAPI_ISteamUserStats_GetAchievementName(self.ptr, iAchievement);
     }
 
-    pub fn RequestUserStats(self: Self, steamIDUser: CSteamID) SteamAPICall_t {
+    pub fn RequestUserStats(self: *const Self, steamIDUser: CSteamID) SteamAPICall_t {
         return SteamAPI_ISteamUserStats_RequestUserStats(self.ptr, steamIDUser);
     }
 
-    pub fn GetUserStatInt32(self: Self, steamIDUser: CSteamID, pchName: [*c]const u8, pData: [*c]int32) bool {
-        return SteamAPI_ISteamUserStats_GetUserStatInt32(self.ptr, steamIDUser, pchName, pData);
+    pub fn GetUserStatInt32(self: *const Self, steamIDUser: CSteamID, pchName: []const u8, pData: []int32) bool {
+        return SteamAPI_ISteamUserStats_GetUserStatInt32(self.ptr, steamIDUser, pchName.ptr, pData.ptr);
     }
 
-    pub fn GetUserStatFloat(self: Self, steamIDUser: CSteamID, pchName: [*c]const u8, pData: [*c]f32) bool {
-        return SteamAPI_ISteamUserStats_GetUserStatFloat(self.ptr, steamIDUser, pchName, pData);
+    pub fn GetUserStatFloat(self: *const Self, steamIDUser: CSteamID, pchName: []const u8, pData: []f32) bool {
+        return SteamAPI_ISteamUserStats_GetUserStatFloat(self.ptr, steamIDUser, pchName.ptr, pData.ptr);
     }
 
-    pub fn GetUserAchievement(self: Self, steamIDUser: CSteamID, pchName: [*c]const u8, pbAchieved: [*c]bool) bool {
-        return SteamAPI_ISteamUserStats_GetUserAchievement(self.ptr, steamIDUser, pchName, pbAchieved);
+    pub fn GetUserAchievement(self: *const Self, steamIDUser: CSteamID, pchName: []const u8, pbAchieved: *bool) bool {
+        return SteamAPI_ISteamUserStats_GetUserAchievement(self.ptr, steamIDUser, pchName.ptr, pbAchieved);
     }
 
-    pub fn GetUserAchievementAndUnlockTime(self: Self, steamIDUser: CSteamID, pchName: [*c]const u8, pbAchieved: [*c]bool, punUnlockTime: [*c]uint32) bool {
-        return SteamAPI_ISteamUserStats_GetUserAchievementAndUnlockTime(self.ptr, steamIDUser, pchName, pbAchieved, punUnlockTime);
+    pub fn GetUserAchievementAndUnlockTime(self: *const Self, steamIDUser: CSteamID, pchName: []const u8, pbAchieved: *bool, punUnlockTime: *uint32) bool {
+        return SteamAPI_ISteamUserStats_GetUserAchievementAndUnlockTime(self.ptr, steamIDUser, pchName.ptr, pbAchieved, punUnlockTime);
     }
 
-    pub fn ResetAllStats(self: Self, bAchievementsToo: bool) bool {
+    pub fn ResetAllStats(self: *const Self, bAchievementsToo: bool) bool {
         return SteamAPI_ISteamUserStats_ResetAllStats(self.ptr, bAchievementsToo);
     }
 
-    pub fn FindOrCreateLeaderboard(self: Self, pchLeaderboardName: [*c]const u8, eLeaderboardSortMethod: ELeaderboardSortMethod, eLeaderboardDisplayType: ELeaderboardDisplayType) SteamAPICall_t {
-        return SteamAPI_ISteamUserStats_FindOrCreateLeaderboard(self.ptr, pchLeaderboardName, eLeaderboardSortMethod, eLeaderboardDisplayType);
+    pub fn FindOrCreateLeaderboard(self: *const Self, pchLeaderboardName: []const u8, eLeaderboardSortMethod: ELeaderboardSortMethod, eLeaderboardDisplayType: ELeaderboardDisplayType) SteamAPICall_t {
+        return SteamAPI_ISteamUserStats_FindOrCreateLeaderboard(self.ptr, pchLeaderboardName.ptr, eLeaderboardSortMethod, eLeaderboardDisplayType);
     }
 
-    pub fn FindLeaderboard(self: Self, pchLeaderboardName: [*c]const u8) SteamAPICall_t {
-        return SteamAPI_ISteamUserStats_FindLeaderboard(self.ptr, pchLeaderboardName);
+    pub fn FindLeaderboard(self: *const Self, pchLeaderboardName: []const u8) SteamAPICall_t {
+        return SteamAPI_ISteamUserStats_FindLeaderboard(self.ptr, pchLeaderboardName.ptr);
     }
 
-    pub fn GetLeaderboardName(self: Self, hSteamLeaderboard: SteamLeaderboard_t) [*c]const u8 {
+    pub fn GetLeaderboardName(self: *const Self, hSteamLeaderboard: SteamLeaderboard_t) [*c]const u8 {
         return SteamAPI_ISteamUserStats_GetLeaderboardName(self.ptr, hSteamLeaderboard);
     }
 
-    pub fn GetLeaderboardEntryCount(self: Self, hSteamLeaderboard: SteamLeaderboard_t) i32 {
+    pub fn GetLeaderboardEntryCount(self: *const Self, hSteamLeaderboard: SteamLeaderboard_t) i32 {
         return SteamAPI_ISteamUserStats_GetLeaderboardEntryCount(self.ptr, hSteamLeaderboard);
     }
 
-    pub fn GetLeaderboardSortMethod(self: Self, hSteamLeaderboard: SteamLeaderboard_t) ELeaderboardSortMethod {
+    pub fn GetLeaderboardSortMethod(self: *const Self, hSteamLeaderboard: SteamLeaderboard_t) ELeaderboardSortMethod {
         return SteamAPI_ISteamUserStats_GetLeaderboardSortMethod(self.ptr, hSteamLeaderboard);
     }
 
-    pub fn GetLeaderboardDisplayType(self: Self, hSteamLeaderboard: SteamLeaderboard_t) ELeaderboardDisplayType {
+    pub fn GetLeaderboardDisplayType(self: *const Self, hSteamLeaderboard: SteamLeaderboard_t) ELeaderboardDisplayType {
         return SteamAPI_ISteamUserStats_GetLeaderboardDisplayType(self.ptr, hSteamLeaderboard);
     }
 
-    pub fn DownloadLeaderboardEntries(self: Self, hSteamLeaderboard: SteamLeaderboard_t, eLeaderboardDataRequest: ELeaderboardDataRequest, nRangeStart: i32, nRangeEnd: i32) SteamAPICall_t {
+    pub fn DownloadLeaderboardEntries(self: *const Self, hSteamLeaderboard: SteamLeaderboard_t, eLeaderboardDataRequest: ELeaderboardDataRequest, nRangeStart: i32, nRangeEnd: i32) SteamAPICall_t {
         return SteamAPI_ISteamUserStats_DownloadLeaderboardEntries(self.ptr, hSteamLeaderboard, eLeaderboardDataRequest, nRangeStart, nRangeEnd);
     }
 
-    pub fn DownloadLeaderboardEntriesForUsers(self: Self, hSteamLeaderboard: SteamLeaderboard_t, prgUsers: [*c]CSteamID, cUsers: i32) SteamAPICall_t {
+    pub fn DownloadLeaderboardEntriesForUsers(self: *const Self, hSteamLeaderboard: SteamLeaderboard_t, prgUsers: *CSteamID, cUsers: i32) SteamAPICall_t {
         return SteamAPI_ISteamUserStats_DownloadLeaderboardEntriesForUsers(self.ptr, hSteamLeaderboard, prgUsers, cUsers);
     }
 
-    pub fn GetDownloadedLeaderboardEntry(self: Self, hSteamLeaderboardEntries: SteamLeaderboardEntries_t, index: i32, pLeaderboardEntry: [*c]LeaderboardEntry_t, pDetails: [*c]int32, cDetailsMax: i32) bool {
-        return SteamAPI_ISteamUserStats_GetDownloadedLeaderboardEntry(self.ptr, hSteamLeaderboardEntries, index, pLeaderboardEntry, pDetails, cDetailsMax);
+    pub fn GetDownloadedLeaderboardEntry(self: *const Self, hSteamLeaderboardEntries: SteamLeaderboardEntries_t, index: i32, pLeaderboardEntry: []LeaderboardEntry_t, pDetails: []int32, cDetailsMax: i32) bool {
+        return SteamAPI_ISteamUserStats_GetDownloadedLeaderboardEntry(self.ptr, hSteamLeaderboardEntries, index, pLeaderboardEntry.ptr, pDetails.ptr, cDetailsMax);
     }
 
-    pub fn UploadLeaderboardScore(self: Self, hSteamLeaderboard: SteamLeaderboard_t, eLeaderboardUploadScoreMethod: ELeaderboardUploadScoreMethod, nScore: int32, pScoreDetails: [*c]const int32, cScoreDetailsCount: i32) SteamAPICall_t {
-        return SteamAPI_ISteamUserStats_UploadLeaderboardScore(self.ptr, hSteamLeaderboard, eLeaderboardUploadScoreMethod, nScore, pScoreDetails, cScoreDetailsCount);
+    pub fn UploadLeaderboardScore(self: *const Self, hSteamLeaderboard: SteamLeaderboard_t, eLeaderboardUploadScoreMethod: ELeaderboardUploadScoreMethod, nScore: int32, pScoreDetails: []const int32, cScoreDetailsCount: i32) SteamAPICall_t {
+        return SteamAPI_ISteamUserStats_UploadLeaderboardScore(self.ptr, hSteamLeaderboard, eLeaderboardUploadScoreMethod, nScore, pScoreDetails.ptr, cScoreDetailsCount);
     }
 
-    pub fn AttachLeaderboardUGC(self: Self, hSteamLeaderboard: SteamLeaderboard_t, hUGC: UGCHandle_t) SteamAPICall_t {
+    pub fn AttachLeaderboardUGC(self: *const Self, hSteamLeaderboard: SteamLeaderboard_t, hUGC: UGCHandle_t) SteamAPICall_t {
         return SteamAPI_ISteamUserStats_AttachLeaderboardUGC(self.ptr, hSteamLeaderboard, hUGC);
     }
 
-    pub fn GetNumberOfCurrentPlayers(self: Self) SteamAPICall_t {
+    pub fn GetNumberOfCurrentPlayers(self: *const Self) SteamAPICall_t {
         return SteamAPI_ISteamUserStats_GetNumberOfCurrentPlayers(self.ptr);
     }
 
-    pub fn RequestGlobalAchievementPercentages(self: Self) SteamAPICall_t {
+    pub fn RequestGlobalAchievementPercentages(self: *const Self) SteamAPICall_t {
         return SteamAPI_ISteamUserStats_RequestGlobalAchievementPercentages(self.ptr);
     }
 
-    pub fn GetMostAchievedAchievementInfo(self: Self, pchName: [*c]u8, unNameBufLen: uint32, pflPercent: [*c]f32, pbAchieved: [*c]bool) i32 {
-        return SteamAPI_ISteamUserStats_GetMostAchievedAchievementInfo(self.ptr, pchName, unNameBufLen, pflPercent, pbAchieved);
+    pub fn GetMostAchievedAchievementInfo(self: *const Self, pchName: []u8, unNameBufLen: uint32, pflPercent: *f32, pbAchieved: *bool) i32 {
+        return SteamAPI_ISteamUserStats_GetMostAchievedAchievementInfo(self.ptr, pchName.ptr, unNameBufLen, pflPercent, pbAchieved);
     }
 
-    pub fn GetNextMostAchievedAchievementInfo(self: Self, iIteratorPrevious: i32, pchName: [*c]u8, unNameBufLen: uint32, pflPercent: [*c]f32, pbAchieved: [*c]bool) i32 {
-        return SteamAPI_ISteamUserStats_GetNextMostAchievedAchievementInfo(self.ptr, iIteratorPrevious, pchName, unNameBufLen, pflPercent, pbAchieved);
+    pub fn GetNextMostAchievedAchievementInfo(self: *const Self, iIteratorPrevious: i32, pchName: []u8, unNameBufLen: uint32, pflPercent: *f32, pbAchieved: *bool) i32 {
+        return SteamAPI_ISteamUserStats_GetNextMostAchievedAchievementInfo(self.ptr, iIteratorPrevious, pchName.ptr, unNameBufLen, pflPercent, pbAchieved);
     }
 
-    pub fn GetAchievementAchievedPercent(self: Self, pchName: [*c]const u8, pflPercent: [*c]f32) bool {
-        return SteamAPI_ISteamUserStats_GetAchievementAchievedPercent(self.ptr, pchName, pflPercent);
+    pub fn GetAchievementAchievedPercent(self: *const Self, pchName: []const u8, pflPercent: *f32) bool {
+        return SteamAPI_ISteamUserStats_GetAchievementAchievedPercent(self.ptr, pchName.ptr, pflPercent);
     }
 
-    pub fn RequestGlobalStats(self: Self, nHistoryDays: i32) SteamAPICall_t {
+    pub fn RequestGlobalStats(self: *const Self, nHistoryDays: i32) SteamAPICall_t {
         return SteamAPI_ISteamUserStats_RequestGlobalStats(self.ptr, nHistoryDays);
     }
 
-    pub fn GetGlobalStatInt64(self: Self, pchStatName: [*c]const u8, pData: [*c]int64) bool {
-        return SteamAPI_ISteamUserStats_GetGlobalStatInt64(self.ptr, pchStatName, pData);
+    pub fn GetGlobalStatInt64(self: *const Self, pchStatName: []const u8, pData: []int64) bool {
+        return SteamAPI_ISteamUserStats_GetGlobalStatInt64(self.ptr, pchStatName.ptr, pData.ptr);
     }
 
-    pub fn GetGlobalStatDouble(self: Self, pchStatName: [*c]const u8, pData: [*c]f64) bool {
-        return SteamAPI_ISteamUserStats_GetGlobalStatDouble(self.ptr, pchStatName, pData);
+    pub fn GetGlobalStatDouble(self: *const Self, pchStatName: []const u8, pData: []f64) bool {
+        return SteamAPI_ISteamUserStats_GetGlobalStatDouble(self.ptr, pchStatName.ptr, pData.ptr);
     }
 
-    pub fn GetGlobalStatHistoryInt64(self: Self, pchStatName: [*c]const u8, pData: [*c]int64, cubData: uint32) int32 {
-        return SteamAPI_ISteamUserStats_GetGlobalStatHistoryInt64(self.ptr, pchStatName, pData, cubData);
+    pub fn GetGlobalStatHistoryInt64(self: *const Self, pchStatName: []const u8, pData: []int64) int32 {
+        return SteamAPI_ISteamUserStats_GetGlobalStatHistoryInt64(self.ptr, pchStatName.ptr, pData.ptr, @intCast(pData.len));
     }
 
-    pub fn GetGlobalStatHistoryDouble(self: Self, pchStatName: [*c]const u8, pData: [*c]f64, cubData: uint32) int32 {
-        return SteamAPI_ISteamUserStats_GetGlobalStatHistoryDouble(self.ptr, pchStatName, pData, cubData);
+    pub fn GetGlobalStatHistoryDouble(self: *const Self, pchStatName: []const u8, pData: []f64) int32 {
+        return SteamAPI_ISteamUserStats_GetGlobalStatHistoryDouble(self.ptr, pchStatName.ptr, pData.ptr, @intCast(pData.len));
     }
 
-    pub fn GetAchievementProgressLimitsInt32(self: Self, pchName: [*c]const u8, pnMinProgress: [*c]int32, pnMaxProgress: [*c]int32) bool {
-        return SteamAPI_ISteamUserStats_GetAchievementProgressLimitsInt32(self.ptr, pchName, pnMinProgress, pnMaxProgress);
+    pub fn GetAchievementProgressLimitsInt32(self: *const Self, pchName: []const u8, pnMinProgress: *int32, pnMaxProgress: *int32) bool {
+        return SteamAPI_ISteamUserStats_GetAchievementProgressLimitsInt32(self.ptr, pchName.ptr, pnMinProgress, pnMaxProgress);
     }
 
-    pub fn GetAchievementProgressLimitsFloat(self: Self, pchName: [*c]const u8, pfMinProgress: [*c]f32, pfMaxProgress: [*c]f32) bool {
-        return SteamAPI_ISteamUserStats_GetAchievementProgressLimitsFloat(self.ptr, pchName, pfMinProgress, pfMaxProgress);
+    pub fn GetAchievementProgressLimitsFloat(self: *const Self, pchName: []const u8, pfMinProgress: *f32, pfMaxProgress: *f32) bool {
+        return SteamAPI_ISteamUserStats_GetAchievementProgressLimitsFloat(self.ptr, pchName.ptr, pfMinProgress, pfMaxProgress);
     }
 };
 
@@ -7904,123 +7904,123 @@ pub const ISteamApps = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn BIsSubscribed(self: Self) bool {
+    pub fn BIsSubscribed(self: *const Self) bool {
         return SteamAPI_ISteamApps_BIsSubscribed(self.ptr);
     }
 
-    pub fn BIsLowViolence(self: Self) bool {
+    pub fn BIsLowViolence(self: *const Self) bool {
         return SteamAPI_ISteamApps_BIsLowViolence(self.ptr);
     }
 
-    pub fn BIsCybercafe(self: Self) bool {
+    pub fn BIsCybercafe(self: *const Self) bool {
         return SteamAPI_ISteamApps_BIsCybercafe(self.ptr);
     }
 
-    pub fn BIsVACBanned(self: Self) bool {
+    pub fn BIsVACBanned(self: *const Self) bool {
         return SteamAPI_ISteamApps_BIsVACBanned(self.ptr);
     }
 
-    pub fn GetCurrentGameLanguage(self: Self) [*c]const u8 {
+    pub fn GetCurrentGameLanguage(self: *const Self) [*c]const u8 {
         return SteamAPI_ISteamApps_GetCurrentGameLanguage(self.ptr);
     }
 
-    pub fn GetAvailableGameLanguages(self: Self) [*c]const u8 {
+    pub fn GetAvailableGameLanguages(self: *const Self) [*c]const u8 {
         return SteamAPI_ISteamApps_GetAvailableGameLanguages(self.ptr);
     }
 
-    pub fn BIsSubscribedApp(self: Self, appID: AppId_t) bool {
+    pub fn BIsSubscribedApp(self: *const Self, appID: AppId_t) bool {
         return SteamAPI_ISteamApps_BIsSubscribedApp(self.ptr, appID);
     }
 
-    pub fn BIsDlcInstalled(self: Self, appID: AppId_t) bool {
+    pub fn BIsDlcInstalled(self: *const Self, appID: AppId_t) bool {
         return SteamAPI_ISteamApps_BIsDlcInstalled(self.ptr, appID);
     }
 
-    pub fn GetEarliestPurchaseUnixTime(self: Self, nAppID: AppId_t) uint32 {
+    pub fn GetEarliestPurchaseUnixTime(self: *const Self, nAppID: AppId_t) uint32 {
         return SteamAPI_ISteamApps_GetEarliestPurchaseUnixTime(self.ptr, nAppID);
     }
 
-    pub fn BIsSubscribedFromFreeWeekend(self: Self) bool {
+    pub fn BIsSubscribedFromFreeWeekend(self: *const Self) bool {
         return SteamAPI_ISteamApps_BIsSubscribedFromFreeWeekend(self.ptr);
     }
 
-    pub fn GetDLCCount(self: Self) i32 {
+    pub fn GetDLCCount(self: *const Self) i32 {
         return SteamAPI_ISteamApps_GetDLCCount(self.ptr);
     }
 
-    pub fn BGetDLCDataByIndex(self: Self, iDLC: i32, pAppID: [*c]AppId_t, pbAvailable: [*c]bool, pchName: [*c]u8, cchNameBufferSize: i32) bool {
-        return SteamAPI_ISteamApps_BGetDLCDataByIndex(self.ptr, iDLC, pAppID, pbAvailable, pchName, cchNameBufferSize);
+    pub fn BGetDLCDataByIndex(self: *const Self, iDLC: i32, pAppID: []AppId_t, pbAvailable: *bool, pchName: []u8) bool {
+        return SteamAPI_ISteamApps_BGetDLCDataByIndex(self.ptr, iDLC, pAppID.ptr, pbAvailable, pchName.ptr, @intCast(pchName.len));
     }
 
-    pub fn InstallDLC(self: Self, nAppID: AppId_t) void {
+    pub fn InstallDLC(self: *const Self, nAppID: AppId_t) void {
         return SteamAPI_ISteamApps_InstallDLC(self.ptr, nAppID);
     }
 
-    pub fn UninstallDLC(self: Self, nAppID: AppId_t) void {
+    pub fn UninstallDLC(self: *const Self, nAppID: AppId_t) void {
         return SteamAPI_ISteamApps_UninstallDLC(self.ptr, nAppID);
     }
 
-    pub fn RequestAppProofOfPurchaseKey(self: Self, nAppID: AppId_t) void {
+    pub fn RequestAppProofOfPurchaseKey(self: *const Self, nAppID: AppId_t) void {
         return SteamAPI_ISteamApps_RequestAppProofOfPurchaseKey(self.ptr, nAppID);
     }
 
-    pub fn GetCurrentBetaName(self: Self, pchName: [*c]u8, cchNameBufferSize: i32) bool {
-        return SteamAPI_ISteamApps_GetCurrentBetaName(self.ptr, pchName, cchNameBufferSize);
+    pub fn GetCurrentBetaName(self: *const Self, pchName: []u8) bool {
+        return SteamAPI_ISteamApps_GetCurrentBetaName(self.ptr, pchName.ptr, @intCast(pchName.len));
     }
 
-    pub fn MarkContentCorrupt(self: Self, bMissingFilesOnly: bool) bool {
+    pub fn MarkContentCorrupt(self: *const Self, bMissingFilesOnly: bool) bool {
         return SteamAPI_ISteamApps_MarkContentCorrupt(self.ptr, bMissingFilesOnly);
     }
 
-    pub fn GetInstalledDepots(self: Self, appID: AppId_t, pvecDepots: [*c]DepotId_t, cMaxDepots: uint32) uint32 {
+    pub fn GetInstalledDepots(self: *const Self, appID: AppId_t, pvecDepots: *DepotId_t, cMaxDepots: uint32) uint32 {
         return SteamAPI_ISteamApps_GetInstalledDepots(self.ptr, appID, pvecDepots, cMaxDepots);
     }
 
-    pub fn GetAppInstallDir(self: Self, appID: AppId_t, pchFolder: [*c]u8, cchFolderBufferSize: uint32) uint32 {
-        return SteamAPI_ISteamApps_GetAppInstallDir(self.ptr, appID, pchFolder, cchFolderBufferSize);
+    pub fn GetAppInstallDir(self: *const Self, appID: AppId_t, pchFolder: []u8) uint32 {
+        return SteamAPI_ISteamApps_GetAppInstallDir(self.ptr, appID, pchFolder.ptr, @intCast(pchFolder.len));
     }
 
-    pub fn BIsAppInstalled(self: Self, appID: AppId_t) bool {
+    pub fn BIsAppInstalled(self: *const Self, appID: AppId_t) bool {
         return SteamAPI_ISteamApps_BIsAppInstalled(self.ptr, appID);
     }
 
-    pub fn GetAppOwner(self: Self) CSteamID {
+    pub fn GetAppOwner(self: *const Self) CSteamID {
         return SteamAPI_ISteamApps_GetAppOwner(self.ptr);
     }
 
-    pub fn GetLaunchQueryParam(self: Self, pchKey: [*c]const u8) [*c]const u8 {
-        return SteamAPI_ISteamApps_GetLaunchQueryParam(self.ptr, pchKey);
+    pub fn GetLaunchQueryParam(self: *const Self, pchKey: []const u8) [*c]const u8 {
+        return SteamAPI_ISteamApps_GetLaunchQueryParam(self.ptr, pchKey.ptr);
     }
 
-    pub fn GetDlcDownloadProgress(self: Self, nAppID: AppId_t, punBytesDownloaded: [*c]uint64, punBytesTotal: [*c]uint64) bool {
+    pub fn GetDlcDownloadProgress(self: *const Self, nAppID: AppId_t, punBytesDownloaded: *uint64, punBytesTotal: *uint64) bool {
         return SteamAPI_ISteamApps_GetDlcDownloadProgress(self.ptr, nAppID, punBytesDownloaded, punBytesTotal);
     }
 
-    pub fn GetAppBuildId(self: Self) i32 {
+    pub fn GetAppBuildId(self: *const Self) i32 {
         return SteamAPI_ISteamApps_GetAppBuildId(self.ptr);
     }
 
-    pub fn RequestAllProofOfPurchaseKeys(self: Self) void {
+    pub fn RequestAllProofOfPurchaseKeys(self: *const Self) void {
         return SteamAPI_ISteamApps_RequestAllProofOfPurchaseKeys(self.ptr);
     }
 
-    pub fn GetFileDetails(self: Self, pszFileName: [*c]const u8) SteamAPICall_t {
-        return SteamAPI_ISteamApps_GetFileDetails(self.ptr, pszFileName);
+    pub fn GetFileDetails(self: *const Self, pszFileName: [:0]const u8) SteamAPICall_t {
+        return SteamAPI_ISteamApps_GetFileDetails(self.ptr, pszFileName.ptr);
     }
 
-    pub fn GetLaunchCommandLine(self: Self, pszCommandLine: [*c]u8, cubCommandLine: i32) i32 {
-        return SteamAPI_ISteamApps_GetLaunchCommandLine(self.ptr, pszCommandLine, cubCommandLine);
+    pub fn GetLaunchCommandLine(self: *const Self, pszCommandLine: [:0]u8) i32 {
+        return SteamAPI_ISteamApps_GetLaunchCommandLine(self.ptr, pszCommandLine.ptr, @intCast(pszCommandLine.len));
     }
 
-    pub fn BIsSubscribedFromFamilySharing(self: Self) bool {
+    pub fn BIsSubscribedFromFamilySharing(self: *const Self) bool {
         return SteamAPI_ISteamApps_BIsSubscribedFromFamilySharing(self.ptr);
     }
 
-    pub fn BIsTimedTrial(self: Self, punSecondsAllowed: [*c]uint32, punSecondsPlayed: [*c]uint32) bool {
+    pub fn BIsTimedTrial(self: *const Self, punSecondsAllowed: *uint32, punSecondsPlayed: *uint32) bool {
         return SteamAPI_ISteamApps_BIsTimedTrial(self.ptr, punSecondsAllowed, punSecondsPlayed);
     }
 
-    pub fn SetDlcContext(self: Self, nAppID: AppId_t) bool {
+    pub fn SetDlcContext(self: *const Self, nAppID: AppId_t) bool {
         return SteamAPI_ISteamApps_SetDlcContext(self.ptr, nAppID);
     }
 };
@@ -8071,91 +8071,91 @@ pub const ISteamNetworking = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn SendP2PPacket(self: Self, steamIDRemote: CSteamID, pubData: ?*const anyopaque, cubData: uint32, eP2PSendType: EP2PSend, nChannel: i32) bool {
-        return SteamAPI_ISteamNetworking_SendP2PPacket(self.ptr, steamIDRemote, pubData, cubData, eP2PSendType, nChannel);
+    pub fn SendP2PPacket(self: *const Self, steamIDRemote: CSteamID, pubData: []const u8, eP2PSendType: EP2PSend, nChannel: i32) bool {
+        return SteamAPI_ISteamNetworking_SendP2PPacket(self.ptr, steamIDRemote, pubData.ptr, @intCast(pubData.len), eP2PSendType, nChannel);
     }
 
-    pub fn IsP2PPacketAvailable(self: Self, pcubMsgSize: [*c]uint32, nChannel: i32) bool {
+    pub fn IsP2PPacketAvailable(self: *const Self, pcubMsgSize: *uint32, nChannel: i32) bool {
         return SteamAPI_ISteamNetworking_IsP2PPacketAvailable(self.ptr, pcubMsgSize, nChannel);
     }
 
-    pub fn ReadP2PPacket(self: Self, pubDest: ?*anyopaque, cubDest: uint32, pcubMsgSize: [*c]uint32, psteamIDRemote: [*c]CSteamID, nChannel: i32) bool {
-        return SteamAPI_ISteamNetworking_ReadP2PPacket(self.ptr, pubDest, cubDest, pcubMsgSize, psteamIDRemote, nChannel);
+    pub fn ReadP2PPacket(self: *const Self, pubDest: []u8, pcubMsgSize: *uint32, psteamIDRemote: *CSteamID, nChannel: i32) bool {
+        return SteamAPI_ISteamNetworking_ReadP2PPacket(self.ptr, pubDest.ptr, @intCast(pubDest.len), pcubMsgSize, psteamIDRemote, nChannel);
     }
 
-    pub fn AcceptP2PSessionWithUser(self: Self, steamIDRemote: CSteamID) bool {
+    pub fn AcceptP2PSessionWithUser(self: *const Self, steamIDRemote: CSteamID) bool {
         return SteamAPI_ISteamNetworking_AcceptP2PSessionWithUser(self.ptr, steamIDRemote);
     }
 
-    pub fn CloseP2PSessionWithUser(self: Self, steamIDRemote: CSteamID) bool {
+    pub fn CloseP2PSessionWithUser(self: *const Self, steamIDRemote: CSteamID) bool {
         return SteamAPI_ISteamNetworking_CloseP2PSessionWithUser(self.ptr, steamIDRemote);
     }
 
-    pub fn CloseP2PChannelWithUser(self: Self, steamIDRemote: CSteamID, nChannel: i32) bool {
+    pub fn CloseP2PChannelWithUser(self: *const Self, steamIDRemote: CSteamID, nChannel: i32) bool {
         return SteamAPI_ISteamNetworking_CloseP2PChannelWithUser(self.ptr, steamIDRemote, nChannel);
     }
 
-    pub fn GetP2PSessionState(self: Self, steamIDRemote: CSteamID, pConnectionState: [*c]P2PSessionState_t) bool {
-        return SteamAPI_ISteamNetworking_GetP2PSessionState(self.ptr, steamIDRemote, pConnectionState);
+    pub fn GetP2PSessionState(self: *const Self, steamIDRemote: CSteamID, pConnectionState: []P2PSessionState_t) bool {
+        return SteamAPI_ISteamNetworking_GetP2PSessionState(self.ptr, steamIDRemote, pConnectionState.ptr);
     }
 
-    pub fn AllowP2PPacketRelay(self: Self, bAllow: bool) bool {
+    pub fn AllowP2PPacketRelay(self: *const Self, bAllow: bool) bool {
         return SteamAPI_ISteamNetworking_AllowP2PPacketRelay(self.ptr, bAllow);
     }
 
-    pub fn CreateListenSocket(self: Self, nVirtualP2PPort: i32, nIP: SteamIPAddress_t, nPort: uint16, bAllowUseOfPacketRelay: bool) SNetListenSocket_t {
+    pub fn CreateListenSocket(self: *const Self, nVirtualP2PPort: i32, nIP: SteamIPAddress_t, nPort: uint16, bAllowUseOfPacketRelay: bool) SNetListenSocket_t {
         return SteamAPI_ISteamNetworking_CreateListenSocket(self.ptr, nVirtualP2PPort, nIP, nPort, bAllowUseOfPacketRelay);
     }
 
-    pub fn CreateP2PConnectionSocket(self: Self, steamIDTarget: CSteamID, nVirtualPort: i32, nTimeoutSec: i32, bAllowUseOfPacketRelay: bool) SNetSocket_t {
+    pub fn CreateP2PConnectionSocket(self: *const Self, steamIDTarget: CSteamID, nVirtualPort: i32, nTimeoutSec: i32, bAllowUseOfPacketRelay: bool) SNetSocket_t {
         return SteamAPI_ISteamNetworking_CreateP2PConnectionSocket(self.ptr, steamIDTarget, nVirtualPort, nTimeoutSec, bAllowUseOfPacketRelay);
     }
 
-    pub fn CreateConnectionSocket(self: Self, nIP: SteamIPAddress_t, nPort: uint16, nTimeoutSec: i32) SNetSocket_t {
+    pub fn CreateConnectionSocket(self: *const Self, nIP: SteamIPAddress_t, nPort: uint16, nTimeoutSec: i32) SNetSocket_t {
         return SteamAPI_ISteamNetworking_CreateConnectionSocket(self.ptr, nIP, nPort, nTimeoutSec);
     }
 
-    pub fn DestroySocket(self: Self, hSocket: SNetSocket_t, bNotifyRemoteEnd: bool) bool {
+    pub fn DestroySocket(self: *const Self, hSocket: SNetSocket_t, bNotifyRemoteEnd: bool) bool {
         return SteamAPI_ISteamNetworking_DestroySocket(self.ptr, hSocket, bNotifyRemoteEnd);
     }
 
-    pub fn DestroyListenSocket(self: Self, hSocket: SNetListenSocket_t, bNotifyRemoteEnd: bool) bool {
+    pub fn DestroyListenSocket(self: *const Self, hSocket: SNetListenSocket_t, bNotifyRemoteEnd: bool) bool {
         return SteamAPI_ISteamNetworking_DestroyListenSocket(self.ptr, hSocket, bNotifyRemoteEnd);
     }
 
-    pub fn SendDataOnSocket(self: Self, hSocket: SNetSocket_t, pubData: ?*anyopaque, cubData: uint32, bReliable: bool) bool {
-        return SteamAPI_ISteamNetworking_SendDataOnSocket(self.ptr, hSocket, pubData, cubData, bReliable);
+    pub fn SendDataOnSocket(self: *const Self, hSocket: SNetSocket_t, pubData: []u8, bReliable: bool) bool {
+        return SteamAPI_ISteamNetworking_SendDataOnSocket(self.ptr, hSocket, pubData.ptr, @intCast(pubData.len), bReliable);
     }
 
-    pub fn IsDataAvailableOnSocket(self: Self, hSocket: SNetSocket_t, pcubMsgSize: [*c]uint32) bool {
+    pub fn IsDataAvailableOnSocket(self: *const Self, hSocket: SNetSocket_t, pcubMsgSize: *uint32) bool {
         return SteamAPI_ISteamNetworking_IsDataAvailableOnSocket(self.ptr, hSocket, pcubMsgSize);
     }
 
-    pub fn RetrieveDataFromSocket(self: Self, hSocket: SNetSocket_t, pubDest: ?*anyopaque, cubDest: uint32, pcubMsgSize: [*c]uint32) bool {
-        return SteamAPI_ISteamNetworking_RetrieveDataFromSocket(self.ptr, hSocket, pubDest, cubDest, pcubMsgSize);
+    pub fn RetrieveDataFromSocket(self: *const Self, hSocket: SNetSocket_t, pubDest: []u8, pcubMsgSize: *uint32) bool {
+        return SteamAPI_ISteamNetworking_RetrieveDataFromSocket(self.ptr, hSocket, pubDest.ptr, @intCast(pubDest.len), pcubMsgSize);
     }
 
-    pub fn IsDataAvailable(self: Self, hListenSocket: SNetListenSocket_t, pcubMsgSize: [*c]uint32, phSocket: [*c]SNetSocket_t) bool {
+    pub fn IsDataAvailable(self: *const Self, hListenSocket: SNetListenSocket_t, pcubMsgSize: *uint32, phSocket: *SNetSocket_t) bool {
         return SteamAPI_ISteamNetworking_IsDataAvailable(self.ptr, hListenSocket, pcubMsgSize, phSocket);
     }
 
-    pub fn RetrieveData(self: Self, hListenSocket: SNetListenSocket_t, pubDest: ?*anyopaque, cubDest: uint32, pcubMsgSize: [*c]uint32, phSocket: [*c]SNetSocket_t) bool {
-        return SteamAPI_ISteamNetworking_RetrieveData(self.ptr, hListenSocket, pubDest, cubDest, pcubMsgSize, phSocket);
+    pub fn RetrieveData(self: *const Self, hListenSocket: SNetListenSocket_t, pubDest: []u8, pcubMsgSize: *uint32, phSocket: *SNetSocket_t) bool {
+        return SteamAPI_ISteamNetworking_RetrieveData(self.ptr, hListenSocket, pubDest.ptr, @intCast(pubDest.len), pcubMsgSize, phSocket);
     }
 
-    pub fn GetSocketInfo(self: Self, hSocket: SNetSocket_t, pSteamIDRemote: [*c]CSteamID, peSocketStatus: [*c]i32, punIPRemote: [*c]SteamIPAddress_t, punPortRemote: [*c]uint16) bool {
-        return SteamAPI_ISteamNetworking_GetSocketInfo(self.ptr, hSocket, pSteamIDRemote, peSocketStatus, punIPRemote, punPortRemote);
+    pub fn GetSocketInfo(self: *const Self, hSocket: SNetSocket_t, pSteamIDRemote: []CSteamID, peSocketStatus: *i32, punIPRemote: *SteamIPAddress_t, punPortRemote: *uint16) bool {
+        return SteamAPI_ISteamNetworking_GetSocketInfo(self.ptr, hSocket, pSteamIDRemote.ptr, peSocketStatus, punIPRemote, punPortRemote);
     }
 
-    pub fn GetListenSocketInfo(self: Self, hListenSocket: SNetListenSocket_t, pnIP: [*c]SteamIPAddress_t, pnPort: [*c]uint16) bool {
+    pub fn GetListenSocketInfo(self: *const Self, hListenSocket: SNetListenSocket_t, pnIP: *SteamIPAddress_t, pnPort: *uint16) bool {
         return SteamAPI_ISteamNetworking_GetListenSocketInfo(self.ptr, hListenSocket, pnIP, pnPort);
     }
 
-    pub fn GetSocketConnectionType(self: Self, hSocket: SNetSocket_t) ESNetSocketConnectionType {
+    pub fn GetSocketConnectionType(self: *const Self, hSocket: SNetSocket_t) ESNetSocketConnectionType {
         return SteamAPI_ISteamNetworking_GetSocketConnectionType(self.ptr, hSocket);
     }
 
-    pub fn GetMaxPacketSize(self: Self, hSocket: SNetSocket_t) i32 {
+    pub fn GetMaxPacketSize(self: *const Self, hSocket: SNetSocket_t) i32 {
         return SteamAPI_ISteamNetworking_GetMaxPacketSize(self.ptr, hSocket);
     }
 };
@@ -8193,40 +8193,40 @@ pub const ISteamScreenshots = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn WriteScreenshot(self: Self, pubRGB: ?*anyopaque, cubRGB: uint32, nWidth: i32, nHeight: i32) ScreenshotHandle {
-        return SteamAPI_ISteamScreenshots_WriteScreenshot(self.ptr, pubRGB, cubRGB, nWidth, nHeight);
+    pub fn WriteScreenshot(self: *const Self, pubRGB: []u8, nWidth: i32, nHeight: i32) ScreenshotHandle {
+        return SteamAPI_ISteamScreenshots_WriteScreenshot(self.ptr, pubRGB.ptr, @intCast(pubRGB.len), nWidth, nHeight);
     }
 
-    pub fn AddScreenshotToLibrary(self: Self, pchFilename: [*c]const u8, pchThumbnailFilename: [*c]const u8, nWidth: i32, nHeight: i32) ScreenshotHandle {
-        return SteamAPI_ISteamScreenshots_AddScreenshotToLibrary(self.ptr, pchFilename, pchThumbnailFilename, nWidth, nHeight);
+    pub fn AddScreenshotToLibrary(self: *const Self, pchFilename: []const u8, pchThumbnailFilename: []const u8, nWidth: i32, nHeight: i32) ScreenshotHandle {
+        return SteamAPI_ISteamScreenshots_AddScreenshotToLibrary(self.ptr, pchFilename.ptr, pchThumbnailFilename.ptr, nWidth, nHeight);
     }
 
-    pub fn TriggerScreenshot(self: Self) void {
+    pub fn TriggerScreenshot(self: *const Self) void {
         return SteamAPI_ISteamScreenshots_TriggerScreenshot(self.ptr);
     }
 
-    pub fn HookScreenshots(self: Self, bHook: bool) void {
+    pub fn HookScreenshots(self: *const Self, bHook: bool) void {
         return SteamAPI_ISteamScreenshots_HookScreenshots(self.ptr, bHook);
     }
 
-    pub fn SetLocation(self: Self, hScreenshot: ScreenshotHandle, pchLocation: [*c]const u8) bool {
-        return SteamAPI_ISteamScreenshots_SetLocation(self.ptr, hScreenshot, pchLocation);
+    pub fn SetLocation(self: *const Self, hScreenshot: ScreenshotHandle, pchLocation: []const u8) bool {
+        return SteamAPI_ISteamScreenshots_SetLocation(self.ptr, hScreenshot, pchLocation.ptr);
     }
 
-    pub fn TagUser(self: Self, hScreenshot: ScreenshotHandle, steamID: CSteamID) bool {
+    pub fn TagUser(self: *const Self, hScreenshot: ScreenshotHandle, steamID: CSteamID) bool {
         return SteamAPI_ISteamScreenshots_TagUser(self.ptr, hScreenshot, steamID);
     }
 
-    pub fn TagPublishedFile(self: Self, hScreenshot: ScreenshotHandle, unPublishedFileID: PublishedFileId_t) bool {
+    pub fn TagPublishedFile(self: *const Self, hScreenshot: ScreenshotHandle, unPublishedFileID: PublishedFileId_t) bool {
         return SteamAPI_ISteamScreenshots_TagPublishedFile(self.ptr, hScreenshot, unPublishedFileID);
     }
 
-    pub fn IsScreenshotsHooked(self: Self) bool {
+    pub fn IsScreenshotsHooked(self: *const Self) bool {
         return SteamAPI_ISteamScreenshots_IsScreenshotsHooked(self.ptr);
     }
 
-    pub fn AddVRScreenshotToLibrary(self: Self, eType: EVRScreenshotType, pchFilename: [*c]const u8, pchVRFilename: [*c]const u8) ScreenshotHandle {
-        return SteamAPI_ISteamScreenshots_AddVRScreenshotToLibrary(self.ptr, eType, pchFilename, pchVRFilename);
+    pub fn AddVRScreenshotToLibrary(self: *const Self, eType: EVRScreenshotType, pchFilename: []const u8, pchVRFilename: []const u8) ScreenshotHandle {
+        return SteamAPI_ISteamScreenshots_AddVRScreenshotToLibrary(self.ptr, eType, pchFilename.ptr, pchVRFilename.ptr);
     }
 };
 
@@ -8250,39 +8250,39 @@ pub const ISteamMusic = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn BIsEnabled(self: Self) bool {
+    pub fn BIsEnabled(self: *const Self) bool {
         return SteamAPI_ISteamMusic_BIsEnabled(self.ptr);
     }
 
-    pub fn BIsPlaying(self: Self) bool {
+    pub fn BIsPlaying(self: *const Self) bool {
         return SteamAPI_ISteamMusic_BIsPlaying(self.ptr);
     }
 
-    pub fn GetPlaybackStatus(self: Self) AudioPlayback_Status {
+    pub fn GetPlaybackStatus(self: *const Self) AudioPlayback_Status {
         return SteamAPI_ISteamMusic_GetPlaybackStatus(self.ptr);
     }
 
-    pub fn Play(self: Self) void {
+    pub fn Play(self: *const Self) void {
         return SteamAPI_ISteamMusic_Play(self.ptr);
     }
 
-    pub fn Pause(self: Self) void {
+    pub fn Pause(self: *const Self) void {
         return SteamAPI_ISteamMusic_Pause(self.ptr);
     }
 
-    pub fn PlayPrevious(self: Self) void {
+    pub fn PlayPrevious(self: *const Self) void {
         return SteamAPI_ISteamMusic_PlayPrevious(self.ptr);
     }
 
-    pub fn PlayNext(self: Self) void {
+    pub fn PlayNext(self: *const Self) void {
         return SteamAPI_ISteamMusic_PlayNext(self.ptr);
     }
 
-    pub fn SetVolume(self: Self, flVolume: f32) void {
+    pub fn SetVolume(self: *const Self, flVolume: f32) void {
         return SteamAPI_ISteamMusic_SetVolume(self.ptr, flVolume);
     }
 
-    pub fn GetVolume(self: Self) f32 {
+    pub fn GetVolume(self: *const Self) f32 {
         return SteamAPI_ISteamMusic_GetVolume(self.ptr);
     }
 };
@@ -8307,131 +8307,131 @@ pub const ISteamMusicRemote = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn RegisterSteamMusicRemote(self: Self, pchName: [*c]const u8) bool {
-        return SteamAPI_ISteamMusicRemote_RegisterSteamMusicRemote(self.ptr, pchName);
+    pub fn RegisterSteamMusicRemote(self: *const Self, pchName: []const u8) bool {
+        return SteamAPI_ISteamMusicRemote_RegisterSteamMusicRemote(self.ptr, pchName.ptr);
     }
 
-    pub fn DeregisterSteamMusicRemote(self: Self) bool {
+    pub fn DeregisterSteamMusicRemote(self: *const Self) bool {
         return SteamAPI_ISteamMusicRemote_DeregisterSteamMusicRemote(self.ptr);
     }
 
-    pub fn BIsCurrentMusicRemote(self: Self) bool {
+    pub fn BIsCurrentMusicRemote(self: *const Self) bool {
         return SteamAPI_ISteamMusicRemote_BIsCurrentMusicRemote(self.ptr);
     }
 
-    pub fn BActivationSuccess(self: Self, bValue: bool) bool {
+    pub fn BActivationSuccess(self: *const Self, bValue: bool) bool {
         return SteamAPI_ISteamMusicRemote_BActivationSuccess(self.ptr, bValue);
     }
 
-    pub fn SetDisplayName(self: Self, pchDisplayName: [*c]const u8) bool {
-        return SteamAPI_ISteamMusicRemote_SetDisplayName(self.ptr, pchDisplayName);
+    pub fn SetDisplayName(self: *const Self, pchDisplayName: []const u8) bool {
+        return SteamAPI_ISteamMusicRemote_SetDisplayName(self.ptr, pchDisplayName.ptr);
     }
 
-    pub fn SetPNGIcon_64x64(self: Self, pvBuffer: ?*anyopaque, cbBufferLength: uint32) bool {
-        return SteamAPI_ISteamMusicRemote_SetPNGIcon_64x64(self.ptr, pvBuffer, cbBufferLength);
+    pub fn SetPNGIcon_64x64(self: *const Self, pvBuffer: []u8) bool {
+        return SteamAPI_ISteamMusicRemote_SetPNGIcon_64x64(self.ptr, pvBuffer.ptr, @intCast(pvBuffer.len));
     }
 
-    pub fn EnablePlayPrevious(self: Self, bValue: bool) bool {
+    pub fn EnablePlayPrevious(self: *const Self, bValue: bool) bool {
         return SteamAPI_ISteamMusicRemote_EnablePlayPrevious(self.ptr, bValue);
     }
 
-    pub fn EnablePlayNext(self: Self, bValue: bool) bool {
+    pub fn EnablePlayNext(self: *const Self, bValue: bool) bool {
         return SteamAPI_ISteamMusicRemote_EnablePlayNext(self.ptr, bValue);
     }
 
-    pub fn EnableShuffled(self: Self, bValue: bool) bool {
+    pub fn EnableShuffled(self: *const Self, bValue: bool) bool {
         return SteamAPI_ISteamMusicRemote_EnableShuffled(self.ptr, bValue);
     }
 
-    pub fn EnableLooped(self: Self, bValue: bool) bool {
+    pub fn EnableLooped(self: *const Self, bValue: bool) bool {
         return SteamAPI_ISteamMusicRemote_EnableLooped(self.ptr, bValue);
     }
 
-    pub fn EnableQueue(self: Self, bValue: bool) bool {
+    pub fn EnableQueue(self: *const Self, bValue: bool) bool {
         return SteamAPI_ISteamMusicRemote_EnableQueue(self.ptr, bValue);
     }
 
-    pub fn EnablePlaylists(self: Self, bValue: bool) bool {
+    pub fn EnablePlaylists(self: *const Self, bValue: bool) bool {
         return SteamAPI_ISteamMusicRemote_EnablePlaylists(self.ptr, bValue);
     }
 
-    pub fn UpdatePlaybackStatus(self: Self, nStatus: AudioPlayback_Status) bool {
+    pub fn UpdatePlaybackStatus(self: *const Self, nStatus: AudioPlayback_Status) bool {
         return SteamAPI_ISteamMusicRemote_UpdatePlaybackStatus(self.ptr, nStatus);
     }
 
-    pub fn UpdateShuffled(self: Self, bValue: bool) bool {
+    pub fn UpdateShuffled(self: *const Self, bValue: bool) bool {
         return SteamAPI_ISteamMusicRemote_UpdateShuffled(self.ptr, bValue);
     }
 
-    pub fn UpdateLooped(self: Self, bValue: bool) bool {
+    pub fn UpdateLooped(self: *const Self, bValue: bool) bool {
         return SteamAPI_ISteamMusicRemote_UpdateLooped(self.ptr, bValue);
     }
 
-    pub fn UpdateVolume(self: Self, flValue: f32) bool {
+    pub fn UpdateVolume(self: *const Self, flValue: f32) bool {
         return SteamAPI_ISteamMusicRemote_UpdateVolume(self.ptr, flValue);
     }
 
-    pub fn CurrentEntryWillChange(self: Self) bool {
+    pub fn CurrentEntryWillChange(self: *const Self) bool {
         return SteamAPI_ISteamMusicRemote_CurrentEntryWillChange(self.ptr);
     }
 
-    pub fn CurrentEntryIsAvailable(self: Self, bAvailable: bool) bool {
+    pub fn CurrentEntryIsAvailable(self: *const Self, bAvailable: bool) bool {
         return SteamAPI_ISteamMusicRemote_CurrentEntryIsAvailable(self.ptr, bAvailable);
     }
 
-    pub fn UpdateCurrentEntryText(self: Self, pchText: [*c]const u8) bool {
-        return SteamAPI_ISteamMusicRemote_UpdateCurrentEntryText(self.ptr, pchText);
+    pub fn UpdateCurrentEntryText(self: *const Self, pchText: []const u8) bool {
+        return SteamAPI_ISteamMusicRemote_UpdateCurrentEntryText(self.ptr, pchText.ptr);
     }
 
-    pub fn UpdateCurrentEntryElapsedSeconds(self: Self, nValue: i32) bool {
+    pub fn UpdateCurrentEntryElapsedSeconds(self: *const Self, nValue: i32) bool {
         return SteamAPI_ISteamMusicRemote_UpdateCurrentEntryElapsedSeconds(self.ptr, nValue);
     }
 
-    pub fn UpdateCurrentEntryCoverArt(self: Self, pvBuffer: ?*anyopaque, cbBufferLength: uint32) bool {
-        return SteamAPI_ISteamMusicRemote_UpdateCurrentEntryCoverArt(self.ptr, pvBuffer, cbBufferLength);
+    pub fn UpdateCurrentEntryCoverArt(self: *const Self, pvBuffer: []u8) bool {
+        return SteamAPI_ISteamMusicRemote_UpdateCurrentEntryCoverArt(self.ptr, pvBuffer.ptr, @intCast(pvBuffer.len));
     }
 
-    pub fn CurrentEntryDidChange(self: Self) bool {
+    pub fn CurrentEntryDidChange(self: *const Self) bool {
         return SteamAPI_ISteamMusicRemote_CurrentEntryDidChange(self.ptr);
     }
 
-    pub fn QueueWillChange(self: Self) bool {
+    pub fn QueueWillChange(self: *const Self) bool {
         return SteamAPI_ISteamMusicRemote_QueueWillChange(self.ptr);
     }
 
-    pub fn ResetQueueEntries(self: Self) bool {
+    pub fn ResetQueueEntries(self: *const Self) bool {
         return SteamAPI_ISteamMusicRemote_ResetQueueEntries(self.ptr);
     }
 
-    pub fn SetQueueEntry(self: Self, nID: i32, nPosition: i32, pchEntryText: [*c]const u8) bool {
-        return SteamAPI_ISteamMusicRemote_SetQueueEntry(self.ptr, nID, nPosition, pchEntryText);
+    pub fn SetQueueEntry(self: *const Self, nID: i32, nPosition: i32, pchEntryText: []const u8) bool {
+        return SteamAPI_ISteamMusicRemote_SetQueueEntry(self.ptr, nID, nPosition, pchEntryText.ptr);
     }
 
-    pub fn SetCurrentQueueEntry(self: Self, nID: i32) bool {
+    pub fn SetCurrentQueueEntry(self: *const Self, nID: i32) bool {
         return SteamAPI_ISteamMusicRemote_SetCurrentQueueEntry(self.ptr, nID);
     }
 
-    pub fn QueueDidChange(self: Self) bool {
+    pub fn QueueDidChange(self: *const Self) bool {
         return SteamAPI_ISteamMusicRemote_QueueDidChange(self.ptr);
     }
 
-    pub fn PlaylistWillChange(self: Self) bool {
+    pub fn PlaylistWillChange(self: *const Self) bool {
         return SteamAPI_ISteamMusicRemote_PlaylistWillChange(self.ptr);
     }
 
-    pub fn ResetPlaylistEntries(self: Self) bool {
+    pub fn ResetPlaylistEntries(self: *const Self) bool {
         return SteamAPI_ISteamMusicRemote_ResetPlaylistEntries(self.ptr);
     }
 
-    pub fn SetPlaylistEntry(self: Self, nID: i32, nPosition: i32, pchEntryText: [*c]const u8) bool {
-        return SteamAPI_ISteamMusicRemote_SetPlaylistEntry(self.ptr, nID, nPosition, pchEntryText);
+    pub fn SetPlaylistEntry(self: *const Self, nID: i32, nPosition: i32, pchEntryText: []const u8) bool {
+        return SteamAPI_ISteamMusicRemote_SetPlaylistEntry(self.ptr, nID, nPosition, pchEntryText.ptr);
     }
 
-    pub fn SetCurrentPlaylistEntry(self: Self, nID: i32) bool {
+    pub fn SetCurrentPlaylistEntry(self: *const Self, nID: i32) bool {
         return SteamAPI_ISteamMusicRemote_SetCurrentPlaylistEntry(self.ptr, nID);
     }
 
-    pub fn PlaylistDidChange(self: Self) bool {
+    pub fn PlaylistDidChange(self: *const Self) bool {
         return SteamAPI_ISteamMusicRemote_PlaylistDidChange(self.ptr);
     }
 };
@@ -8484,103 +8484,103 @@ pub const ISteamHTTP = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn CreateHTTPRequest(self: Self, eHTTPRequestMethod: EHTTPMethod, pchAbsoluteURL: [*c]const u8) HTTPRequestHandle {
-        return SteamAPI_ISteamHTTP_CreateHTTPRequest(self.ptr, eHTTPRequestMethod, pchAbsoluteURL);
+    pub fn CreateHTTPRequest(self: *const Self, eHTTPRequestMethod: EHTTPMethod, pchAbsoluteURL: []const u8) HTTPRequestHandle {
+        return SteamAPI_ISteamHTTP_CreateHTTPRequest(self.ptr, eHTTPRequestMethod, pchAbsoluteURL.ptr);
     }
 
-    pub fn SetHTTPRequestContextValue(self: Self, hRequest: HTTPRequestHandle, ulContextValue: uint64) bool {
+    pub fn SetHTTPRequestContextValue(self: *const Self, hRequest: HTTPRequestHandle, ulContextValue: uint64) bool {
         return SteamAPI_ISteamHTTP_SetHTTPRequestContextValue(self.ptr, hRequest, ulContextValue);
     }
 
-    pub fn SetHTTPRequestNetworkActivityTimeout(self: Self, hRequest: HTTPRequestHandle, unTimeoutSeconds: uint32) bool {
+    pub fn SetHTTPRequestNetworkActivityTimeout(self: *const Self, hRequest: HTTPRequestHandle, unTimeoutSeconds: uint32) bool {
         return SteamAPI_ISteamHTTP_SetHTTPRequestNetworkActivityTimeout(self.ptr, hRequest, unTimeoutSeconds);
     }
 
-    pub fn SetHTTPRequestHeaderValue(self: Self, hRequest: HTTPRequestHandle, pchHeaderName: [*c]const u8, pchHeaderValue: [*c]const u8) bool {
-        return SteamAPI_ISteamHTTP_SetHTTPRequestHeaderValue(self.ptr, hRequest, pchHeaderName, pchHeaderValue);
+    pub fn SetHTTPRequestHeaderValue(self: *const Self, hRequest: HTTPRequestHandle, pchHeaderName: []const u8, pchHeaderValue: []const u8) bool {
+        return SteamAPI_ISteamHTTP_SetHTTPRequestHeaderValue(self.ptr, hRequest, pchHeaderName.ptr, pchHeaderValue.ptr);
     }
 
-    pub fn SetHTTPRequestGetOrPostParameter(self: Self, hRequest: HTTPRequestHandle, pchParamName: [*c]const u8, pchParamValue: [*c]const u8) bool {
-        return SteamAPI_ISteamHTTP_SetHTTPRequestGetOrPostParameter(self.ptr, hRequest, pchParamName, pchParamValue);
+    pub fn SetHTTPRequestGetOrPostParameter(self: *const Self, hRequest: HTTPRequestHandle, pchParamName: []const u8, pchParamValue: []const u8) bool {
+        return SteamAPI_ISteamHTTP_SetHTTPRequestGetOrPostParameter(self.ptr, hRequest, pchParamName.ptr, pchParamValue.ptr);
     }
 
-    pub fn SendHTTPRequest(self: Self, hRequest: HTTPRequestHandle, pCallHandle: [*c]SteamAPICall_t) bool {
-        return SteamAPI_ISteamHTTP_SendHTTPRequest(self.ptr, hRequest, pCallHandle);
+    pub fn SendHTTPRequest(self: *const Self, hRequest: HTTPRequestHandle, pCallHandle: []SteamAPICall_t) bool {
+        return SteamAPI_ISteamHTTP_SendHTTPRequest(self.ptr, hRequest, pCallHandle.ptr);
     }
 
-    pub fn SendHTTPRequestAndStreamResponse(self: Self, hRequest: HTTPRequestHandle, pCallHandle: [*c]SteamAPICall_t) bool {
-        return SteamAPI_ISteamHTTP_SendHTTPRequestAndStreamResponse(self.ptr, hRequest, pCallHandle);
+    pub fn SendHTTPRequestAndStreamResponse(self: *const Self, hRequest: HTTPRequestHandle, pCallHandle: []SteamAPICall_t) bool {
+        return SteamAPI_ISteamHTTP_SendHTTPRequestAndStreamResponse(self.ptr, hRequest, pCallHandle.ptr);
     }
 
-    pub fn DeferHTTPRequest(self: Self, hRequest: HTTPRequestHandle) bool {
+    pub fn DeferHTTPRequest(self: *const Self, hRequest: HTTPRequestHandle) bool {
         return SteamAPI_ISteamHTTP_DeferHTTPRequest(self.ptr, hRequest);
     }
 
-    pub fn PrioritizeHTTPRequest(self: Self, hRequest: HTTPRequestHandle) bool {
+    pub fn PrioritizeHTTPRequest(self: *const Self, hRequest: HTTPRequestHandle) bool {
         return SteamAPI_ISteamHTTP_PrioritizeHTTPRequest(self.ptr, hRequest);
     }
 
-    pub fn GetHTTPResponseHeaderSize(self: Self, hRequest: HTTPRequestHandle, pchHeaderName: [*c]const u8, unResponseHeaderSize: [*c]uint32) bool {
-        return SteamAPI_ISteamHTTP_GetHTTPResponseHeaderSize(self.ptr, hRequest, pchHeaderName, unResponseHeaderSize);
+    pub fn GetHTTPResponseHeaderSize(self: *const Self, hRequest: HTTPRequestHandle, pchHeaderName: []const u8, unResponseHeaderSize: *uint32) bool {
+        return SteamAPI_ISteamHTTP_GetHTTPResponseHeaderSize(self.ptr, hRequest, pchHeaderName.ptr, unResponseHeaderSize);
     }
 
-    pub fn GetHTTPResponseHeaderValue(self: Self, hRequest: HTTPRequestHandle, pchHeaderName: [*c]const u8, pHeaderValueBuffer: [*c]uint8, unBufferSize: uint32) bool {
-        return SteamAPI_ISteamHTTP_GetHTTPResponseHeaderValue(self.ptr, hRequest, pchHeaderName, pHeaderValueBuffer, unBufferSize);
+    pub fn GetHTTPResponseHeaderValue(self: *const Self, hRequest: HTTPRequestHandle, pchHeaderName: []const u8, pHeaderValueBuffer: []uint8, unBufferSize: uint32) bool {
+        return SteamAPI_ISteamHTTP_GetHTTPResponseHeaderValue(self.ptr, hRequest, pchHeaderName.ptr, pHeaderValueBuffer.ptr, unBufferSize);
     }
 
-    pub fn GetHTTPResponseBodySize(self: Self, hRequest: HTTPRequestHandle, unBodySize: [*c]uint32) bool {
+    pub fn GetHTTPResponseBodySize(self: *const Self, hRequest: HTTPRequestHandle, unBodySize: *uint32) bool {
         return SteamAPI_ISteamHTTP_GetHTTPResponseBodySize(self.ptr, hRequest, unBodySize);
     }
 
-    pub fn GetHTTPResponseBodyData(self: Self, hRequest: HTTPRequestHandle, pBodyDataBuffer: [*c]uint8, unBufferSize: uint32) bool {
-        return SteamAPI_ISteamHTTP_GetHTTPResponseBodyData(self.ptr, hRequest, pBodyDataBuffer, unBufferSize);
+    pub fn GetHTTPResponseBodyData(self: *const Self, hRequest: HTTPRequestHandle, pBodyDataBuffer: []uint8, unBufferSize: uint32) bool {
+        return SteamAPI_ISteamHTTP_GetHTTPResponseBodyData(self.ptr, hRequest, pBodyDataBuffer.ptr, unBufferSize);
     }
 
-    pub fn GetHTTPStreamingResponseBodyData(self: Self, hRequest: HTTPRequestHandle, cOffset: uint32, pBodyDataBuffer: [*c]uint8, unBufferSize: uint32) bool {
-        return SteamAPI_ISteamHTTP_GetHTTPStreamingResponseBodyData(self.ptr, hRequest, cOffset, pBodyDataBuffer, unBufferSize);
+    pub fn GetHTTPStreamingResponseBodyData(self: *const Self, hRequest: HTTPRequestHandle, cOffset: uint32, pBodyDataBuffer: []uint8, unBufferSize: uint32) bool {
+        return SteamAPI_ISteamHTTP_GetHTTPStreamingResponseBodyData(self.ptr, hRequest, cOffset, pBodyDataBuffer.ptr, unBufferSize);
     }
 
-    pub fn ReleaseHTTPRequest(self: Self, hRequest: HTTPRequestHandle) bool {
+    pub fn ReleaseHTTPRequest(self: *const Self, hRequest: HTTPRequestHandle) bool {
         return SteamAPI_ISteamHTTP_ReleaseHTTPRequest(self.ptr, hRequest);
     }
 
-    pub fn GetHTTPDownloadProgressPct(self: Self, hRequest: HTTPRequestHandle, pflPercentOut: [*c]f32) bool {
+    pub fn GetHTTPDownloadProgressPct(self: *const Self, hRequest: HTTPRequestHandle, pflPercentOut: *f32) bool {
         return SteamAPI_ISteamHTTP_GetHTTPDownloadProgressPct(self.ptr, hRequest, pflPercentOut);
     }
 
-    pub fn SetHTTPRequestRawPostBody(self: Self, hRequest: HTTPRequestHandle, pchContentType: [*c]const u8, pubBody: [*c]uint8, unBodyLen: uint32) bool {
-        return SteamAPI_ISteamHTTP_SetHTTPRequestRawPostBody(self.ptr, hRequest, pchContentType, pubBody, unBodyLen);
+    pub fn SetHTTPRequestRawPostBody(self: *const Self, hRequest: HTTPRequestHandle, pchContentType: []const u8, pubBody: []uint8, unBodyLen: uint32) bool {
+        return SteamAPI_ISteamHTTP_SetHTTPRequestRawPostBody(self.ptr, hRequest, pchContentType.ptr, pubBody.ptr, unBodyLen);
     }
 
-    pub fn CreateCookieContainer(self: Self, bAllowResponsesToModify: bool) HTTPCookieContainerHandle {
+    pub fn CreateCookieContainer(self: *const Self, bAllowResponsesToModify: bool) HTTPCookieContainerHandle {
         return SteamAPI_ISteamHTTP_CreateCookieContainer(self.ptr, bAllowResponsesToModify);
     }
 
-    pub fn ReleaseCookieContainer(self: Self, hCookieContainer: HTTPCookieContainerHandle) bool {
+    pub fn ReleaseCookieContainer(self: *const Self, hCookieContainer: HTTPCookieContainerHandle) bool {
         return SteamAPI_ISteamHTTP_ReleaseCookieContainer(self.ptr, hCookieContainer);
     }
 
-    pub fn SetCookie(self: Self, hCookieContainer: HTTPCookieContainerHandle, pchHost: [*c]const u8, pchUrl: [*c]const u8, pchCookie: [*c]const u8) bool {
-        return SteamAPI_ISteamHTTP_SetCookie(self.ptr, hCookieContainer, pchHost, pchUrl, pchCookie);
+    pub fn SetCookie(self: *const Self, hCookieContainer: HTTPCookieContainerHandle, pchHost: []const u8, pchUrl: []const u8, pchCookie: []const u8) bool {
+        return SteamAPI_ISteamHTTP_SetCookie(self.ptr, hCookieContainer, pchHost.ptr, pchUrl.ptr, pchCookie.ptr);
     }
 
-    pub fn SetHTTPRequestCookieContainer(self: Self, hRequest: HTTPRequestHandle, hCookieContainer: HTTPCookieContainerHandle) bool {
+    pub fn SetHTTPRequestCookieContainer(self: *const Self, hRequest: HTTPRequestHandle, hCookieContainer: HTTPCookieContainerHandle) bool {
         return SteamAPI_ISteamHTTP_SetHTTPRequestCookieContainer(self.ptr, hRequest, hCookieContainer);
     }
 
-    pub fn SetHTTPRequestUserAgentInfo(self: Self, hRequest: HTTPRequestHandle, pchUserAgentInfo: [*c]const u8) bool {
-        return SteamAPI_ISteamHTTP_SetHTTPRequestUserAgentInfo(self.ptr, hRequest, pchUserAgentInfo);
+    pub fn SetHTTPRequestUserAgentInfo(self: *const Self, hRequest: HTTPRequestHandle, pchUserAgentInfo: []const u8) bool {
+        return SteamAPI_ISteamHTTP_SetHTTPRequestUserAgentInfo(self.ptr, hRequest, pchUserAgentInfo.ptr);
     }
 
-    pub fn SetHTTPRequestRequiresVerifiedCertificate(self: Self, hRequest: HTTPRequestHandle, bRequireVerifiedCertificate: bool) bool {
+    pub fn SetHTTPRequestRequiresVerifiedCertificate(self: *const Self, hRequest: HTTPRequestHandle, bRequireVerifiedCertificate: bool) bool {
         return SteamAPI_ISteamHTTP_SetHTTPRequestRequiresVerifiedCertificate(self.ptr, hRequest, bRequireVerifiedCertificate);
     }
 
-    pub fn SetHTTPRequestAbsoluteTimeoutMS(self: Self, hRequest: HTTPRequestHandle, unMilliseconds: uint32) bool {
+    pub fn SetHTTPRequestAbsoluteTimeoutMS(self: *const Self, hRequest: HTTPRequestHandle, unMilliseconds: uint32) bool {
         return SteamAPI_ISteamHTTP_SetHTTPRequestAbsoluteTimeoutMS(self.ptr, hRequest, unMilliseconds);
     }
 
-    pub fn GetHTTPRequestWasTimedOut(self: Self, hRequest: HTTPRequestHandle, pbWasTimedOut: [*c]bool) bool {
+    pub fn GetHTTPRequestWasTimedOut(self: *const Self, hRequest: HTTPRequestHandle, pbWasTimedOut: *bool) bool {
         return SteamAPI_ISteamHTTP_GetHTTPRequestWasTimedOut(self.ptr, hRequest, pbWasTimedOut);
     }
 };
@@ -8621,196 +8621,196 @@ pub const ISteamInput = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn Init(self: Self, bExplicitlyCallRunFrame: bool) bool {
+    pub fn Init(self: *const Self, bExplicitlyCallRunFrame: bool) bool {
         return SteamAPI_ISteamInput_Init(self.ptr, bExplicitlyCallRunFrame);
     }
 
-    pub fn Shutdown(self: Self) bool {
+    pub fn Shutdown(self: *const Self) bool {
         return SteamAPI_ISteamInput_Shutdown(self.ptr);
     }
 
-    pub fn SetInputActionManifestFilePath(self: Self, pchInputActionManifestAbsolutePath: [*c]const u8) bool {
-        return SteamAPI_ISteamInput_SetInputActionManifestFilePath(self.ptr, pchInputActionManifestAbsolutePath);
+    pub fn SetInputActionManifestFilePath(self: *const Self, pchInputActionManifestAbsolutePath: []const u8) bool {
+        return SteamAPI_ISteamInput_SetInputActionManifestFilePath(self.ptr, pchInputActionManifestAbsolutePath.ptr);
     }
 
-    pub fn RunFrame(self: Self, bReservedValue: bool) void {
+    pub fn RunFrame(self: *const Self, bReservedValue: bool) void {
         return SteamAPI_ISteamInput_RunFrame(self.ptr, bReservedValue);
     }
 
-    pub fn BWaitForData(self: Self, bWaitForever: bool, unTimeout: uint32) bool {
+    pub fn BWaitForData(self: *const Self, bWaitForever: bool, unTimeout: uint32) bool {
         return SteamAPI_ISteamInput_BWaitForData(self.ptr, bWaitForever, unTimeout);
     }
 
-    pub fn BNewDataAvailable(self: Self) bool {
+    pub fn BNewDataAvailable(self: *const Self) bool {
         return SteamAPI_ISteamInput_BNewDataAvailable(self.ptr);
     }
 
-    pub fn GetConnectedControllers(self: Self, handlesOut: [*c]InputHandle_t) i32 {
+    pub fn GetConnectedControllers(self: *const Self, handlesOut: *InputHandle_t) i32 {
         return SteamAPI_ISteamInput_GetConnectedControllers(self.ptr, handlesOut);
     }
 
-    pub fn EnableDeviceCallbacks(self: Self) void {
+    pub fn EnableDeviceCallbacks(self: *const Self) void {
         return SteamAPI_ISteamInput_EnableDeviceCallbacks(self.ptr);
     }
 
-    pub fn EnableActionEventCallbacks(self: Self, pCallback: SteamInputActionEventCallbackPointer) void {
+    pub fn EnableActionEventCallbacks(self: *const Self, pCallback: SteamInputActionEventCallbackPointer) void {
         return SteamAPI_ISteamInput_EnableActionEventCallbacks(self.ptr, pCallback);
     }
 
-    pub fn GetActionSetHandle(self: Self, pszActionSetName: [*c]const u8) InputActionSetHandle_t {
-        return SteamAPI_ISteamInput_GetActionSetHandle(self.ptr, pszActionSetName);
+    pub fn GetActionSetHandle(self: *const Self, pszActionSetName: [:0]const u8) InputActionSetHandle_t {
+        return SteamAPI_ISteamInput_GetActionSetHandle(self.ptr, pszActionSetName.ptr);
     }
 
-    pub fn ActivateActionSet(self: Self, inputHandle: InputHandle_t, actionSetHandle: InputActionSetHandle_t) void {
+    pub fn ActivateActionSet(self: *const Self, inputHandle: InputHandle_t, actionSetHandle: InputActionSetHandle_t) void {
         return SteamAPI_ISteamInput_ActivateActionSet(self.ptr, inputHandle, actionSetHandle);
     }
 
-    pub fn GetCurrentActionSet(self: Self, inputHandle: InputHandle_t) InputActionSetHandle_t {
+    pub fn GetCurrentActionSet(self: *const Self, inputHandle: InputHandle_t) InputActionSetHandle_t {
         return SteamAPI_ISteamInput_GetCurrentActionSet(self.ptr, inputHandle);
     }
 
-    pub fn ActivateActionSetLayer(self: Self, inputHandle: InputHandle_t, actionSetLayerHandle: InputActionSetHandle_t) void {
+    pub fn ActivateActionSetLayer(self: *const Self, inputHandle: InputHandle_t, actionSetLayerHandle: InputActionSetHandle_t) void {
         return SteamAPI_ISteamInput_ActivateActionSetLayer(self.ptr, inputHandle, actionSetLayerHandle);
     }
 
-    pub fn DeactivateActionSetLayer(self: Self, inputHandle: InputHandle_t, actionSetLayerHandle: InputActionSetHandle_t) void {
+    pub fn DeactivateActionSetLayer(self: *const Self, inputHandle: InputHandle_t, actionSetLayerHandle: InputActionSetHandle_t) void {
         return SteamAPI_ISteamInput_DeactivateActionSetLayer(self.ptr, inputHandle, actionSetLayerHandle);
     }
 
-    pub fn DeactivateAllActionSetLayers(self: Self, inputHandle: InputHandle_t) void {
+    pub fn DeactivateAllActionSetLayers(self: *const Self, inputHandle: InputHandle_t) void {
         return SteamAPI_ISteamInput_DeactivateAllActionSetLayers(self.ptr, inputHandle);
     }
 
-    pub fn GetActiveActionSetLayers(self: Self, inputHandle: InputHandle_t, handlesOut: [*c]InputActionSetHandle_t) i32 {
+    pub fn GetActiveActionSetLayers(self: *const Self, inputHandle: InputHandle_t, handlesOut: *InputActionSetHandle_t) i32 {
         return SteamAPI_ISteamInput_GetActiveActionSetLayers(self.ptr, inputHandle, handlesOut);
     }
 
-    pub fn GetDigitalActionHandle(self: Self, pszActionName: [*c]const u8) InputDigitalActionHandle_t {
-        return SteamAPI_ISteamInput_GetDigitalActionHandle(self.ptr, pszActionName);
+    pub fn GetDigitalActionHandle(self: *const Self, pszActionName: [:0]const u8) InputDigitalActionHandle_t {
+        return SteamAPI_ISteamInput_GetDigitalActionHandle(self.ptr, pszActionName.ptr);
     }
 
-    pub fn GetDigitalActionData(self: Self, inputHandle: InputHandle_t, digitalActionHandle: InputDigitalActionHandle_t) InputDigitalActionData_t {
+    pub fn GetDigitalActionData(self: *const Self, inputHandle: InputHandle_t, digitalActionHandle: InputDigitalActionHandle_t) InputDigitalActionData_t {
         return SteamAPI_ISteamInput_GetDigitalActionData(self.ptr, inputHandle, digitalActionHandle);
     }
 
-    pub fn GetDigitalActionOrigins(self: Self, inputHandle: InputHandle_t, actionSetHandle: InputActionSetHandle_t, digitalActionHandle: InputDigitalActionHandle_t, originsOut: [*c]EInputActionOrigin) i32 {
+    pub fn GetDigitalActionOrigins(self: *const Self, inputHandle: InputHandle_t, actionSetHandle: InputActionSetHandle_t, digitalActionHandle: InputDigitalActionHandle_t, originsOut: *EInputActionOrigin) i32 {
         return SteamAPI_ISteamInput_GetDigitalActionOrigins(self.ptr, inputHandle, actionSetHandle, digitalActionHandle, originsOut);
     }
 
-    pub fn GetStringForDigitalActionName(self: Self, eActionHandle: InputDigitalActionHandle_t) [*c]const u8 {
+    pub fn GetStringForDigitalActionName(self: *const Self, eActionHandle: InputDigitalActionHandle_t) [*c]const u8 {
         return SteamAPI_ISteamInput_GetStringForDigitalActionName(self.ptr, eActionHandle);
     }
 
-    pub fn GetAnalogActionHandle(self: Self, pszActionName: [*c]const u8) InputAnalogActionHandle_t {
-        return SteamAPI_ISteamInput_GetAnalogActionHandle(self.ptr, pszActionName);
+    pub fn GetAnalogActionHandle(self: *const Self, pszActionName: [:0]const u8) InputAnalogActionHandle_t {
+        return SteamAPI_ISteamInput_GetAnalogActionHandle(self.ptr, pszActionName.ptr);
     }
 
-    pub fn GetAnalogActionData(self: Self, inputHandle: InputHandle_t, analogActionHandle: InputAnalogActionHandle_t) InputAnalogActionData_t {
+    pub fn GetAnalogActionData(self: *const Self, inputHandle: InputHandle_t, analogActionHandle: InputAnalogActionHandle_t) InputAnalogActionData_t {
         return SteamAPI_ISteamInput_GetAnalogActionData(self.ptr, inputHandle, analogActionHandle);
     }
 
-    pub fn GetAnalogActionOrigins(self: Self, inputHandle: InputHandle_t, actionSetHandle: InputActionSetHandle_t, analogActionHandle: InputAnalogActionHandle_t, originsOut: [*c]EInputActionOrigin) i32 {
+    pub fn GetAnalogActionOrigins(self: *const Self, inputHandle: InputHandle_t, actionSetHandle: InputActionSetHandle_t, analogActionHandle: InputAnalogActionHandle_t, originsOut: *EInputActionOrigin) i32 {
         return SteamAPI_ISteamInput_GetAnalogActionOrigins(self.ptr, inputHandle, actionSetHandle, analogActionHandle, originsOut);
     }
 
-    pub fn GetGlyphPNGForActionOrigin(self: Self, eOrigin: EInputActionOrigin, eSize: ESteamInputGlyphSize, unFlags: uint32) [*c]const u8 {
+    pub fn GetGlyphPNGForActionOrigin(self: *const Self, eOrigin: EInputActionOrigin, eSize: ESteamInputGlyphSize, unFlags: uint32) [*c]const u8 {
         return SteamAPI_ISteamInput_GetGlyphPNGForActionOrigin(self.ptr, eOrigin, eSize, unFlags);
     }
 
-    pub fn GetGlyphSVGForActionOrigin(self: Self, eOrigin: EInputActionOrigin, unFlags: uint32) [*c]const u8 {
+    pub fn GetGlyphSVGForActionOrigin(self: *const Self, eOrigin: EInputActionOrigin, unFlags: uint32) [*c]const u8 {
         return SteamAPI_ISteamInput_GetGlyphSVGForActionOrigin(self.ptr, eOrigin, unFlags);
     }
 
-    pub fn GetGlyphForActionOrigin_Legacy(self: Self, eOrigin: EInputActionOrigin) [*c]const u8 {
+    pub fn GetGlyphForActionOrigin_Legacy(self: *const Self, eOrigin: EInputActionOrigin) [*c]const u8 {
         return SteamAPI_ISteamInput_GetGlyphForActionOrigin_Legacy(self.ptr, eOrigin);
     }
 
-    pub fn GetStringForActionOrigin(self: Self, eOrigin: EInputActionOrigin) [*c]const u8 {
+    pub fn GetStringForActionOrigin(self: *const Self, eOrigin: EInputActionOrigin) [*c]const u8 {
         return SteamAPI_ISteamInput_GetStringForActionOrigin(self.ptr, eOrigin);
     }
 
-    pub fn GetStringForAnalogActionName(self: Self, eActionHandle: InputAnalogActionHandle_t) [*c]const u8 {
+    pub fn GetStringForAnalogActionName(self: *const Self, eActionHandle: InputAnalogActionHandle_t) [*c]const u8 {
         return SteamAPI_ISteamInput_GetStringForAnalogActionName(self.ptr, eActionHandle);
     }
 
-    pub fn StopAnalogActionMomentum(self: Self, inputHandle: InputHandle_t, eAction: InputAnalogActionHandle_t) void {
+    pub fn StopAnalogActionMomentum(self: *const Self, inputHandle: InputHandle_t, eAction: InputAnalogActionHandle_t) void {
         return SteamAPI_ISteamInput_StopAnalogActionMomentum(self.ptr, inputHandle, eAction);
     }
 
-    pub fn GetMotionData(self: Self, inputHandle: InputHandle_t) InputMotionData_t {
+    pub fn GetMotionData(self: *const Self, inputHandle: InputHandle_t) InputMotionData_t {
         return SteamAPI_ISteamInput_GetMotionData(self.ptr, inputHandle);
     }
 
-    pub fn TriggerVibration(self: Self, inputHandle: InputHandle_t, usLeftSpeed: u16, usRightSpeed: u16) void {
+    pub fn TriggerVibration(self: *const Self, inputHandle: InputHandle_t, usLeftSpeed: u16, usRightSpeed: u16) void {
         return SteamAPI_ISteamInput_TriggerVibration(self.ptr, inputHandle, usLeftSpeed, usRightSpeed);
     }
 
-    pub fn TriggerVibrationExtended(self: Self, inputHandle: InputHandle_t, usLeftSpeed: u16, usRightSpeed: u16, usLeftTriggerSpeed: u16, usRightTriggerSpeed: u16) void {
+    pub fn TriggerVibrationExtended(self: *const Self, inputHandle: InputHandle_t, usLeftSpeed: u16, usRightSpeed: u16, usLeftTriggerSpeed: u16, usRightTriggerSpeed: u16) void {
         return SteamAPI_ISteamInput_TriggerVibrationExtended(self.ptr, inputHandle, usLeftSpeed, usRightSpeed, usLeftTriggerSpeed, usRightTriggerSpeed);
     }
 
-    pub fn TriggerSimpleHapticEvent(self: Self, inputHandle: InputHandle_t, eHapticLocation: EControllerHapticLocation, nIntensity: uint8, nGainDB: u8, nOtherIntensity: uint8, nOtherGainDB: u8) void {
+    pub fn TriggerSimpleHapticEvent(self: *const Self, inputHandle: InputHandle_t, eHapticLocation: EControllerHapticLocation, nIntensity: uint8, nGainDB: u8, nOtherIntensity: uint8, nOtherGainDB: u8) void {
         return SteamAPI_ISteamInput_TriggerSimpleHapticEvent(self.ptr, inputHandle, eHapticLocation, nIntensity, nGainDB, nOtherIntensity, nOtherGainDB);
     }
 
-    pub fn SetLEDColor(self: Self, inputHandle: InputHandle_t, nColorR: uint8, nColorG: uint8, nColorB: uint8, nFlags: u32) void {
+    pub fn SetLEDColor(self: *const Self, inputHandle: InputHandle_t, nColorR: uint8, nColorG: uint8, nColorB: uint8, nFlags: u32) void {
         return SteamAPI_ISteamInput_SetLEDColor(self.ptr, inputHandle, nColorR, nColorG, nColorB, nFlags);
     }
 
-    pub fn Legacy_TriggerHapticPulse(self: Self, inputHandle: InputHandle_t, eTargetPad: ESteamControllerPad, usDurationMicroSec: u16) void {
+    pub fn Legacy_TriggerHapticPulse(self: *const Self, inputHandle: InputHandle_t, eTargetPad: ESteamControllerPad, usDurationMicroSec: u16) void {
         return SteamAPI_ISteamInput_Legacy_TriggerHapticPulse(self.ptr, inputHandle, eTargetPad, usDurationMicroSec);
     }
 
-    pub fn Legacy_TriggerRepeatedHapticPulse(self: Self, inputHandle: InputHandle_t, eTargetPad: ESteamControllerPad, usDurationMicroSec: u16, usOffMicroSec: u16, unRepeat: u16, nFlags: u32) void {
+    pub fn Legacy_TriggerRepeatedHapticPulse(self: *const Self, inputHandle: InputHandle_t, eTargetPad: ESteamControllerPad, usDurationMicroSec: u16, usOffMicroSec: u16, unRepeat: u16, nFlags: u32) void {
         return SteamAPI_ISteamInput_Legacy_TriggerRepeatedHapticPulse(self.ptr, inputHandle, eTargetPad, usDurationMicroSec, usOffMicroSec, unRepeat, nFlags);
     }
 
-    pub fn ShowBindingPanel(self: Self, inputHandle: InputHandle_t) bool {
+    pub fn ShowBindingPanel(self: *const Self, inputHandle: InputHandle_t) bool {
         return SteamAPI_ISteamInput_ShowBindingPanel(self.ptr, inputHandle);
     }
 
-    pub fn GetInputTypeForHandle(self: Self, inputHandle: InputHandle_t) ESteamInputType {
+    pub fn GetInputTypeForHandle(self: *const Self, inputHandle: InputHandle_t) ESteamInputType {
         return SteamAPI_ISteamInput_GetInputTypeForHandle(self.ptr, inputHandle);
     }
 
-    pub fn GetControllerForGamepadIndex(self: Self, nIndex: i32) InputHandle_t {
+    pub fn GetControllerForGamepadIndex(self: *const Self, nIndex: i32) InputHandle_t {
         return SteamAPI_ISteamInput_GetControllerForGamepadIndex(self.ptr, nIndex);
     }
 
-    pub fn GetGamepadIndexForController(self: Self, ulinputHandle: InputHandle_t) i32 {
+    pub fn GetGamepadIndexForController(self: *const Self, ulinputHandle: InputHandle_t) i32 {
         return SteamAPI_ISteamInput_GetGamepadIndexForController(self.ptr, ulinputHandle);
     }
 
-    pub fn GetStringForXboxOrigin(self: Self, eOrigin: EXboxOrigin) [*c]const u8 {
+    pub fn GetStringForXboxOrigin(self: *const Self, eOrigin: EXboxOrigin) [*c]const u8 {
         return SteamAPI_ISteamInput_GetStringForXboxOrigin(self.ptr, eOrigin);
     }
 
-    pub fn GetGlyphForXboxOrigin(self: Self, eOrigin: EXboxOrigin) [*c]const u8 {
+    pub fn GetGlyphForXboxOrigin(self: *const Self, eOrigin: EXboxOrigin) [*c]const u8 {
         return SteamAPI_ISteamInput_GetGlyphForXboxOrigin(self.ptr, eOrigin);
     }
 
-    pub fn GetActionOriginFromXboxOrigin(self: Self, inputHandle: InputHandle_t, eOrigin: EXboxOrigin) EInputActionOrigin {
+    pub fn GetActionOriginFromXboxOrigin(self: *const Self, inputHandle: InputHandle_t, eOrigin: EXboxOrigin) EInputActionOrigin {
         return SteamAPI_ISteamInput_GetActionOriginFromXboxOrigin(self.ptr, inputHandle, eOrigin);
     }
 
-    pub fn TranslateActionOrigin(self: Self, eDestinationInputType: ESteamInputType, eSourceOrigin: EInputActionOrigin) EInputActionOrigin {
+    pub fn TranslateActionOrigin(self: *const Self, eDestinationInputType: ESteamInputType, eSourceOrigin: EInputActionOrigin) EInputActionOrigin {
         return SteamAPI_ISteamInput_TranslateActionOrigin(self.ptr, eDestinationInputType, eSourceOrigin);
     }
 
-    pub fn GetDeviceBindingRevision(self: Self, inputHandle: InputHandle_t, pMajor: [*c]i32, pMinor: [*c]i32) bool {
-        return SteamAPI_ISteamInput_GetDeviceBindingRevision(self.ptr, inputHandle, pMajor, pMinor);
+    pub fn GetDeviceBindingRevision(self: *const Self, inputHandle: InputHandle_t, pMajor: []i32, pMinor: []i32) bool {
+        return SteamAPI_ISteamInput_GetDeviceBindingRevision(self.ptr, inputHandle, pMajor.ptr, pMinor.ptr);
     }
 
-    pub fn GetRemotePlaySessionID(self: Self, inputHandle: InputHandle_t) uint32 {
+    pub fn GetRemotePlaySessionID(self: *const Self, inputHandle: InputHandle_t) uint32 {
         return SteamAPI_ISteamInput_GetRemotePlaySessionID(self.ptr, inputHandle);
     }
 
-    pub fn GetSessionInputConfigurationSettings(self: Self) uint16 {
+    pub fn GetSessionInputConfigurationSettings(self: *const Self) uint16 {
         return SteamAPI_ISteamInput_GetSessionInputConfigurationSettings(self.ptr);
     }
 
-    pub fn SetDualSenseTriggerEffect(self: Self, inputHandle: InputHandle_t, pParam: *const anyopaque) void {
-        return SteamAPI_ISteamInput_SetDualSenseTriggerEffect(self.ptr, inputHandle, pParam);
+    pub fn SetDualSenseTriggerEffect(self: *const Self, inputHandle: InputHandle_t, pParam: []const u8) void {
+        return SteamAPI_ISteamInput_SetDualSenseTriggerEffect(self.ptr, inputHandle, pParam.ptr);
     }
 };
 
@@ -8862,7 +8862,7 @@ extern fn SteamAPI_ISteamInput_TranslateActionOrigin(self: ?*anyopaque, eDestina
 extern fn SteamAPI_ISteamInput_GetDeviceBindingRevision(self: ?*anyopaque, inputHandle: InputHandle_t, pMajor: [*c]i32, pMinor: [*c]i32) callconv(.C) bool;
 extern fn SteamAPI_ISteamInput_GetRemotePlaySessionID(self: ?*anyopaque, inputHandle: InputHandle_t) callconv(.C) uint32;
 extern fn SteamAPI_ISteamInput_GetSessionInputConfigurationSettings(self: ?*anyopaque) callconv(.C) uint16;
-extern fn SteamAPI_ISteamInput_SetDualSenseTriggerEffect(self: ?*anyopaque, inputHandle: InputHandle_t, pParam: *const anyopaque) callconv(.C) void;
+extern fn SteamAPI_ISteamInput_SetDualSenseTriggerEffect(self: ?*anyopaque, inputHandle: InputHandle_t, pParam: ?*const anyopaque) callconv(.C) void;
 extern fn SteamAPI_SteamController_v008() callconv(.C) [*c]ISteamController;
 /// user
 pub fn SteamController() ISteamController {
@@ -8873,140 +8873,140 @@ pub const ISteamController = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn Init(self: Self) bool {
+    pub fn Init(self: *const Self) bool {
         return SteamAPI_ISteamController_Init(self.ptr);
     }
 
-    pub fn Shutdown(self: Self) bool {
+    pub fn Shutdown(self: *const Self) bool {
         return SteamAPI_ISteamController_Shutdown(self.ptr);
     }
 
-    pub fn RunFrame(self: Self) void {
+    pub fn RunFrame(self: *const Self) void {
         return SteamAPI_ISteamController_RunFrame(self.ptr);
     }
 
-    pub fn GetConnectedControllers(self: Self, handlesOut: [*c]ControllerHandle_t) i32 {
+    pub fn GetConnectedControllers(self: *const Self, handlesOut: *ControllerHandle_t) i32 {
         return SteamAPI_ISteamController_GetConnectedControllers(self.ptr, handlesOut);
     }
 
-    pub fn GetActionSetHandle(self: Self, pszActionSetName: [*c]const u8) ControllerActionSetHandle_t {
-        return SteamAPI_ISteamController_GetActionSetHandle(self.ptr, pszActionSetName);
+    pub fn GetActionSetHandle(self: *const Self, pszActionSetName: [:0]const u8) ControllerActionSetHandle_t {
+        return SteamAPI_ISteamController_GetActionSetHandle(self.ptr, pszActionSetName.ptr);
     }
 
-    pub fn ActivateActionSet(self: Self, controllerHandle: ControllerHandle_t, actionSetHandle: ControllerActionSetHandle_t) void {
+    pub fn ActivateActionSet(self: *const Self, controllerHandle: ControllerHandle_t, actionSetHandle: ControllerActionSetHandle_t) void {
         return SteamAPI_ISteamController_ActivateActionSet(self.ptr, controllerHandle, actionSetHandle);
     }
 
-    pub fn GetCurrentActionSet(self: Self, controllerHandle: ControllerHandle_t) ControllerActionSetHandle_t {
+    pub fn GetCurrentActionSet(self: *const Self, controllerHandle: ControllerHandle_t) ControllerActionSetHandle_t {
         return SteamAPI_ISteamController_GetCurrentActionSet(self.ptr, controllerHandle);
     }
 
-    pub fn ActivateActionSetLayer(self: Self, controllerHandle: ControllerHandle_t, actionSetLayerHandle: ControllerActionSetHandle_t) void {
+    pub fn ActivateActionSetLayer(self: *const Self, controllerHandle: ControllerHandle_t, actionSetLayerHandle: ControllerActionSetHandle_t) void {
         return SteamAPI_ISteamController_ActivateActionSetLayer(self.ptr, controllerHandle, actionSetLayerHandle);
     }
 
-    pub fn DeactivateActionSetLayer(self: Self, controllerHandle: ControllerHandle_t, actionSetLayerHandle: ControllerActionSetHandle_t) void {
+    pub fn DeactivateActionSetLayer(self: *const Self, controllerHandle: ControllerHandle_t, actionSetLayerHandle: ControllerActionSetHandle_t) void {
         return SteamAPI_ISteamController_DeactivateActionSetLayer(self.ptr, controllerHandle, actionSetLayerHandle);
     }
 
-    pub fn DeactivateAllActionSetLayers(self: Self, controllerHandle: ControllerHandle_t) void {
+    pub fn DeactivateAllActionSetLayers(self: *const Self, controllerHandle: ControllerHandle_t) void {
         return SteamAPI_ISteamController_DeactivateAllActionSetLayers(self.ptr, controllerHandle);
     }
 
-    pub fn GetActiveActionSetLayers(self: Self, controllerHandle: ControllerHandle_t, handlesOut: [*c]ControllerActionSetHandle_t) i32 {
+    pub fn GetActiveActionSetLayers(self: *const Self, controllerHandle: ControllerHandle_t, handlesOut: *ControllerActionSetHandle_t) i32 {
         return SteamAPI_ISteamController_GetActiveActionSetLayers(self.ptr, controllerHandle, handlesOut);
     }
 
-    pub fn GetDigitalActionHandle(self: Self, pszActionName: [*c]const u8) ControllerDigitalActionHandle_t {
-        return SteamAPI_ISteamController_GetDigitalActionHandle(self.ptr, pszActionName);
+    pub fn GetDigitalActionHandle(self: *const Self, pszActionName: [:0]const u8) ControllerDigitalActionHandle_t {
+        return SteamAPI_ISteamController_GetDigitalActionHandle(self.ptr, pszActionName.ptr);
     }
 
-    pub fn GetDigitalActionData(self: Self, controllerHandle: ControllerHandle_t, digitalActionHandle: ControllerDigitalActionHandle_t) InputDigitalActionData_t {
+    pub fn GetDigitalActionData(self: *const Self, controllerHandle: ControllerHandle_t, digitalActionHandle: ControllerDigitalActionHandle_t) InputDigitalActionData_t {
         return SteamAPI_ISteamController_GetDigitalActionData(self.ptr, controllerHandle, digitalActionHandle);
     }
 
-    pub fn GetDigitalActionOrigins(self: Self, controllerHandle: ControllerHandle_t, actionSetHandle: ControllerActionSetHandle_t, digitalActionHandle: ControllerDigitalActionHandle_t, originsOut: [*c]EControllerActionOrigin) i32 {
+    pub fn GetDigitalActionOrigins(self: *const Self, controllerHandle: ControllerHandle_t, actionSetHandle: ControllerActionSetHandle_t, digitalActionHandle: ControllerDigitalActionHandle_t, originsOut: *EControllerActionOrigin) i32 {
         return SteamAPI_ISteamController_GetDigitalActionOrigins(self.ptr, controllerHandle, actionSetHandle, digitalActionHandle, originsOut);
     }
 
-    pub fn GetAnalogActionHandle(self: Self, pszActionName: [*c]const u8) ControllerAnalogActionHandle_t {
-        return SteamAPI_ISteamController_GetAnalogActionHandle(self.ptr, pszActionName);
+    pub fn GetAnalogActionHandle(self: *const Self, pszActionName: [:0]const u8) ControllerAnalogActionHandle_t {
+        return SteamAPI_ISteamController_GetAnalogActionHandle(self.ptr, pszActionName.ptr);
     }
 
-    pub fn GetAnalogActionData(self: Self, controllerHandle: ControllerHandle_t, analogActionHandle: ControllerAnalogActionHandle_t) InputAnalogActionData_t {
+    pub fn GetAnalogActionData(self: *const Self, controllerHandle: ControllerHandle_t, analogActionHandle: ControllerAnalogActionHandle_t) InputAnalogActionData_t {
         return SteamAPI_ISteamController_GetAnalogActionData(self.ptr, controllerHandle, analogActionHandle);
     }
 
-    pub fn GetAnalogActionOrigins(self: Self, controllerHandle: ControllerHandle_t, actionSetHandle: ControllerActionSetHandle_t, analogActionHandle: ControllerAnalogActionHandle_t, originsOut: [*c]EControllerActionOrigin) i32 {
+    pub fn GetAnalogActionOrigins(self: *const Self, controllerHandle: ControllerHandle_t, actionSetHandle: ControllerActionSetHandle_t, analogActionHandle: ControllerAnalogActionHandle_t, originsOut: *EControllerActionOrigin) i32 {
         return SteamAPI_ISteamController_GetAnalogActionOrigins(self.ptr, controllerHandle, actionSetHandle, analogActionHandle, originsOut);
     }
 
-    pub fn GetGlyphForActionOrigin(self: Self, eOrigin: EControllerActionOrigin) [*c]const u8 {
+    pub fn GetGlyphForActionOrigin(self: *const Self, eOrigin: EControllerActionOrigin) [*c]const u8 {
         return SteamAPI_ISteamController_GetGlyphForActionOrigin(self.ptr, eOrigin);
     }
 
-    pub fn GetStringForActionOrigin(self: Self, eOrigin: EControllerActionOrigin) [*c]const u8 {
+    pub fn GetStringForActionOrigin(self: *const Self, eOrigin: EControllerActionOrigin) [*c]const u8 {
         return SteamAPI_ISteamController_GetStringForActionOrigin(self.ptr, eOrigin);
     }
 
-    pub fn StopAnalogActionMomentum(self: Self, controllerHandle: ControllerHandle_t, eAction: ControllerAnalogActionHandle_t) void {
+    pub fn StopAnalogActionMomentum(self: *const Self, controllerHandle: ControllerHandle_t, eAction: ControllerAnalogActionHandle_t) void {
         return SteamAPI_ISteamController_StopAnalogActionMomentum(self.ptr, controllerHandle, eAction);
     }
 
-    pub fn GetMotionData(self: Self, controllerHandle: ControllerHandle_t) InputMotionData_t {
+    pub fn GetMotionData(self: *const Self, controllerHandle: ControllerHandle_t) InputMotionData_t {
         return SteamAPI_ISteamController_GetMotionData(self.ptr, controllerHandle);
     }
 
-    pub fn TriggerHapticPulse(self: Self, controllerHandle: ControllerHandle_t, eTargetPad: ESteamControllerPad, usDurationMicroSec: u16) void {
+    pub fn TriggerHapticPulse(self: *const Self, controllerHandle: ControllerHandle_t, eTargetPad: ESteamControllerPad, usDurationMicroSec: u16) void {
         return SteamAPI_ISteamController_TriggerHapticPulse(self.ptr, controllerHandle, eTargetPad, usDurationMicroSec);
     }
 
-    pub fn TriggerRepeatedHapticPulse(self: Self, controllerHandle: ControllerHandle_t, eTargetPad: ESteamControllerPad, usDurationMicroSec: u16, usOffMicroSec: u16, unRepeat: u16, nFlags: u32) void {
+    pub fn TriggerRepeatedHapticPulse(self: *const Self, controllerHandle: ControllerHandle_t, eTargetPad: ESteamControllerPad, usDurationMicroSec: u16, usOffMicroSec: u16, unRepeat: u16, nFlags: u32) void {
         return SteamAPI_ISteamController_TriggerRepeatedHapticPulse(self.ptr, controllerHandle, eTargetPad, usDurationMicroSec, usOffMicroSec, unRepeat, nFlags);
     }
 
-    pub fn TriggerVibration(self: Self, controllerHandle: ControllerHandle_t, usLeftSpeed: u16, usRightSpeed: u16) void {
+    pub fn TriggerVibration(self: *const Self, controllerHandle: ControllerHandle_t, usLeftSpeed: u16, usRightSpeed: u16) void {
         return SteamAPI_ISteamController_TriggerVibration(self.ptr, controllerHandle, usLeftSpeed, usRightSpeed);
     }
 
-    pub fn SetLEDColor(self: Self, controllerHandle: ControllerHandle_t, nColorR: uint8, nColorG: uint8, nColorB: uint8, nFlags: u32) void {
+    pub fn SetLEDColor(self: *const Self, controllerHandle: ControllerHandle_t, nColorR: uint8, nColorG: uint8, nColorB: uint8, nFlags: u32) void {
         return SteamAPI_ISteamController_SetLEDColor(self.ptr, controllerHandle, nColorR, nColorG, nColorB, nFlags);
     }
 
-    pub fn ShowBindingPanel(self: Self, controllerHandle: ControllerHandle_t) bool {
+    pub fn ShowBindingPanel(self: *const Self, controllerHandle: ControllerHandle_t) bool {
         return SteamAPI_ISteamController_ShowBindingPanel(self.ptr, controllerHandle);
     }
 
-    pub fn GetInputTypeForHandle(self: Self, controllerHandle: ControllerHandle_t) ESteamInputType {
+    pub fn GetInputTypeForHandle(self: *const Self, controllerHandle: ControllerHandle_t) ESteamInputType {
         return SteamAPI_ISteamController_GetInputTypeForHandle(self.ptr, controllerHandle);
     }
 
-    pub fn GetControllerForGamepadIndex(self: Self, nIndex: i32) ControllerHandle_t {
+    pub fn GetControllerForGamepadIndex(self: *const Self, nIndex: i32) ControllerHandle_t {
         return SteamAPI_ISteamController_GetControllerForGamepadIndex(self.ptr, nIndex);
     }
 
-    pub fn GetGamepadIndexForController(self: Self, ulControllerHandle: ControllerHandle_t) i32 {
+    pub fn GetGamepadIndexForController(self: *const Self, ulControllerHandle: ControllerHandle_t) i32 {
         return SteamAPI_ISteamController_GetGamepadIndexForController(self.ptr, ulControllerHandle);
     }
 
-    pub fn GetStringForXboxOrigin(self: Self, eOrigin: EXboxOrigin) [*c]const u8 {
+    pub fn GetStringForXboxOrigin(self: *const Self, eOrigin: EXboxOrigin) [*c]const u8 {
         return SteamAPI_ISteamController_GetStringForXboxOrigin(self.ptr, eOrigin);
     }
 
-    pub fn GetGlyphForXboxOrigin(self: Self, eOrigin: EXboxOrigin) [*c]const u8 {
+    pub fn GetGlyphForXboxOrigin(self: *const Self, eOrigin: EXboxOrigin) [*c]const u8 {
         return SteamAPI_ISteamController_GetGlyphForXboxOrigin(self.ptr, eOrigin);
     }
 
-    pub fn GetActionOriginFromXboxOrigin(self: Self, controllerHandle: ControllerHandle_t, eOrigin: EXboxOrigin) EControllerActionOrigin {
+    pub fn GetActionOriginFromXboxOrigin(self: *const Self, controllerHandle: ControllerHandle_t, eOrigin: EXboxOrigin) EControllerActionOrigin {
         return SteamAPI_ISteamController_GetActionOriginFromXboxOrigin(self.ptr, controllerHandle, eOrigin);
     }
 
-    pub fn TranslateActionOrigin(self: Self, eDestinationInputType: ESteamInputType, eSourceOrigin: EControllerActionOrigin) EControllerActionOrigin {
+    pub fn TranslateActionOrigin(self: *const Self, eDestinationInputType: ESteamInputType, eSourceOrigin: EControllerActionOrigin) EControllerActionOrigin {
         return SteamAPI_ISteamController_TranslateActionOrigin(self.ptr, eDestinationInputType, eSourceOrigin);
     }
 
-    pub fn GetControllerBindingRevision(self: Self, controllerHandle: ControllerHandle_t, pMajor: [*c]i32, pMinor: [*c]i32) bool {
-        return SteamAPI_ISteamController_GetControllerBindingRevision(self.ptr, controllerHandle, pMajor, pMinor);
+    pub fn GetControllerBindingRevision(self: *const Self, controllerHandle: ControllerHandle_t, pMajor: []i32, pMinor: []i32) bool {
+        return SteamAPI_ISteamController_GetControllerBindingRevision(self.ptr, controllerHandle, pMajor.ptr, pMinor.ptr);
     }
 };
 
@@ -9060,359 +9060,359 @@ pub const ISteamUGC = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn CreateQueryUserUGCRequest(self: Self, unAccountID: AccountID_t, eListType: EUserUGCList, eMatchingUGCType: EUGCMatchingUGCType, eSortOrder: EUserUGCListSortOrder, nCreatorAppID: AppId_t, nConsumerAppID: AppId_t, unPage: uint32) UGCQueryHandle_t {
+    pub fn CreateQueryUserUGCRequest(self: *const Self, unAccountID: AccountID_t, eListType: EUserUGCList, eMatchingUGCType: EUGCMatchingUGCType, eSortOrder: EUserUGCListSortOrder, nCreatorAppID: AppId_t, nConsumerAppID: AppId_t, unPage: uint32) UGCQueryHandle_t {
         return SteamAPI_ISteamUGC_CreateQueryUserUGCRequest(self.ptr, unAccountID, eListType, eMatchingUGCType, eSortOrder, nCreatorAppID, nConsumerAppID, unPage);
     }
 
-    pub fn CreateQueryAllUGCRequestPage(self: Self, eQueryType: EUGCQuery, eMatchingeMatchingUGCTypeFileType: EUGCMatchingUGCType, nCreatorAppID: AppId_t, nConsumerAppID: AppId_t, unPage: uint32) UGCQueryHandle_t {
+    pub fn CreateQueryAllUGCRequestPage(self: *const Self, eQueryType: EUGCQuery, eMatchingeMatchingUGCTypeFileType: EUGCMatchingUGCType, nCreatorAppID: AppId_t, nConsumerAppID: AppId_t, unPage: uint32) UGCQueryHandle_t {
         return SteamAPI_ISteamUGC_CreateQueryAllUGCRequestPage(self.ptr, eQueryType, eMatchingeMatchingUGCTypeFileType, nCreatorAppID, nConsumerAppID, unPage);
     }
 
-    pub fn CreateQueryAllUGCRequestCursor(self: Self, eQueryType: EUGCQuery, eMatchingeMatchingUGCTypeFileType: EUGCMatchingUGCType, nCreatorAppID: AppId_t, nConsumerAppID: AppId_t, pchCursor: [*c]const u8) UGCQueryHandle_t {
-        return SteamAPI_ISteamUGC_CreateQueryAllUGCRequestCursor(self.ptr, eQueryType, eMatchingeMatchingUGCTypeFileType, nCreatorAppID, nConsumerAppID, pchCursor);
+    pub fn CreateQueryAllUGCRequestCursor(self: *const Self, eQueryType: EUGCQuery, eMatchingeMatchingUGCTypeFileType: EUGCMatchingUGCType, nCreatorAppID: AppId_t, nConsumerAppID: AppId_t, pchCursor: []const u8) UGCQueryHandle_t {
+        return SteamAPI_ISteamUGC_CreateQueryAllUGCRequestCursor(self.ptr, eQueryType, eMatchingeMatchingUGCTypeFileType, nCreatorAppID, nConsumerAppID, pchCursor.ptr);
     }
 
-    pub fn CreateQueryUGCDetailsRequest(self: Self, pvecPublishedFileID: [*c]PublishedFileId_t, unNumPublishedFileIDs: uint32) UGCQueryHandle_t {
+    pub fn CreateQueryUGCDetailsRequest(self: *const Self, pvecPublishedFileID: *PublishedFileId_t, unNumPublishedFileIDs: uint32) UGCQueryHandle_t {
         return SteamAPI_ISteamUGC_CreateQueryUGCDetailsRequest(self.ptr, pvecPublishedFileID, unNumPublishedFileIDs);
     }
 
-    pub fn SendQueryUGCRequest(self: Self, handle: UGCQueryHandle_t) SteamAPICall_t {
+    pub fn SendQueryUGCRequest(self: *const Self, handle: UGCQueryHandle_t) SteamAPICall_t {
         return SteamAPI_ISteamUGC_SendQueryUGCRequest(self.ptr, handle);
     }
 
-    pub fn GetQueryUGCResult(self: Self, handle: UGCQueryHandle_t, index: uint32, pDetails: [*c]SteamUGCDetails_t) bool {
-        return SteamAPI_ISteamUGC_GetQueryUGCResult(self.ptr, handle, index, pDetails);
+    pub fn GetQueryUGCResult(self: *const Self, handle: UGCQueryHandle_t, index: uint32, pDetails: []SteamUGCDetails_t) bool {
+        return SteamAPI_ISteamUGC_GetQueryUGCResult(self.ptr, handle, index, pDetails.ptr);
     }
 
-    pub fn GetQueryUGCNumTags(self: Self, handle: UGCQueryHandle_t, index: uint32) uint32 {
+    pub fn GetQueryUGCNumTags(self: *const Self, handle: UGCQueryHandle_t, index: uint32) uint32 {
         return SteamAPI_ISteamUGC_GetQueryUGCNumTags(self.ptr, handle, index);
     }
 
-    pub fn GetQueryUGCTag(self: Self, handle: UGCQueryHandle_t, index: uint32, indexTag: uint32, pchValue: [*c]u8, cchValueSize: uint32) bool {
-        return SteamAPI_ISteamUGC_GetQueryUGCTag(self.ptr, handle, index, indexTag, pchValue, cchValueSize);
+    pub fn GetQueryUGCTag(self: *const Self, handle: UGCQueryHandle_t, index: uint32, indexTag: uint32, pchValue: []u8) bool {
+        return SteamAPI_ISteamUGC_GetQueryUGCTag(self.ptr, handle, index, indexTag, pchValue.ptr, @intCast(pchValue.len));
     }
 
-    pub fn GetQueryUGCTagDisplayName(self: Self, handle: UGCQueryHandle_t, index: uint32, indexTag: uint32, pchValue: [*c]u8, cchValueSize: uint32) bool {
-        return SteamAPI_ISteamUGC_GetQueryUGCTagDisplayName(self.ptr, handle, index, indexTag, pchValue, cchValueSize);
+    pub fn GetQueryUGCTagDisplayName(self: *const Self, handle: UGCQueryHandle_t, index: uint32, indexTag: uint32, pchValue: []u8) bool {
+        return SteamAPI_ISteamUGC_GetQueryUGCTagDisplayName(self.ptr, handle, index, indexTag, pchValue.ptr, @intCast(pchValue.len));
     }
 
-    pub fn GetQueryUGCPreviewURL(self: Self, handle: UGCQueryHandle_t, index: uint32, pchURL: [*c]u8, cchURLSize: uint32) bool {
-        return SteamAPI_ISteamUGC_GetQueryUGCPreviewURL(self.ptr, handle, index, pchURL, cchURLSize);
+    pub fn GetQueryUGCPreviewURL(self: *const Self, handle: UGCQueryHandle_t, index: uint32, pchURL: []u8) bool {
+        return SteamAPI_ISteamUGC_GetQueryUGCPreviewURL(self.ptr, handle, index, pchURL.ptr, @intCast(pchURL.len));
     }
 
-    pub fn GetQueryUGCMetadata(self: Self, handle: UGCQueryHandle_t, index: uint32, pchMetadata: [*c]u8, cchMetadatasize: uint32) bool {
-        return SteamAPI_ISteamUGC_GetQueryUGCMetadata(self.ptr, handle, index, pchMetadata, cchMetadatasize);
+    pub fn GetQueryUGCMetadata(self: *const Self, handle: UGCQueryHandle_t, index: uint32, pchMetadata: []u8) bool {
+        return SteamAPI_ISteamUGC_GetQueryUGCMetadata(self.ptr, handle, index, pchMetadata.ptr, @intCast(pchMetadata.len));
     }
 
-    pub fn GetQueryUGCChildren(self: Self, handle: UGCQueryHandle_t, index: uint32, pvecPublishedFileID: [*c]PublishedFileId_t, cMaxEntries: uint32) bool {
+    pub fn GetQueryUGCChildren(self: *const Self, handle: UGCQueryHandle_t, index: uint32, pvecPublishedFileID: *PublishedFileId_t, cMaxEntries: uint32) bool {
         return SteamAPI_ISteamUGC_GetQueryUGCChildren(self.ptr, handle, index, pvecPublishedFileID, cMaxEntries);
     }
 
-    pub fn GetQueryUGCStatistic(self: Self, handle: UGCQueryHandle_t, index: uint32, eStatType: EItemStatistic, pStatValue: [*c]uint64) bool {
-        return SteamAPI_ISteamUGC_GetQueryUGCStatistic(self.ptr, handle, index, eStatType, pStatValue);
+    pub fn GetQueryUGCStatistic(self: *const Self, handle: UGCQueryHandle_t, index: uint32, eStatType: EItemStatistic, pStatValue: []uint64) bool {
+        return SteamAPI_ISteamUGC_GetQueryUGCStatistic(self.ptr, handle, index, eStatType, pStatValue.ptr);
     }
 
-    pub fn GetQueryUGCNumAdditionalPreviews(self: Self, handle: UGCQueryHandle_t, index: uint32) uint32 {
+    pub fn GetQueryUGCNumAdditionalPreviews(self: *const Self, handle: UGCQueryHandle_t, index: uint32) uint32 {
         return SteamAPI_ISteamUGC_GetQueryUGCNumAdditionalPreviews(self.ptr, handle, index);
     }
 
-    pub fn GetQueryUGCAdditionalPreview(self: Self, handle: UGCQueryHandle_t, index: uint32, previewIndex: uint32, pchURLOrVideoID: [*c]u8, cchURLSize: uint32, pchOriginalFileName: [*c]u8, cchOriginalFileNameSize: uint32, pPreviewType: [*c]EItemPreviewType) bool {
-        return SteamAPI_ISteamUGC_GetQueryUGCAdditionalPreview(self.ptr, handle, index, previewIndex, pchURLOrVideoID, cchURLSize, pchOriginalFileName, cchOriginalFileNameSize, pPreviewType);
+    pub fn GetQueryUGCAdditionalPreview(self: *const Self, handle: UGCQueryHandle_t, index: uint32, previewIndex: uint32, pchURLOrVideoID: []u8, cchURLSize: uint32, pchOriginalFileName: []u8, pPreviewType: []EItemPreviewType) bool {
+        return SteamAPI_ISteamUGC_GetQueryUGCAdditionalPreview(self.ptr, handle, index, previewIndex, pchURLOrVideoID.ptr, cchURLSize, pchOriginalFileName.ptr, @intCast(pchOriginalFileName.len), pPreviewType.ptr);
     }
 
-    pub fn GetQueryUGCNumKeyValueTags(self: Self, handle: UGCQueryHandle_t, index: uint32) uint32 {
+    pub fn GetQueryUGCNumKeyValueTags(self: *const Self, handle: UGCQueryHandle_t, index: uint32) uint32 {
         return SteamAPI_ISteamUGC_GetQueryUGCNumKeyValueTags(self.ptr, handle, index);
     }
 
-    pub fn GetQueryUGCKeyValueTag(self: Self, handle: UGCQueryHandle_t, index: uint32, keyValueTagIndex: uint32, pchKey: [*c]u8, cchKeySize: uint32, pchValue: [*c]u8, cchValueSize: uint32) bool {
-        return SteamAPI_ISteamUGC_GetQueryUGCKeyValueTag(self.ptr, handle, index, keyValueTagIndex, pchKey, cchKeySize, pchValue, cchValueSize);
+    pub fn GetQueryUGCKeyValueTag(self: *const Self, handle: UGCQueryHandle_t, index: uint32, keyValueTagIndex: uint32, pchKey: []u8, pchValue: []u8) bool {
+        return SteamAPI_ISteamUGC_GetQueryUGCKeyValueTag(self.ptr, handle, index, keyValueTagIndex, pchKey.ptr, @intCast(pchKey.len), pchValue.ptr, @intCast(pchValue.len));
     }
 
-    pub fn GetQueryFirstUGCKeyValueTag(self: Self, handle: UGCQueryHandle_t, index: uint32, pchKey: [*c]const u8, pchValue: [*c]u8, cchValueSize: uint32) bool {
-        return SteamAPI_ISteamUGC_GetQueryFirstUGCKeyValueTag(self.ptr, handle, index, pchKey, pchValue, cchValueSize);
+    pub fn GetQueryFirstUGCKeyValueTag(self: *const Self, handle: UGCQueryHandle_t, index: uint32, pchKey: []const u8, pchValue: []u8) bool {
+        return SteamAPI_ISteamUGC_GetQueryFirstUGCKeyValueTag(self.ptr, handle, index, pchKey.ptr, pchValue.ptr, @intCast(pchValue.len));
     }
 
-    pub fn GetQueryUGCContentDescriptors(self: Self, handle: UGCQueryHandle_t, index: uint32, pvecDescriptors: [*c]EUGCContentDescriptorID, cMaxEntries: uint32) uint32 {
+    pub fn GetQueryUGCContentDescriptors(self: *const Self, handle: UGCQueryHandle_t, index: uint32, pvecDescriptors: *EUGCContentDescriptorID, cMaxEntries: uint32) uint32 {
         return SteamAPI_ISteamUGC_GetQueryUGCContentDescriptors(self.ptr, handle, index, pvecDescriptors, cMaxEntries);
     }
 
-    pub fn ReleaseQueryUGCRequest(self: Self, handle: UGCQueryHandle_t) bool {
+    pub fn ReleaseQueryUGCRequest(self: *const Self, handle: UGCQueryHandle_t) bool {
         return SteamAPI_ISteamUGC_ReleaseQueryUGCRequest(self.ptr, handle);
     }
 
-    pub fn AddRequiredTag(self: Self, handle: UGCQueryHandle_t, pTagName: [*c]const u8) bool {
-        return SteamAPI_ISteamUGC_AddRequiredTag(self.ptr, handle, pTagName);
+    pub fn AddRequiredTag(self: *const Self, handle: UGCQueryHandle_t, pTagName: []const u8) bool {
+        return SteamAPI_ISteamUGC_AddRequiredTag(self.ptr, handle, pTagName.ptr);
     }
 
-    pub fn AddRequiredTagGroup(self: Self, handle: UGCQueryHandle_t, pTagGroups: [*c]const SteamParamStringArray_t) bool {
-        return SteamAPI_ISteamUGC_AddRequiredTagGroup(self.ptr, handle, pTagGroups);
+    pub fn AddRequiredTagGroup(self: *const Self, handle: UGCQueryHandle_t, pTagGroups: []const SteamParamStringArray_t) bool {
+        return SteamAPI_ISteamUGC_AddRequiredTagGroup(self.ptr, handle, pTagGroups.ptr);
     }
 
-    pub fn AddExcludedTag(self: Self, handle: UGCQueryHandle_t, pTagName: [*c]const u8) bool {
-        return SteamAPI_ISteamUGC_AddExcludedTag(self.ptr, handle, pTagName);
+    pub fn AddExcludedTag(self: *const Self, handle: UGCQueryHandle_t, pTagName: []const u8) bool {
+        return SteamAPI_ISteamUGC_AddExcludedTag(self.ptr, handle, pTagName.ptr);
     }
 
-    pub fn SetReturnOnlyIDs(self: Self, handle: UGCQueryHandle_t, bReturnOnlyIDs: bool) bool {
+    pub fn SetReturnOnlyIDs(self: *const Self, handle: UGCQueryHandle_t, bReturnOnlyIDs: bool) bool {
         return SteamAPI_ISteamUGC_SetReturnOnlyIDs(self.ptr, handle, bReturnOnlyIDs);
     }
 
-    pub fn SetReturnKeyValueTags(self: Self, handle: UGCQueryHandle_t, bReturnKeyValueTags: bool) bool {
+    pub fn SetReturnKeyValueTags(self: *const Self, handle: UGCQueryHandle_t, bReturnKeyValueTags: bool) bool {
         return SteamAPI_ISteamUGC_SetReturnKeyValueTags(self.ptr, handle, bReturnKeyValueTags);
     }
 
-    pub fn SetReturnLongDescription(self: Self, handle: UGCQueryHandle_t, bReturnLongDescription: bool) bool {
+    pub fn SetReturnLongDescription(self: *const Self, handle: UGCQueryHandle_t, bReturnLongDescription: bool) bool {
         return SteamAPI_ISteamUGC_SetReturnLongDescription(self.ptr, handle, bReturnLongDescription);
     }
 
-    pub fn SetReturnMetadata(self: Self, handle: UGCQueryHandle_t, bReturnMetadata: bool) bool {
+    pub fn SetReturnMetadata(self: *const Self, handle: UGCQueryHandle_t, bReturnMetadata: bool) bool {
         return SteamAPI_ISteamUGC_SetReturnMetadata(self.ptr, handle, bReturnMetadata);
     }
 
-    pub fn SetReturnChildren(self: Self, handle: UGCQueryHandle_t, bReturnChildren: bool) bool {
+    pub fn SetReturnChildren(self: *const Self, handle: UGCQueryHandle_t, bReturnChildren: bool) bool {
         return SteamAPI_ISteamUGC_SetReturnChildren(self.ptr, handle, bReturnChildren);
     }
 
-    pub fn SetReturnAdditionalPreviews(self: Self, handle: UGCQueryHandle_t, bReturnAdditionalPreviews: bool) bool {
+    pub fn SetReturnAdditionalPreviews(self: *const Self, handle: UGCQueryHandle_t, bReturnAdditionalPreviews: bool) bool {
         return SteamAPI_ISteamUGC_SetReturnAdditionalPreviews(self.ptr, handle, bReturnAdditionalPreviews);
     }
 
-    pub fn SetReturnTotalOnly(self: Self, handle: UGCQueryHandle_t, bReturnTotalOnly: bool) bool {
+    pub fn SetReturnTotalOnly(self: *const Self, handle: UGCQueryHandle_t, bReturnTotalOnly: bool) bool {
         return SteamAPI_ISteamUGC_SetReturnTotalOnly(self.ptr, handle, bReturnTotalOnly);
     }
 
-    pub fn SetReturnPlaytimeStats(self: Self, handle: UGCQueryHandle_t, unDays: uint32) bool {
+    pub fn SetReturnPlaytimeStats(self: *const Self, handle: UGCQueryHandle_t, unDays: uint32) bool {
         return SteamAPI_ISteamUGC_SetReturnPlaytimeStats(self.ptr, handle, unDays);
     }
 
-    pub fn SetLanguage(self: Self, handle: UGCQueryHandle_t, pchLanguage: [*c]const u8) bool {
-        return SteamAPI_ISteamUGC_SetLanguage(self.ptr, handle, pchLanguage);
+    pub fn SetLanguage(self: *const Self, handle: UGCQueryHandle_t, pchLanguage: []const u8) bool {
+        return SteamAPI_ISteamUGC_SetLanguage(self.ptr, handle, pchLanguage.ptr);
     }
 
-    pub fn SetAllowCachedResponse(self: Self, handle: UGCQueryHandle_t, unMaxAgeSeconds: uint32) bool {
+    pub fn SetAllowCachedResponse(self: *const Self, handle: UGCQueryHandle_t, unMaxAgeSeconds: uint32) bool {
         return SteamAPI_ISteamUGC_SetAllowCachedResponse(self.ptr, handle, unMaxAgeSeconds);
     }
 
-    pub fn SetCloudFileNameFilter(self: Self, handle: UGCQueryHandle_t, pMatchCloudFileName: [*c]const u8) bool {
-        return SteamAPI_ISteamUGC_SetCloudFileNameFilter(self.ptr, handle, pMatchCloudFileName);
+    pub fn SetCloudFileNameFilter(self: *const Self, handle: UGCQueryHandle_t, pMatchCloudFileName: []const u8) bool {
+        return SteamAPI_ISteamUGC_SetCloudFileNameFilter(self.ptr, handle, pMatchCloudFileName.ptr);
     }
 
-    pub fn SetMatchAnyTag(self: Self, handle: UGCQueryHandle_t, bMatchAnyTag: bool) bool {
+    pub fn SetMatchAnyTag(self: *const Self, handle: UGCQueryHandle_t, bMatchAnyTag: bool) bool {
         return SteamAPI_ISteamUGC_SetMatchAnyTag(self.ptr, handle, bMatchAnyTag);
     }
 
-    pub fn SetSearchText(self: Self, handle: UGCQueryHandle_t, pSearchText: [*c]const u8) bool {
-        return SteamAPI_ISteamUGC_SetSearchText(self.ptr, handle, pSearchText);
+    pub fn SetSearchText(self: *const Self, handle: UGCQueryHandle_t, pSearchText: []const u8) bool {
+        return SteamAPI_ISteamUGC_SetSearchText(self.ptr, handle, pSearchText.ptr);
     }
 
-    pub fn SetRankedByTrendDays(self: Self, handle: UGCQueryHandle_t, unDays: uint32) bool {
+    pub fn SetRankedByTrendDays(self: *const Self, handle: UGCQueryHandle_t, unDays: uint32) bool {
         return SteamAPI_ISteamUGC_SetRankedByTrendDays(self.ptr, handle, unDays);
     }
 
-    pub fn SetTimeCreatedDateRange(self: Self, handle: UGCQueryHandle_t, rtStart: RTime32, rtEnd: RTime32) bool {
+    pub fn SetTimeCreatedDateRange(self: *const Self, handle: UGCQueryHandle_t, rtStart: RTime32, rtEnd: RTime32) bool {
         return SteamAPI_ISteamUGC_SetTimeCreatedDateRange(self.ptr, handle, rtStart, rtEnd);
     }
 
-    pub fn SetTimeUpdatedDateRange(self: Self, handle: UGCQueryHandle_t, rtStart: RTime32, rtEnd: RTime32) bool {
+    pub fn SetTimeUpdatedDateRange(self: *const Self, handle: UGCQueryHandle_t, rtStart: RTime32, rtEnd: RTime32) bool {
         return SteamAPI_ISteamUGC_SetTimeUpdatedDateRange(self.ptr, handle, rtStart, rtEnd);
     }
 
-    pub fn AddRequiredKeyValueTag(self: Self, handle: UGCQueryHandle_t, pKey: [*c]const u8, pValue: [*c]const u8) bool {
-        return SteamAPI_ISteamUGC_AddRequiredKeyValueTag(self.ptr, handle, pKey, pValue);
+    pub fn AddRequiredKeyValueTag(self: *const Self, handle: UGCQueryHandle_t, pKey: []const u8, pValue: []const u8) bool {
+        return SteamAPI_ISteamUGC_AddRequiredKeyValueTag(self.ptr, handle, pKey.ptr, pValue.ptr);
     }
 
-    pub fn RequestUGCDetails(self: Self, nPublishedFileID: PublishedFileId_t, unMaxAgeSeconds: uint32) SteamAPICall_t {
+    pub fn RequestUGCDetails(self: *const Self, nPublishedFileID: PublishedFileId_t, unMaxAgeSeconds: uint32) SteamAPICall_t {
         return SteamAPI_ISteamUGC_RequestUGCDetails(self.ptr, nPublishedFileID, unMaxAgeSeconds);
     }
 
-    pub fn CreateItem(self: Self, nConsumerAppId: AppId_t, eFileType: EWorkshopFileType) SteamAPICall_t {
+    pub fn CreateItem(self: *const Self, nConsumerAppId: AppId_t, eFileType: EWorkshopFileType) SteamAPICall_t {
         return SteamAPI_ISteamUGC_CreateItem(self.ptr, nConsumerAppId, eFileType);
     }
 
-    pub fn StartItemUpdate(self: Self, nConsumerAppId: AppId_t, nPublishedFileID: PublishedFileId_t) UGCUpdateHandle_t {
+    pub fn StartItemUpdate(self: *const Self, nConsumerAppId: AppId_t, nPublishedFileID: PublishedFileId_t) UGCUpdateHandle_t {
         return SteamAPI_ISteamUGC_StartItemUpdate(self.ptr, nConsumerAppId, nPublishedFileID);
     }
 
-    pub fn SetItemTitle(self: Self, handle: UGCUpdateHandle_t, pchTitle: [*c]const u8) bool {
-        return SteamAPI_ISteamUGC_SetItemTitle(self.ptr, handle, pchTitle);
+    pub fn SetItemTitle(self: *const Self, handle: UGCUpdateHandle_t, pchTitle: []const u8) bool {
+        return SteamAPI_ISteamUGC_SetItemTitle(self.ptr, handle, pchTitle.ptr);
     }
 
-    pub fn SetItemDescription(self: Self, handle: UGCUpdateHandle_t, pchDescription: [*c]const u8) bool {
-        return SteamAPI_ISteamUGC_SetItemDescription(self.ptr, handle, pchDescription);
+    pub fn SetItemDescription(self: *const Self, handle: UGCUpdateHandle_t, pchDescription: []const u8) bool {
+        return SteamAPI_ISteamUGC_SetItemDescription(self.ptr, handle, pchDescription.ptr);
     }
 
-    pub fn SetItemUpdateLanguage(self: Self, handle: UGCUpdateHandle_t, pchLanguage: [*c]const u8) bool {
-        return SteamAPI_ISteamUGC_SetItemUpdateLanguage(self.ptr, handle, pchLanguage);
+    pub fn SetItemUpdateLanguage(self: *const Self, handle: UGCUpdateHandle_t, pchLanguage: []const u8) bool {
+        return SteamAPI_ISteamUGC_SetItemUpdateLanguage(self.ptr, handle, pchLanguage.ptr);
     }
 
-    pub fn SetItemMetadata(self: Self, handle: UGCUpdateHandle_t, pchMetaData: [*c]const u8) bool {
-        return SteamAPI_ISteamUGC_SetItemMetadata(self.ptr, handle, pchMetaData);
+    pub fn SetItemMetadata(self: *const Self, handle: UGCUpdateHandle_t, pchMetaData: []const u8) bool {
+        return SteamAPI_ISteamUGC_SetItemMetadata(self.ptr, handle, pchMetaData.ptr);
     }
 
-    pub fn SetItemVisibility(self: Self, handle: UGCUpdateHandle_t, eVisibility: ERemoteStoragePublishedFileVisibility) bool {
+    pub fn SetItemVisibility(self: *const Self, handle: UGCUpdateHandle_t, eVisibility: ERemoteStoragePublishedFileVisibility) bool {
         return SteamAPI_ISteamUGC_SetItemVisibility(self.ptr, handle, eVisibility);
     }
 
-    pub fn SetItemTags(self: Self, updateHandle: UGCUpdateHandle_t, pTags: [*c]const SteamParamStringArray_t) bool {
-        return SteamAPI_ISteamUGC_SetItemTags(self.ptr, updateHandle, pTags);
+    pub fn SetItemTags(self: *const Self, updateHandle: UGCUpdateHandle_t, pTags: []const SteamParamStringArray_t) bool {
+        return SteamAPI_ISteamUGC_SetItemTags(self.ptr, updateHandle, pTags.ptr);
     }
 
-    pub fn SetItemContent(self: Self, handle: UGCUpdateHandle_t, pszContentFolder: [*c]const u8) bool {
-        return SteamAPI_ISteamUGC_SetItemContent(self.ptr, handle, pszContentFolder);
+    pub fn SetItemContent(self: *const Self, handle: UGCUpdateHandle_t, pszContentFolder: [:0]const u8) bool {
+        return SteamAPI_ISteamUGC_SetItemContent(self.ptr, handle, pszContentFolder.ptr);
     }
 
-    pub fn SetItemPreview(self: Self, handle: UGCUpdateHandle_t, pszPreviewFile: [*c]const u8) bool {
-        return SteamAPI_ISteamUGC_SetItemPreview(self.ptr, handle, pszPreviewFile);
+    pub fn SetItemPreview(self: *const Self, handle: UGCUpdateHandle_t, pszPreviewFile: [:0]const u8) bool {
+        return SteamAPI_ISteamUGC_SetItemPreview(self.ptr, handle, pszPreviewFile.ptr);
     }
 
-    pub fn SetAllowLegacyUpload(self: Self, handle: UGCUpdateHandle_t, bAllowLegacyUpload: bool) bool {
+    pub fn SetAllowLegacyUpload(self: *const Self, handle: UGCUpdateHandle_t, bAllowLegacyUpload: bool) bool {
         return SteamAPI_ISteamUGC_SetAllowLegacyUpload(self.ptr, handle, bAllowLegacyUpload);
     }
 
-    pub fn RemoveAllItemKeyValueTags(self: Self, handle: UGCUpdateHandle_t) bool {
+    pub fn RemoveAllItemKeyValueTags(self: *const Self, handle: UGCUpdateHandle_t) bool {
         return SteamAPI_ISteamUGC_RemoveAllItemKeyValueTags(self.ptr, handle);
     }
 
-    pub fn RemoveItemKeyValueTags(self: Self, handle: UGCUpdateHandle_t, pchKey: [*c]const u8) bool {
-        return SteamAPI_ISteamUGC_RemoveItemKeyValueTags(self.ptr, handle, pchKey);
+    pub fn RemoveItemKeyValueTags(self: *const Self, handle: UGCUpdateHandle_t, pchKey: []const u8) bool {
+        return SteamAPI_ISteamUGC_RemoveItemKeyValueTags(self.ptr, handle, pchKey.ptr);
     }
 
-    pub fn AddItemKeyValueTag(self: Self, handle: UGCUpdateHandle_t, pchKey: [*c]const u8, pchValue: [*c]const u8) bool {
-        return SteamAPI_ISteamUGC_AddItemKeyValueTag(self.ptr, handle, pchKey, pchValue);
+    pub fn AddItemKeyValueTag(self: *const Self, handle: UGCUpdateHandle_t, pchKey: []const u8, pchValue: []const u8) bool {
+        return SteamAPI_ISteamUGC_AddItemKeyValueTag(self.ptr, handle, pchKey.ptr, pchValue.ptr);
     }
 
-    pub fn AddItemPreviewFile(self: Self, handle: UGCUpdateHandle_t, pszPreviewFile: [*c]const u8, _type: EItemPreviewType) bool {
-        return SteamAPI_ISteamUGC_AddItemPreviewFile(self.ptr, handle, pszPreviewFile, _type);
+    pub fn AddItemPreviewFile(self: *const Self, handle: UGCUpdateHandle_t, pszPreviewFile: [:0]const u8, _type: EItemPreviewType) bool {
+        return SteamAPI_ISteamUGC_AddItemPreviewFile(self.ptr, handle, pszPreviewFile.ptr, _type);
     }
 
-    pub fn AddItemPreviewVideo(self: Self, handle: UGCUpdateHandle_t, pszVideoID: [*c]const u8) bool {
-        return SteamAPI_ISteamUGC_AddItemPreviewVideo(self.ptr, handle, pszVideoID);
+    pub fn AddItemPreviewVideo(self: *const Self, handle: UGCUpdateHandle_t, pszVideoID: [:0]const u8) bool {
+        return SteamAPI_ISteamUGC_AddItemPreviewVideo(self.ptr, handle, pszVideoID.ptr);
     }
 
-    pub fn UpdateItemPreviewFile(self: Self, handle: UGCUpdateHandle_t, index: uint32, pszPreviewFile: [*c]const u8) bool {
-        return SteamAPI_ISteamUGC_UpdateItemPreviewFile(self.ptr, handle, index, pszPreviewFile);
+    pub fn UpdateItemPreviewFile(self: *const Self, handle: UGCUpdateHandle_t, index: uint32, pszPreviewFile: [:0]const u8) bool {
+        return SteamAPI_ISteamUGC_UpdateItemPreviewFile(self.ptr, handle, index, pszPreviewFile.ptr);
     }
 
-    pub fn UpdateItemPreviewVideo(self: Self, handle: UGCUpdateHandle_t, index: uint32, pszVideoID: [*c]const u8) bool {
-        return SteamAPI_ISteamUGC_UpdateItemPreviewVideo(self.ptr, handle, index, pszVideoID);
+    pub fn UpdateItemPreviewVideo(self: *const Self, handle: UGCUpdateHandle_t, index: uint32, pszVideoID: [:0]const u8) bool {
+        return SteamAPI_ISteamUGC_UpdateItemPreviewVideo(self.ptr, handle, index, pszVideoID.ptr);
     }
 
-    pub fn RemoveItemPreview(self: Self, handle: UGCUpdateHandle_t, index: uint32) bool {
+    pub fn RemoveItemPreview(self: *const Self, handle: UGCUpdateHandle_t, index: uint32) bool {
         return SteamAPI_ISteamUGC_RemoveItemPreview(self.ptr, handle, index);
     }
 
-    pub fn AddContentDescriptor(self: Self, handle: UGCUpdateHandle_t, descid: EUGCContentDescriptorID) bool {
+    pub fn AddContentDescriptor(self: *const Self, handle: UGCUpdateHandle_t, descid: EUGCContentDescriptorID) bool {
         return SteamAPI_ISteamUGC_AddContentDescriptor(self.ptr, handle, descid);
     }
 
-    pub fn RemoveContentDescriptor(self: Self, handle: UGCUpdateHandle_t, descid: EUGCContentDescriptorID) bool {
+    pub fn RemoveContentDescriptor(self: *const Self, handle: UGCUpdateHandle_t, descid: EUGCContentDescriptorID) bool {
         return SteamAPI_ISteamUGC_RemoveContentDescriptor(self.ptr, handle, descid);
     }
 
-    pub fn SubmitItemUpdate(self: Self, handle: UGCUpdateHandle_t, pchChangeNote: [*c]const u8) SteamAPICall_t {
-        return SteamAPI_ISteamUGC_SubmitItemUpdate(self.ptr, handle, pchChangeNote);
+    pub fn SubmitItemUpdate(self: *const Self, handle: UGCUpdateHandle_t, pchChangeNote: []const u8) SteamAPICall_t {
+        return SteamAPI_ISteamUGC_SubmitItemUpdate(self.ptr, handle, pchChangeNote.ptr);
     }
 
-    pub fn GetItemUpdateProgress(self: Self, handle: UGCUpdateHandle_t, punBytesProcessed: [*c]uint64, punBytesTotal: [*c]uint64) EItemUpdateStatus {
+    pub fn GetItemUpdateProgress(self: *const Self, handle: UGCUpdateHandle_t, punBytesProcessed: *uint64, punBytesTotal: *uint64) EItemUpdateStatus {
         return SteamAPI_ISteamUGC_GetItemUpdateProgress(self.ptr, handle, punBytesProcessed, punBytesTotal);
     }
 
-    pub fn SetUserItemVote(self: Self, nPublishedFileID: PublishedFileId_t, bVoteUp: bool) SteamAPICall_t {
+    pub fn SetUserItemVote(self: *const Self, nPublishedFileID: PublishedFileId_t, bVoteUp: bool) SteamAPICall_t {
         return SteamAPI_ISteamUGC_SetUserItemVote(self.ptr, nPublishedFileID, bVoteUp);
     }
 
-    pub fn GetUserItemVote(self: Self, nPublishedFileID: PublishedFileId_t) SteamAPICall_t {
+    pub fn GetUserItemVote(self: *const Self, nPublishedFileID: PublishedFileId_t) SteamAPICall_t {
         return SteamAPI_ISteamUGC_GetUserItemVote(self.ptr, nPublishedFileID);
     }
 
-    pub fn AddItemToFavorites(self: Self, nAppId: AppId_t, nPublishedFileID: PublishedFileId_t) SteamAPICall_t {
+    pub fn AddItemToFavorites(self: *const Self, nAppId: AppId_t, nPublishedFileID: PublishedFileId_t) SteamAPICall_t {
         return SteamAPI_ISteamUGC_AddItemToFavorites(self.ptr, nAppId, nPublishedFileID);
     }
 
-    pub fn RemoveItemFromFavorites(self: Self, nAppId: AppId_t, nPublishedFileID: PublishedFileId_t) SteamAPICall_t {
+    pub fn RemoveItemFromFavorites(self: *const Self, nAppId: AppId_t, nPublishedFileID: PublishedFileId_t) SteamAPICall_t {
         return SteamAPI_ISteamUGC_RemoveItemFromFavorites(self.ptr, nAppId, nPublishedFileID);
     }
 
-    pub fn SubscribeItem(self: Self, nPublishedFileID: PublishedFileId_t) SteamAPICall_t {
+    pub fn SubscribeItem(self: *const Self, nPublishedFileID: PublishedFileId_t) SteamAPICall_t {
         return SteamAPI_ISteamUGC_SubscribeItem(self.ptr, nPublishedFileID);
     }
 
-    pub fn UnsubscribeItem(self: Self, nPublishedFileID: PublishedFileId_t) SteamAPICall_t {
+    pub fn UnsubscribeItem(self: *const Self, nPublishedFileID: PublishedFileId_t) SteamAPICall_t {
         return SteamAPI_ISteamUGC_UnsubscribeItem(self.ptr, nPublishedFileID);
     }
 
-    pub fn GetNumSubscribedItems(self: Self) uint32 {
+    pub fn GetNumSubscribedItems(self: *const Self) uint32 {
         return SteamAPI_ISteamUGC_GetNumSubscribedItems(self.ptr);
     }
 
-    pub fn GetSubscribedItems(self: Self, pvecPublishedFileID: [*c]PublishedFileId_t, cMaxEntries: uint32) uint32 {
+    pub fn GetSubscribedItems(self: *const Self, pvecPublishedFileID: *PublishedFileId_t, cMaxEntries: uint32) uint32 {
         return SteamAPI_ISteamUGC_GetSubscribedItems(self.ptr, pvecPublishedFileID, cMaxEntries);
     }
 
-    pub fn GetItemState(self: Self, nPublishedFileID: PublishedFileId_t) uint32 {
+    pub fn GetItemState(self: *const Self, nPublishedFileID: PublishedFileId_t) uint32 {
         return SteamAPI_ISteamUGC_GetItemState(self.ptr, nPublishedFileID);
     }
 
-    pub fn GetItemInstallInfo(self: Self, nPublishedFileID: PublishedFileId_t, punSizeOnDisk: [*c]uint64, pchFolder: [*c]u8, cchFolderSize: uint32, punTimeStamp: [*c]uint32) bool {
-        return SteamAPI_ISteamUGC_GetItemInstallInfo(self.ptr, nPublishedFileID, punSizeOnDisk, pchFolder, cchFolderSize, punTimeStamp);
+    pub fn GetItemInstallInfo(self: *const Self, nPublishedFileID: PublishedFileId_t, punSizeOnDisk: *uint64, pchFolder: []u8, punTimeStamp: *uint32) bool {
+        return SteamAPI_ISteamUGC_GetItemInstallInfo(self.ptr, nPublishedFileID, punSizeOnDisk, pchFolder.ptr, @intCast(pchFolder.len), punTimeStamp);
     }
 
-    pub fn GetItemDownloadInfo(self: Self, nPublishedFileID: PublishedFileId_t, punBytesDownloaded: [*c]uint64, punBytesTotal: [*c]uint64) bool {
+    pub fn GetItemDownloadInfo(self: *const Self, nPublishedFileID: PublishedFileId_t, punBytesDownloaded: *uint64, punBytesTotal: *uint64) bool {
         return SteamAPI_ISteamUGC_GetItemDownloadInfo(self.ptr, nPublishedFileID, punBytesDownloaded, punBytesTotal);
     }
 
-    pub fn DownloadItem(self: Self, nPublishedFileID: PublishedFileId_t, bHighPriority: bool) bool {
+    pub fn DownloadItem(self: *const Self, nPublishedFileID: PublishedFileId_t, bHighPriority: bool) bool {
         return SteamAPI_ISteamUGC_DownloadItem(self.ptr, nPublishedFileID, bHighPriority);
     }
 
-    pub fn BInitWorkshopForGameServer(self: Self, unWorkshopDepotID: DepotId_t, pszFolder: [*c]const u8) bool {
-        return SteamAPI_ISteamUGC_BInitWorkshopForGameServer(self.ptr, unWorkshopDepotID, pszFolder);
+    pub fn BInitWorkshopForGameServer(self: *const Self, unWorkshopDepotID: DepotId_t, pszFolder: [:0]const u8) bool {
+        return SteamAPI_ISteamUGC_BInitWorkshopForGameServer(self.ptr, unWorkshopDepotID, pszFolder.ptr);
     }
 
-    pub fn SuspendDownloads(self: Self, bSuspend: bool) void {
+    pub fn SuspendDownloads(self: *const Self, bSuspend: bool) void {
         return SteamAPI_ISteamUGC_SuspendDownloads(self.ptr, bSuspend);
     }
 
-    pub fn StartPlaytimeTracking(self: Self, pvecPublishedFileID: [*c]PublishedFileId_t, unNumPublishedFileIDs: uint32) SteamAPICall_t {
+    pub fn StartPlaytimeTracking(self: *const Self, pvecPublishedFileID: *PublishedFileId_t, unNumPublishedFileIDs: uint32) SteamAPICall_t {
         return SteamAPI_ISteamUGC_StartPlaytimeTracking(self.ptr, pvecPublishedFileID, unNumPublishedFileIDs);
     }
 
-    pub fn StopPlaytimeTracking(self: Self, pvecPublishedFileID: [*c]PublishedFileId_t, unNumPublishedFileIDs: uint32) SteamAPICall_t {
+    pub fn StopPlaytimeTracking(self: *const Self, pvecPublishedFileID: *PublishedFileId_t, unNumPublishedFileIDs: uint32) SteamAPICall_t {
         return SteamAPI_ISteamUGC_StopPlaytimeTracking(self.ptr, pvecPublishedFileID, unNumPublishedFileIDs);
     }
 
-    pub fn StopPlaytimeTrackingForAllItems(self: Self) SteamAPICall_t {
+    pub fn StopPlaytimeTrackingForAllItems(self: *const Self) SteamAPICall_t {
         return SteamAPI_ISteamUGC_StopPlaytimeTrackingForAllItems(self.ptr);
     }
 
-    pub fn AddDependency(self: Self, nParentPublishedFileID: PublishedFileId_t, nChildPublishedFileID: PublishedFileId_t) SteamAPICall_t {
+    pub fn AddDependency(self: *const Self, nParentPublishedFileID: PublishedFileId_t, nChildPublishedFileID: PublishedFileId_t) SteamAPICall_t {
         return SteamAPI_ISteamUGC_AddDependency(self.ptr, nParentPublishedFileID, nChildPublishedFileID);
     }
 
-    pub fn RemoveDependency(self: Self, nParentPublishedFileID: PublishedFileId_t, nChildPublishedFileID: PublishedFileId_t) SteamAPICall_t {
+    pub fn RemoveDependency(self: *const Self, nParentPublishedFileID: PublishedFileId_t, nChildPublishedFileID: PublishedFileId_t) SteamAPICall_t {
         return SteamAPI_ISteamUGC_RemoveDependency(self.ptr, nParentPublishedFileID, nChildPublishedFileID);
     }
 
-    pub fn AddAppDependency(self: Self, nPublishedFileID: PublishedFileId_t, nAppID: AppId_t) SteamAPICall_t {
+    pub fn AddAppDependency(self: *const Self, nPublishedFileID: PublishedFileId_t, nAppID: AppId_t) SteamAPICall_t {
         return SteamAPI_ISteamUGC_AddAppDependency(self.ptr, nPublishedFileID, nAppID);
     }
 
-    pub fn RemoveAppDependency(self: Self, nPublishedFileID: PublishedFileId_t, nAppID: AppId_t) SteamAPICall_t {
+    pub fn RemoveAppDependency(self: *const Self, nPublishedFileID: PublishedFileId_t, nAppID: AppId_t) SteamAPICall_t {
         return SteamAPI_ISteamUGC_RemoveAppDependency(self.ptr, nPublishedFileID, nAppID);
     }
 
-    pub fn GetAppDependencies(self: Self, nPublishedFileID: PublishedFileId_t) SteamAPICall_t {
+    pub fn GetAppDependencies(self: *const Self, nPublishedFileID: PublishedFileId_t) SteamAPICall_t {
         return SteamAPI_ISteamUGC_GetAppDependencies(self.ptr, nPublishedFileID);
     }
 
-    pub fn DeleteItem(self: Self, nPublishedFileID: PublishedFileId_t) SteamAPICall_t {
+    pub fn DeleteItem(self: *const Self, nPublishedFileID: PublishedFileId_t) SteamAPICall_t {
         return SteamAPI_ISteamUGC_DeleteItem(self.ptr, nPublishedFileID);
     }
 
-    pub fn ShowWorkshopEULA(self: Self) bool {
+    pub fn ShowWorkshopEULA(self: *const Self) bool {
         return SteamAPI_ISteamUGC_ShowWorkshopEULA(self.ptr);
     }
 
-    pub fn GetWorkshopEULAStatus(self: Self) SteamAPICall_t {
+    pub fn GetWorkshopEULAStatus(self: *const Self) SteamAPICall_t {
         return SteamAPI_ISteamUGC_GetWorkshopEULAStatus(self.ptr);
     }
 };
@@ -9517,23 +9517,23 @@ pub const ISteamAppList = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn GetNumInstalledApps(self: Self) uint32 {
+    pub fn GetNumInstalledApps(self: *const Self) uint32 {
         return SteamAPI_ISteamAppList_GetNumInstalledApps(self.ptr);
     }
 
-    pub fn GetInstalledApps(self: Self, pvecAppID: [*c]AppId_t, unMaxAppIDs: uint32) uint32 {
+    pub fn GetInstalledApps(self: *const Self, pvecAppID: *AppId_t, unMaxAppIDs: uint32) uint32 {
         return SteamAPI_ISteamAppList_GetInstalledApps(self.ptr, pvecAppID, unMaxAppIDs);
     }
 
-    pub fn GetAppName(self: Self, nAppID: AppId_t, pchName: [*c]u8, cchNameMax: i32) i32 {
-        return SteamAPI_ISteamAppList_GetAppName(self.ptr, nAppID, pchName, cchNameMax);
+    pub fn GetAppName(self: *const Self, nAppID: AppId_t, pchName: []u8) i32 {
+        return SteamAPI_ISteamAppList_GetAppName(self.ptr, nAppID, pchName.ptr, @intCast(pchName.len));
     }
 
-    pub fn GetAppInstallDir(self: Self, nAppID: AppId_t, pchDirectory: [*c]u8, cchNameMax: i32) i32 {
-        return SteamAPI_ISteamAppList_GetAppInstallDir(self.ptr, nAppID, pchDirectory, cchNameMax);
+    pub fn GetAppInstallDir(self: *const Self, nAppID: AppId_t, pchDirectory: []u8, cchNameMax: i32) i32 {
+        return SteamAPI_ISteamAppList_GetAppInstallDir(self.ptr, nAppID, pchDirectory.ptr, cchNameMax);
     }
 
-    pub fn GetAppBuildId(self: Self, nAppID: AppId_t) i32 {
+    pub fn GetAppBuildId(self: *const Self, nAppID: AppId_t) i32 {
         return SteamAPI_ISteamAppList_GetAppBuildId(self.ptr, nAppID);
     }
 };
@@ -9617,151 +9617,151 @@ pub const ISteamHTMLSurface = extern struct {
     };
     // methods
     const Self = @This();
-    pub fn Init(self: Self) bool {
+    pub fn Init(self: *const Self) bool {
         return SteamAPI_ISteamHTMLSurface_Init(self.ptr);
     }
 
-    pub fn Shutdown(self: Self) bool {
+    pub fn Shutdown(self: *const Self) bool {
         return SteamAPI_ISteamHTMLSurface_Shutdown(self.ptr);
     }
 
-    pub fn CreateBrowser(self: Self, pchUserAgent: [*c]const u8, pchUserCSS: [*c]const u8) SteamAPICall_t {
-        return SteamAPI_ISteamHTMLSurface_CreateBrowser(self.ptr, pchUserAgent, pchUserCSS);
+    pub fn CreateBrowser(self: *const Self, pchUserAgent: []const u8, pchUserCSS: []const u8) SteamAPICall_t {
+        return SteamAPI_ISteamHTMLSurface_CreateBrowser(self.ptr, pchUserAgent.ptr, pchUserCSS.ptr);
     }
 
-    pub fn RemoveBrowser(self: Self, unBrowserHandle: HHTMLBrowser) void {
+    pub fn RemoveBrowser(self: *const Self, unBrowserHandle: HHTMLBrowser) void {
         return SteamAPI_ISteamHTMLSurface_RemoveBrowser(self.ptr, unBrowserHandle);
     }
 
-    pub fn LoadURL(self: Self, unBrowserHandle: HHTMLBrowser, pchURL: [*c]const u8, pchPostData: [*c]const u8) void {
-        return SteamAPI_ISteamHTMLSurface_LoadURL(self.ptr, unBrowserHandle, pchURL, pchPostData);
+    pub fn LoadURL(self: *const Self, unBrowserHandle: HHTMLBrowser, pchURL: []const u8, pchPostData: []const u8) void {
+        return SteamAPI_ISteamHTMLSurface_LoadURL(self.ptr, unBrowserHandle, pchURL.ptr, pchPostData.ptr);
     }
 
-    pub fn SetSize(self: Self, unBrowserHandle: HHTMLBrowser, unWidth: uint32, unHeight: uint32) void {
+    pub fn SetSize(self: *const Self, unBrowserHandle: HHTMLBrowser, unWidth: uint32, unHeight: uint32) void {
         return SteamAPI_ISteamHTMLSurface_SetSize(self.ptr, unBrowserHandle, unWidth, unHeight);
     }
 
-    pub fn StopLoad(self: Self, unBrowserHandle: HHTMLBrowser) void {
+    pub fn StopLoad(self: *const Self, unBrowserHandle: HHTMLBrowser) void {
         return SteamAPI_ISteamHTMLSurface_StopLoad(self.ptr, unBrowserHandle);
     }
 
-    pub fn Reload(self: Self, unBrowserHandle: HHTMLBrowser) void {
+    pub fn Reload(self: *const Self, unBrowserHandle: HHTMLBrowser) void {
         return SteamAPI_ISteamHTMLSurface_Reload(self.ptr, unBrowserHandle);
     }
 
-    pub fn GoBack(self: Self, unBrowserHandle: HHTMLBrowser) void {
+    pub fn GoBack(self: *const Self, unBrowserHandle: HHTMLBrowser) void {
         return SteamAPI_ISteamHTMLSurface_GoBack(self.ptr, unBrowserHandle);
     }
 
-    pub fn GoForward(self: Self, unBrowserHandle: HHTMLBrowser) void {
+    pub fn GoForward(self: *const Self, unBrowserHandle: HHTMLBrowser) void {
         return SteamAPI_ISteamHTMLSurface_GoForward(self.ptr, unBrowserHandle);
     }
 
-    pub fn AddHeader(self: Self, unBrowserHandle: HHTMLBrowser, pchKey: [*c]const u8, pchValue: [*c]const u8) void {
-        return SteamAPI_ISteamHTMLSurface_AddHeader(self.ptr, unBrowserHandle, pchKey, pchValue);
+    pub fn AddHeader(self: *const Self, unBrowserHandle: HHTMLBrowser, pchKey: []const u8, pchValue: []const u8) void {
+        return SteamAPI_ISteamHTMLSurface_AddHeader(self.ptr, unBrowserHandle, pchKey.ptr, pchValue.ptr);
     }
 
-    pub fn ExecuteJavascript(self: Self, unBrowserHandle: HHTMLBrowser, pchScript: [*c]const u8) void {
-        return SteamAPI_ISteamHTMLSurface_ExecuteJavascript(self.ptr, unBrowserHandle, pchScript);
+    pub fn ExecuteJavascript(self: *const Self, unBrowserHandle: HHTMLBrowser, pchScript: []const u8) void {
+        return SteamAPI_ISteamHTMLSurface_ExecuteJavascript(self.ptr, unBrowserHandle, pchScript.ptr);
     }
 
-    pub fn MouseUp(self: Self, unBrowserHandle: HHTMLBrowser, eMouseButton: c_int) void {
+    pub fn MouseUp(self: *const Self, unBrowserHandle: HHTMLBrowser, eMouseButton: c_int) void {
         return SteamAPI_ISteamHTMLSurface_MouseUp(self.ptr, unBrowserHandle, eMouseButton);
     }
 
-    pub fn MouseDown(self: Self, unBrowserHandle: HHTMLBrowser, eMouseButton: c_int) void {
+    pub fn MouseDown(self: *const Self, unBrowserHandle: HHTMLBrowser, eMouseButton: c_int) void {
         return SteamAPI_ISteamHTMLSurface_MouseDown(self.ptr, unBrowserHandle, eMouseButton);
     }
 
-    pub fn MouseDoubleClick(self: Self, unBrowserHandle: HHTMLBrowser, eMouseButton: c_int) void {
+    pub fn MouseDoubleClick(self: *const Self, unBrowserHandle: HHTMLBrowser, eMouseButton: c_int) void {
         return SteamAPI_ISteamHTMLSurface_MouseDoubleClick(self.ptr, unBrowserHandle, eMouseButton);
     }
 
-    pub fn MouseMove(self: Self, unBrowserHandle: HHTMLBrowser, x: i32, y: i32) void {
+    pub fn MouseMove(self: *const Self, unBrowserHandle: HHTMLBrowser, x: i32, y: i32) void {
         return SteamAPI_ISteamHTMLSurface_MouseMove(self.ptr, unBrowserHandle, x, y);
     }
 
-    pub fn MouseWheel(self: Self, unBrowserHandle: HHTMLBrowser, nDelta: int32) void {
+    pub fn MouseWheel(self: *const Self, unBrowserHandle: HHTMLBrowser, nDelta: int32) void {
         return SteamAPI_ISteamHTMLSurface_MouseWheel(self.ptr, unBrowserHandle, nDelta);
     }
 
-    pub fn KeyDown(self: Self, unBrowserHandle: HHTMLBrowser, nNativeKeyCode: uint32, eHTMLKeyModifiers: c_int, bIsSystemKey: bool) void {
+    pub fn KeyDown(self: *const Self, unBrowserHandle: HHTMLBrowser, nNativeKeyCode: uint32, eHTMLKeyModifiers: c_int, bIsSystemKey: bool) void {
         return SteamAPI_ISteamHTMLSurface_KeyDown(self.ptr, unBrowserHandle, nNativeKeyCode, eHTMLKeyModifiers, bIsSystemKey);
     }
 
-    pub fn KeyUp(self: Self, unBrowserHandle: HHTMLBrowser, nNativeKeyCode: uint32, eHTMLKeyModifiers: c_int) void {
+    pub fn KeyUp(self: *const Self, unBrowserHandle: HHTMLBrowser, nNativeKeyCode: uint32, eHTMLKeyModifiers: c_int) void {
         return SteamAPI_ISteamHTMLSurface_KeyUp(self.ptr, unBrowserHandle, nNativeKeyCode, eHTMLKeyModifiers);
     }
 
-    pub fn KeyChar(self: Self, unBrowserHandle: HHTMLBrowser, cUnicodeChar: uint32, eHTMLKeyModifiers: c_int) void {
+    pub fn KeyChar(self: *const Self, unBrowserHandle: HHTMLBrowser, cUnicodeChar: uint32, eHTMLKeyModifiers: c_int) void {
         return SteamAPI_ISteamHTMLSurface_KeyChar(self.ptr, unBrowserHandle, cUnicodeChar, eHTMLKeyModifiers);
     }
 
-    pub fn SetHorizontalScroll(self: Self, unBrowserHandle: HHTMLBrowser, nAbsolutePixelScroll: uint32) void {
+    pub fn SetHorizontalScroll(self: *const Self, unBrowserHandle: HHTMLBrowser, nAbsolutePixelScroll: uint32) void {
         return SteamAPI_ISteamHTMLSurface_SetHorizontalScroll(self.ptr, unBrowserHandle, nAbsolutePixelScroll);
     }
 
-    pub fn SetVerticalScroll(self: Self, unBrowserHandle: HHTMLBrowser, nAbsolutePixelScroll: uint32) void {
+    pub fn SetVerticalScroll(self: *const Self, unBrowserHandle: HHTMLBrowser, nAbsolutePixelScroll: uint32) void {
         return SteamAPI_ISteamHTMLSurface_SetVerticalScroll(self.ptr, unBrowserHandle, nAbsolutePixelScroll);
     }
 
-    pub fn SetKeyFocus(self: Self, unBrowserHandle: HHTMLBrowser, bHasKeyFocus: bool) void {
+    pub fn SetKeyFocus(self: *const Self, unBrowserHandle: HHTMLBrowser, bHasKeyFocus: bool) void {
         return SteamAPI_ISteamHTMLSurface_SetKeyFocus(self.ptr, unBrowserHandle, bHasKeyFocus);
     }
 
-    pub fn ViewSource(self: Self, unBrowserHandle: HHTMLBrowser) void {
+    pub fn ViewSource(self: *const Self, unBrowserHandle: HHTMLBrowser) void {
         return SteamAPI_ISteamHTMLSurface_ViewSource(self.ptr, unBrowserHandle);
     }
 
-    pub fn CopyToClipboard(self: Self, unBrowserHandle: HHTMLBrowser) void {
+    pub fn CopyToClipboard(self: *const Self, unBrowserHandle: HHTMLBrowser) void {
         return SteamAPI_ISteamHTMLSurface_CopyToClipboard(self.ptr, unBrowserHandle);
     }
 
-    pub fn PasteFromClipboard(self: Self, unBrowserHandle: HHTMLBrowser) void {
+    pub fn PasteFromClipboard(self: *const Self, unBrowserHandle: HHTMLBrowser) void {
         return SteamAPI_ISteamHTMLSurface_PasteFromClipboard(self.ptr, unBrowserHandle);
     }
 
-    pub fn Find(self: Self, unBrowserHandle: HHTMLBrowser, pchSearchStr: [*c]const u8, bCurrentlyInFind: bool, bReverse: bool) void {
-        return SteamAPI_ISteamHTMLSurface_Find(self.ptr, unBrowserHandle, pchSearchStr, bCurrentlyInFind, bReverse);
+    pub fn Find(self: *const Self, unBrowserHandle: HHTMLBrowser, pchSearchStr: []const u8, bCurrentlyInFind: bool, bReverse: bool) void {
+        return SteamAPI_ISteamHTMLSurface_Find(self.ptr, unBrowserHandle, pchSearchStr.ptr, bCurrentlyInFind, bReverse);
     }
 
-    pub fn StopFind(self: Self, unBrowserHandle: HHTMLBrowser) void {
+    pub fn StopFind(self: *const Self, unBrowserHandle: HHTMLBrowser) void {
         return SteamAPI_ISteamHTMLSurface_StopFind(self.ptr, unBrowserHandle);
     }
 
-    pub fn GetLinkAtPosition(self: Self, unBrowserHandle: HHTMLBrowser, x: i32, y: i32) void {
+    pub fn GetLinkAtPosition(self: *const Self, unBrowserHandle: HHTMLBrowser, x: i32, y: i32) void {
         return SteamAPI_ISteamHTMLSurface_GetLinkAtPosition(self.ptr, unBrowserHandle, x, y);
     }
 
-    pub fn SetCookie(self: Self, pchHostname: [*c]const u8, pchKey: [*c]const u8, pchValue: [*c]const u8, pchPath: [*c]const u8, nExpires: RTime32, bSecure: bool, bHTTPOnly: bool) void {
-        return SteamAPI_ISteamHTMLSurface_SetCookie(self.ptr, pchHostname, pchKey, pchValue, pchPath, nExpires, bSecure, bHTTPOnly);
+    pub fn SetCookie(self: *const Self, pchHostname: []const u8, pchKey: []const u8, pchValue: []const u8, pchPath: []const u8, nExpires: RTime32, bSecure: bool, bHTTPOnly: bool) void {
+        return SteamAPI_ISteamHTMLSurface_SetCookie(self.ptr, pchHostname.ptr, pchKey.ptr, pchValue.ptr, pchPath.ptr, nExpires, bSecure, bHTTPOnly);
     }
 
-    pub fn SetPageScaleFactor(self: Self, unBrowserHandle: HHTMLBrowser, flZoom: f32, nPointX: i32, nPointY: i32) void {
+    pub fn SetPageScaleFactor(self: *const Self, unBrowserHandle: HHTMLBrowser, flZoom: f32, nPointX: i32, nPointY: i32) void {
         return SteamAPI_ISteamHTMLSurface_SetPageScaleFactor(self.ptr, unBrowserHandle, flZoom, nPointX, nPointY);
     }
 
-    pub fn SetBackgroundMode(self: Self, unBrowserHandle: HHTMLBrowser, bBackgroundMode: bool) void {
+    pub fn SetBackgroundMode(self: *const Self, unBrowserHandle: HHTMLBrowser, bBackgroundMode: bool) void {
         return SteamAPI_ISteamHTMLSurface_SetBackgroundMode(self.ptr, unBrowserHandle, bBackgroundMode);
     }
 
-    pub fn SetDPIScalingFactor(self: Self, unBrowserHandle: HHTMLBrowser, flDPIScaling: f32) void {
+    pub fn SetDPIScalingFactor(self: *const Self, unBrowserHandle: HHTMLBrowser, flDPIScaling: f32) void {
         return SteamAPI_ISteamHTMLSurface_SetDPIScalingFactor(self.ptr, unBrowserHandle, flDPIScaling);
     }
 
-    pub fn OpenDeveloperTools(self: Self, unBrowserHandle: HHTMLBrowser) void {
+    pub fn OpenDeveloperTools(self: *const Self, unBrowserHandle: HHTMLBrowser) void {
         return SteamAPI_ISteamHTMLSurface_OpenDeveloperTools(self.ptr, unBrowserHandle);
     }
 
-    pub fn AllowStartRequest(self: Self, unBrowserHandle: HHTMLBrowser, bAllowed: bool) void {
+    pub fn AllowStartRequest(self: *const Self, unBrowserHandle: HHTMLBrowser, bAllowed: bool) void {
         return SteamAPI_ISteamHTMLSurface_AllowStartRequest(self.ptr, unBrowserHandle, bAllowed);
     }
 
-    pub fn JSDialogResponse(self: Self, unBrowserHandle: HHTMLBrowser, bResult: bool) void {
+    pub fn JSDialogResponse(self: *const Self, unBrowserHandle: HHTMLBrowser, bResult: bool) void {
         return SteamAPI_ISteamHTMLSurface_JSDialogResponse(self.ptr, unBrowserHandle, bResult);
     }
 
-    pub fn FileLoadDialogResponse(self: Self, unBrowserHandle: HHTMLBrowser, pchSelectedFiles: [*c][*c]const u8) void {
+    pub fn FileLoadDialogResponse(self: *const Self, unBrowserHandle: HHTMLBrowser, pchSelectedFiles: [*c][*c]const u8) void {
         return SteamAPI_ISteamHTMLSurface_FileLoadDialogResponse(self.ptr, unBrowserHandle, pchSelectedFiles);
     }
 };
@@ -9819,156 +9819,156 @@ pub const ISteamInventory = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn GetResultStatus(self: Self, resultHandle: SteamInventoryResult_t) EResult {
+    pub fn GetResultStatus(self: *const Self, resultHandle: SteamInventoryResult_t) EResult {
         return SteamAPI_ISteamInventory_GetResultStatus(self.ptr, resultHandle);
     }
 
-    pub fn GetResultItems(self: Self, resultHandle: SteamInventoryResult_t, pOutItemsArray: [*c]SteamItemDetails_t, punOutItemsArraySize: [*c]uint32) bool {
-        return SteamAPI_ISteamInventory_GetResultItems(self.ptr, resultHandle, pOutItemsArray, punOutItemsArraySize);
+    pub fn GetResultItems(self: *const Self, resultHandle: SteamInventoryResult_t, pOutItemsArray: []SteamItemDetails_t, punOutItemsArraySize: *uint32) bool {
+        return SteamAPI_ISteamInventory_GetResultItems(self.ptr, resultHandle, pOutItemsArray.ptr, punOutItemsArraySize);
     }
 
-    pub fn GetResultItemProperty(self: Self, resultHandle: SteamInventoryResult_t, unItemIndex: uint32, pchPropertyName: [*c]const u8, pchValueBuffer: [*c]u8, punValueBufferSizeOut: [*c]uint32) bool {
-        return SteamAPI_ISteamInventory_GetResultItemProperty(self.ptr, resultHandle, unItemIndex, pchPropertyName, pchValueBuffer, punValueBufferSizeOut);
+    pub fn GetResultItemProperty(self: *const Self, resultHandle: SteamInventoryResult_t, unItemIndex: uint32, pchPropertyName: []const u8, pchValueBuffer: []u8, punValueBufferSizeOut: *uint32) bool {
+        return SteamAPI_ISteamInventory_GetResultItemProperty(self.ptr, resultHandle, unItemIndex, pchPropertyName.ptr, pchValueBuffer.ptr, punValueBufferSizeOut);
     }
 
-    pub fn GetResultTimestamp(self: Self, resultHandle: SteamInventoryResult_t) uint32 {
+    pub fn GetResultTimestamp(self: *const Self, resultHandle: SteamInventoryResult_t) uint32 {
         return SteamAPI_ISteamInventory_GetResultTimestamp(self.ptr, resultHandle);
     }
 
-    pub fn CheckResultSteamID(self: Self, resultHandle: SteamInventoryResult_t, steamIDExpected: CSteamID) bool {
+    pub fn CheckResultSteamID(self: *const Self, resultHandle: SteamInventoryResult_t, steamIDExpected: CSteamID) bool {
         return SteamAPI_ISteamInventory_CheckResultSteamID(self.ptr, resultHandle, steamIDExpected);
     }
 
-    pub fn DestroyResult(self: Self, resultHandle: SteamInventoryResult_t) void {
+    pub fn DestroyResult(self: *const Self, resultHandle: SteamInventoryResult_t) void {
         return SteamAPI_ISteamInventory_DestroyResult(self.ptr, resultHandle);
     }
 
-    pub fn GetAllItems(self: Self, pResultHandle: [*c]SteamInventoryResult_t) bool {
-        return SteamAPI_ISteamInventory_GetAllItems(self.ptr, pResultHandle);
+    pub fn GetAllItems(self: *const Self, pResultHandle: []SteamInventoryResult_t) bool {
+        return SteamAPI_ISteamInventory_GetAllItems(self.ptr, pResultHandle.ptr);
     }
 
-    pub fn GetItemsByID(self: Self, pResultHandle: [*c]SteamInventoryResult_t, pInstanceIDs: [*c]const SteamItemInstanceID_t, unCountInstanceIDs: uint32) bool {
-        return SteamAPI_ISteamInventory_GetItemsByID(self.ptr, pResultHandle, pInstanceIDs, unCountInstanceIDs);
+    pub fn GetItemsByID(self: *const Self, pResultHandle: []SteamInventoryResult_t, pInstanceIDs: []const SteamItemInstanceID_t) bool {
+        return SteamAPI_ISteamInventory_GetItemsByID(self.ptr, pResultHandle.ptr, pInstanceIDs.ptr, @intCast(pInstanceIDs.len));
     }
 
-    pub fn SerializeResult(self: Self, resultHandle: SteamInventoryResult_t, pOutBuffer: ?*anyopaque, punOutBufferSize: [*c]uint32) bool {
-        return SteamAPI_ISteamInventory_SerializeResult(self.ptr, resultHandle, pOutBuffer, punOutBufferSize);
+    pub fn SerializeResult(self: *const Self, resultHandle: SteamInventoryResult_t, pOutBuffer: []u8, punOutBufferSize: *uint32) bool {
+        return SteamAPI_ISteamInventory_SerializeResult(self.ptr, resultHandle, pOutBuffer.ptr, punOutBufferSize);
     }
 
-    pub fn DeserializeResult(self: Self, pOutResultHandle: [*c]SteamInventoryResult_t, pBuffer: ?*const anyopaque, unBufferSize: uint32, bRESERVED_MUST_BE_FALSE: bool) bool {
-        return SteamAPI_ISteamInventory_DeserializeResult(self.ptr, pOutResultHandle, pBuffer, unBufferSize, bRESERVED_MUST_BE_FALSE);
+    pub fn DeserializeResult(self: *const Self, pOutResultHandle: []SteamInventoryResult_t, pBuffer: []const u8, unBufferSize: uint32, bRESERVED_MUST_BE_FALSE: bool) bool {
+        return SteamAPI_ISteamInventory_DeserializeResult(self.ptr, pOutResultHandle.ptr, pBuffer.ptr, unBufferSize, bRESERVED_MUST_BE_FALSE);
     }
 
-    pub fn GenerateItems(self: Self, pResultHandle: [*c]SteamInventoryResult_t, pArrayItemDefs: [*c]const SteamItemDef_t, punArrayQuantity: [*c]const uint32, unArrayLength: uint32) bool {
-        return SteamAPI_ISteamInventory_GenerateItems(self.ptr, pResultHandle, pArrayItemDefs, punArrayQuantity, unArrayLength);
+    pub fn GenerateItems(self: *const Self, pResultHandle: []SteamInventoryResult_t, pArrayItemDefs: []const SteamItemDef_t, punArrayQuantity: *const uint32) bool {
+        return SteamAPI_ISteamInventory_GenerateItems(self.ptr, pResultHandle.ptr, pArrayItemDefs.ptr, punArrayQuantity, @intCast(pArrayItemDefs.len));
     }
 
-    pub fn GrantPromoItems(self: Self, pResultHandle: [*c]SteamInventoryResult_t) bool {
-        return SteamAPI_ISteamInventory_GrantPromoItems(self.ptr, pResultHandle);
+    pub fn GrantPromoItems(self: *const Self, pResultHandle: []SteamInventoryResult_t) bool {
+        return SteamAPI_ISteamInventory_GrantPromoItems(self.ptr, pResultHandle.ptr);
     }
 
-    pub fn AddPromoItem(self: Self, pResultHandle: [*c]SteamInventoryResult_t, itemDef: SteamItemDef_t) bool {
-        return SteamAPI_ISteamInventory_AddPromoItem(self.ptr, pResultHandle, itemDef);
+    pub fn AddPromoItem(self: *const Self, pResultHandle: []SteamInventoryResult_t, itemDef: SteamItemDef_t) bool {
+        return SteamAPI_ISteamInventory_AddPromoItem(self.ptr, pResultHandle.ptr, itemDef);
     }
 
-    pub fn AddPromoItems(self: Self, pResultHandle: [*c]SteamInventoryResult_t, pArrayItemDefs: [*c]const SteamItemDef_t, unArrayLength: uint32) bool {
-        return SteamAPI_ISteamInventory_AddPromoItems(self.ptr, pResultHandle, pArrayItemDefs, unArrayLength);
+    pub fn AddPromoItems(self: *const Self, pResultHandle: []SteamInventoryResult_t, pArrayItemDefs: []const SteamItemDef_t) bool {
+        return SteamAPI_ISteamInventory_AddPromoItems(self.ptr, pResultHandle.ptr, pArrayItemDefs.ptr, @intCast(pArrayItemDefs.len));
     }
 
-    pub fn ConsumeItem(self: Self, pResultHandle: [*c]SteamInventoryResult_t, itemConsume: SteamItemInstanceID_t, unQuantity: uint32) bool {
-        return SteamAPI_ISteamInventory_ConsumeItem(self.ptr, pResultHandle, itemConsume, unQuantity);
+    pub fn ConsumeItem(self: *const Self, pResultHandle: []SteamInventoryResult_t, itemConsume: SteamItemInstanceID_t, unQuantity: uint32) bool {
+        return SteamAPI_ISteamInventory_ConsumeItem(self.ptr, pResultHandle.ptr, itemConsume, unQuantity);
     }
 
-    pub fn ExchangeItems(self: Self, pResultHandle: [*c]SteamInventoryResult_t, pArrayGenerate: [*c]const SteamItemDef_t, punArrayGenerateQuantity: [*c]const uint32, unArrayGenerateLength: uint32, pArrayDestroy: [*c]const SteamItemInstanceID_t, punArrayDestroyQuantity: [*c]const uint32, unArrayDestroyLength: uint32) bool {
-        return SteamAPI_ISteamInventory_ExchangeItems(self.ptr, pResultHandle, pArrayGenerate, punArrayGenerateQuantity, unArrayGenerateLength, pArrayDestroy, punArrayDestroyQuantity, unArrayDestroyLength);
+    pub fn ExchangeItems(self: *const Self, pResultHandle: []SteamInventoryResult_t, pArrayGenerate: []const SteamItemDef_t, punArrayGenerateQuantity: *const uint32, pArrayDestroy: []const SteamItemInstanceID_t, punArrayDestroyQuantity: *const uint32) bool {
+        return SteamAPI_ISteamInventory_ExchangeItems(self.ptr, pResultHandle.ptr, pArrayGenerate.ptr, punArrayGenerateQuantity, @intCast(pArrayGenerate.len), pArrayDestroy.ptr, punArrayDestroyQuantity, @intCast(pArrayDestroy.len));
     }
 
-    pub fn TransferItemQuantity(self: Self, pResultHandle: [*c]SteamInventoryResult_t, itemIdSource: SteamItemInstanceID_t, unQuantity: uint32, itemIdDest: SteamItemInstanceID_t) bool {
-        return SteamAPI_ISteamInventory_TransferItemQuantity(self.ptr, pResultHandle, itemIdSource, unQuantity, itemIdDest);
+    pub fn TransferItemQuantity(self: *const Self, pResultHandle: []SteamInventoryResult_t, itemIdSource: SteamItemInstanceID_t, unQuantity: uint32, itemIdDest: SteamItemInstanceID_t) bool {
+        return SteamAPI_ISteamInventory_TransferItemQuantity(self.ptr, pResultHandle.ptr, itemIdSource, unQuantity, itemIdDest);
     }
 
-    pub fn SendItemDropHeartbeat(self: Self) void {
+    pub fn SendItemDropHeartbeat(self: *const Self) void {
         return SteamAPI_ISteamInventory_SendItemDropHeartbeat(self.ptr);
     }
 
-    pub fn TriggerItemDrop(self: Self, pResultHandle: [*c]SteamInventoryResult_t, dropListDefinition: SteamItemDef_t) bool {
-        return SteamAPI_ISteamInventory_TriggerItemDrop(self.ptr, pResultHandle, dropListDefinition);
+    pub fn TriggerItemDrop(self: *const Self, pResultHandle: []SteamInventoryResult_t, dropListDefinition: SteamItemDef_t) bool {
+        return SteamAPI_ISteamInventory_TriggerItemDrop(self.ptr, pResultHandle.ptr, dropListDefinition);
     }
 
-    pub fn TradeItems(self: Self, pResultHandle: [*c]SteamInventoryResult_t, steamIDTradePartner: CSteamID, pArrayGive: [*c]const SteamItemInstanceID_t, pArrayGiveQuantity: [*c]const uint32, nArrayGiveLength: uint32, pArrayGet: [*c]const SteamItemInstanceID_t, pArrayGetQuantity: [*c]const uint32, nArrayGetLength: uint32) bool {
-        return SteamAPI_ISteamInventory_TradeItems(self.ptr, pResultHandle, steamIDTradePartner, pArrayGive, pArrayGiveQuantity, nArrayGiveLength, pArrayGet, pArrayGetQuantity, nArrayGetLength);
+    pub fn TradeItems(self: *const Self, pResultHandle: []SteamInventoryResult_t, steamIDTradePartner: CSteamID, pArrayGive: []const SteamItemInstanceID_t, pArrayGiveQuantity: []const uint32, pArrayGet: []const SteamItemInstanceID_t, pArrayGetQuantity: []const uint32) bool {
+        return SteamAPI_ISteamInventory_TradeItems(self.ptr, pResultHandle.ptr, steamIDTradePartner, pArrayGive.ptr, pArrayGiveQuantity.ptr, @intCast(pArrayGiveQuantity.len), pArrayGet.ptr, pArrayGetQuantity.ptr, @intCast(pArrayGetQuantity.len));
     }
 
-    pub fn LoadItemDefinitions(self: Self) bool {
+    pub fn LoadItemDefinitions(self: *const Self) bool {
         return SteamAPI_ISteamInventory_LoadItemDefinitions(self.ptr);
     }
 
-    pub fn GetItemDefinitionIDs(self: Self, pItemDefIDs: [*c]SteamItemDef_t, punItemDefIDsArraySize: [*c]uint32) bool {
-        return SteamAPI_ISteamInventory_GetItemDefinitionIDs(self.ptr, pItemDefIDs, punItemDefIDsArraySize);
+    pub fn GetItemDefinitionIDs(self: *const Self, pItemDefIDs: []SteamItemDef_t, punItemDefIDsArraySize: *uint32) bool {
+        return SteamAPI_ISteamInventory_GetItemDefinitionIDs(self.ptr, pItemDefIDs.ptr, punItemDefIDsArraySize);
     }
 
-    pub fn GetItemDefinitionProperty(self: Self, iDefinition: SteamItemDef_t, pchPropertyName: [*c]const u8, pchValueBuffer: [*c]u8, punValueBufferSizeOut: [*c]uint32) bool {
-        return SteamAPI_ISteamInventory_GetItemDefinitionProperty(self.ptr, iDefinition, pchPropertyName, pchValueBuffer, punValueBufferSizeOut);
+    pub fn GetItemDefinitionProperty(self: *const Self, iDefinition: SteamItemDef_t, pchPropertyName: []const u8, pchValueBuffer: []u8, punValueBufferSizeOut: *uint32) bool {
+        return SteamAPI_ISteamInventory_GetItemDefinitionProperty(self.ptr, iDefinition, pchPropertyName.ptr, pchValueBuffer.ptr, punValueBufferSizeOut);
     }
 
-    pub fn RequestEligiblePromoItemDefinitionsIDs(self: Self, steamID: CSteamID) SteamAPICall_t {
+    pub fn RequestEligiblePromoItemDefinitionsIDs(self: *const Self, steamID: CSteamID) SteamAPICall_t {
         return SteamAPI_ISteamInventory_RequestEligiblePromoItemDefinitionsIDs(self.ptr, steamID);
     }
 
-    pub fn GetEligiblePromoItemDefinitionIDs(self: Self, steamID: CSteamID, pItemDefIDs: [*c]SteamItemDef_t, punItemDefIDsArraySize: [*c]uint32) bool {
-        return SteamAPI_ISteamInventory_GetEligiblePromoItemDefinitionIDs(self.ptr, steamID, pItemDefIDs, punItemDefIDsArraySize);
+    pub fn GetEligiblePromoItemDefinitionIDs(self: *const Self, steamID: CSteamID, pItemDefIDs: []SteamItemDef_t, punItemDefIDsArraySize: *uint32) bool {
+        return SteamAPI_ISteamInventory_GetEligiblePromoItemDefinitionIDs(self.ptr, steamID, pItemDefIDs.ptr, punItemDefIDsArraySize);
     }
 
-    pub fn StartPurchase(self: Self, pArrayItemDefs: [*c]const SteamItemDef_t, punArrayQuantity: [*c]const uint32, unArrayLength: uint32) SteamAPICall_t {
-        return SteamAPI_ISteamInventory_StartPurchase(self.ptr, pArrayItemDefs, punArrayQuantity, unArrayLength);
+    pub fn StartPurchase(self: *const Self, pArrayItemDefs: []const SteamItemDef_t, punArrayQuantity: *const uint32) SteamAPICall_t {
+        return SteamAPI_ISteamInventory_StartPurchase(self.ptr, pArrayItemDefs.ptr, punArrayQuantity, @intCast(pArrayItemDefs.len));
     }
 
-    pub fn RequestPrices(self: Self) SteamAPICall_t {
+    pub fn RequestPrices(self: *const Self) SteamAPICall_t {
         return SteamAPI_ISteamInventory_RequestPrices(self.ptr);
     }
 
-    pub fn GetNumItemsWithPrices(self: Self) uint32 {
+    pub fn GetNumItemsWithPrices(self: *const Self) uint32 {
         return SteamAPI_ISteamInventory_GetNumItemsWithPrices(self.ptr);
     }
 
-    pub fn GetItemsWithPrices(self: Self, pArrayItemDefs: [*c]SteamItemDef_t, pCurrentPrices: [*c]uint64, pBasePrices: [*c]uint64, unArrayLength: uint32) bool {
-        return SteamAPI_ISteamInventory_GetItemsWithPrices(self.ptr, pArrayItemDefs, pCurrentPrices, pBasePrices, unArrayLength);
+    pub fn GetItemsWithPrices(self: *const Self, pArrayItemDefs: []SteamItemDef_t, pCurrentPrices: []uint64, pBasePrices: []uint64) bool {
+        return SteamAPI_ISteamInventory_GetItemsWithPrices(self.ptr, pArrayItemDefs.ptr, pCurrentPrices.ptr, pBasePrices.ptr, @intCast(pBasePrices.len));
     }
 
-    pub fn GetItemPrice(self: Self, iDefinition: SteamItemDef_t, pCurrentPrice: [*c]uint64, pBasePrice: [*c]uint64) bool {
-        return SteamAPI_ISteamInventory_GetItemPrice(self.ptr, iDefinition, pCurrentPrice, pBasePrice);
+    pub fn GetItemPrice(self: *const Self, iDefinition: SteamItemDef_t, pCurrentPrice: []uint64, pBasePrice: []uint64) bool {
+        return SteamAPI_ISteamInventory_GetItemPrice(self.ptr, iDefinition, pCurrentPrice.ptr, pBasePrice.ptr);
     }
 
-    pub fn StartUpdateProperties(self: Self) SteamInventoryUpdateHandle_t {
+    pub fn StartUpdateProperties(self: *const Self) SteamInventoryUpdateHandle_t {
         return SteamAPI_ISteamInventory_StartUpdateProperties(self.ptr);
     }
 
-    pub fn RemoveProperty(self: Self, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: [*c]const u8) bool {
-        return SteamAPI_ISteamInventory_RemoveProperty(self.ptr, handle, nItemID, pchPropertyName);
+    pub fn RemoveProperty(self: *const Self, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: []const u8) bool {
+        return SteamAPI_ISteamInventory_RemoveProperty(self.ptr, handle, nItemID, pchPropertyName.ptr);
     }
 
-    pub fn SetPropertyString(self: Self, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: [*c]const u8, pchPropertyValue: [*c]const u8) bool {
-        return SteamAPI_ISteamInventory_SetPropertyString(self.ptr, handle, nItemID, pchPropertyName, pchPropertyValue);
+    pub fn SetPropertyString(self: *const Self, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: []const u8, pchPropertyValue: []const u8) bool {
+        return SteamAPI_ISteamInventory_SetPropertyString(self.ptr, handle, nItemID, pchPropertyName.ptr, pchPropertyValue.ptr);
     }
 
-    pub fn SetPropertyBool(self: Self, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: [*c]const u8, bValue: bool) bool {
-        return SteamAPI_ISteamInventory_SetPropertyBool(self.ptr, handle, nItemID, pchPropertyName, bValue);
+    pub fn SetPropertyBool(self: *const Self, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: []const u8, bValue: bool) bool {
+        return SteamAPI_ISteamInventory_SetPropertyBool(self.ptr, handle, nItemID, pchPropertyName.ptr, bValue);
     }
 
-    pub fn SetPropertyInt64(self: Self, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: [*c]const u8, nValue: int64) bool {
-        return SteamAPI_ISteamInventory_SetPropertyInt64(self.ptr, handle, nItemID, pchPropertyName, nValue);
+    pub fn SetPropertyInt64(self: *const Self, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: []const u8, nValue: int64) bool {
+        return SteamAPI_ISteamInventory_SetPropertyInt64(self.ptr, handle, nItemID, pchPropertyName.ptr, nValue);
     }
 
-    pub fn SetPropertyFloat(self: Self, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: [*c]const u8, flValue: f32) bool {
-        return SteamAPI_ISteamInventory_SetPropertyFloat(self.ptr, handle, nItemID, pchPropertyName, flValue);
+    pub fn SetPropertyFloat(self: *const Self, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: []const u8, flValue: f32) bool {
+        return SteamAPI_ISteamInventory_SetPropertyFloat(self.ptr, handle, nItemID, pchPropertyName.ptr, flValue);
     }
 
-    pub fn SubmitUpdateProperties(self: Self, handle: SteamInventoryUpdateHandle_t, pResultHandle: [*c]SteamInventoryResult_t) bool {
-        return SteamAPI_ISteamInventory_SubmitUpdateProperties(self.ptr, handle, pResultHandle);
+    pub fn SubmitUpdateProperties(self: *const Self, handle: SteamInventoryUpdateHandle_t, pResultHandle: []SteamInventoryResult_t) bool {
+        return SteamAPI_ISteamInventory_SubmitUpdateProperties(self.ptr, handle, pResultHandle.ptr);
     }
 
-    pub fn InspectItem(self: Self, pResultHandle: [*c]SteamInventoryResult_t, pchItemToken: [*c]const u8) bool {
-        return SteamAPI_ISteamInventory_InspectItem(self.ptr, pResultHandle, pchItemToken);
+    pub fn InspectItem(self: *const Self, pResultHandle: []SteamInventoryResult_t, pchItemToken: []const u8) bool {
+        return SteamAPI_ISteamInventory_InspectItem(self.ptr, pResultHandle.ptr, pchItemToken.ptr);
     }
 };
 
@@ -10021,20 +10021,20 @@ pub const ISteamVideo = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn GetVideoURL(self: Self, unVideoAppID: AppId_t) void {
+    pub fn GetVideoURL(self: *const Self, unVideoAppID: AppId_t) void {
         return SteamAPI_ISteamVideo_GetVideoURL(self.ptr, unVideoAppID);
     }
 
-    pub fn IsBroadcasting(self: Self, pnNumViewers: [*c]i32) bool {
+    pub fn IsBroadcasting(self: *const Self, pnNumViewers: *i32) bool {
         return SteamAPI_ISteamVideo_IsBroadcasting(self.ptr, pnNumViewers);
     }
 
-    pub fn GetOPFSettings(self: Self, unVideoAppID: AppId_t) void {
+    pub fn GetOPFSettings(self: *const Self, unVideoAppID: AppId_t) void {
         return SteamAPI_ISteamVideo_GetOPFSettings(self.ptr, unVideoAppID);
     }
 
-    pub fn GetOPFStringForApp(self: Self, unVideoAppID: AppId_t, pchBuffer: [*c]u8, pnBufferSize: [*c]int32) bool {
-        return SteamAPI_ISteamVideo_GetOPFStringForApp(self.ptr, unVideoAppID, pchBuffer, pnBufferSize);
+    pub fn GetOPFStringForApp(self: *const Self, unVideoAppID: AppId_t, pchBuffer: []u8, pnBufferSize: *int32) bool {
+        return SteamAPI_ISteamVideo_GetOPFStringForApp(self.ptr, unVideoAppID, pchBuffer.ptr, pnBufferSize);
     }
 };
 
@@ -10053,27 +10053,27 @@ pub const ISteamParentalSettings = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn BIsParentalLockEnabled(self: Self) bool {
+    pub fn BIsParentalLockEnabled(self: *const Self) bool {
         return SteamAPI_ISteamParentalSettings_BIsParentalLockEnabled(self.ptr);
     }
 
-    pub fn BIsParentalLockLocked(self: Self) bool {
+    pub fn BIsParentalLockLocked(self: *const Self) bool {
         return SteamAPI_ISteamParentalSettings_BIsParentalLockLocked(self.ptr);
     }
 
-    pub fn BIsAppBlocked(self: Self, nAppID: AppId_t) bool {
+    pub fn BIsAppBlocked(self: *const Self, nAppID: AppId_t) bool {
         return SteamAPI_ISteamParentalSettings_BIsAppBlocked(self.ptr, nAppID);
     }
 
-    pub fn BIsAppInBlockList(self: Self, nAppID: AppId_t) bool {
+    pub fn BIsAppInBlockList(self: *const Self, nAppID: AppId_t) bool {
         return SteamAPI_ISteamParentalSettings_BIsAppInBlockList(self.ptr, nAppID);
     }
 
-    pub fn BIsFeatureBlocked(self: Self, eFeature: EParentalFeature) bool {
+    pub fn BIsFeatureBlocked(self: *const Self, eFeature: EParentalFeature) bool {
         return SteamAPI_ISteamParentalSettings_BIsFeatureBlocked(self.ptr, eFeature);
     }
 
-    pub fn BIsFeatureInBlockList(self: Self, eFeature: EParentalFeature) bool {
+    pub fn BIsFeatureInBlockList(self: *const Self, eFeature: EParentalFeature) bool {
         return SteamAPI_ISteamParentalSettings_BIsFeatureInBlockList(self.ptr, eFeature);
     }
 };
@@ -10095,31 +10095,31 @@ pub const ISteamRemotePlay = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn GetSessionCount(self: Self) uint32 {
+    pub fn GetSessionCount(self: *const Self) uint32 {
         return SteamAPI_ISteamRemotePlay_GetSessionCount(self.ptr);
     }
 
-    pub fn GetSessionID(self: Self, iSessionIndex: i32) RemotePlaySessionID_t {
+    pub fn GetSessionID(self: *const Self, iSessionIndex: i32) RemotePlaySessionID_t {
         return SteamAPI_ISteamRemotePlay_GetSessionID(self.ptr, iSessionIndex);
     }
 
-    pub fn GetSessionSteamID(self: Self, unSessionID: RemotePlaySessionID_t) CSteamID {
+    pub fn GetSessionSteamID(self: *const Self, unSessionID: RemotePlaySessionID_t) CSteamID {
         return SteamAPI_ISteamRemotePlay_GetSessionSteamID(self.ptr, unSessionID);
     }
 
-    pub fn GetSessionClientName(self: Self, unSessionID: RemotePlaySessionID_t) [*c]const u8 {
+    pub fn GetSessionClientName(self: *const Self, unSessionID: RemotePlaySessionID_t) [*c]const u8 {
         return SteamAPI_ISteamRemotePlay_GetSessionClientName(self.ptr, unSessionID);
     }
 
-    pub fn GetSessionClientFormFactor(self: Self, unSessionID: RemotePlaySessionID_t) ESteamDeviceFormFactor {
+    pub fn GetSessionClientFormFactor(self: *const Self, unSessionID: RemotePlaySessionID_t) ESteamDeviceFormFactor {
         return SteamAPI_ISteamRemotePlay_GetSessionClientFormFactor(self.ptr, unSessionID);
     }
 
-    pub fn BGetSessionClientResolution(self: Self, unSessionID: RemotePlaySessionID_t, pnResolutionX: [*c]i32, pnResolutionY: [*c]i32) bool {
+    pub fn BGetSessionClientResolution(self: *const Self, unSessionID: RemotePlaySessionID_t, pnResolutionX: *i32, pnResolutionY: *i32) bool {
         return SteamAPI_ISteamRemotePlay_BGetSessionClientResolution(self.ptr, unSessionID, pnResolutionX, pnResolutionY);
     }
 
-    pub fn BSendRemotePlayTogetherInvite(self: Self, steamIDFriend: CSteamID) bool {
+    pub fn BSendRemotePlayTogetherInvite(self: *const Self, steamIDFriend: CSteamID) bool {
         return SteamAPI_ISteamRemotePlay_BSendRemotePlayTogetherInvite(self.ptr, steamIDFriend);
     }
 };
@@ -10147,38 +10147,38 @@ pub const ISteamNetworkingMessages = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn SendMessageToUser(self: Self, identityRemote: SteamNetworkingIdentity, pubData: ?*const anyopaque, cubData: uint32, nSendFlags: i32, nRemoteChannel: i32) EResult {
-        return SteamAPI_ISteamNetworkingMessages_SendMessageToUser(self.ptr, identityRemote, pubData, cubData, nSendFlags, nRemoteChannel);
+    pub fn SendMessageToUser(self: *const Self, identityRemote: *const SteamNetworkingIdentity, pubData: []const u8, nSendFlags: i32, nRemoteChannel: i32) EResult {
+        return SteamAPI_ISteamNetworkingMessages_SendMessageToUser(self.ptr, identityRemote, pubData.ptr, @intCast(pubData.len), nSendFlags, nRemoteChannel);
     }
 
-    pub fn ReceiveMessagesOnChannel(self: Self, nLocalChannel: i32, ppOutMessages: [*c][*c]SteamNetworkingMessage_t, nMaxMessages: i32) i32 {
+    pub fn ReceiveMessagesOnChannel(self: *const Self, nLocalChannel: i32, ppOutMessages: [*c][*c]SteamNetworkingMessage_t, nMaxMessages: i32) i32 {
         return SteamAPI_ISteamNetworkingMessages_ReceiveMessagesOnChannel(self.ptr, nLocalChannel, ppOutMessages, nMaxMessages);
     }
 
-    pub fn AcceptSessionWithUser(self: Self, identityRemote: SteamNetworkingIdentity) bool {
+    pub fn AcceptSessionWithUser(self: *const Self, identityRemote: *const SteamNetworkingIdentity) bool {
         return SteamAPI_ISteamNetworkingMessages_AcceptSessionWithUser(self.ptr, identityRemote);
     }
 
-    pub fn CloseSessionWithUser(self: Self, identityRemote: SteamNetworkingIdentity) bool {
+    pub fn CloseSessionWithUser(self: *const Self, identityRemote: *const SteamNetworkingIdentity) bool {
         return SteamAPI_ISteamNetworkingMessages_CloseSessionWithUser(self.ptr, identityRemote);
     }
 
-    pub fn CloseChannelWithUser(self: Self, identityRemote: SteamNetworkingIdentity, nLocalChannel: i32) bool {
+    pub fn CloseChannelWithUser(self: *const Self, identityRemote: *const SteamNetworkingIdentity, nLocalChannel: i32) bool {
         return SteamAPI_ISteamNetworkingMessages_CloseChannelWithUser(self.ptr, identityRemote, nLocalChannel);
     }
 
-    pub fn GetSessionConnectionInfo(self: Self, identityRemote: SteamNetworkingIdentity, pConnectionInfo: [*c]SteamNetConnectionInfo_t, pQuickStatus: [*c]SteamNetConnectionRealTimeStatus_t) ESteamNetworkingConnectionState {
-        return SteamAPI_ISteamNetworkingMessages_GetSessionConnectionInfo(self.ptr, identityRemote, pConnectionInfo, pQuickStatus);
+    pub fn GetSessionConnectionInfo(self: *const Self, identityRemote: *const SteamNetworkingIdentity, pConnectionInfo: []SteamNetConnectionInfo_t, pQuickStatus: []SteamNetConnectionRealTimeStatus_t) ESteamNetworkingConnectionState {
+        return SteamAPI_ISteamNetworkingMessages_GetSessionConnectionInfo(self.ptr, identityRemote, pConnectionInfo.ptr, pQuickStatus.ptr);
     }
 };
 
 // static functions
-extern fn SteamAPI_ISteamNetworkingMessages_SendMessageToUser(self: ?*anyopaque, identityRemote: SteamNetworkingIdentity, pubData: ?*const anyopaque, cubData: uint32, nSendFlags: i32, nRemoteChannel: i32) callconv(.C) EResult;
+extern fn SteamAPI_ISteamNetworkingMessages_SendMessageToUser(self: ?*anyopaque, identityRemote: [*c]const SteamNetworkingIdentity, pubData: ?*const anyopaque, cubData: uint32, nSendFlags: i32, nRemoteChannel: i32) callconv(.C) EResult;
 extern fn SteamAPI_ISteamNetworkingMessages_ReceiveMessagesOnChannel(self: ?*anyopaque, nLocalChannel: i32, ppOutMessages: [*c][*c]SteamNetworkingMessage_t, nMaxMessages: i32) callconv(.C) i32;
-extern fn SteamAPI_ISteamNetworkingMessages_AcceptSessionWithUser(self: ?*anyopaque, identityRemote: SteamNetworkingIdentity) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingMessages_CloseSessionWithUser(self: ?*anyopaque, identityRemote: SteamNetworkingIdentity) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingMessages_CloseChannelWithUser(self: ?*anyopaque, identityRemote: SteamNetworkingIdentity, nLocalChannel: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingMessages_GetSessionConnectionInfo(self: ?*anyopaque, identityRemote: SteamNetworkingIdentity, pConnectionInfo: [*c]SteamNetConnectionInfo_t, pQuickStatus: [*c]SteamNetConnectionRealTimeStatus_t) callconv(.C) ESteamNetworkingConnectionState;
+extern fn SteamAPI_ISteamNetworkingMessages_AcceptSessionWithUser(self: ?*anyopaque, identityRemote: [*c]const SteamNetworkingIdentity) callconv(.C) bool;
+extern fn SteamAPI_ISteamNetworkingMessages_CloseSessionWithUser(self: ?*anyopaque, identityRemote: [*c]const SteamNetworkingIdentity) callconv(.C) bool;
+extern fn SteamAPI_ISteamNetworkingMessages_CloseChannelWithUser(self: ?*anyopaque, identityRemote: [*c]const SteamNetworkingIdentity, nLocalChannel: i32) callconv(.C) bool;
+extern fn SteamAPI_ISteamNetworkingMessages_GetSessionConnectionInfo(self: ?*anyopaque, identityRemote: [*c]const SteamNetworkingIdentity, pConnectionInfo: [*c]SteamNetConnectionInfo_t, pQuickStatus: [*c]SteamNetConnectionRealTimeStatus_t) callconv(.C) ESteamNetworkingConnectionState;
 extern fn SteamAPI_SteamNetworkingSockets_SteamAPI_v012() callconv(.C) [*c]ISteamNetworkingSockets;
 /// user
 pub fn SteamNetworkingSockets_SteamAPI() ISteamNetworkingSockets {
@@ -10194,200 +10194,200 @@ pub const ISteamNetworkingSockets = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn CreateListenSocketIP(self: Self, localAddress: SteamNetworkingIPAddr, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) HSteamListenSocket {
-        return SteamAPI_ISteamNetworkingSockets_CreateListenSocketIP(self.ptr, localAddress, nOptions, pOptions);
+    pub fn CreateListenSocketIP(self: *const Self, localAddress: *const SteamNetworkingIPAddr, nOptions: i32, pOptions: []const SteamNetworkingConfigValue_t) HSteamListenSocket {
+        return SteamAPI_ISteamNetworkingSockets_CreateListenSocketIP(self.ptr, localAddress, nOptions, pOptions.ptr);
     }
 
-    pub fn ConnectByIPAddress(self: Self, address: SteamNetworkingIPAddr, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) HSteamNetConnection {
-        return SteamAPI_ISteamNetworkingSockets_ConnectByIPAddress(self.ptr, address, nOptions, pOptions);
+    pub fn ConnectByIPAddress(self: *const Self, address: *const SteamNetworkingIPAddr, nOptions: i32, pOptions: []const SteamNetworkingConfigValue_t) HSteamNetConnection {
+        return SteamAPI_ISteamNetworkingSockets_ConnectByIPAddress(self.ptr, address, nOptions, pOptions.ptr);
     }
 
-    pub fn CreateListenSocketP2P(self: Self, nLocalVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) HSteamListenSocket {
-        return SteamAPI_ISteamNetworkingSockets_CreateListenSocketP2P(self.ptr, nLocalVirtualPort, nOptions, pOptions);
+    pub fn CreateListenSocketP2P(self: *const Self, nLocalVirtualPort: i32, nOptions: i32, pOptions: []const SteamNetworkingConfigValue_t) HSteamListenSocket {
+        return SteamAPI_ISteamNetworkingSockets_CreateListenSocketP2P(self.ptr, nLocalVirtualPort, nOptions, pOptions.ptr);
     }
 
-    pub fn ConnectP2P(self: Self, identityRemote: SteamNetworkingIdentity, nRemoteVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) HSteamNetConnection {
-        return SteamAPI_ISteamNetworkingSockets_ConnectP2P(self.ptr, identityRemote, nRemoteVirtualPort, nOptions, pOptions);
+    pub fn ConnectP2P(self: *const Self, identityRemote: *const SteamNetworkingIdentity, nRemoteVirtualPort: i32, nOptions: i32, pOptions: []const SteamNetworkingConfigValue_t) HSteamNetConnection {
+        return SteamAPI_ISteamNetworkingSockets_ConnectP2P(self.ptr, identityRemote, nRemoteVirtualPort, nOptions, pOptions.ptr);
     }
 
-    pub fn AcceptConnection(self: Self, hConn: HSteamNetConnection) EResult {
+    pub fn AcceptConnection(self: *const Self, hConn: HSteamNetConnection) EResult {
         return SteamAPI_ISteamNetworkingSockets_AcceptConnection(self.ptr, hConn);
     }
 
-    pub fn CloseConnection(self: Self, hPeer: HSteamNetConnection, nReason: i32, pszDebug: [*c]const u8, bEnableLinger: bool) bool {
-        return SteamAPI_ISteamNetworkingSockets_CloseConnection(self.ptr, hPeer, nReason, pszDebug, bEnableLinger);
+    pub fn CloseConnection(self: *const Self, hPeer: HSteamNetConnection, nReason: i32, pszDebug: [:0]const u8, bEnableLinger: bool) bool {
+        return SteamAPI_ISteamNetworkingSockets_CloseConnection(self.ptr, hPeer, nReason, pszDebug.ptr, bEnableLinger);
     }
 
-    pub fn CloseListenSocket(self: Self, hSocket: HSteamListenSocket) bool {
+    pub fn CloseListenSocket(self: *const Self, hSocket: HSteamListenSocket) bool {
         return SteamAPI_ISteamNetworkingSockets_CloseListenSocket(self.ptr, hSocket);
     }
 
-    pub fn SetConnectionUserData(self: Self, hPeer: HSteamNetConnection, nUserData: int64) bool {
+    pub fn SetConnectionUserData(self: *const Self, hPeer: HSteamNetConnection, nUserData: int64) bool {
         return SteamAPI_ISteamNetworkingSockets_SetConnectionUserData(self.ptr, hPeer, nUserData);
     }
 
-    pub fn GetConnectionUserData(self: Self, hPeer: HSteamNetConnection) int64 {
+    pub fn GetConnectionUserData(self: *const Self, hPeer: HSteamNetConnection) int64 {
         return SteamAPI_ISteamNetworkingSockets_GetConnectionUserData(self.ptr, hPeer);
     }
 
-    pub fn SetConnectionName(self: Self, hPeer: HSteamNetConnection, pszName: [*c]const u8) void {
-        return SteamAPI_ISteamNetworkingSockets_SetConnectionName(self.ptr, hPeer, pszName);
+    pub fn SetConnectionName(self: *const Self, hPeer: HSteamNetConnection, pszName: [:0]const u8) void {
+        return SteamAPI_ISteamNetworkingSockets_SetConnectionName(self.ptr, hPeer, pszName.ptr);
     }
 
-    pub fn GetConnectionName(self: Self, hPeer: HSteamNetConnection, pszName: [*c]u8, nMaxLen: i32) bool {
-        return SteamAPI_ISteamNetworkingSockets_GetConnectionName(self.ptr, hPeer, pszName, nMaxLen);
+    pub fn GetConnectionName(self: *const Self, hPeer: HSteamNetConnection, pszName: [:0]u8, nMaxLen: i32) bool {
+        return SteamAPI_ISteamNetworkingSockets_GetConnectionName(self.ptr, hPeer, pszName.ptr, nMaxLen);
     }
 
-    pub fn SendMessageToConnection(self: Self, hConn: HSteamNetConnection, pData: ?*const anyopaque, cbData: uint32, nSendFlags: i32, pOutMessageNumber: [*c]int64) EResult {
-        return SteamAPI_ISteamNetworkingSockets_SendMessageToConnection(self.ptr, hConn, pData, cbData, nSendFlags, pOutMessageNumber);
+    pub fn SendMessageToConnection(self: *const Self, hConn: HSteamNetConnection, pData: []const u8, nSendFlags: i32, pOutMessageNumber: []int64) EResult {
+        return SteamAPI_ISteamNetworkingSockets_SendMessageToConnection(self.ptr, hConn, pData.ptr, @intCast(pData.len), nSendFlags, pOutMessageNumber.ptr);
     }
 
-    pub fn SendMessages(self: Self, nMessages: i32, pMessages: [*c]const [*c]SteamNetworkingMessage_t, pOutMessageNumberOrResult: [*c]int64) void {
-        return SteamAPI_ISteamNetworkingSockets_SendMessages(self.ptr, nMessages, pMessages, pOutMessageNumberOrResult);
+    pub fn SendMessages(self: *const Self, nMessages: i32, pMessages: [*c]const [*c]SteamNetworkingMessage_t, pOutMessageNumberOrResult: []int64) void {
+        return SteamAPI_ISteamNetworkingSockets_SendMessages(self.ptr, nMessages, pMessages, pOutMessageNumberOrResult.ptr);
     }
 
-    pub fn FlushMessagesOnConnection(self: Self, hConn: HSteamNetConnection) EResult {
+    pub fn FlushMessagesOnConnection(self: *const Self, hConn: HSteamNetConnection) EResult {
         return SteamAPI_ISteamNetworkingSockets_FlushMessagesOnConnection(self.ptr, hConn);
     }
 
-    pub fn ReceiveMessagesOnConnection(self: Self, hConn: HSteamNetConnection, ppOutMessages: [*c][*c]SteamNetworkingMessage_t, nMaxMessages: i32) i32 {
+    pub fn ReceiveMessagesOnConnection(self: *const Self, hConn: HSteamNetConnection, ppOutMessages: [*c][*c]SteamNetworkingMessage_t, nMaxMessages: i32) i32 {
         return SteamAPI_ISteamNetworkingSockets_ReceiveMessagesOnConnection(self.ptr, hConn, ppOutMessages, nMaxMessages);
     }
 
-    pub fn GetConnectionInfo(self: Self, hConn: HSteamNetConnection, pInfo: [*c]SteamNetConnectionInfo_t) bool {
-        return SteamAPI_ISteamNetworkingSockets_GetConnectionInfo(self.ptr, hConn, pInfo);
+    pub fn GetConnectionInfo(self: *const Self, hConn: HSteamNetConnection, pInfo: []SteamNetConnectionInfo_t) bool {
+        return SteamAPI_ISteamNetworkingSockets_GetConnectionInfo(self.ptr, hConn, pInfo.ptr);
     }
 
-    pub fn GetConnectionRealTimeStatus(self: Self, hConn: HSteamNetConnection, pStatus: [*c]SteamNetConnectionRealTimeStatus_t, nLanes: i32, pLanes: [*c]SteamNetConnectionRealTimeLaneStatus_t) EResult {
-        return SteamAPI_ISteamNetworkingSockets_GetConnectionRealTimeStatus(self.ptr, hConn, pStatus, nLanes, pLanes);
+    pub fn GetConnectionRealTimeStatus(self: *const Self, hConn: HSteamNetConnection, pStatus: []SteamNetConnectionRealTimeStatus_t, nLanes: i32, pLanes: []SteamNetConnectionRealTimeLaneStatus_t) EResult {
+        return SteamAPI_ISteamNetworkingSockets_GetConnectionRealTimeStatus(self.ptr, hConn, pStatus.ptr, nLanes, pLanes.ptr);
     }
 
-    pub fn GetDetailedConnectionStatus(self: Self, hConn: HSteamNetConnection, pszBuf: [*c]u8, cbBuf: i32) i32 {
-        return SteamAPI_ISteamNetworkingSockets_GetDetailedConnectionStatus(self.ptr, hConn, pszBuf, cbBuf);
+    pub fn GetDetailedConnectionStatus(self: *const Self, hConn: HSteamNetConnection, pszBuf: [:0]u8) i32 {
+        return SteamAPI_ISteamNetworkingSockets_GetDetailedConnectionStatus(self.ptr, hConn, pszBuf.ptr, @intCast(pszBuf.len));
     }
 
-    pub fn GetListenSocketAddress(self: Self, hSocket: HSteamListenSocket, address: [*c]SteamNetworkingIPAddr) bool {
+    pub fn GetListenSocketAddress(self: *const Self, hSocket: HSteamListenSocket, address: *SteamNetworkingIPAddr) bool {
         return SteamAPI_ISteamNetworkingSockets_GetListenSocketAddress(self.ptr, hSocket, address);
     }
 
-    pub fn CreateSocketPair(self: Self, pOutConnection1: [*c]HSteamNetConnection, pOutConnection2: [*c]HSteamNetConnection, bUseNetworkLoopback: bool, pIdentity1: [*c]const SteamNetworkingIdentity, pIdentity2: [*c]const SteamNetworkingIdentity) bool {
-        return SteamAPI_ISteamNetworkingSockets_CreateSocketPair(self.ptr, pOutConnection1, pOutConnection2, bUseNetworkLoopback, pIdentity1, pIdentity2);
+    pub fn CreateSocketPair(self: *const Self, pOutConnection1: []HSteamNetConnection, pOutConnection2: []HSteamNetConnection, bUseNetworkLoopback: bool, pIdentity1: []const SteamNetworkingIdentity, pIdentity2: []const SteamNetworkingIdentity) bool {
+        return SteamAPI_ISteamNetworkingSockets_CreateSocketPair(self.ptr, pOutConnection1.ptr, pOutConnection2.ptr, bUseNetworkLoopback, pIdentity1.ptr, pIdentity2.ptr);
     }
 
-    pub fn ConfigureConnectionLanes(self: Self, hConn: HSteamNetConnection, nNumLanes: i32, pLanePriorities: [*c]const i32, pLaneWeights: [*c]const uint16) EResult {
-        return SteamAPI_ISteamNetworkingSockets_ConfigureConnectionLanes(self.ptr, hConn, nNumLanes, pLanePriorities, pLaneWeights);
+    pub fn ConfigureConnectionLanes(self: *const Self, hConn: HSteamNetConnection, nNumLanes: i32, pLanePriorities: []const i32, pLaneWeights: []const uint16) EResult {
+        return SteamAPI_ISteamNetworkingSockets_ConfigureConnectionLanes(self.ptr, hConn, nNumLanes, pLanePriorities.ptr, pLaneWeights.ptr);
     }
 
-    pub fn GetIdentity(self: Self, pIdentity: [*c]SteamNetworkingIdentity) bool {
-        return SteamAPI_ISteamNetworkingSockets_GetIdentity(self.ptr, pIdentity);
+    pub fn GetIdentity(self: *const Self, pIdentity: []SteamNetworkingIdentity) bool {
+        return SteamAPI_ISteamNetworkingSockets_GetIdentity(self.ptr, pIdentity.ptr);
     }
 
-    pub fn InitAuthentication(self: Self) ESteamNetworkingAvailability {
+    pub fn InitAuthentication(self: *const Self) ESteamNetworkingAvailability {
         return SteamAPI_ISteamNetworkingSockets_InitAuthentication(self.ptr);
     }
 
-    pub fn GetAuthenticationStatus(self: Self, pDetails: [*c]SteamNetAuthenticationStatus_t) ESteamNetworkingAvailability {
-        return SteamAPI_ISteamNetworkingSockets_GetAuthenticationStatus(self.ptr, pDetails);
+    pub fn GetAuthenticationStatus(self: *const Self, pDetails: []SteamNetAuthenticationStatus_t) ESteamNetworkingAvailability {
+        return SteamAPI_ISteamNetworkingSockets_GetAuthenticationStatus(self.ptr, pDetails.ptr);
     }
 
-    pub fn CreatePollGroup(self: Self) HSteamNetPollGroup {
+    pub fn CreatePollGroup(self: *const Self) HSteamNetPollGroup {
         return SteamAPI_ISteamNetworkingSockets_CreatePollGroup(self.ptr);
     }
 
-    pub fn DestroyPollGroup(self: Self, hPollGroup: HSteamNetPollGroup) bool {
+    pub fn DestroyPollGroup(self: *const Self, hPollGroup: HSteamNetPollGroup) bool {
         return SteamAPI_ISteamNetworkingSockets_DestroyPollGroup(self.ptr, hPollGroup);
     }
 
-    pub fn SetConnectionPollGroup(self: Self, hConn: HSteamNetConnection, hPollGroup: HSteamNetPollGroup) bool {
+    pub fn SetConnectionPollGroup(self: *const Self, hConn: HSteamNetConnection, hPollGroup: HSteamNetPollGroup) bool {
         return SteamAPI_ISteamNetworkingSockets_SetConnectionPollGroup(self.ptr, hConn, hPollGroup);
     }
 
-    pub fn ReceiveMessagesOnPollGroup(self: Self, hPollGroup: HSteamNetPollGroup, ppOutMessages: [*c][*c]SteamNetworkingMessage_t, nMaxMessages: i32) i32 {
+    pub fn ReceiveMessagesOnPollGroup(self: *const Self, hPollGroup: HSteamNetPollGroup, ppOutMessages: [*c][*c]SteamNetworkingMessage_t, nMaxMessages: i32) i32 {
         return SteamAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup(self.ptr, hPollGroup, ppOutMessages, nMaxMessages);
     }
 
-    pub fn ReceivedRelayAuthTicket(self: Self, pvTicket: ?*const anyopaque, cbTicket: i32, pOutParsedTicket: [*c]SteamDatagramRelayAuthTicket) bool {
-        return SteamAPI_ISteamNetworkingSockets_ReceivedRelayAuthTicket(self.ptr, pvTicket, cbTicket, pOutParsedTicket);
+    pub fn ReceivedRelayAuthTicket(self: *const Self, pvTicket: []const u8, pOutParsedTicket: []SteamDatagramRelayAuthTicket) bool {
+        return SteamAPI_ISteamNetworkingSockets_ReceivedRelayAuthTicket(self.ptr, pvTicket.ptr, @intCast(pvTicket.len), pOutParsedTicket.ptr);
     }
 
-    pub fn FindRelayAuthTicketForServer(self: Self, identityGameServer: SteamNetworkingIdentity, nRemoteVirtualPort: i32, pOutParsedTicket: [*c]SteamDatagramRelayAuthTicket) i32 {
-        return SteamAPI_ISteamNetworkingSockets_FindRelayAuthTicketForServer(self.ptr, identityGameServer, nRemoteVirtualPort, pOutParsedTicket);
+    pub fn FindRelayAuthTicketForServer(self: *const Self, identityGameServer: *const SteamNetworkingIdentity, nRemoteVirtualPort: i32, pOutParsedTicket: []SteamDatagramRelayAuthTicket) i32 {
+        return SteamAPI_ISteamNetworkingSockets_FindRelayAuthTicketForServer(self.ptr, identityGameServer, nRemoteVirtualPort, pOutParsedTicket.ptr);
     }
 
-    pub fn ConnectToHostedDedicatedServer(self: Self, identityTarget: SteamNetworkingIdentity, nRemoteVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) HSteamNetConnection {
-        return SteamAPI_ISteamNetworkingSockets_ConnectToHostedDedicatedServer(self.ptr, identityTarget, nRemoteVirtualPort, nOptions, pOptions);
+    pub fn ConnectToHostedDedicatedServer(self: *const Self, identityTarget: *const SteamNetworkingIdentity, nRemoteVirtualPort: i32, nOptions: i32, pOptions: []const SteamNetworkingConfigValue_t) HSteamNetConnection {
+        return SteamAPI_ISteamNetworkingSockets_ConnectToHostedDedicatedServer(self.ptr, identityTarget, nRemoteVirtualPort, nOptions, pOptions.ptr);
     }
 
-    pub fn GetHostedDedicatedServerPort(self: Self) uint16 {
+    pub fn GetHostedDedicatedServerPort(self: *const Self) uint16 {
         return SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerPort(self.ptr);
     }
 
-    pub fn GetHostedDedicatedServerPOPID(self: Self) SteamNetworkingPOPID {
+    pub fn GetHostedDedicatedServerPOPID(self: *const Self) SteamNetworkingPOPID {
         return SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerPOPID(self.ptr);
     }
 
-    pub fn GetHostedDedicatedServerAddress(self: Self, pRouting: [*c]SteamDatagramHostedAddress) EResult {
-        return SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerAddress(self.ptr, pRouting);
+    pub fn GetHostedDedicatedServerAddress(self: *const Self, pRouting: []SteamDatagramHostedAddress) EResult {
+        return SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerAddress(self.ptr, pRouting.ptr);
     }
 
-    pub fn CreateHostedDedicatedServerListenSocket(self: Self, nLocalVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) HSteamListenSocket {
-        return SteamAPI_ISteamNetworkingSockets_CreateHostedDedicatedServerListenSocket(self.ptr, nLocalVirtualPort, nOptions, pOptions);
+    pub fn CreateHostedDedicatedServerListenSocket(self: *const Self, nLocalVirtualPort: i32, nOptions: i32, pOptions: []const SteamNetworkingConfigValue_t) HSteamListenSocket {
+        return SteamAPI_ISteamNetworkingSockets_CreateHostedDedicatedServerListenSocket(self.ptr, nLocalVirtualPort, nOptions, pOptions.ptr);
     }
 
-    pub fn GetGameCoordinatorServerLogin(self: Self, pLoginInfo: [*c]SteamDatagramGameCoordinatorServerLogin, pcbSignedBlob: [*c]i32, pBlob: ?*anyopaque) EResult {
-        return SteamAPI_ISteamNetworkingSockets_GetGameCoordinatorServerLogin(self.ptr, pLoginInfo, pcbSignedBlob, pBlob);
+    pub fn GetGameCoordinatorServerLogin(self: *const Self, pLoginInfo: []SteamDatagramGameCoordinatorServerLogin, pcbSignedBlob: *i32, pBlob: []u8) EResult {
+        return SteamAPI_ISteamNetworkingSockets_GetGameCoordinatorServerLogin(self.ptr, pLoginInfo.ptr, pcbSignedBlob, pBlob.ptr);
     }
 
-    pub fn ConnectP2PCustomSignaling(self: Self, pSignaling: [*c]ISteamNetworkingConnectionSignaling, pPeerIdentity: [*c]const SteamNetworkingIdentity, nRemoteVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) HSteamNetConnection {
-        return SteamAPI_ISteamNetworkingSockets_ConnectP2PCustomSignaling(self.ptr, pSignaling, pPeerIdentity, nRemoteVirtualPort, nOptions, pOptions);
+    pub fn ConnectP2PCustomSignaling(self: *const Self, pSignaling: []ISteamNetworkingConnectionSignaling, pPeerIdentity: []const SteamNetworkingIdentity, nRemoteVirtualPort: i32, nOptions: i32, pOptions: []const SteamNetworkingConfigValue_t) HSteamNetConnection {
+        return SteamAPI_ISteamNetworkingSockets_ConnectP2PCustomSignaling(self.ptr, pSignaling.ptr, pPeerIdentity.ptr, nRemoteVirtualPort, nOptions, pOptions.ptr);
     }
 
-    pub fn ReceivedP2PCustomSignal(self: Self, pMsg: ?*const anyopaque, cbMsg: i32, pContext: [*c]ISteamNetworkingSignalingRecvContext) bool {
-        return SteamAPI_ISteamNetworkingSockets_ReceivedP2PCustomSignal(self.ptr, pMsg, cbMsg, pContext);
+    pub fn ReceivedP2PCustomSignal(self: *const Self, pMsg: []const u8, pContext: []ISteamNetworkingSignalingRecvContext) bool {
+        return SteamAPI_ISteamNetworkingSockets_ReceivedP2PCustomSignal(self.ptr, pMsg.ptr, @intCast(pMsg.len), pContext.ptr);
     }
 
-    pub fn GetCertificateRequest(self: Self, pcbBlob: [*c]i32, pBlob: ?*anyopaque, errMsg: [*c]u8) bool {
-        return SteamAPI_ISteamNetworkingSockets_GetCertificateRequest(self.ptr, pcbBlob, pBlob, errMsg);
+    pub fn GetCertificateRequest(self: *const Self, pcbBlob: *i32, pBlob: []u8, errMsg: *SteamNetworkingErrMsg) bool {
+        return SteamAPI_ISteamNetworkingSockets_GetCertificateRequest(self.ptr, pcbBlob, pBlob.ptr, errMsg);
     }
 
-    pub fn SetCertificate(self: Self, pCertificate: ?*const anyopaque, cbCertificate: i32, errMsg: [*c]u8) bool {
-        return SteamAPI_ISteamNetworkingSockets_SetCertificate(self.ptr, pCertificate, cbCertificate, errMsg);
+    pub fn SetCertificate(self: *const Self, pCertificate: []const u8, errMsg: *SteamNetworkingErrMsg) bool {
+        return SteamAPI_ISteamNetworkingSockets_SetCertificate(self.ptr, pCertificate.ptr, @intCast(pCertificate.len), errMsg);
     }
 
-    pub fn ResetIdentity(self: Self, pIdentity: [*c]const SteamNetworkingIdentity) void {
-        return SteamAPI_ISteamNetworkingSockets_ResetIdentity(self.ptr, pIdentity);
+    pub fn ResetIdentity(self: *const Self, pIdentity: []const SteamNetworkingIdentity) void {
+        return SteamAPI_ISteamNetworkingSockets_ResetIdentity(self.ptr, pIdentity.ptr);
     }
 
-    pub fn RunCallbacks(self: Self) void {
+    pub fn RunCallbacks(self: *const Self) void {
         return SteamAPI_ISteamNetworkingSockets_RunCallbacks(self.ptr);
     }
 
-    pub fn BeginAsyncRequestFakeIP(self: Self, nNumPorts: i32) bool {
+    pub fn BeginAsyncRequestFakeIP(self: *const Self, nNumPorts: i32) bool {
         return SteamAPI_ISteamNetworkingSockets_BeginAsyncRequestFakeIP(self.ptr, nNumPorts);
     }
 
-    pub fn GetFakeIP(self: Self, idxFirstPort: i32, pInfo: [*c]SteamNetworkingFakeIPResult_t) void {
-        return SteamAPI_ISteamNetworkingSockets_GetFakeIP(self.ptr, idxFirstPort, pInfo);
+    pub fn GetFakeIP(self: *const Self, idxFirstPort: i32, pInfo: []SteamNetworkingFakeIPResult_t) void {
+        return SteamAPI_ISteamNetworkingSockets_GetFakeIP(self.ptr, idxFirstPort, pInfo.ptr);
     }
 
-    pub fn CreateListenSocketP2PFakeIP(self: Self, idxFakePort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) HSteamListenSocket {
-        return SteamAPI_ISteamNetworkingSockets_CreateListenSocketP2PFakeIP(self.ptr, idxFakePort, nOptions, pOptions);
+    pub fn CreateListenSocketP2PFakeIP(self: *const Self, idxFakePort: i32, nOptions: i32, pOptions: []const SteamNetworkingConfigValue_t) HSteamListenSocket {
+        return SteamAPI_ISteamNetworkingSockets_CreateListenSocketP2PFakeIP(self.ptr, idxFakePort, nOptions, pOptions.ptr);
     }
 
-    pub fn GetRemoteFakeIPForConnection(self: Self, hConn: HSteamNetConnection, pOutAddr: [*c]SteamNetworkingIPAddr) EResult {
-        return SteamAPI_ISteamNetworkingSockets_GetRemoteFakeIPForConnection(self.ptr, hConn, pOutAddr);
+    pub fn GetRemoteFakeIPForConnection(self: *const Self, hConn: HSteamNetConnection, pOutAddr: []SteamNetworkingIPAddr) EResult {
+        return SteamAPI_ISteamNetworkingSockets_GetRemoteFakeIPForConnection(self.ptr, hConn, pOutAddr.ptr);
     }
 
-    pub fn CreateFakeUDPPort(self: Self, idxFakeServerPort: i32) [*c]ISteamNetworkingFakeUDPPort {
+    pub fn CreateFakeUDPPort(self: *const Self, idxFakeServerPort: i32) [*c]ISteamNetworkingFakeUDPPort {
         return SteamAPI_ISteamNetworkingSockets_CreateFakeUDPPort(self.ptr, idxFakeServerPort);
     }
 };
 
 // static functions
-extern fn SteamAPI_ISteamNetworkingSockets_CreateListenSocketIP(self: ?*anyopaque, localAddress: SteamNetworkingIPAddr, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.C) HSteamListenSocket;
-extern fn SteamAPI_ISteamNetworkingSockets_ConnectByIPAddress(self: ?*anyopaque, address: SteamNetworkingIPAddr, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.C) HSteamNetConnection;
+extern fn SteamAPI_ISteamNetworkingSockets_CreateListenSocketIP(self: ?*anyopaque, localAddress: [*c]const SteamNetworkingIPAddr, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.C) HSteamListenSocket;
+extern fn SteamAPI_ISteamNetworkingSockets_ConnectByIPAddress(self: ?*anyopaque, address: [*c]const SteamNetworkingIPAddr, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.C) HSteamNetConnection;
 extern fn SteamAPI_ISteamNetworkingSockets_CreateListenSocketP2P(self: ?*anyopaque, nLocalVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.C) HSteamListenSocket;
-extern fn SteamAPI_ISteamNetworkingSockets_ConnectP2P(self: ?*anyopaque, identityRemote: SteamNetworkingIdentity, nRemoteVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.C) HSteamNetConnection;
+extern fn SteamAPI_ISteamNetworkingSockets_ConnectP2P(self: ?*anyopaque, identityRemote: [*c]const SteamNetworkingIdentity, nRemoteVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.C) HSteamNetConnection;
 extern fn SteamAPI_ISteamNetworkingSockets_AcceptConnection(self: ?*anyopaque, hConn: HSteamNetConnection) callconv(.C) EResult;
 extern fn SteamAPI_ISteamNetworkingSockets_CloseConnection(self: ?*anyopaque, hPeer: HSteamNetConnection, nReason: i32, pszDebug: [*c]const u8, bEnableLinger: bool) callconv(.C) bool;
 extern fn SteamAPI_ISteamNetworkingSockets_CloseListenSocket(self: ?*anyopaque, hSocket: HSteamListenSocket) callconv(.C) bool;
@@ -10413,8 +10413,8 @@ extern fn SteamAPI_ISteamNetworkingSockets_DestroyPollGroup(self: ?*anyopaque, h
 extern fn SteamAPI_ISteamNetworkingSockets_SetConnectionPollGroup(self: ?*anyopaque, hConn: HSteamNetConnection, hPollGroup: HSteamNetPollGroup) callconv(.C) bool;
 extern fn SteamAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup(self: ?*anyopaque, hPollGroup: HSteamNetPollGroup, ppOutMessages: [*c][*c]SteamNetworkingMessage_t, nMaxMessages: i32) callconv(.C) i32;
 extern fn SteamAPI_ISteamNetworkingSockets_ReceivedRelayAuthTicket(self: ?*anyopaque, pvTicket: ?*const anyopaque, cbTicket: i32, pOutParsedTicket: [*c]SteamDatagramRelayAuthTicket) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingSockets_FindRelayAuthTicketForServer(self: ?*anyopaque, identityGameServer: SteamNetworkingIdentity, nRemoteVirtualPort: i32, pOutParsedTicket: [*c]SteamDatagramRelayAuthTicket) callconv(.C) i32;
-extern fn SteamAPI_ISteamNetworkingSockets_ConnectToHostedDedicatedServer(self: ?*anyopaque, identityTarget: SteamNetworkingIdentity, nRemoteVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.C) HSteamNetConnection;
+extern fn SteamAPI_ISteamNetworkingSockets_FindRelayAuthTicketForServer(self: ?*anyopaque, identityGameServer: [*c]const SteamNetworkingIdentity, nRemoteVirtualPort: i32, pOutParsedTicket: [*c]SteamDatagramRelayAuthTicket) callconv(.C) i32;
+extern fn SteamAPI_ISteamNetworkingSockets_ConnectToHostedDedicatedServer(self: ?*anyopaque, identityTarget: [*c]const SteamNetworkingIdentity, nRemoteVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.C) HSteamNetConnection;
 extern fn SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerPort(self: ?*anyopaque) callconv(.C) uint16;
 extern fn SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerPOPID(self: ?*anyopaque) callconv(.C) SteamNetworkingPOPID;
 extern fn SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerAddress(self: ?*anyopaque, pRouting: [*c]SteamDatagramHostedAddress) callconv(.C) EResult;
@@ -10422,8 +10422,8 @@ extern fn SteamAPI_ISteamNetworkingSockets_CreateHostedDedicatedServerListenSock
 extern fn SteamAPI_ISteamNetworkingSockets_GetGameCoordinatorServerLogin(self: ?*anyopaque, pLoginInfo: [*c]SteamDatagramGameCoordinatorServerLogin, pcbSignedBlob: [*c]i32, pBlob: ?*anyopaque) callconv(.C) EResult;
 extern fn SteamAPI_ISteamNetworkingSockets_ConnectP2PCustomSignaling(self: ?*anyopaque, pSignaling: [*c]ISteamNetworkingConnectionSignaling, pPeerIdentity: [*c]const SteamNetworkingIdentity, nRemoteVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.C) HSteamNetConnection;
 extern fn SteamAPI_ISteamNetworkingSockets_ReceivedP2PCustomSignal(self: ?*anyopaque, pMsg: ?*const anyopaque, cbMsg: i32, pContext: [*c]ISteamNetworkingSignalingRecvContext) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingSockets_GetCertificateRequest(self: ?*anyopaque, pcbBlob: [*c]i32, pBlob: ?*anyopaque, errMsg: [*c]u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingSockets_SetCertificate(self: ?*anyopaque, pCertificate: ?*const anyopaque, cbCertificate: i32, errMsg: [*c]u8) callconv(.C) bool;
+extern fn SteamAPI_ISteamNetworkingSockets_GetCertificateRequest(self: ?*anyopaque, pcbBlob: [*c]i32, pBlob: ?*anyopaque, errMsg: [*c]SteamNetworkingErrMsg) callconv(.C) bool;
+extern fn SteamAPI_ISteamNetworkingSockets_SetCertificate(self: ?*anyopaque, pCertificate: ?*const anyopaque, cbCertificate: i32, errMsg: [*c]SteamNetworkingErrMsg) callconv(.C) bool;
 extern fn SteamAPI_ISteamNetworkingSockets_ResetIdentity(self: ?*anyopaque, pIdentity: [*c]const SteamNetworkingIdentity) callconv(.C) void;
 extern fn SteamAPI_ISteamNetworkingSockets_RunCallbacks(self: ?*anyopaque) callconv(.C) void;
 extern fn SteamAPI_ISteamNetworkingSockets_BeginAsyncRequestFakeIP(self: ?*anyopaque, nNumPorts: i32) callconv(.C) bool;
@@ -10441,168 +10441,168 @@ pub const ISteamNetworkingUtils = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn AllocateMessage(self: Self, cbAllocateBuffer: i32) [*c]SteamNetworkingMessage_t {
+    pub fn AllocateMessage(self: *const Self, cbAllocateBuffer: i32) [*c]SteamNetworkingMessage_t {
         return SteamAPI_ISteamNetworkingUtils_AllocateMessage(self.ptr, cbAllocateBuffer);
     }
 
-    pub fn InitRelayNetworkAccess(self: Self) void {
+    pub fn InitRelayNetworkAccess(self: *const Self) void {
         return SteamAPI_ISteamNetworkingUtils_InitRelayNetworkAccess(self.ptr);
     }
 
-    pub fn GetRelayNetworkStatus(self: Self, pDetails: [*c]SteamRelayNetworkStatus_t) ESteamNetworkingAvailability {
-        return SteamAPI_ISteamNetworkingUtils_GetRelayNetworkStatus(self.ptr, pDetails);
+    pub fn GetRelayNetworkStatus(self: *const Self, pDetails: []SteamRelayNetworkStatus_t) ESteamNetworkingAvailability {
+        return SteamAPI_ISteamNetworkingUtils_GetRelayNetworkStatus(self.ptr, pDetails.ptr);
     }
 
-    pub fn GetLocalPingLocation(self: Self, result: SteamNetworkPingLocation_t) f32 {
+    pub fn GetLocalPingLocation(self: *const Self, result: *SteamNetworkPingLocation_t) f32 {
         return SteamAPI_ISteamNetworkingUtils_GetLocalPingLocation(self.ptr, result);
     }
 
-    pub fn EstimatePingTimeBetweenTwoLocations(self: Self, location1: SteamNetworkPingLocation_t, location2: SteamNetworkPingLocation_t) i32 {
+    pub fn EstimatePingTimeBetweenTwoLocations(self: *const Self, location1: *const SteamNetworkPingLocation_t, location2: *const SteamNetworkPingLocation_t) i32 {
         return SteamAPI_ISteamNetworkingUtils_EstimatePingTimeBetweenTwoLocations(self.ptr, location1, location2);
     }
 
-    pub fn EstimatePingTimeFromLocalHost(self: Self, remoteLocation: SteamNetworkPingLocation_t) i32 {
+    pub fn EstimatePingTimeFromLocalHost(self: *const Self, remoteLocation: *const SteamNetworkPingLocation_t) i32 {
         return SteamAPI_ISteamNetworkingUtils_EstimatePingTimeFromLocalHost(self.ptr, remoteLocation);
     }
 
-    pub fn ConvertPingLocationToString(self: Self, location: SteamNetworkPingLocation_t, pszBuf: [*c]u8, cchBufSize: i32) void {
-        return SteamAPI_ISteamNetworkingUtils_ConvertPingLocationToString(self.ptr, location, pszBuf, cchBufSize);
+    pub fn ConvertPingLocationToString(self: *const Self, location: *const SteamNetworkPingLocation_t, pszBuf: [:0]u8) void {
+        return SteamAPI_ISteamNetworkingUtils_ConvertPingLocationToString(self.ptr, location, pszBuf.ptr, @intCast(pszBuf.len));
     }
 
-    pub fn ParsePingLocationString(self: Self, pszString: [*c]const u8, result: SteamNetworkPingLocation_t) bool {
-        return SteamAPI_ISteamNetworkingUtils_ParsePingLocationString(self.ptr, pszString, result);
+    pub fn ParsePingLocationString(self: *const Self, pszString: [:0]const u8, result: *SteamNetworkPingLocation_t) bool {
+        return SteamAPI_ISteamNetworkingUtils_ParsePingLocationString(self.ptr, pszString.ptr, result);
     }
 
-    pub fn CheckPingDataUpToDate(self: Self, flMaxAgeSeconds: f32) bool {
+    pub fn CheckPingDataUpToDate(self: *const Self, flMaxAgeSeconds: f32) bool {
         return SteamAPI_ISteamNetworkingUtils_CheckPingDataUpToDate(self.ptr, flMaxAgeSeconds);
     }
 
-    pub fn GetPingToDataCenter(self: Self, popID: SteamNetworkingPOPID, pViaRelayPoP: [*c]SteamNetworkingPOPID) i32 {
-        return SteamAPI_ISteamNetworkingUtils_GetPingToDataCenter(self.ptr, popID, pViaRelayPoP);
+    pub fn GetPingToDataCenter(self: *const Self, popID: SteamNetworkingPOPID, pViaRelayPoP: []SteamNetworkingPOPID) i32 {
+        return SteamAPI_ISteamNetworkingUtils_GetPingToDataCenter(self.ptr, popID, pViaRelayPoP.ptr);
     }
 
-    pub fn GetDirectPingToPOP(self: Self, popID: SteamNetworkingPOPID) i32 {
+    pub fn GetDirectPingToPOP(self: *const Self, popID: SteamNetworkingPOPID) i32 {
         return SteamAPI_ISteamNetworkingUtils_GetDirectPingToPOP(self.ptr, popID);
     }
 
-    pub fn GetPOPCount(self: Self) i32 {
+    pub fn GetPOPCount(self: *const Self) i32 {
         return SteamAPI_ISteamNetworkingUtils_GetPOPCount(self.ptr);
     }
 
-    pub fn GetPOPList(self: Self, list: [*c]SteamNetworkingPOPID, nListSz: i32) i32 {
+    pub fn GetPOPList(self: *const Self, list: *SteamNetworkingPOPID, nListSz: i32) i32 {
         return SteamAPI_ISteamNetworkingUtils_GetPOPList(self.ptr, list, nListSz);
     }
 
-    pub fn GetLocalTimestamp(self: Self) SteamNetworkingMicroseconds {
+    pub fn GetLocalTimestamp(self: *const Self) SteamNetworkingMicroseconds {
         return SteamAPI_ISteamNetworkingUtils_GetLocalTimestamp(self.ptr);
     }
 
-    pub fn SetDebugOutputFunction(self: Self, eDetailLevel: ESteamNetworkingSocketsDebugOutputType, pfnFunc: FSteamNetworkingSocketsDebugOutput) void {
+    pub fn SetDebugOutputFunction(self: *const Self, eDetailLevel: ESteamNetworkingSocketsDebugOutputType, pfnFunc: FSteamNetworkingSocketsDebugOutput) void {
         return SteamAPI_ISteamNetworkingUtils_SetDebugOutputFunction(self.ptr, eDetailLevel, pfnFunc);
     }
 
-    pub fn IsFakeIPv4(self: Self, nIPv4: uint32) bool {
+    pub fn IsFakeIPv4(self: *const Self, nIPv4: uint32) bool {
         return SteamAPI_ISteamNetworkingUtils_IsFakeIPv4(self.ptr, nIPv4);
     }
 
-    pub fn GetIPv4FakeIPType(self: Self, nIPv4: uint32) ESteamNetworkingFakeIPType {
+    pub fn GetIPv4FakeIPType(self: *const Self, nIPv4: uint32) ESteamNetworkingFakeIPType {
         return SteamAPI_ISteamNetworkingUtils_GetIPv4FakeIPType(self.ptr, nIPv4);
     }
 
-    pub fn GetRealIdentityForFakeIP(self: Self, fakeIP: SteamNetworkingIPAddr, pOutRealIdentity: [*c]SteamNetworkingIdentity) EResult {
-        return SteamAPI_ISteamNetworkingUtils_GetRealIdentityForFakeIP(self.ptr, fakeIP, pOutRealIdentity);
+    pub fn GetRealIdentityForFakeIP(self: *const Self, fakeIP: *const SteamNetworkingIPAddr, pOutRealIdentity: []SteamNetworkingIdentity) EResult {
+        return SteamAPI_ISteamNetworkingUtils_GetRealIdentityForFakeIP(self.ptr, fakeIP, pOutRealIdentity.ptr);
     }
 
-    pub fn SetGlobalConfigValueInt32(self: Self, eValue: ESteamNetworkingConfigValue, val: int32) bool {
+    pub fn SetGlobalConfigValueInt32(self: *const Self, eValue: ESteamNetworkingConfigValue, val: int32) bool {
         return SteamAPI_ISteamNetworkingUtils_SetGlobalConfigValueInt32(self.ptr, eValue, val);
     }
 
-    pub fn SetGlobalConfigValueFloat(self: Self, eValue: ESteamNetworkingConfigValue, val: f32) bool {
+    pub fn SetGlobalConfigValueFloat(self: *const Self, eValue: ESteamNetworkingConfigValue, val: f32) bool {
         return SteamAPI_ISteamNetworkingUtils_SetGlobalConfigValueFloat(self.ptr, eValue, val);
     }
 
-    pub fn SetGlobalConfigValueString(self: Self, eValue: ESteamNetworkingConfigValue, val: [*c]const u8) bool {
+    pub fn SetGlobalConfigValueString(self: *const Self, eValue: ESteamNetworkingConfigValue, val: *const u8) bool {
         return SteamAPI_ISteamNetworkingUtils_SetGlobalConfigValueString(self.ptr, eValue, val);
     }
 
-    pub fn SetGlobalConfigValuePtr(self: Self, eValue: ESteamNetworkingConfigValue, val: ?*anyopaque) bool {
+    pub fn SetGlobalConfigValuePtr(self: *const Self, eValue: ESteamNetworkingConfigValue, val: *u8) bool {
         return SteamAPI_ISteamNetworkingUtils_SetGlobalConfigValuePtr(self.ptr, eValue, val);
     }
 
-    pub fn SetConnectionConfigValueInt32(self: Self, hConn: HSteamNetConnection, eValue: ESteamNetworkingConfigValue, val: int32) bool {
+    pub fn SetConnectionConfigValueInt32(self: *const Self, hConn: HSteamNetConnection, eValue: ESteamNetworkingConfigValue, val: int32) bool {
         return SteamAPI_ISteamNetworkingUtils_SetConnectionConfigValueInt32(self.ptr, hConn, eValue, val);
     }
 
-    pub fn SetConnectionConfigValueFloat(self: Self, hConn: HSteamNetConnection, eValue: ESteamNetworkingConfigValue, val: f32) bool {
+    pub fn SetConnectionConfigValueFloat(self: *const Self, hConn: HSteamNetConnection, eValue: ESteamNetworkingConfigValue, val: f32) bool {
         return SteamAPI_ISteamNetworkingUtils_SetConnectionConfigValueFloat(self.ptr, hConn, eValue, val);
     }
 
-    pub fn SetConnectionConfigValueString(self: Self, hConn: HSteamNetConnection, eValue: ESteamNetworkingConfigValue, val: [*c]const u8) bool {
+    pub fn SetConnectionConfigValueString(self: *const Self, hConn: HSteamNetConnection, eValue: ESteamNetworkingConfigValue, val: *const u8) bool {
         return SteamAPI_ISteamNetworkingUtils_SetConnectionConfigValueString(self.ptr, hConn, eValue, val);
     }
 
-    pub fn SetGlobalCallback_SteamNetConnectionStatusChanged(self: Self, fnCallback: FnSteamNetConnectionStatusChanged) bool {
+    pub fn SetGlobalCallback_SteamNetConnectionStatusChanged(self: *const Self, fnCallback: FnSteamNetConnectionStatusChanged) bool {
         return SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_SteamNetConnectionStatusChanged(self.ptr, fnCallback);
     }
 
-    pub fn SetGlobalCallback_SteamNetAuthenticationStatusChanged(self: Self, fnCallback: FnSteamNetAuthenticationStatusChanged) bool {
+    pub fn SetGlobalCallback_SteamNetAuthenticationStatusChanged(self: *const Self, fnCallback: FnSteamNetAuthenticationStatusChanged) bool {
         return SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_SteamNetAuthenticationStatusChanged(self.ptr, fnCallback);
     }
 
-    pub fn SetGlobalCallback_SteamRelayNetworkStatusChanged(self: Self, fnCallback: FnSteamRelayNetworkStatusChanged) bool {
+    pub fn SetGlobalCallback_SteamRelayNetworkStatusChanged(self: *const Self, fnCallback: FnSteamRelayNetworkStatusChanged) bool {
         return SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_SteamRelayNetworkStatusChanged(self.ptr, fnCallback);
     }
 
-    pub fn SetGlobalCallback_FakeIPResult(self: Self, fnCallback: FnSteamNetworkingFakeIPResult) bool {
+    pub fn SetGlobalCallback_FakeIPResult(self: *const Self, fnCallback: FnSteamNetworkingFakeIPResult) bool {
         return SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_FakeIPResult(self.ptr, fnCallback);
     }
 
-    pub fn SetGlobalCallback_MessagesSessionRequest(self: Self, fnCallback: FnSteamNetworkingMessagesSessionRequest) bool {
+    pub fn SetGlobalCallback_MessagesSessionRequest(self: *const Self, fnCallback: FnSteamNetworkingMessagesSessionRequest) bool {
         return SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_MessagesSessionRequest(self.ptr, fnCallback);
     }
 
-    pub fn SetGlobalCallback_MessagesSessionFailed(self: Self, fnCallback: FnSteamNetworkingMessagesSessionFailed) bool {
+    pub fn SetGlobalCallback_MessagesSessionFailed(self: *const Self, fnCallback: FnSteamNetworkingMessagesSessionFailed) bool {
         return SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_MessagesSessionFailed(self.ptr, fnCallback);
     }
 
-    pub fn SetConfigValue(self: Self, eValue: ESteamNetworkingConfigValue, eScopeType: ESteamNetworkingConfigScope, scopeObj: intptr_t, eDataType: ESteamNetworkingConfigDataType, pArg: ?*const anyopaque) bool {
-        return SteamAPI_ISteamNetworkingUtils_SetConfigValue(self.ptr, eValue, eScopeType, scopeObj, eDataType, pArg);
+    pub fn SetConfigValue(self: *const Self, eValue: ESteamNetworkingConfigValue, eScopeType: ESteamNetworkingConfigScope, scopeObj: intptr_t, eDataType: ESteamNetworkingConfigDataType, pArg: []const u8) bool {
+        return SteamAPI_ISteamNetworkingUtils_SetConfigValue(self.ptr, eValue, eScopeType, scopeObj, eDataType, pArg.ptr);
     }
 
-    pub fn SetConfigValueStruct(self: Self, opt: SteamNetworkingConfigValue_t, eScopeType: ESteamNetworkingConfigScope, scopeObj: intptr_t) bool {
+    pub fn SetConfigValueStruct(self: *const Self, opt: *const SteamNetworkingConfigValue_t, eScopeType: ESteamNetworkingConfigScope, scopeObj: intptr_t) bool {
         return SteamAPI_ISteamNetworkingUtils_SetConfigValueStruct(self.ptr, opt, eScopeType, scopeObj);
     }
 
-    pub fn GetConfigValue(self: Self, eValue: ESteamNetworkingConfigValue, eScopeType: ESteamNetworkingConfigScope, scopeObj: intptr_t, pOutDataType: [*c]ESteamNetworkingConfigDataType, pResult: ?*anyopaque, cbResult: [*c]size_t) ESteamNetworkingGetConfigValueResult {
-        return SteamAPI_ISteamNetworkingUtils_GetConfigValue(self.ptr, eValue, eScopeType, scopeObj, pOutDataType, pResult, cbResult);
+    pub fn GetConfigValue(self: *const Self, eValue: ESteamNetworkingConfigValue, eScopeType: ESteamNetworkingConfigScope, scopeObj: intptr_t, pOutDataType: []ESteamNetworkingConfigDataType, pResult: []u8, cbResult: *size_t) ESteamNetworkingGetConfigValueResult {
+        return SteamAPI_ISteamNetworkingUtils_GetConfigValue(self.ptr, eValue, eScopeType, scopeObj, pOutDataType.ptr, pResult.ptr, cbResult);
     }
 
-    pub fn GetConfigValueInfo(self: Self, eValue: ESteamNetworkingConfigValue, pOutDataType: [*c]ESteamNetworkingConfigDataType, pOutScope: [*c]ESteamNetworkingConfigScope) [*c]const u8 {
-        return SteamAPI_ISteamNetworkingUtils_GetConfigValueInfo(self.ptr, eValue, pOutDataType, pOutScope);
+    pub fn GetConfigValueInfo(self: *const Self, eValue: ESteamNetworkingConfigValue, pOutDataType: []ESteamNetworkingConfigDataType, pOutScope: []ESteamNetworkingConfigScope) [*c]const u8 {
+        return SteamAPI_ISteamNetworkingUtils_GetConfigValueInfo(self.ptr, eValue, pOutDataType.ptr, pOutScope.ptr);
     }
 
-    pub fn IterateGenericEditableConfigValues(self: Self, eCurrent: ESteamNetworkingConfigValue, bEnumerateDevVars: bool) ESteamNetworkingConfigValue {
+    pub fn IterateGenericEditableConfigValues(self: *const Self, eCurrent: ESteamNetworkingConfigValue, bEnumerateDevVars: bool) ESteamNetworkingConfigValue {
         return SteamAPI_ISteamNetworkingUtils_IterateGenericEditableConfigValues(self.ptr, eCurrent, bEnumerateDevVars);
     }
 
-    pub fn SteamNetworkingIPAddr_ToString(self: Self, addr: SteamNetworkingIPAddr, buf: [*c]u8, cbBuf: uint32, bWithPort: bool) void {
+    pub fn SteamNetworkingIPAddr_ToString(self: *const Self, addr: *const SteamNetworkingIPAddr, buf: *u8, cbBuf: uint32, bWithPort: bool) void {
         return SteamAPI_ISteamNetworkingUtils_SteamNetworkingIPAddr_ToString(self.ptr, addr, buf, cbBuf, bWithPort);
     }
 
-    pub fn SteamNetworkingIPAddr_ParseString(self: Self, pAddr: [*c]SteamNetworkingIPAddr, pszStr: [*c]const u8) bool {
-        return SteamAPI_ISteamNetworkingUtils_SteamNetworkingIPAddr_ParseString(self.ptr, pAddr, pszStr);
+    pub fn SteamNetworkingIPAddr_ParseString(self: *const Self, pAddr: []SteamNetworkingIPAddr, pszStr: [:0]const u8) bool {
+        return SteamAPI_ISteamNetworkingUtils_SteamNetworkingIPAddr_ParseString(self.ptr, pAddr.ptr, pszStr.ptr);
     }
 
-    pub fn SteamNetworkingIPAddr_GetFakeIPType(self: Self, addr: SteamNetworkingIPAddr) ESteamNetworkingFakeIPType {
+    pub fn SteamNetworkingIPAddr_GetFakeIPType(self: *const Self, addr: *const SteamNetworkingIPAddr) ESteamNetworkingFakeIPType {
         return SteamAPI_ISteamNetworkingUtils_SteamNetworkingIPAddr_GetFakeIPType(self.ptr, addr);
     }
 
-    pub fn SteamNetworkingIdentity_ToString(self: Self, identity: SteamNetworkingIdentity, buf: [*c]u8, cbBuf: uint32) void {
+    pub fn SteamNetworkingIdentity_ToString(self: *const Self, identity: *const SteamNetworkingIdentity, buf: *u8, cbBuf: uint32) void {
         return SteamAPI_ISteamNetworkingUtils_SteamNetworkingIdentity_ToString(self.ptr, identity, buf, cbBuf);
     }
 
-    pub fn SteamNetworkingIdentity_ParseString(self: Self, pIdentity: [*c]SteamNetworkingIdentity, pszStr: [*c]const u8) bool {
-        return SteamAPI_ISteamNetworkingUtils_SteamNetworkingIdentity_ParseString(self.ptr, pIdentity, pszStr);
+    pub fn SteamNetworkingIdentity_ParseString(self: *const Self, pIdentity: []SteamNetworkingIdentity, pszStr: [:0]const u8) bool {
+        return SteamAPI_ISteamNetworkingUtils_SteamNetworkingIdentity_ParseString(self.ptr, pIdentity.ptr, pszStr.ptr);
     }
 };
 
@@ -10610,11 +10610,11 @@ pub const ISteamNetworkingUtils = extern struct {
 extern fn SteamAPI_ISteamNetworkingUtils_AllocateMessage(self: ?*anyopaque, cbAllocateBuffer: i32) callconv(.C) [*c]SteamNetworkingMessage_t;
 extern fn SteamAPI_ISteamNetworkingUtils_InitRelayNetworkAccess(self: ?*anyopaque) callconv(.C) void;
 extern fn SteamAPI_ISteamNetworkingUtils_GetRelayNetworkStatus(self: ?*anyopaque, pDetails: [*c]SteamRelayNetworkStatus_t) callconv(.C) ESteamNetworkingAvailability;
-extern fn SteamAPI_ISteamNetworkingUtils_GetLocalPingLocation(self: ?*anyopaque, result: SteamNetworkPingLocation_t) callconv(.C) f32;
-extern fn SteamAPI_ISteamNetworkingUtils_EstimatePingTimeBetweenTwoLocations(self: ?*anyopaque, location1: SteamNetworkPingLocation_t, location2: SteamNetworkPingLocation_t) callconv(.C) i32;
-extern fn SteamAPI_ISteamNetworkingUtils_EstimatePingTimeFromLocalHost(self: ?*anyopaque, remoteLocation: SteamNetworkPingLocation_t) callconv(.C) i32;
-extern fn SteamAPI_ISteamNetworkingUtils_ConvertPingLocationToString(self: ?*anyopaque, location: SteamNetworkPingLocation_t, pszBuf: [*c]u8, cchBufSize: i32) callconv(.C) void;
-extern fn SteamAPI_ISteamNetworkingUtils_ParsePingLocationString(self: ?*anyopaque, pszString: [*c]const u8, result: SteamNetworkPingLocation_t) callconv(.C) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_GetLocalPingLocation(self: ?*anyopaque, result: [*c]SteamNetworkPingLocation_t) callconv(.C) f32;
+extern fn SteamAPI_ISteamNetworkingUtils_EstimatePingTimeBetweenTwoLocations(self: ?*anyopaque, location1: [*c]const SteamNetworkPingLocation_t, location2: [*c]const SteamNetworkPingLocation_t) callconv(.C) i32;
+extern fn SteamAPI_ISteamNetworkingUtils_EstimatePingTimeFromLocalHost(self: ?*anyopaque, remoteLocation: [*c]const SteamNetworkPingLocation_t) callconv(.C) i32;
+extern fn SteamAPI_ISteamNetworkingUtils_ConvertPingLocationToString(self: ?*anyopaque, location: [*c]const SteamNetworkPingLocation_t, pszBuf: [*c]u8, cchBufSize: i32) callconv(.C) void;
+extern fn SteamAPI_ISteamNetworkingUtils_ParsePingLocationString(self: ?*anyopaque, pszString: [*c]const u8, result: [*c]SteamNetworkPingLocation_t) callconv(.C) bool;
 extern fn SteamAPI_ISteamNetworkingUtils_CheckPingDataUpToDate(self: ?*anyopaque, flMaxAgeSeconds: f32) callconv(.C) bool;
 extern fn SteamAPI_ISteamNetworkingUtils_GetPingToDataCenter(self: ?*anyopaque, popID: SteamNetworkingPOPID, pViaRelayPoP: [*c]SteamNetworkingPOPID) callconv(.C) i32;
 extern fn SteamAPI_ISteamNetworkingUtils_GetDirectPingToPOP(self: ?*anyopaque, popID: SteamNetworkingPOPID) callconv(.C) i32;
@@ -10624,7 +10624,7 @@ extern fn SteamAPI_ISteamNetworkingUtils_GetLocalTimestamp(self: ?*anyopaque) ca
 extern fn SteamAPI_ISteamNetworkingUtils_SetDebugOutputFunction(self: ?*anyopaque, eDetailLevel: ESteamNetworkingSocketsDebugOutputType, pfnFunc: FSteamNetworkingSocketsDebugOutput) callconv(.C) void;
 extern fn SteamAPI_ISteamNetworkingUtils_IsFakeIPv4(self: ?*anyopaque, nIPv4: uint32) callconv(.C) bool;
 extern fn SteamAPI_ISteamNetworkingUtils_GetIPv4FakeIPType(self: ?*anyopaque, nIPv4: uint32) callconv(.C) ESteamNetworkingFakeIPType;
-extern fn SteamAPI_ISteamNetworkingUtils_GetRealIdentityForFakeIP(self: ?*anyopaque, fakeIP: SteamNetworkingIPAddr, pOutRealIdentity: [*c]SteamNetworkingIdentity) callconv(.C) EResult;
+extern fn SteamAPI_ISteamNetworkingUtils_GetRealIdentityForFakeIP(self: ?*anyopaque, fakeIP: [*c]const SteamNetworkingIPAddr, pOutRealIdentity: [*c]SteamNetworkingIdentity) callconv(.C) EResult;
 extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalConfigValueInt32(self: ?*anyopaque, eValue: ESteamNetworkingConfigValue, val: int32) callconv(.C) bool;
 extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalConfigValueFloat(self: ?*anyopaque, eValue: ESteamNetworkingConfigValue, val: f32) callconv(.C) bool;
 extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalConfigValueString(self: ?*anyopaque, eValue: ESteamNetworkingConfigValue, val: [*c]const u8) callconv(.C) bool;
@@ -10639,14 +10639,14 @@ extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_FakeIPResult(self: ?*
 extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_MessagesSessionRequest(self: ?*anyopaque, fnCallback: FnSteamNetworkingMessagesSessionRequest) callconv(.C) bool;
 extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_MessagesSessionFailed(self: ?*anyopaque, fnCallback: FnSteamNetworkingMessagesSessionFailed) callconv(.C) bool;
 extern fn SteamAPI_ISteamNetworkingUtils_SetConfigValue(self: ?*anyopaque, eValue: ESteamNetworkingConfigValue, eScopeType: ESteamNetworkingConfigScope, scopeObj: intptr_t, eDataType: ESteamNetworkingConfigDataType, pArg: ?*const anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_SetConfigValueStruct(self: ?*anyopaque, opt: SteamNetworkingConfigValue_t, eScopeType: ESteamNetworkingConfigScope, scopeObj: intptr_t) callconv(.C) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_SetConfigValueStruct(self: ?*anyopaque, opt: [*c]const SteamNetworkingConfigValue_t, eScopeType: ESteamNetworkingConfigScope, scopeObj: intptr_t) callconv(.C) bool;
 extern fn SteamAPI_ISteamNetworkingUtils_GetConfigValue(self: ?*anyopaque, eValue: ESteamNetworkingConfigValue, eScopeType: ESteamNetworkingConfigScope, scopeObj: intptr_t, pOutDataType: [*c]ESteamNetworkingConfigDataType, pResult: ?*anyopaque, cbResult: [*c]size_t) callconv(.C) ESteamNetworkingGetConfigValueResult;
 extern fn SteamAPI_ISteamNetworkingUtils_GetConfigValueInfo(self: ?*anyopaque, eValue: ESteamNetworkingConfigValue, pOutDataType: [*c]ESteamNetworkingConfigDataType, pOutScope: [*c]ESteamNetworkingConfigScope) callconv(.C) [*c]const u8;
 extern fn SteamAPI_ISteamNetworkingUtils_IterateGenericEditableConfigValues(self: ?*anyopaque, eCurrent: ESteamNetworkingConfigValue, bEnumerateDevVars: bool) callconv(.C) ESteamNetworkingConfigValue;
-extern fn SteamAPI_ISteamNetworkingUtils_SteamNetworkingIPAddr_ToString(self: ?*anyopaque, addr: SteamNetworkingIPAddr, buf: [*c]u8, cbBuf: uint32, bWithPort: bool) callconv(.C) void;
+extern fn SteamAPI_ISteamNetworkingUtils_SteamNetworkingIPAddr_ToString(self: ?*anyopaque, addr: [*c]const SteamNetworkingIPAddr, buf: [*c]u8, cbBuf: uint32, bWithPort: bool) callconv(.C) void;
 extern fn SteamAPI_ISteamNetworkingUtils_SteamNetworkingIPAddr_ParseString(self: ?*anyopaque, pAddr: [*c]SteamNetworkingIPAddr, pszStr: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_SteamNetworkingIPAddr_GetFakeIPType(self: ?*anyopaque, addr: SteamNetworkingIPAddr) callconv(.C) ESteamNetworkingFakeIPType;
-extern fn SteamAPI_ISteamNetworkingUtils_SteamNetworkingIdentity_ToString(self: ?*anyopaque, identity: SteamNetworkingIdentity, buf: [*c]u8, cbBuf: uint32) callconv(.C) void;
+extern fn SteamAPI_ISteamNetworkingUtils_SteamNetworkingIPAddr_GetFakeIPType(self: ?*anyopaque, addr: [*c]const SteamNetworkingIPAddr) callconv(.C) ESteamNetworkingFakeIPType;
+extern fn SteamAPI_ISteamNetworkingUtils_SteamNetworkingIdentity_ToString(self: ?*anyopaque, identity: [*c]const SteamNetworkingIdentity, buf: [*c]u8, cbBuf: uint32) callconv(.C) void;
 extern fn SteamAPI_ISteamNetworkingUtils_SteamNetworkingIdentity_ParseString(self: ?*anyopaque, pIdentity: [*c]SteamNetworkingIdentity, pszStr: [*c]const u8) callconv(.C) bool;
 extern fn SteamAPI_SteamGameServer_v015() callconv(.C) [*c]ISteamGameServer;
 /// gameserver
@@ -10658,168 +10658,168 @@ pub const ISteamGameServer = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn SetProduct(self: Self, pszProduct: [*c]const u8) void {
-        return SteamAPI_ISteamGameServer_SetProduct(self.ptr, pszProduct);
+    pub fn SetProduct(self: *const Self, pszProduct: [:0]const u8) void {
+        return SteamAPI_ISteamGameServer_SetProduct(self.ptr, pszProduct.ptr);
     }
 
-    pub fn SetGameDescription(self: Self, pszGameDescription: [*c]const u8) void {
-        return SteamAPI_ISteamGameServer_SetGameDescription(self.ptr, pszGameDescription);
+    pub fn SetGameDescription(self: *const Self, pszGameDescription: [:0]const u8) void {
+        return SteamAPI_ISteamGameServer_SetGameDescription(self.ptr, pszGameDescription.ptr);
     }
 
-    pub fn SetModDir(self: Self, pszModDir: [*c]const u8) void {
-        return SteamAPI_ISteamGameServer_SetModDir(self.ptr, pszModDir);
+    pub fn SetModDir(self: *const Self, pszModDir: [:0]const u8) void {
+        return SteamAPI_ISteamGameServer_SetModDir(self.ptr, pszModDir.ptr);
     }
 
-    pub fn SetDedicatedServer(self: Self, bDedicated: bool) void {
+    pub fn SetDedicatedServer(self: *const Self, bDedicated: bool) void {
         return SteamAPI_ISteamGameServer_SetDedicatedServer(self.ptr, bDedicated);
     }
 
-    pub fn LogOn(self: Self, pszToken: [*c]const u8) void {
-        return SteamAPI_ISteamGameServer_LogOn(self.ptr, pszToken);
+    pub fn LogOn(self: *const Self, pszToken: [:0]const u8) void {
+        return SteamAPI_ISteamGameServer_LogOn(self.ptr, pszToken.ptr);
     }
 
-    pub fn LogOnAnonymous(self: Self) void {
+    pub fn LogOnAnonymous(self: *const Self) void {
         return SteamAPI_ISteamGameServer_LogOnAnonymous(self.ptr);
     }
 
-    pub fn LogOff(self: Self) void {
+    pub fn LogOff(self: *const Self) void {
         return SteamAPI_ISteamGameServer_LogOff(self.ptr);
     }
 
-    pub fn BLoggedOn(self: Self) bool {
+    pub fn BLoggedOn(self: *const Self) bool {
         return SteamAPI_ISteamGameServer_BLoggedOn(self.ptr);
     }
 
-    pub fn BSecure(self: Self) bool {
+    pub fn BSecure(self: *const Self) bool {
         return SteamAPI_ISteamGameServer_BSecure(self.ptr);
     }
 
-    pub fn GetSteamID(self: Self) CSteamID {
+    pub fn GetSteamID(self: *const Self) CSteamID {
         return SteamAPI_ISteamGameServer_GetSteamID(self.ptr);
     }
 
-    pub fn WasRestartRequested(self: Self) bool {
+    pub fn WasRestartRequested(self: *const Self) bool {
         return SteamAPI_ISteamGameServer_WasRestartRequested(self.ptr);
     }
 
-    pub fn SetMaxPlayerCount(self: Self, cPlayersMax: i32) void {
+    pub fn SetMaxPlayerCount(self: *const Self, cPlayersMax: i32) void {
         return SteamAPI_ISteamGameServer_SetMaxPlayerCount(self.ptr, cPlayersMax);
     }
 
-    pub fn SetBotPlayerCount(self: Self, cBotplayers: i32) void {
+    pub fn SetBotPlayerCount(self: *const Self, cBotplayers: i32) void {
         return SteamAPI_ISteamGameServer_SetBotPlayerCount(self.ptr, cBotplayers);
     }
 
-    pub fn SetServerName(self: Self, pszServerName: [*c]const u8) void {
-        return SteamAPI_ISteamGameServer_SetServerName(self.ptr, pszServerName);
+    pub fn SetServerName(self: *const Self, pszServerName: [:0]const u8) void {
+        return SteamAPI_ISteamGameServer_SetServerName(self.ptr, pszServerName.ptr);
     }
 
-    pub fn SetMapName(self: Self, pszMapName: [*c]const u8) void {
-        return SteamAPI_ISteamGameServer_SetMapName(self.ptr, pszMapName);
+    pub fn SetMapName(self: *const Self, pszMapName: [:0]const u8) void {
+        return SteamAPI_ISteamGameServer_SetMapName(self.ptr, pszMapName.ptr);
     }
 
-    pub fn SetPasswordProtected(self: Self, bPasswordProtected: bool) void {
+    pub fn SetPasswordProtected(self: *const Self, bPasswordProtected: bool) void {
         return SteamAPI_ISteamGameServer_SetPasswordProtected(self.ptr, bPasswordProtected);
     }
 
-    pub fn SetSpectatorPort(self: Self, unSpectatorPort: uint16) void {
+    pub fn SetSpectatorPort(self: *const Self, unSpectatorPort: uint16) void {
         return SteamAPI_ISteamGameServer_SetSpectatorPort(self.ptr, unSpectatorPort);
     }
 
-    pub fn SetSpectatorServerName(self: Self, pszSpectatorServerName: [*c]const u8) void {
-        return SteamAPI_ISteamGameServer_SetSpectatorServerName(self.ptr, pszSpectatorServerName);
+    pub fn SetSpectatorServerName(self: *const Self, pszSpectatorServerName: [:0]const u8) void {
+        return SteamAPI_ISteamGameServer_SetSpectatorServerName(self.ptr, pszSpectatorServerName.ptr);
     }
 
-    pub fn ClearAllKeyValues(self: Self) void {
+    pub fn ClearAllKeyValues(self: *const Self) void {
         return SteamAPI_ISteamGameServer_ClearAllKeyValues(self.ptr);
     }
 
-    pub fn SetKeyValue(self: Self, pKey: [*c]const u8, pValue: [*c]const u8) void {
-        return SteamAPI_ISteamGameServer_SetKeyValue(self.ptr, pKey, pValue);
+    pub fn SetKeyValue(self: *const Self, pKey: []const u8, pValue: []const u8) void {
+        return SteamAPI_ISteamGameServer_SetKeyValue(self.ptr, pKey.ptr, pValue.ptr);
     }
 
-    pub fn SetGameTags(self: Self, pchGameTags: [*c]const u8) void {
-        return SteamAPI_ISteamGameServer_SetGameTags(self.ptr, pchGameTags);
+    pub fn SetGameTags(self: *const Self, pchGameTags: []const u8) void {
+        return SteamAPI_ISteamGameServer_SetGameTags(self.ptr, pchGameTags.ptr);
     }
 
-    pub fn SetGameData(self: Self, pchGameData: [*c]const u8) void {
-        return SteamAPI_ISteamGameServer_SetGameData(self.ptr, pchGameData);
+    pub fn SetGameData(self: *const Self, pchGameData: []const u8) void {
+        return SteamAPI_ISteamGameServer_SetGameData(self.ptr, pchGameData.ptr);
     }
 
-    pub fn SetRegion(self: Self, pszRegion: [*c]const u8) void {
-        return SteamAPI_ISteamGameServer_SetRegion(self.ptr, pszRegion);
+    pub fn SetRegion(self: *const Self, pszRegion: [:0]const u8) void {
+        return SteamAPI_ISteamGameServer_SetRegion(self.ptr, pszRegion.ptr);
     }
 
-    pub fn SetAdvertiseServerActive(self: Self, bActive: bool) void {
+    pub fn SetAdvertiseServerActive(self: *const Self, bActive: bool) void {
         return SteamAPI_ISteamGameServer_SetAdvertiseServerActive(self.ptr, bActive);
     }
 
-    pub fn GetAuthSessionTicket(self: Self, pTicket: ?*anyopaque, cbMaxTicket: i32, pcbTicket: [*c]uint32, pSnid: [*c]const SteamNetworkingIdentity) HAuthTicket {
-        return SteamAPI_ISteamGameServer_GetAuthSessionTicket(self.ptr, pTicket, cbMaxTicket, pcbTicket, pSnid);
+    pub fn GetAuthSessionTicket(self: *const Self, pTicket: []u8, pcbTicket: *uint32, pSnid: []const SteamNetworkingIdentity) HAuthTicket {
+        return SteamAPI_ISteamGameServer_GetAuthSessionTicket(self.ptr, pTicket.ptr, @intCast(pTicket.len), pcbTicket, pSnid.ptr);
     }
 
-    pub fn BeginAuthSession(self: Self, pAuthTicket: ?*const anyopaque, cbAuthTicket: i32, steamID: CSteamID) EBeginAuthSessionResult {
-        return SteamAPI_ISteamGameServer_BeginAuthSession(self.ptr, pAuthTicket, cbAuthTicket, steamID);
+    pub fn BeginAuthSession(self: *const Self, pAuthTicket: []const u8, steamID: CSteamID) EBeginAuthSessionResult {
+        return SteamAPI_ISteamGameServer_BeginAuthSession(self.ptr, pAuthTicket.ptr, @intCast(pAuthTicket.len), steamID);
     }
 
-    pub fn EndAuthSession(self: Self, steamID: CSteamID) void {
+    pub fn EndAuthSession(self: *const Self, steamID: CSteamID) void {
         return SteamAPI_ISteamGameServer_EndAuthSession(self.ptr, steamID);
     }
 
-    pub fn CancelAuthTicket(self: Self, hAuthTicket: HAuthTicket) void {
+    pub fn CancelAuthTicket(self: *const Self, hAuthTicket: HAuthTicket) void {
         return SteamAPI_ISteamGameServer_CancelAuthTicket(self.ptr, hAuthTicket);
     }
 
-    pub fn UserHasLicenseForApp(self: Self, steamID: CSteamID, appID: AppId_t) EUserHasLicenseForAppResult {
+    pub fn UserHasLicenseForApp(self: *const Self, steamID: CSteamID, appID: AppId_t) EUserHasLicenseForAppResult {
         return SteamAPI_ISteamGameServer_UserHasLicenseForApp(self.ptr, steamID, appID);
     }
 
-    pub fn RequestUserGroupStatus(self: Self, steamIDUser: CSteamID, steamIDGroup: CSteamID) bool {
+    pub fn RequestUserGroupStatus(self: *const Self, steamIDUser: CSteamID, steamIDGroup: CSteamID) bool {
         return SteamAPI_ISteamGameServer_RequestUserGroupStatus(self.ptr, steamIDUser, steamIDGroup);
     }
 
-    pub fn GetGameplayStats(self: Self) void {
+    pub fn GetGameplayStats(self: *const Self) void {
         return SteamAPI_ISteamGameServer_GetGameplayStats(self.ptr);
     }
 
-    pub fn GetServerReputation(self: Self) SteamAPICall_t {
+    pub fn GetServerReputation(self: *const Self) SteamAPICall_t {
         return SteamAPI_ISteamGameServer_GetServerReputation(self.ptr);
     }
 
-    pub fn GetPublicIP(self: Self) SteamIPAddress_t {
+    pub fn GetPublicIP(self: *const Self) SteamIPAddress_t {
         return SteamAPI_ISteamGameServer_GetPublicIP(self.ptr);
     }
 
-    pub fn HandleIncomingPacket(self: Self, pData: ?*const anyopaque, cbData: i32, srcIP: uint32, srcPort: uint16) bool {
-        return SteamAPI_ISteamGameServer_HandleIncomingPacket(self.ptr, pData, cbData, srcIP, srcPort);
+    pub fn HandleIncomingPacket(self: *const Self, pData: []const u8, srcIP: uint32, srcPort: uint16) bool {
+        return SteamAPI_ISteamGameServer_HandleIncomingPacket(self.ptr, pData.ptr, @intCast(pData.len), srcIP, srcPort);
     }
 
-    pub fn GetNextOutgoingPacket(self: Self, pOut: ?*anyopaque, cbMaxOut: i32, pNetAdr: [*c]uint32, pPort: [*c]uint16) i32 {
-        return SteamAPI_ISteamGameServer_GetNextOutgoingPacket(self.ptr, pOut, cbMaxOut, pNetAdr, pPort);
+    pub fn GetNextOutgoingPacket(self: *const Self, pOut: []u8, pNetAdr: []uint32, pPort: []uint16) i32 {
+        return SteamAPI_ISteamGameServer_GetNextOutgoingPacket(self.ptr, pOut.ptr, @intCast(pOut.len), pNetAdr.ptr, pPort.ptr);
     }
 
-    pub fn AssociateWithClan(self: Self, steamIDClan: CSteamID) SteamAPICall_t {
+    pub fn AssociateWithClan(self: *const Self, steamIDClan: CSteamID) SteamAPICall_t {
         return SteamAPI_ISteamGameServer_AssociateWithClan(self.ptr, steamIDClan);
     }
 
-    pub fn ComputeNewPlayerCompatibility(self: Self, steamIDNewPlayer: CSteamID) SteamAPICall_t {
+    pub fn ComputeNewPlayerCompatibility(self: *const Self, steamIDNewPlayer: CSteamID) SteamAPICall_t {
         return SteamAPI_ISteamGameServer_ComputeNewPlayerCompatibility(self.ptr, steamIDNewPlayer);
     }
 
-    pub fn SendUserConnectAndAuthenticate_DEPRECATED(self: Self, unIPClient: uint32, pvAuthBlob: ?*const anyopaque, cubAuthBlobSize: uint32, pSteamIDUser: [*c]CSteamID) bool {
-        return SteamAPI_ISteamGameServer_SendUserConnectAndAuthenticate_DEPRECATED(self.ptr, unIPClient, pvAuthBlob, cubAuthBlobSize, pSteamIDUser);
+    pub fn SendUserConnectAndAuthenticate_DEPRECATED(self: *const Self, unIPClient: uint32, pvAuthBlob: []const u8, pSteamIDUser: []CSteamID) bool {
+        return SteamAPI_ISteamGameServer_SendUserConnectAndAuthenticate_DEPRECATED(self.ptr, unIPClient, pvAuthBlob.ptr, @intCast(pvAuthBlob.len), pSteamIDUser.ptr);
     }
 
-    pub fn CreateUnauthenticatedUserConnection(self: Self) CSteamID {
+    pub fn CreateUnauthenticatedUserConnection(self: *const Self) CSteamID {
         return SteamAPI_ISteamGameServer_CreateUnauthenticatedUserConnection(self.ptr);
     }
 
-    pub fn SendUserDisconnect_DEPRECATED(self: Self, steamIDUser: CSteamID) void {
+    pub fn SendUserDisconnect_DEPRECATED(self: *const Self, steamIDUser: CSteamID) void {
         return SteamAPI_ISteamGameServer_SendUserDisconnect_DEPRECATED(self.ptr, steamIDUser);
     }
 
-    pub fn BUpdateUserData(self: Self, steamIDUser: CSteamID, pchPlayerName: [*c]const u8, uScore: uint32) bool {
-        return SteamAPI_ISteamGameServer_BUpdateUserData(self.ptr, steamIDUser, pchPlayerName, uScore);
+    pub fn BUpdateUserData(self: *const Self, steamIDUser: CSteamID, pchPlayerName: []const u8, uScore: uint32) bool {
+        return SteamAPI_ISteamGameServer_BUpdateUserData(self.ptr, steamIDUser, pchPlayerName.ptr, uScore);
     }
 };
 
@@ -10875,43 +10875,43 @@ pub const ISteamGameServerStats = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn RequestUserStats(self: Self, steamIDUser: CSteamID) SteamAPICall_t {
+    pub fn RequestUserStats(self: *const Self, steamIDUser: CSteamID) SteamAPICall_t {
         return SteamAPI_ISteamGameServerStats_RequestUserStats(self.ptr, steamIDUser);
     }
 
-    pub fn GetUserStatInt32(self: Self, steamIDUser: CSteamID, pchName: [*c]const u8, pData: [*c]int32) bool {
-        return SteamAPI_ISteamGameServerStats_GetUserStatInt32(self.ptr, steamIDUser, pchName, pData);
+    pub fn GetUserStatInt32(self: *const Self, steamIDUser: CSteamID, pchName: []const u8, pData: []int32) bool {
+        return SteamAPI_ISteamGameServerStats_GetUserStatInt32(self.ptr, steamIDUser, pchName.ptr, pData.ptr);
     }
 
-    pub fn GetUserStatFloat(self: Self, steamIDUser: CSteamID, pchName: [*c]const u8, pData: [*c]f32) bool {
-        return SteamAPI_ISteamGameServerStats_GetUserStatFloat(self.ptr, steamIDUser, pchName, pData);
+    pub fn GetUserStatFloat(self: *const Self, steamIDUser: CSteamID, pchName: []const u8, pData: []f32) bool {
+        return SteamAPI_ISteamGameServerStats_GetUserStatFloat(self.ptr, steamIDUser, pchName.ptr, pData.ptr);
     }
 
-    pub fn GetUserAchievement(self: Self, steamIDUser: CSteamID, pchName: [*c]const u8, pbAchieved: [*c]bool) bool {
-        return SteamAPI_ISteamGameServerStats_GetUserAchievement(self.ptr, steamIDUser, pchName, pbAchieved);
+    pub fn GetUserAchievement(self: *const Self, steamIDUser: CSteamID, pchName: []const u8, pbAchieved: *bool) bool {
+        return SteamAPI_ISteamGameServerStats_GetUserAchievement(self.ptr, steamIDUser, pchName.ptr, pbAchieved);
     }
 
-    pub fn SetUserStatInt32(self: Self, steamIDUser: CSteamID, pchName: [*c]const u8, nData: int32) bool {
-        return SteamAPI_ISteamGameServerStats_SetUserStatInt32(self.ptr, steamIDUser, pchName, nData);
+    pub fn SetUserStatInt32(self: *const Self, steamIDUser: CSteamID, pchName: []const u8, nData: int32) bool {
+        return SteamAPI_ISteamGameServerStats_SetUserStatInt32(self.ptr, steamIDUser, pchName.ptr, nData);
     }
 
-    pub fn SetUserStatFloat(self: Self, steamIDUser: CSteamID, pchName: [*c]const u8, fData: f32) bool {
-        return SteamAPI_ISteamGameServerStats_SetUserStatFloat(self.ptr, steamIDUser, pchName, fData);
+    pub fn SetUserStatFloat(self: *const Self, steamIDUser: CSteamID, pchName: []const u8, fData: f32) bool {
+        return SteamAPI_ISteamGameServerStats_SetUserStatFloat(self.ptr, steamIDUser, pchName.ptr, fData);
     }
 
-    pub fn UpdateUserAvgRateStat(self: Self, steamIDUser: CSteamID, pchName: [*c]const u8, flCountThisSession: f32, dSessionLength: f64) bool {
-        return SteamAPI_ISteamGameServerStats_UpdateUserAvgRateStat(self.ptr, steamIDUser, pchName, flCountThisSession, dSessionLength);
+    pub fn UpdateUserAvgRateStat(self: *const Self, steamIDUser: CSteamID, pchName: []const u8, flCountThisSession: f32, dSessionLength: f64) bool {
+        return SteamAPI_ISteamGameServerStats_UpdateUserAvgRateStat(self.ptr, steamIDUser, pchName.ptr, flCountThisSession, dSessionLength);
     }
 
-    pub fn SetUserAchievement(self: Self, steamIDUser: CSteamID, pchName: [*c]const u8) bool {
-        return SteamAPI_ISteamGameServerStats_SetUserAchievement(self.ptr, steamIDUser, pchName);
+    pub fn SetUserAchievement(self: *const Self, steamIDUser: CSteamID, pchName: []const u8) bool {
+        return SteamAPI_ISteamGameServerStats_SetUserAchievement(self.ptr, steamIDUser, pchName.ptr);
     }
 
-    pub fn ClearUserAchievement(self: Self, steamIDUser: CSteamID, pchName: [*c]const u8) bool {
-        return SteamAPI_ISteamGameServerStats_ClearUserAchievement(self.ptr, steamIDUser, pchName);
+    pub fn ClearUserAchievement(self: *const Self, steamIDUser: CSteamID, pchName: []const u8) bool {
+        return SteamAPI_ISteamGameServerStats_ClearUserAchievement(self.ptr, steamIDUser, pchName.ptr);
     }
 
-    pub fn StoreUserStats(self: Self, steamIDUser: CSteamID) SteamAPICall_t {
+    pub fn StoreUserStats(self: *const Self, steamIDUser: CSteamID) SteamAPICall_t {
         return SteamAPI_ISteamGameServerStats_StoreUserStats(self.ptr, steamIDUser);
     }
 };
@@ -10932,25 +10932,25 @@ pub const ISteamNetworkingFakeUDPPort = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn DestroyFakeUDPPort(self: Self) void {
+    pub fn DestroyFakeUDPPort(self: *const Self) void {
         return SteamAPI_ISteamNetworkingFakeUDPPort_DestroyFakeUDPPort(self.ptr);
     }
 
-    pub fn SendMessageToFakeIP(self: Self, remoteAddress: SteamNetworkingIPAddr, pData: ?*const anyopaque, cbData: uint32, nSendFlags: i32) EResult {
-        return SteamAPI_ISteamNetworkingFakeUDPPort_SendMessageToFakeIP(self.ptr, remoteAddress, pData, cbData, nSendFlags);
+    pub fn SendMessageToFakeIP(self: *const Self, remoteAddress: *const SteamNetworkingIPAddr, pData: []const u8, nSendFlags: i32) EResult {
+        return SteamAPI_ISteamNetworkingFakeUDPPort_SendMessageToFakeIP(self.ptr, remoteAddress, pData.ptr, @intCast(pData.len), nSendFlags);
     }
 
-    pub fn ReceiveMessages(self: Self, ppOutMessages: [*c][*c]SteamNetworkingMessage_t, nMaxMessages: i32) i32 {
+    pub fn ReceiveMessages(self: *const Self, ppOutMessages: [*c][*c]SteamNetworkingMessage_t, nMaxMessages: i32) i32 {
         return SteamAPI_ISteamNetworkingFakeUDPPort_ReceiveMessages(self.ptr, ppOutMessages, nMaxMessages);
     }
 
-    pub fn ScheduleCleanup(self: Self, remoteAddress: SteamNetworkingIPAddr) void {
+    pub fn ScheduleCleanup(self: *const Self, remoteAddress: *const SteamNetworkingIPAddr) void {
         return SteamAPI_ISteamNetworkingFakeUDPPort_ScheduleCleanup(self.ptr, remoteAddress);
     }
 };
 
 // static functions
 extern fn SteamAPI_ISteamNetworkingFakeUDPPort_DestroyFakeUDPPort(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamNetworkingFakeUDPPort_SendMessageToFakeIP(self: ?*anyopaque, remoteAddress: SteamNetworkingIPAddr, pData: ?*const anyopaque, cbData: uint32, nSendFlags: i32) callconv(.C) EResult;
+extern fn SteamAPI_ISteamNetworkingFakeUDPPort_SendMessageToFakeIP(self: ?*anyopaque, remoteAddress: [*c]const SteamNetworkingIPAddr, pData: ?*const anyopaque, cbData: uint32, nSendFlags: i32) callconv(.C) EResult;
 extern fn SteamAPI_ISteamNetworkingFakeUDPPort_ReceiveMessages(self: ?*anyopaque, ppOutMessages: [*c][*c]SteamNetworkingMessage_t, nMaxMessages: i32) callconv(.C) i32;
-extern fn SteamAPI_ISteamNetworkingFakeUDPPort_ScheduleCleanup(self: ?*anyopaque, remoteAddress: SteamNetworkingIPAddr) callconv(.C) void;
+extern fn SteamAPI_ISteamNetworkingFakeUDPPort_ScheduleCleanup(self: ?*anyopaque, remoteAddress: [*c]const SteamNetworkingIPAddr) callconv(.C) void;

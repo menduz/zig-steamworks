@@ -9444,7 +9444,7 @@
           "methodname_flat": "SteamAPI_ISteamInput_SetDualSenseTriggerEffect",
           "params": [
             { "paramname":"inputHandle", "paramtype":"InputHandle_t" },
-            { "paramname":"pParam", "paramtype":"const ScePadTriggerEffectParam *" }
+            { "paramname":"pParam", "paramtype":"const void *" }
           ],
           "returntype": "void"
         }
