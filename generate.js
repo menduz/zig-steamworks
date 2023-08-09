@@ -199,9 +199,7 @@ pub fn from_slice(comptime T: anytype, slice: []const u8) T {
         }
       }
       
-      if(!@inComptime()) {
-        std.debug.print("------------ OK\\n", .{});
-        
+      if (!@inComptime()) {
         var fast_method_result = from_slice(T, slice);
         var fast_method_fmt = std.fmt.allocPrint(std.heap.c_allocator, "{any}", .{fast_method_result}) catch unreachable;
         var slow_method_fmt = std.fmt.allocPrint(std.heap.c_allocator, "{any}", .{ret}) catch unreachable;
@@ -779,8 +777,8 @@ function convertType(t, isFnSignature) {
     case 'long long': return 'i64';
     case 'int64_t': return 'i64';
     case 'unsigned long long': return 'u64';
-    case 'void *': return '?*anyopaque';
-    case 'const void *': return '?*const anyopaque';
+    case 'void *': return '[*c]u8';
+    case 'const void *': return '[*c]const u8';
     case 'char *': return '[*c]u8'
     case 'float': return 'f32'
     case 'double': return 'f64'
