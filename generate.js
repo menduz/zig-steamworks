@@ -431,6 +431,7 @@ function transformParameters(fn) {
       const paramNameWithoutPrefix = param.paramname.substring(matches_prefix[1].length)
       const countParam = fn.params.find(_ => (
         param.array_count && _.paramname == param.array_count ||
+        _.paramname.startsWith('n' + paramNameWithoutPrefix) ||
         _.paramname.startsWith('cub' + paramNameWithoutPrefix) ||
         _.paramname.startsWith('cch' + paramNameWithoutPrefix) ||
         _.paramname.startsWith('cbMax' + paramNameWithoutPrefix) ||
@@ -441,23 +442,27 @@ function transformParameters(fn) {
 
       const is_pointer_to_pointer = param.paramtype.split(/\*/g).length > 2
 
-      if (param.paramtype.endsWith('*') && !is_pointer_to_pointer) {
-        param.is_slice = true
-        param.code_replacement = `${param.paramname}.ptr`
-      }
+      if (!is_pointer_to_pointer) {
+        if (countParam && countParam.paramtype.includes('*') == false) {
+          param.is_slice = true
+          let expr = `${param.paramname}.len`
+          if (countParam.paramtype != 'usize') {
+            countParam.code_replacement = `@intCast(${expr})`
+          } else {
+            countParam.code_replacement = expr
+          }
+          countParam.calculated = true;
 
-      if (countParam && countParam.paramtype.includes('*') == false) {
-        param.is_slice = true
-        let expr = `${param.paramname}.len`
-        if (countParam.paramtype != 'usize') {
-          countParam.code_replacement = `@intCast(${expr})`
-        } else {
-          countParam.code_replacement = expr
+        } else if (param.zero_slice) {
+          param.is_slice = true
         }
-        countParam.calculated = true;
-        
-      } else if (param.zero_slice) {
-        param.is_slice = true
+
+        if (param.is_slice) {
+        // if (param.paramtype.endsWith('*')) {
+          // param.is_slice = true
+          param.code_replacement = `${param.paramname}.ptr`
+        }
+
       }
     }
   }
