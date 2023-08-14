@@ -107,8 +107,8 @@ pub extern fn SteamAPI_ReleaseCurrentThreadMemory() callconv(.C) void;
 
 
 // crash dump recording functions
-//pub extern fn SteamAPI_WriteMiniDump( uint32 uStructuredExceptionCode, void* pvExceptionInfo, uint32 uBuildID ) callconv(.C) void;
-//pub extern fn SteamAPI_SetMiniDumpComment( const char *pchMsg ) callconv(.C) void;
+pub extern fn SteamAPI_WriteMiniDump( uStructuredExceptionCode: u32, pvExceptionInfo: [*c]const u8, uBuildID: u32 ) callconv(.C) void;
+pub extern fn SteamAPI_SetMiniDumpComment( pchMsg: [*c]const u8 ) callconv(.C) void;
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 //	steamclient.dll private wrapper functions
@@ -494,6 +494,9 @@ function printStructMethods(structName, data, module) {
 
       if (fnName && /^[a-z0-9_]+$/i.test(fnName)) {
         out.push(`pub fn ${fnName}(${[`self: ${self}`, ...originalParams].join(', ')}) ${convertType(_.returntype)} {`)
+
+        // out.push(`  std.debug.print("Calling ${_.methodname_flat}\\n", .{});`)
+
 
         let ptr = module ? 'self.ptr' : '@as(?*anyopaque, @ptrCast(self))'
 

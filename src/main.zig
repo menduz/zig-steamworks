@@ -46,8 +46,8 @@ pub extern fn SteamAPI_RestartAppIfNecessary(unOwnAppID: u32) callconv(.C) bool;
 pub extern fn SteamAPI_ReleaseCurrentThreadMemory() callconv(.C) void;
 
 // crash dump recording functions
-//pub extern fn SteamAPI_WriteMiniDump( uint32 uStructuredExceptionCode, void* pvExceptionInfo, uint32 uBuildID ) callconv(.C) void;
-//pub extern fn SteamAPI_SetMiniDumpComment( const char *pchMsg ) callconv(.C) void;
+pub extern fn SteamAPI_WriteMiniDump(uStructuredExceptionCode: u32, pvExceptionInfo: [*c]const u8, uBuildID: u32) callconv(.C) void;
+pub extern fn SteamAPI_SetMiniDumpComment(pchMsg: [*c]const u8) callconv(.C) void;
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 //	steamclient.dll private wrapper functions
