@@ -79,7 +79,7 @@ pub fn build(b: *std.Build) !void {
 
     // Include dirs.
     lib.addIncludePath(.{ .path = "steamworks/public/steam" });
-    lib.addCSourceFiles(&.{"src/steam.cpp"}, flagContainer.items);
+    lib.addCSourceFiles(.{ .files = &.{"src/steam.cpp"}, .flags = flagContainer.items });
 
     b.installArtifact(lib);
 
@@ -130,7 +130,7 @@ fn build_aux_cli(b: *std.Build, target: std.zig.CrossTarget, optimize: std.built
     flagContainer.append("-Wno-gnu") catch unreachable;
 
     test_exe.addIncludePath(.{ .path = "steamworks/public/steam" });
-    test_exe.addCSourceFiles(&.{"src/steam-aux.cpp"}, flagContainer.items);
+    test_exe.addCSourceFiles(.{ .files = &.{"src/steam-aux.cpp"}, .flags = flagContainer.items });
 
     test_exe.linkLibrary(lib);
 
@@ -162,7 +162,7 @@ fn test_step(b: *std.Build, module: *std.Build.Module, target: std.zig.CrossTarg
     }
 
     var run_unit_tests = b.addRunArtifact(main_tests);
-    run_unit_tests.cwd = b.exe_dir;
+    run_unit_tests.cwd = .{ .path = b.exe_dir };
     run_unit_tests.step.dependOn(&b.addInstallBinFile(.{ .path = sdkPath("/src/steam_appid.txt") }, "steam_appid.txt").step);
 
     var run_step = b.step("test", "Run the app");
