@@ -11,9 +11,9 @@ pub fn SteamAPIDebugTextHook(nSeverity: c_int, pchDebugText: [*c]const u8) callc
 
 /// get an authentication ticket for our user
 fn authTicket(identity: *steam.SteamNetworkingIdentity) !void {
-    var rgchToken: []u8 = try allocator.alloc(u8, 2048);
+    const rgchToken: []u8 = try allocator.alloc(u8, 2048);
     var unTokenLen: c_uint = 0;
-    var m_hAuthTicket = steam.SteamUser().GetAuthSessionTicket(rgchToken, &unTokenLen, identity);
+    const m_hAuthTicket = steam.SteamUser().GetAuthSessionTicket(rgchToken, &unTokenLen, identity);
     std.debug.print("GetAuthSessionTicket={} len={} token={s:0}\n", .{ m_hAuthTicket, unTokenLen, rgchToken });
 }
 
@@ -56,15 +56,15 @@ pub fn main() !void {
         std.debug.print("Current username: {s}\n", .{steam.SteamFriends().GetPersonaName()});
     }
 
-    var pDetails: *steam.SteamNetAuthenticationStatus_t = try allocator.create(steam.SteamNetAuthenticationStatus_t);
+    const pDetails: *steam.SteamNetAuthenticationStatus_t = try allocator.create(steam.SteamNetAuthenticationStatus_t);
     defer allocator.destroy(pDetails);
 
-    var connectionStatus = sock.GetAuthenticationStatus(pDetails);
+    const connectionStatus = sock.GetAuthenticationStatus(pDetails);
     std.debug.print("GetAuthenticationStatus: {} {}\n", .{ connectionStatus, pDetails });
 
-    var pIdentity: *steam.SteamNetworkingIdentity align(1) = try allocator.create(steam.SteamNetworkingIdentity);
+    const pIdentity: *steam.SteamNetworkingIdentity align(1) = try allocator.create(steam.SteamNetworkingIdentity);
     allocator.destroy(pIdentity);
-    var r = sock.GetIdentity(pIdentity);
+    const r = sock.GetIdentity(pIdentity);
     std.debug.print("GetIdentity={} {}\n", .{ r, pIdentity });
 
     try authTicket(pIdentity);

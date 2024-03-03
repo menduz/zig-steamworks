@@ -3,13 +3,13 @@ const builtin = @import("builtin");
 
 // TODO(build-system): this is needed because lib2.linkLibrary(lib)
 // will not add the library path transitively to lib3.linkLibrary(lib2)
-pub fn addLibraryPath(compile: *std.build.CompileStep) void {
-    if (compile.target.os_tag != null and compile.target.os_tag.? == .macos) {
+pub fn addLibraryPath(compile: *std.Build.Step.Compile) void {
+    if (compile.root_module.resolved_target != null and compile.root_module.resolved_target.?.result.os.tag == .macos) {
         compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = sdkPath("/steamworks/redistributable_bin/osx/libsteam_api.dylib") }, "libsteam_api.dylib").step);
         compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = sdkPath("/steamworks/public/steam/lib/osx/libsdkencryptedappticket.dylib") }, "libsdkencryptedappticket.dylib").step);
         compile.addLibraryPath(.{ .path = sdkPath("/steamworks/public/steam/lib/osx") });
         compile.addLibraryPath(.{ .path = sdkPath("/steamworks/redistributable_bin/osx") });
-    } else if (compile.target.os_tag != null and compile.target.os_tag.? == .windows) {
+    } else if (compile.root_module.resolved_target != null and compile.root_module.resolved_target.?.result.os.tag == .windows) {
         compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = sdkPath("/steamworks/public/steam/lib/win64/sdkencryptedappticket64.dll") }, "sdkencryptedappticket64.dll").step);
         compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = sdkPath("/steamworks/redistributable_bin/win64/steam_api64.dll") }, "steam_api64.dll").step);
         compile.addLibraryPath(.{ .path = sdkPath("/steamworks/public/steam/lib/win64") });
@@ -47,12 +47,12 @@ pub fn build(b: *std.Build) !void {
     const optimize = b.standardOptimizeOption(.{});
 
     const module = b.addModule("steamworks", .{
-        .source_file = .{ .path = "src/main.zig" },
+        .root_source_file = .{ .path = "src/main.zig" },
     });
 
     var lib = b.addStaticLibrary(.{
         .name = "steamworks",
-        .root_source_file = .{ .path = "src/steam.cpp" },
+        // .root_source_file = .{ .path = "src/steam.cpp" },
         .target = target,
         .optimize = optimize,
     });
@@ -69,9 +69,9 @@ pub fn build(b: *std.Build) !void {
 
     addLibraryPath(lib);
 
-    if (lib.target.os_tag != null and lib.target.os_tag.? == .windows) {
-        lib.linkSystemLibraryNeeded("sdkencryptedappticket64");
-        lib.linkSystemLibraryNeeded("steam_api64");
+    if (lib.root_module.resolved_target != null and lib.root_module.resolved_target.?.result.os.tag == .windows) {
+        lib.linkSystemLibrary("sdkencryptedappticket64");
+        lib.linkSystemLibrary("steam_api64");
     } else {
         lib.linkSystemLibrary("sdkencryptedappticket");
         lib.linkSystemLibrary("steam_api");
@@ -92,7 +92,7 @@ pub fn build(b: *std.Build) !void {
     try build_aux_cli(b, target, optimize, lib);
 }
 
-fn build_example_project(b: *std.Build, module: *std.Build.Module, target: std.zig.CrossTarget, optimize: std.builtin.Mode, lib: *std.build.Step.Compile) !void {
+fn build_example_project(b: *std.Build, module: *std.Build.Module, target: std.Build.ResolvedTarget, optimize: std.builtin.Mode, lib: *std.Build.Step.Compile) !void {
     const test_exe = b.addExecutable(.{
         .name = "example",
         // In this case the main source file is merely a path, however, in more
@@ -108,11 +108,11 @@ fn build_example_project(b: *std.Build, module: *std.Build.Module, target: std.z
     // standard location when the user invokes the "install" step (the default
     // step when running `zig build`).
     b.installArtifact(test_exe);
-    test_exe.addModule("steamworks", module);
+    test_exe.root_module.addImport("steamworks", module);
     test_exe.linkLibrary(lib);
 }
 
-fn build_aux_cli(b: *std.Build, target: std.zig.CrossTarget, optimize: std.builtin.Mode, lib: *std.build.Step.Compile) !void {
+fn build_aux_cli(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode, lib: *std.Build.Step.Compile) !void {
     const test_exe = b.addExecutable(.{
         .name = "aux-cli",
         .target = target,
@@ -143,19 +143,19 @@ fn build_aux_cli(b: *std.Build, target: std.zig.CrossTarget, optimize: std.built
     run_step.dependOn(&b.addInstallArtifact(test_exe, .{}).step);
 }
 
-fn test_step(b: *std.Build, module: *std.Build.Module, target: std.zig.CrossTarget, optimize: std.builtin.Mode, lib: *std.build.Step.Compile) !void {
+fn test_step(b: *std.Build, module: *std.Build.Module, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode, lib: *std.Build.Step.Compile) !void {
     const main_tests = b.addTest(.{
         .root_source_file = .{ .path = if (builtin.os.tag == .windows) "src/tests-win.zig" else "src/tests-unix.zig" },
         .target = target,
         .optimize = optimize,
     });
 
-    main_tests.addModule("steamworks", module);
+    main_tests.root_module.addImport("steamworks", module);
     main_tests.linkLibrary(lib);
 
     addLibraryPath(main_tests);
 
-    if (main_tests.target.os_tag == null or main_tests.target.os_tag.? == .linux) {
+    if (main_tests.root_module.resolved_target == null or main_tests.root_module.resolved_target.?.result.os.tag == .linux) {
         // since .so files are not copied to the test binary folder, we specify an extra rpath for these
         main_tests.addRPath(.{ .path = sdkPath("/steamworks/public/steam/lib/linux64") });
         main_tests.addRPath(.{ .path = sdkPath("/steamworks/redistributable_bin/linux64") });

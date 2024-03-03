@@ -182,7 +182,7 @@ pub fn from_slice(comptime T: anytype, slice: []const u8) T {
   
   pub fn from_slice_debug(comptime T: anytype, slice: []const u8) T {
     var ret: T = std.mem.zeroes(T);
-    var retP = &ret;
+    const retP = &ret;
     
     const struct_info = @typeInfo(T).Struct;
     if (struct_info.layout == .Extern) {
@@ -200,11 +200,11 @@ pub fn from_slice(comptime T: anytype, slice: []const u8) T {
       }
       
       if (!@inComptime()) {
-        var fast_method_result = from_slice(T, slice);
-        var fast_method_fmt = std.fmt.allocPrint(std.heap.c_allocator, "{any}", .{fast_method_result}) catch unreachable;
-        var slow_method_fmt = std.fmt.allocPrint(std.heap.c_allocator, "{any}", .{ret}) catch unreachable;
+        const fast_method_result = from_slice(T, slice);
+        const fast_method_fmt = std.fmt.allocPrint(std.heap.c_allocator, "{any}", .{fast_method_result}) catch unreachable;
+        const slow_method_fmt = std.fmt.allocPrint(std.heap.c_allocator, "{any}", .{ret}) catch unreachable;
         
-        var are_different = !std.mem.eql(u8, fast_method_fmt, slow_method_fmt);
+        const are_different = !std.mem.eql(u8, fast_method_fmt, slow_method_fmt);
         
         // finally, print a warning if the serialization differs from what we received.
         // it is important not to miss this logs and review each struct's alignment. eventually, all

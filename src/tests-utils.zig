@@ -41,8 +41,8 @@ pub fn bytes_from_slice(slice: []const u8) []const u8 {
     @setEvalBranchQuota(10000);
     var bytes: [slice.len / 2]u8 = std.mem.zeroes([slice.len / 2]u8);
     for (slice, 0..) |char, index| {
-        var shift: u3 = if (@rem(index, 2) == 0) 4 else 0;
-        var pos: usize = @divFloor(index, 2);
+        const shift: u3 = if (@rem(index, 2) == 0) 4 else 0;
+        const pos: usize = @divFloor(index, 2);
         bytes[pos] = bytes[pos] | try charToInt(char) << shift;
     }
     return &bytes;
