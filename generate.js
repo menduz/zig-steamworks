@@ -168,7 +168,7 @@ fn from_callback(comptime T: anytype, callback: *const CallbackMsg_t) T {
 // this should be the definitive version of the function. that we are going to use after all alignment issues are resolved
 pub fn from_slice(comptime T: anytype, slice: []const u8) T {
   const struct_info = @typeInfo(T).Struct;
-  if (struct_info.layout == .Extern) {
+  if (struct_info.layout == .@"extern") {
     const max_size = @sizeOf(T);
       if (max_size < slice.len) {
         return @as(*T, @constCast(@ptrCast(@alignCast(slice[0..max_size])))).*;
@@ -185,7 +185,7 @@ pub fn from_slice(comptime T: anytype, slice: []const u8) T {
     const retP = &ret;
     
     const struct_info = @typeInfo(T).Struct;
-    if (struct_info.layout == .Extern) {
+    if (struct_info.layout == .@"extern") {
       // the following would be ideal, mostly because it performs way fewer branches
       // -> (&ret).* = @as(*T, @ptrCast(@alignCast(slice))).*;
       // but instead, we must specialize this function with an inline for to account for data types
