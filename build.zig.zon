@@ -1,0 +1,13 @@
+.{
+    .name = "zig-steamworks",
+    .version = "0.0.0",
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "libs",
+        "src",
+        "steamworks",
+        "README.md",
+    },
+    .dependencies = .{},
+}
