@@ -20,11 +20,11 @@ pub const MASTERSERVERUPDATERPORT_USEGAMESOCKETSHARE = 0xFFFF;
 //         A future version of the SDK will remove this argument.
 // - usGamePort is the port that clients will connect to for gameplay.
 // - usQueryPort is the port that will manage server browser related duties and info
-//		pings from clients.  If you pass MASTERSERVERUPDATERPORT_USEGAMESOCKETSHARE for usQueryPort, then it
-//		will use "GameSocketShare" mode, which means that the game is responsible for sending and receiving
-//		UDP packets for the master  server updater. See references to GameSocketShare in isteamgameserver.h.
+//      pings from clients.  If you pass MASTERSERVERUPDATERPORT_USEGAMESOCKETSHARE for usQueryPort, then it
+//      will use "GameSocketShare" mode, which means that the game is responsible for sending and receiving
+//      UDP packets for the master  server updater. See references to GameSocketShare in isteamgameserver.h.
 // - The version string is usually in the form x.x.x.x, and is used by the master server to detect when the
-//		server is out of date.  (Only servers with the latest version will be listed.)
+//      server is out of date.  (Only servers with the latest version will be listed.)
 pub extern fn SteamInternal_GameServer_Init(unIP: steam.uint32, usLegacySteamPort: u16, usGamePort: steam.uint16, usQueryPort: steam.uint16, eServerMode: steam.EServerMode, pchVersionString: [*c]const u8) callconv(.C) bool;
 
 // Shutdown SteamGameSeverXxx interfaces, log out, and free resources.

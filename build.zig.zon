@@ -1,6 +1,7 @@
 .{
-    .name = "zig-steamworks",
+    .name = .zig_steamworks,
     .version = "0.0.0",
+    .fingerprint = 0x565fc0dcfb985f40,
     .paths = .{
         "build.zig",
         "build.zig.zon",
