@@ -50,9 +50,9 @@ pub extern fn SteamAPI_WriteMiniDump(uStructuredExceptionCode: u32, pvExceptionI
 pub extern fn SteamAPI_SetMiniDumpComment(pchMsg: [*c]const u8) callconv(.C) void;
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
-//	steamclient.dll private wrapper functions
+//  steamclient.dll private wrapper functions
 //
-//	The following functions are part of abstracting API access to the steamclient.dll, but should only be used in very specific cases
+//  The following functions are part of abstracting API access to the steamclient.dll, but should only be used in very specific cases
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 /// SteamAPI_IsSteamRunning() returns true if Steam is currently running
@@ -748,7 +748,7 @@ fn from_callback(comptime T: anytype, callback: *const CallbackMsg_t) T {
 
 // this should be the definitive version of the function. that we are going to use after all alignment issues are resolved
 pub fn from_slice(comptime T: anytype, slice: []const u8) T {
-    const struct_info = @typeInfo(T).Struct;
+    const struct_info = @typeInfo(T).@"struct";
     if (struct_info.layout == .@"extern") {
         const max_size = @sizeOf(T);
         if (max_size < slice.len) {
@@ -765,7 +765,7 @@ pub fn from_slice_debug(comptime T: anytype, slice: []const u8) T {
     var ret: T = std.mem.zeroes(T);
     const retP = &ret;
 
-    const struct_info = @typeInfo(T).Struct;
+    const struct_info = @typeInfo(T).@"struct";
     if (struct_info.layout == .@"extern") {
         // the following would be ideal, mostly because it performs way fewer branches
         // -> (&ret).* = @as(*T, @ptrCast(@alignCast(slice))).*;

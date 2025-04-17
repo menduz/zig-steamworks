@@ -110,7 +110,7 @@ pub fn check_callbacks_sizes() !void {
 
         if (print) {
             std.debug.print("  fields:\n", .{});
-            inline for (@typeInfo(T).Struct.fields, 0..) |field, i| {
+            inline for (@typeInfo(T).@"struct".fields, 0..) |field, i| {
                 std.debug.print("    {s} align \tC: {d}\t Zig: {d}\n", .{ field.name, steam_callback_align_field(cb_id, @intCast(i)), field.alignment });
             }
         }
