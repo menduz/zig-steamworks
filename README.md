@@ -17,24 +17,34 @@ Due to licence agreements, you must bring your own SDK. This project assumes it 
 
 ```zig
 // build.zig
-const zig_steamworks = @import("zig-steamworks/linker.zig");
+const zig_steamworks = @import("zig_steamworks");
 
-fn main() !void { 
+pub fn build(b: *std.Build) !void {
+  // create a module
+  const exe_mod = b.createModule( ... );
+
+  // add the library as a dependency
+  const steamworks_lib = b.dependency("zig_steamworks", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
+  // add zig import and link static library
+  exe_mod.addImport("steamworks", steamworks_lib.module("steamworks"));
+  exe_mod.linkLibrary(steamworks_lib.artifact("steamworks"));
+
   // ...
   const exe = b.addExecutable( ... );
 
-  // link steamworks to this executable
-  _ = try zig_steamworks.linkSteamLibrary(b, exe, "steamworks");
-  //                   relative path to steamworks ^^^^^^^^^^
-
-  // you must include the steam_appid.txt file in your final directory
-  try zig_steamworks.copy(comptime zig_steamworks.thisDir() ++ "/src", "zig-out/bin", "steam_appid.txt");
+  zig_steamworks.addLibraryPath(steamworks_lib.builder, exe);
 }
 ```
 
 # Build it
 
 For convenience, this repository offers already built bindings for Zig in the `src` folder. Until Zig modules and package manager are mature, the recommended course of action is to copy these files into your project.
+In this case, you'll need to manually link the steamapi dlls and headers in your own build.zig file.
+Alternatively, you can use `zig fetch --save git+https://github.com/menduz/zig-steamworks` or `zig fetch --save /path/to/local/zig-steamworks`, and include it as a dependency as outlined above
 
 To re-build the files run the following command
 
@@ -46,7 +56,7 @@ node generate.js path_to_steamworks/public/steam/steam_api.json
 
 ```zig
 const std = @import("std");
-const steam = @import("steam.zig");
+const steam = @import("steamworks");
 
 /// callback hook for debug text emitted from the Steam API
 pub fn SteamAPIDebugTextHook(nSeverity: c_int, pchDebugText: [*c]const u8) callconv(.C) void {
