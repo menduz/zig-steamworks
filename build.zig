@@ -6,7 +6,7 @@ const builtin = @import("builtin");
 pub fn addLibraryPath(b: *std.Build, compile: *std.Build.Step.Compile) void {
     if (compile.root_module.resolved_target != null and compile.root_module.resolved_target.?.result.os.tag == .macos) {
         compile.step.dependOn(&compile.step.owner.addInstallBinFile(b.path("steamworks/redistributable_bin/osx/libsteam_api.dylib"), "libsteam_api.dylib").step);
-        compile.step.dependOn(&compile.step.owner.addInstallLibFile(b.path("steamworks/public/steam/lib/osx/libsdkencryptedappticket.dylib"), "libsdkencryptedappticket.dylib").step);
+        compile.step.dependOn(&compile.step.owner.addInstallBinFile(b.path("steamworks/public/steam/lib/osx/libsdkencryptedappticket.dylib"), "libsdkencryptedappticket.dylib").step);
 
         compile.addLibraryPath(b.path("steamworks/public/steam/lib/osx"));
         compile.addLibraryPath(b.path("steamworks/redistributable_bin/osx"));
