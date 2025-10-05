@@ -77,15 +77,15 @@ out.push(`
 
 /// SteamAPI_Init must be called before using any other API functions. If it fails, an
 /// error message will be output to the debugger (or stderr) with further information.
-pub extern fn SteamAPI_Init() callconv(.C) bool;
+pub extern fn SteamAPI_Init() callconv(.c) bool;
 
 /// SteamAPI_Shutdown should be called during process shutdown if possible.
-pub extern fn SteamAPI_Shutdown() callconv(.C) void;
+pub extern fn SteamAPI_Shutdown() callconv(.c) void;
 
-pub extern fn SteamAPI_GetHSteamPipe() callconv(.C) HSteamPipe;
-pub extern fn SteamAPI_GetHSteamUser() callconv(.C) HSteamPipe;
-pub extern fn SteamGameServer_GetHSteamPipe() callconv(.C) HSteamPipe;
-pub extern fn SteamGameServer_GetHSteamUser() callconv(.C) HSteamPipe;
+pub extern fn SteamAPI_GetHSteamPipe() callconv(.c) HSteamPipe;
+pub extern fn SteamAPI_GetHSteamUser() callconv(.c) HSteamPipe;
+pub extern fn SteamGameServer_GetHSteamPipe() callconv(.c) HSteamPipe;
+pub extern fn SteamGameServer_GetHSteamUser() callconv(.c) HSteamPipe;
 
 // SteamAPI_RestartAppIfNecessary ensures that your executable was launched through Steam.
 //
@@ -97,18 +97,18 @@ pub extern fn SteamGameServer_GetHSteamUser() callconv(.C) HSteamPipe;
 //
 // NOTE: If you use the Steam DRM wrapper on your primary executable file, this check is unnecessary
 // since the DRM wrapper will ensure that your application was launched properly through Steam.
-pub extern fn SteamAPI_RestartAppIfNecessary( unOwnAppID: u32 ) callconv(.C) bool;
+pub extern fn SteamAPI_RestartAppIfNecessary( unOwnAppID: u32 ) callconv(.c) bool;
 
 // Many Steam API functions allocate a small amount of thread-local memory for parameter storage.
 // SteamAPI_ReleaseCurrentThreadMemory() will free API memory associated with the calling thread.
 // This function is also called automatically by SteamAPI_RunCallbacks(), so a single-threaded
 // program never needs to explicitly call this function.
-pub extern fn SteamAPI_ReleaseCurrentThreadMemory() callconv(.C) void;
+pub extern fn SteamAPI_ReleaseCurrentThreadMemory() callconv(.c) void;
 
 
 // crash dump recording functions
-pub extern fn SteamAPI_WriteMiniDump( uStructuredExceptionCode: u32, pvExceptionInfo: [*c]const u8, uBuildID: u32 ) callconv(.C) void;
-pub extern fn SteamAPI_SetMiniDumpComment( pchMsg: [*c]const u8 ) callconv(.C) void;
+pub extern fn SteamAPI_WriteMiniDump( uStructuredExceptionCode: u32, pvExceptionInfo: [*c]const u8, uBuildID: u32 ) callconv(.c) void;
+pub extern fn SteamAPI_SetMiniDumpComment( pchMsg: [*c]const u8 ) callconv(.c) void;
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 //	steamclient.dll private wrapper functions
@@ -117,18 +117,18 @@ pub extern fn SteamAPI_SetMiniDumpComment( pchMsg: [*c]const u8 ) callconv(.C) v
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 /// SteamAPI_IsSteamRunning() returns true if Steam is currently running
-pub extern fn SteamAPI_IsSteamRunning() callconv(.C) bool;
+pub extern fn SteamAPI_IsSteamRunning() callconv(.c) bool;
 
 /// sets whether or not Steam_RunCallbacks() should do a try {} catch (...) {} around calls to issuing callbacks
 /// This is ignored if you are using the manual callback dispatch method
-pub extern fn SteamAPI_SetTryCatchCallbacks( bTryCatchCallbacks: bool ) callconv(.C) void;
+pub extern fn SteamAPI_SetTryCatchCallbacks( bTryCatchCallbacks: bool ) callconv(.c) void;
 
 /// Inform the API that you wish to use manual event dispatch.  This must be called after SteamAPI_Init, but before
 /// you use any of the other manual dispatch functions below.
-pub extern fn SteamAPI_ManualDispatch_Init() callconv(.C) void;
+pub extern fn SteamAPI_ManualDispatch_Init() callconv(.c) void;
 
 /// Perform certain periodic actions that need to be performed.
-pub extern fn SteamAPI_ManualDispatch_RunFrame(hSteamPipe: HSteamPipe) callconv(.C) void;
+pub extern fn SteamAPI_ManualDispatch_RunFrame(hSteamPipe: HSteamPipe) callconv(.c) void;
 
 /// Internal structure used in manual callback dispatch
 pub const CallbackMsg_t = extern struct  {
@@ -244,16 +244,16 @@ pub const DigitalAnalogAction_t = extern struct {
 /// Fetch the next pending callback on the given pipe, if any.  If a callback is available, true is returned
 /// and the structure is populated.  In this case, you MUST call SteamAPI_ManualDispatch_FreeLastCallback
 /// (after dispatching the callback) before calling SteamAPI_ManualDispatch_GetNextCallback again.
-pub extern fn SteamAPI_ManualDispatch_GetNextCallback(hSteamPipe: HSteamPipe, pCallbackMsg: [*c]CallbackMsg_t) callconv(.C) bool;
+pub extern fn SteamAPI_ManualDispatch_GetNextCallback(hSteamPipe: HSteamPipe, pCallbackMsg: [*c]CallbackMsg_t) callconv(.c) bool;
 
 /// You must call this after dispatching the callback, if SteamAPI_ManualDispatch_GetNextCallback returns true.
-pub extern fn SteamAPI_ManualDispatch_FreeLastCallback(hSteamPipe: HSteamPipe) callconv(.C) void;
+pub extern fn SteamAPI_ManualDispatch_FreeLastCallback(hSteamPipe: HSteamPipe) callconv(.c) void;
 
 /// Return the call result for the specified call on the specified pipe.  You really should
 /// only call this in a handler for SteamAPICallCompleted_t callback.
 pub extern fn SteamAPI_ManualDispatch_GetAPICallResult(hSteamPipe: HSteamPipe, hSteamAPICall: SteamAPICall_t, result: [*c]u8, size: u32, iCallbackExpected: i32, pbFailed: *bool) bool;
 
-extern fn CustomSteamClientGetter() callconv(.C) [*c]ISteamClient;
+extern fn CustomSteamClientGetter() callconv(.c) [*c]ISteamClient;
 pub fn SteamClient() ISteamClient {
   return ISteamClient{ .ptr = CustomSteamClientGetter() };
 }
@@ -549,7 +549,7 @@ function printFns(structName, data) {
         ...originalParams
       ]
 
-      out.push(`extern fn ${_.methodname_flat}(${params.join(', ')}) callconv(.C) ${convertType(_.returntype, true)};`)
+      out.push(`extern fn ${_.methodname_flat}(${params.join(', ')}) callconv(.c) ${convertType(_.returntype, true)};`)
     })
   }
 }
@@ -677,7 +677,7 @@ out.push(`\n// Interfaces`)
 data.interfaces.forEach(_ => {
 
   _.accessors?.forEach(a => {
-    out.push(`extern fn ${a.name_flat}() callconv(.C) [*c]${_.classname};`)
+    out.push(`extern fn ${a.name_flat}() callconv(.c) [*c]${_.classname};`)
 
     out.push(`/// ${a.kind}`)
     out.push(`pub fn ${a.name}() ${_.classname} {`)
@@ -753,14 +753,14 @@ function convertType(t, isFnSignature) {
   if (t && t.startsWith('void (*)')) {
     const middle = /\(([^\(]*)\)$/.exec(t)
     const types = middle ? middle[1].split(/\s*,\s*/g) : []
-    return `?*const fn (${types.map(_ => convertType(_, true)).join(',')}) callconv(.C) void`
+    return `?*const fn (${types.map(_ => convertType(_, true)).join(',')}) callconv(.c) void`
   }
 
   { // char[123]
     const slice = /([a-z0-9_]+)\s*\[(\d+)\]/i
     const r = slice.exec(t)
     if (r) {
-      // const size slices are incompatible with callconv(.C), use a regular poinnter instead.
+      // const size slices are incompatible with callconv(.c), use a regular poinnter instead.
       // the caller must ensure the pointer has the right size
       if (isFnSignature)
         return `[*c]${convertType(r[1])}`

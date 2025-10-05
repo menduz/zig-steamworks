@@ -9,23 +9,23 @@ pub const StructPackSize = 4;
 pub const CSteamID = u64;
 pub const intptr_t = ?*anyopaque;
 pub const size_t = isize;
-pub const SteamAPIWarningMessageHook_t = ?*const fn (i32, [*c]const u8) callconv(.C) void;
-pub const SteamAPI_CheckCallbackRegistered_t = ?*const fn (i32) callconv(.C) void;
+pub const SteamAPIWarningMessageHook_t = ?*const fn (i32, [*c]const u8) callconv(.c) void;
+pub const SteamAPI_CheckCallbackRegistered_t = ?*const fn (i32) callconv(.c) void;
 pub const SteamDatagramRelayAuthTicket = ?*anyopaque;
 pub const ISteamNetworkingConnectionSignaling = ?*anyopaque;
 pub const ISteamNetworkingSignalingRecvContext = ?*anyopaque;
 
 /// SteamAPI_Init must be called before using any other API functions. If it fails, an
 /// error message will be output to the debugger (or stderr) with further information.
-pub extern fn SteamAPI_Init() callconv(.C) bool;
+pub extern fn SteamAPI_Init() callconv(.c) bool;
 
 /// SteamAPI_Shutdown should be called during process shutdown if possible.
-pub extern fn SteamAPI_Shutdown() callconv(.C) void;
+pub extern fn SteamAPI_Shutdown() callconv(.c) void;
 
-pub extern fn SteamAPI_GetHSteamPipe() callconv(.C) HSteamPipe;
-pub extern fn SteamAPI_GetHSteamUser() callconv(.C) HSteamPipe;
-pub extern fn SteamGameServer_GetHSteamPipe() callconv(.C) HSteamPipe;
-pub extern fn SteamGameServer_GetHSteamUser() callconv(.C) HSteamPipe;
+pub extern fn SteamAPI_GetHSteamPipe() callconv(.c) HSteamPipe;
+pub extern fn SteamAPI_GetHSteamUser() callconv(.c) HSteamPipe;
+pub extern fn SteamGameServer_GetHSteamPipe() callconv(.c) HSteamPipe;
+pub extern fn SteamGameServer_GetHSteamUser() callconv(.c) HSteamPipe;
 
 // SteamAPI_RestartAppIfNecessary ensures that your executable was launched through Steam.
 //
@@ -37,17 +37,17 @@ pub extern fn SteamGameServer_GetHSteamUser() callconv(.C) HSteamPipe;
 //
 // NOTE: If you use the Steam DRM wrapper on your primary executable file, this check is unnecessary
 // since the DRM wrapper will ensure that your application was launched properly through Steam.
-pub extern fn SteamAPI_RestartAppIfNecessary(unOwnAppID: u32) callconv(.C) bool;
+pub extern fn SteamAPI_RestartAppIfNecessary(unOwnAppID: u32) callconv(.c) bool;
 
 // Many Steam API functions allocate a small amount of thread-local memory for parameter storage.
 // SteamAPI_ReleaseCurrentThreadMemory() will free API memory associated with the calling thread.
 // This function is also called automatically by SteamAPI_RunCallbacks(), so a single-threaded
 // program never needs to explicitly call this function.
-pub extern fn SteamAPI_ReleaseCurrentThreadMemory() callconv(.C) void;
+pub extern fn SteamAPI_ReleaseCurrentThreadMemory() callconv(.c) void;
 
 // crash dump recording functions
-pub extern fn SteamAPI_WriteMiniDump(uStructuredExceptionCode: u32, pvExceptionInfo: [*c]const u8, uBuildID: u32) callconv(.C) void;
-pub extern fn SteamAPI_SetMiniDumpComment(pchMsg: [*c]const u8) callconv(.C) void;
+pub extern fn SteamAPI_WriteMiniDump(uStructuredExceptionCode: u32, pvExceptionInfo: [*c]const u8, uBuildID: u32) callconv(.c) void;
+pub extern fn SteamAPI_SetMiniDumpComment(pchMsg: [*c]const u8) callconv(.c) void;
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 //  steamclient.dll private wrapper functions
@@ -56,18 +56,18 @@ pub extern fn SteamAPI_SetMiniDumpComment(pchMsg: [*c]const u8) callconv(.C) voi
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 /// SteamAPI_IsSteamRunning() returns true if Steam is currently running
-pub extern fn SteamAPI_IsSteamRunning() callconv(.C) bool;
+pub extern fn SteamAPI_IsSteamRunning() callconv(.c) bool;
 
 /// sets whether or not Steam_RunCallbacks() should do a try {} catch (...) {} around calls to issuing callbacks
 /// This is ignored if you are using the manual callback dispatch method
-pub extern fn SteamAPI_SetTryCatchCallbacks(bTryCatchCallbacks: bool) callconv(.C) void;
+pub extern fn SteamAPI_SetTryCatchCallbacks(bTryCatchCallbacks: bool) callconv(.c) void;
 
 /// Inform the API that you wish to use manual event dispatch.  This must be called after SteamAPI_Init, but before
 /// you use any of the other manual dispatch functions below.
-pub extern fn SteamAPI_ManualDispatch_Init() callconv(.C) void;
+pub extern fn SteamAPI_ManualDispatch_Init() callconv(.c) void;
 
 /// Perform certain periodic actions that need to be performed.
-pub extern fn SteamAPI_ManualDispatch_RunFrame(hSteamPipe: HSteamPipe) callconv(.C) void;
+pub extern fn SteamAPI_ManualDispatch_RunFrame(hSteamPipe: HSteamPipe) callconv(.c) void;
 
 /// Internal structure used in manual callback dispatch
 pub const CallbackMsg_t = extern struct {
@@ -791,9 +791,9 @@ pub fn from_slice_debug(comptime T: anytype, slice: []const u8) T {
             // it is important not to miss this logs and review each struct's alignment. eventually, all
             // structs will be corrected
             if (are_different or slice.len != @sizeOf(T)) {
-                std.debug.print(" 🚨 Final serializations:\n     struct: {}\n    message: {}\n       slow: {any}\n       fast: {any}\n", .{
-                    std.fmt.fmtSliceHexLower(std.mem.asBytes(retP)),
-                    std.fmt.fmtSliceHexLower(slice),
+                std.debug.print(" 🚨 Final serializations:\n     struct: {x}\n    message: {x}\n       slow: {any}\n       fast: {any}\n", .{
+                    std.mem.asBytes(retP),
+                    slice,
                     ret,
                     fast_method_result,
                 });
@@ -825,16 +825,16 @@ pub const DigitalAnalogAction_t = extern struct {
 /// Fetch the next pending callback on the given pipe, if any.  If a callback is available, true is returned
 /// and the structure is populated.  In this case, you MUST call SteamAPI_ManualDispatch_FreeLastCallback
 /// (after dispatching the callback) before calling SteamAPI_ManualDispatch_GetNextCallback again.
-pub extern fn SteamAPI_ManualDispatch_GetNextCallback(hSteamPipe: HSteamPipe, pCallbackMsg: [*c]CallbackMsg_t) callconv(.C) bool;
+pub extern fn SteamAPI_ManualDispatch_GetNextCallback(hSteamPipe: HSteamPipe, pCallbackMsg: [*c]CallbackMsg_t) callconv(.c) bool;
 
 /// You must call this after dispatching the callback, if SteamAPI_ManualDispatch_GetNextCallback returns true.
-pub extern fn SteamAPI_ManualDispatch_FreeLastCallback(hSteamPipe: HSteamPipe) callconv(.C) void;
+pub extern fn SteamAPI_ManualDispatch_FreeLastCallback(hSteamPipe: HSteamPipe) callconv(.c) void;
 
 /// Return the call result for the specified call on the specified pipe.  You really should
 /// only call this in a handler for SteamAPICallCompleted_t callback.
 pub extern fn SteamAPI_ManualDispatch_GetAPICallResult(hSteamPipe: HSteamPipe, hSteamAPICall: SteamAPICall_t, result: [*c]u8, size: u32, iCallbackExpected: i32, pbFailed: *bool) bool;
 
-extern fn CustomSteamClientGetter() callconv(.C) [*c]ISteamClient;
+extern fn CustomSteamClientGetter() callconv(.c) [*c]ISteamClient;
 pub fn SteamClient() ISteamClient {
     return ISteamClient{ .ptr = CustomSteamClientGetter() };
 }
@@ -859,7 +859,7 @@ pub const SteamAPICall_t = u64;
 pub const AccountID_t = u32;
 pub const PartyBeaconID_t = u64;
 pub const HAuthTicket = u32;
-pub const PFNPreMinidumpCallback = ?*const fn ([*c]u8) callconv(.C) void;
+pub const PFNPreMinidumpCallback = ?*const fn ([*c]u8) callconv(.c) void;
 pub const HSteamPipe = i32;
 pub const HSteamUser = i32;
 pub const FriendsGroupID_t = i16;
@@ -880,7 +880,7 @@ pub const InputHandle_t = u64;
 pub const InputActionSetHandle_t = u64;
 pub const InputDigitalActionHandle_t = u64;
 pub const InputAnalogActionHandle_t = u64;
-pub const SteamInputActionEventCallbackPointer = ?*const fn ([*c]SteamInputActionEvent_t) callconv(.C) void;
+pub const SteamInputActionEventCallbackPointer = ?*const fn ([*c]SteamInputActionEvent_t) callconv(.c) void;
 pub const ControllerHandle_t = u64;
 pub const ControllerActionSetHandle_t = u64;
 pub const ControllerDigitalActionHandle_t = u64;
@@ -893,19 +893,19 @@ pub const SteamItemDef_t = i32;
 pub const SteamInventoryResult_t = i32;
 pub const SteamInventoryUpdateHandle_t = u64;
 pub const RemotePlaySessionID_t = u32;
-pub const FnSteamNetConnectionStatusChanged = ?*const fn ([*c]SteamNetConnectionStatusChangedCallback_t) callconv(.C) void;
-pub const FnSteamNetAuthenticationStatusChanged = ?*const fn ([*c]SteamNetAuthenticationStatus_t) callconv(.C) void;
-pub const FnSteamRelayNetworkStatusChanged = ?*const fn ([*c]SteamRelayNetworkStatus_t) callconv(.C) void;
-pub const FnSteamNetworkingMessagesSessionRequest = ?*const fn ([*c]SteamNetworkingMessagesSessionRequest_t) callconv(.C) void;
-pub const FnSteamNetworkingMessagesSessionFailed = ?*const fn ([*c]SteamNetworkingMessagesSessionFailed_t) callconv(.C) void;
-pub const FnSteamNetworkingFakeIPResult = ?*const fn ([*c]SteamNetworkingFakeIPResult_t) callconv(.C) void;
+pub const FnSteamNetConnectionStatusChanged = ?*const fn ([*c]SteamNetConnectionStatusChangedCallback_t) callconv(.c) void;
+pub const FnSteamNetAuthenticationStatusChanged = ?*const fn ([*c]SteamNetAuthenticationStatus_t) callconv(.c) void;
+pub const FnSteamRelayNetworkStatusChanged = ?*const fn ([*c]SteamRelayNetworkStatus_t) callconv(.c) void;
+pub const FnSteamNetworkingMessagesSessionRequest = ?*const fn ([*c]SteamNetworkingMessagesSessionRequest_t) callconv(.c) void;
+pub const FnSteamNetworkingMessagesSessionFailed = ?*const fn ([*c]SteamNetworkingMessagesSessionFailed_t) callconv(.c) void;
+pub const FnSteamNetworkingFakeIPResult = ?*const fn ([*c]SteamNetworkingFakeIPResult_t) callconv(.c) void;
 pub const HSteamNetConnection = u32;
 pub const HSteamListenSocket = u32;
 pub const HSteamNetPollGroup = u32;
 pub const SteamNetworkingErrMsg = [1024]u8;
 pub const SteamNetworkingPOPID = u32;
 pub const SteamNetworkingMicroseconds = i64;
-pub const FSteamNetworkingSocketsDebugOutput = ?*const fn (ESteamNetworkingSocketsDebugOutputType, [*c]const u8) callconv(.C) void;
+pub const FSteamNetworkingSocketsDebugOutput = ?*const fn (ESteamNetworkingSocketsDebugOutputType, [*c]const u8) callconv(.c) void;
 
 // Callbacks
 /// callbackId = 101
@@ -5173,7 +5173,7 @@ pub const SteamIPAddress_t = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_SteamIPAddress_t_IsSet(self: ?*anyopaque) callconv(.C) bool;
+extern fn SteamAPI_SteamIPAddress_t_IsSet(self: ?*anyopaque) callconv(.c) bool;
 pub const FriendGameInfo_t = extern struct {
     m_gameID: CGameID align(1),
     m_unGameIP: uint32 align(4) = 0,
@@ -5198,7 +5198,7 @@ pub const MatchMakingKeyValuePair_t = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_MatchMakingKeyValuePair_t_Construct(self: ?*anyopaque) callconv(.C) void;
+extern fn SteamAPI_MatchMakingKeyValuePair_t_Construct(self: ?*anyopaque) callconv(.c) void;
 pub const servernetadr_t = extern struct {
     m_usConnectionPort: uint16 align(2) = 0,
     m_usQueryPort: uint16 align(2) = 0,
@@ -5258,18 +5258,18 @@ pub const servernetadr_t = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_servernetadr_t_Construct(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_servernetadr_t_Init(self: ?*anyopaque, ip: u32, usQueryPort: uint16, usConnectionPort: uint16) callconv(.C) void;
-extern fn SteamAPI_servernetadr_t_GetQueryPort(self: ?*anyopaque) callconv(.C) uint16;
-extern fn SteamAPI_servernetadr_t_SetQueryPort(self: ?*anyopaque, usPort: uint16) callconv(.C) void;
-extern fn SteamAPI_servernetadr_t_GetConnectionPort(self: ?*anyopaque) callconv(.C) uint16;
-extern fn SteamAPI_servernetadr_t_SetConnectionPort(self: ?*anyopaque, usPort: uint16) callconv(.C) void;
-extern fn SteamAPI_servernetadr_t_GetIP(self: ?*anyopaque) callconv(.C) uint32;
-extern fn SteamAPI_servernetadr_t_SetIP(self: ?*anyopaque, unIP: uint32) callconv(.C) void;
-extern fn SteamAPI_servernetadr_t_GetConnectionAddressString(self: ?*anyopaque) callconv(.C) [*c]const u8;
-extern fn SteamAPI_servernetadr_t_GetQueryAddressString(self: ?*anyopaque) callconv(.C) [*c]const u8;
-extern fn SteamAPI_servernetadr_t_IsLessThan(self: ?*anyopaque, netadr: [*c]const servernetadr_t) callconv(.C) bool;
-extern fn SteamAPI_servernetadr_t_Assign(self: ?*anyopaque, that: [*c]const servernetadr_t) callconv(.C) void;
+extern fn SteamAPI_servernetadr_t_Construct(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_servernetadr_t_Init(self: ?*anyopaque, ip: u32, usQueryPort: uint16, usConnectionPort: uint16) callconv(.c) void;
+extern fn SteamAPI_servernetadr_t_GetQueryPort(self: ?*anyopaque) callconv(.c) uint16;
+extern fn SteamAPI_servernetadr_t_SetQueryPort(self: ?*anyopaque, usPort: uint16) callconv(.c) void;
+extern fn SteamAPI_servernetadr_t_GetConnectionPort(self: ?*anyopaque) callconv(.c) uint16;
+extern fn SteamAPI_servernetadr_t_SetConnectionPort(self: ?*anyopaque, usPort: uint16) callconv(.c) void;
+extern fn SteamAPI_servernetadr_t_GetIP(self: ?*anyopaque) callconv(.c) uint32;
+extern fn SteamAPI_servernetadr_t_SetIP(self: ?*anyopaque, unIP: uint32) callconv(.c) void;
+extern fn SteamAPI_servernetadr_t_GetConnectionAddressString(self: ?*anyopaque) callconv(.c) [*c]const u8;
+extern fn SteamAPI_servernetadr_t_GetQueryAddressString(self: ?*anyopaque) callconv(.c) [*c]const u8;
+extern fn SteamAPI_servernetadr_t_IsLessThan(self: ?*anyopaque, netadr: [*c]const servernetadr_t) callconv(.c) bool;
+extern fn SteamAPI_servernetadr_t_Assign(self: ?*anyopaque, that: [*c]const servernetadr_t) callconv(.c) void;
 pub const gameserveritem_t = extern struct {
     m_NetAdr: servernetadr_t align(4),
     m_nPing: i32 align(4) = 0,
@@ -5308,9 +5308,9 @@ pub const gameserveritem_t = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_gameserveritem_t_Construct(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_gameserveritem_t_GetName(self: ?*anyopaque) callconv(.C) [*c]const u8;
-extern fn SteamAPI_gameserveritem_t_SetName(self: ?*anyopaque, pName: [*c]const u8) callconv(.C) void;
+extern fn SteamAPI_gameserveritem_t_Construct(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_gameserveritem_t_GetName(self: ?*anyopaque) callconv(.c) [*c]const u8;
+extern fn SteamAPI_gameserveritem_t_SetName(self: ?*anyopaque, pName: [*c]const u8) callconv(.c) void;
 pub const SteamPartyBeaconLocation_t = extern struct {
     m_eType: ESteamPartyBeaconLocationType align(4) = ESteamPartyBeaconLocationType.k_ESteamPartyBeaconLocationType_Invalid,
     m_ulLocationID: uint64 align(StructPlatformPackSize) = 0,
@@ -5519,19 +5519,19 @@ pub const SteamNetworkingIPAddr = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_SteamNetworkingIPAddr_Clear(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_SteamNetworkingIPAddr_IsIPv6AllZeros(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_SteamNetworkingIPAddr_SetIPv6(self: ?*anyopaque, ipv6: [*c]const uint8, nPort: uint16) callconv(.C) void;
-extern fn SteamAPI_SteamNetworkingIPAddr_SetIPv4(self: ?*anyopaque, nIP: uint32, nPort: uint16) callconv(.C) void;
-extern fn SteamAPI_SteamNetworkingIPAddr_IsIPv4(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_SteamNetworkingIPAddr_GetIPv4(self: ?*anyopaque) callconv(.C) uint32;
-extern fn SteamAPI_SteamNetworkingIPAddr_SetIPv6LocalHost(self: ?*anyopaque, nPort: uint16) callconv(.C) void;
-extern fn SteamAPI_SteamNetworkingIPAddr_IsLocalHost(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_SteamNetworkingIPAddr_ToString(self: ?*anyopaque, buf: [*c]u8, cbBuf: uint32, bWithPort: bool) callconv(.C) void;
-extern fn SteamAPI_SteamNetworkingIPAddr_ParseString(self: ?*anyopaque, pszStr: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_SteamNetworkingIPAddr_IsEqualTo(self: ?*anyopaque, x: [*c]const SteamNetworkingIPAddr) callconv(.C) bool;
-extern fn SteamAPI_SteamNetworkingIPAddr_GetFakeIPType(self: ?*anyopaque) callconv(.C) ESteamNetworkingFakeIPType;
-extern fn SteamAPI_SteamNetworkingIPAddr_IsFakeIP(self: ?*anyopaque) callconv(.C) bool;
+extern fn SteamAPI_SteamNetworkingIPAddr_Clear(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_SteamNetworkingIPAddr_IsIPv6AllZeros(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_SteamNetworkingIPAddr_SetIPv6(self: ?*anyopaque, ipv6: [*c]const uint8, nPort: uint16) callconv(.c) void;
+extern fn SteamAPI_SteamNetworkingIPAddr_SetIPv4(self: ?*anyopaque, nIP: uint32, nPort: uint16) callconv(.c) void;
+extern fn SteamAPI_SteamNetworkingIPAddr_IsIPv4(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_SteamNetworkingIPAddr_GetIPv4(self: ?*anyopaque) callconv(.c) uint32;
+extern fn SteamAPI_SteamNetworkingIPAddr_SetIPv6LocalHost(self: ?*anyopaque, nPort: uint16) callconv(.c) void;
+extern fn SteamAPI_SteamNetworkingIPAddr_IsLocalHost(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_SteamNetworkingIPAddr_ToString(self: ?*anyopaque, buf: [*c]u8, cbBuf: uint32, bWithPort: bool) callconv(.c) void;
+extern fn SteamAPI_SteamNetworkingIPAddr_ParseString(self: ?*anyopaque, pszStr: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_SteamNetworkingIPAddr_IsEqualTo(self: ?*anyopaque, x: [*c]const SteamNetworkingIPAddr) callconv(.c) bool;
+extern fn SteamAPI_SteamNetworkingIPAddr_GetFakeIPType(self: ?*anyopaque) callconv(.c) ESteamNetworkingFakeIPType;
+extern fn SteamAPI_SteamNetworkingIPAddr_IsFakeIP(self: ?*anyopaque) callconv(.c) bool;
 pub const SteamNetworkingIdentity = extern struct {
     m_eType: ESteamNetworkingIdentityType align(1) = ESteamNetworkingIdentityType.k_ESteamNetworkingIdentityType_Invalid,
     m_cbSize: i32 align(1) = 0,
@@ -5657,33 +5657,33 @@ pub const SteamNetworkingIdentity = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_SteamNetworkingIdentity_Clear(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_SteamNetworkingIdentity_IsInvalid(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_SteamNetworkingIdentity_SetSteamID(self: ?*anyopaque, steamID: CSteamID) callconv(.C) void;
-extern fn SteamAPI_SteamNetworkingIdentity_GetSteamID(self: ?*anyopaque) callconv(.C) CSteamID;
-extern fn SteamAPI_SteamNetworkingIdentity_SetSteamID64(self: ?*anyopaque, steamID: uint64) callconv(.C) void;
-extern fn SteamAPI_SteamNetworkingIdentity_GetSteamID64(self: ?*anyopaque) callconv(.C) uint64;
-extern fn SteamAPI_SteamNetworkingIdentity_SetXboxPairwiseID(self: ?*anyopaque, pszString: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_SteamNetworkingIdentity_GetXboxPairwiseID(self: ?*anyopaque) callconv(.C) [*c]const u8;
-extern fn SteamAPI_SteamNetworkingIdentity_SetPSNID(self: ?*anyopaque, id: uint64) callconv(.C) void;
-extern fn SteamAPI_SteamNetworkingIdentity_GetPSNID(self: ?*anyopaque) callconv(.C) uint64;
-extern fn SteamAPI_SteamNetworkingIdentity_SetStadiaID(self: ?*anyopaque, id: uint64) callconv(.C) void;
-extern fn SteamAPI_SteamNetworkingIdentity_GetStadiaID(self: ?*anyopaque) callconv(.C) uint64;
-extern fn SteamAPI_SteamNetworkingIdentity_SetIPAddr(self: ?*anyopaque, addr: [*c]const SteamNetworkingIPAddr) callconv(.C) void;
-extern fn SteamAPI_SteamNetworkingIdentity_GetIPAddr(self: ?*anyopaque) callconv(.C) [*c]const SteamNetworkingIPAddr;
-extern fn SteamAPI_SteamNetworkingIdentity_SetIPv4Addr(self: ?*anyopaque, nIPv4: uint32, nPort: uint16) callconv(.C) void;
-extern fn SteamAPI_SteamNetworkingIdentity_GetIPv4(self: ?*anyopaque) callconv(.C) uint32;
-extern fn SteamAPI_SteamNetworkingIdentity_GetFakeIPType(self: ?*anyopaque) callconv(.C) ESteamNetworkingFakeIPType;
-extern fn SteamAPI_SteamNetworkingIdentity_IsFakeIP(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_SteamNetworkingIdentity_SetLocalHost(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_SteamNetworkingIdentity_IsLocalHost(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_SteamNetworkingIdentity_SetGenericString(self: ?*anyopaque, pszString: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_SteamNetworkingIdentity_GetGenericString(self: ?*anyopaque) callconv(.C) [*c]const u8;
-extern fn SteamAPI_SteamNetworkingIdentity_SetGenericBytes(self: ?*anyopaque, data: [*c]const u8, cbLen: uint32) callconv(.C) bool;
-extern fn SteamAPI_SteamNetworkingIdentity_GetGenericBytes(self: ?*anyopaque, cbLen: [*c]i32) callconv(.C) [*c]const uint8;
-extern fn SteamAPI_SteamNetworkingIdentity_IsEqualTo(self: ?*anyopaque, x: [*c]const SteamNetworkingIdentity) callconv(.C) bool;
-extern fn SteamAPI_SteamNetworkingIdentity_ToString(self: ?*anyopaque, buf: [*c]u8, cbBuf: uint32) callconv(.C) void;
-extern fn SteamAPI_SteamNetworkingIdentity_ParseString(self: ?*anyopaque, pszStr: [*c]const u8) callconv(.C) bool;
+extern fn SteamAPI_SteamNetworkingIdentity_Clear(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_SteamNetworkingIdentity_IsInvalid(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_SteamNetworkingIdentity_SetSteamID(self: ?*anyopaque, steamID: CSteamID) callconv(.c) void;
+extern fn SteamAPI_SteamNetworkingIdentity_GetSteamID(self: ?*anyopaque) callconv(.c) CSteamID;
+extern fn SteamAPI_SteamNetworkingIdentity_SetSteamID64(self: ?*anyopaque, steamID: uint64) callconv(.c) void;
+extern fn SteamAPI_SteamNetworkingIdentity_GetSteamID64(self: ?*anyopaque) callconv(.c) uint64;
+extern fn SteamAPI_SteamNetworkingIdentity_SetXboxPairwiseID(self: ?*anyopaque, pszString: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_SteamNetworkingIdentity_GetXboxPairwiseID(self: ?*anyopaque) callconv(.c) [*c]const u8;
+extern fn SteamAPI_SteamNetworkingIdentity_SetPSNID(self: ?*anyopaque, id: uint64) callconv(.c) void;
+extern fn SteamAPI_SteamNetworkingIdentity_GetPSNID(self: ?*anyopaque) callconv(.c) uint64;
+extern fn SteamAPI_SteamNetworkingIdentity_SetStadiaID(self: ?*anyopaque, id: uint64) callconv(.c) void;
+extern fn SteamAPI_SteamNetworkingIdentity_GetStadiaID(self: ?*anyopaque) callconv(.c) uint64;
+extern fn SteamAPI_SteamNetworkingIdentity_SetIPAddr(self: ?*anyopaque, addr: [*c]const SteamNetworkingIPAddr) callconv(.c) void;
+extern fn SteamAPI_SteamNetworkingIdentity_GetIPAddr(self: ?*anyopaque) callconv(.c) [*c]const SteamNetworkingIPAddr;
+extern fn SteamAPI_SteamNetworkingIdentity_SetIPv4Addr(self: ?*anyopaque, nIPv4: uint32, nPort: uint16) callconv(.c) void;
+extern fn SteamAPI_SteamNetworkingIdentity_GetIPv4(self: ?*anyopaque) callconv(.c) uint32;
+extern fn SteamAPI_SteamNetworkingIdentity_GetFakeIPType(self: ?*anyopaque) callconv(.c) ESteamNetworkingFakeIPType;
+extern fn SteamAPI_SteamNetworkingIdentity_IsFakeIP(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_SteamNetworkingIdentity_SetLocalHost(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_SteamNetworkingIdentity_IsLocalHost(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_SteamNetworkingIdentity_SetGenericString(self: ?*anyopaque, pszString: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_SteamNetworkingIdentity_GetGenericString(self: ?*anyopaque) callconv(.c) [*c]const u8;
+extern fn SteamAPI_SteamNetworkingIdentity_SetGenericBytes(self: ?*anyopaque, data: [*c]const u8, cbLen: uint32) callconv(.c) bool;
+extern fn SteamAPI_SteamNetworkingIdentity_GetGenericBytes(self: ?*anyopaque, cbLen: [*c]i32) callconv(.c) [*c]const uint8;
+extern fn SteamAPI_SteamNetworkingIdentity_IsEqualTo(self: ?*anyopaque, x: [*c]const SteamNetworkingIdentity) callconv(.c) bool;
+extern fn SteamAPI_SteamNetworkingIdentity_ToString(self: ?*anyopaque, buf: [*c]u8, cbBuf: uint32) callconv(.c) void;
+extern fn SteamAPI_SteamNetworkingIdentity_ParseString(self: ?*anyopaque, pszStr: [*c]const u8) callconv(.c) bool;
 pub const SteamNetConnectionInfo_t = extern struct {
     m_identityRemote: SteamNetworkingIdentity align(1),
     m_nUserData: int64 align(StructPlatformPackSize) = 0,
@@ -5740,8 +5740,8 @@ pub const SteamNetworkingMessage_t = extern struct {
     m_nConnUserData: int64 align(8) = 0,
     m_usecTimeReceived: SteamNetworkingMicroseconds align(8) = 0,
     m_nMessageNumber: int64 align(8) = 0,
-    m_pfnFreeData: ?*const fn ([*c]SteamNetworkingMessage_t) callconv(.C) void align(8),
-    m_pfnRelease: ?*const fn ([*c]SteamNetworkingMessage_t) callconv(.C) void align(8),
+    m_pfnFreeData: ?*const fn ([*c]SteamNetworkingMessage_t) callconv(.c) void align(8),
+    m_pfnRelease: ?*const fn ([*c]SteamNetworkingMessage_t) callconv(.c) void align(8),
     m_nChannel: i32 align(4) = 0,
     m_nFlags: i32 align(4) = 0,
     m_nUserData: int64 align(8) = 0,
@@ -5758,7 +5758,7 @@ pub const SteamNetworkingMessage_t = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_SteamNetworkingMessage_t_Release(self: ?*anyopaque) callconv(.C) void;
+extern fn SteamAPI_SteamNetworkingMessage_t_Release(self: ?*anyopaque) callconv(.c) void;
 pub const SteamNetworkPingLocation_t = extern struct {
     m_data: [512]uint8 align(1),
     comptime {
@@ -5796,11 +5796,11 @@ pub const SteamNetworkingConfigValue_t = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_SteamNetworkingConfigValue_t_SetInt32(self: ?*anyopaque, eVal: ESteamNetworkingConfigValue, data: i32) callconv(.C) void;
-extern fn SteamAPI_SteamNetworkingConfigValue_t_SetInt64(self: ?*anyopaque, eVal: ESteamNetworkingConfigValue, data: i64) callconv(.C) void;
-extern fn SteamAPI_SteamNetworkingConfigValue_t_SetFloat(self: ?*anyopaque, eVal: ESteamNetworkingConfigValue, data: f32) callconv(.C) void;
-extern fn SteamAPI_SteamNetworkingConfigValue_t_SetPtr(self: ?*anyopaque, eVal: ESteamNetworkingConfigValue, data: [*c]u8) callconv(.C) void;
-extern fn SteamAPI_SteamNetworkingConfigValue_t_SetString(self: ?*anyopaque, eVal: ESteamNetworkingConfigValue, data: [*c]const u8) callconv(.C) void;
+extern fn SteamAPI_SteamNetworkingConfigValue_t_SetInt32(self: ?*anyopaque, eVal: ESteamNetworkingConfigValue, data: i32) callconv(.c) void;
+extern fn SteamAPI_SteamNetworkingConfigValue_t_SetInt64(self: ?*anyopaque, eVal: ESteamNetworkingConfigValue, data: i64) callconv(.c) void;
+extern fn SteamAPI_SteamNetworkingConfigValue_t_SetFloat(self: ?*anyopaque, eVal: ESteamNetworkingConfigValue, data: f32) callconv(.c) void;
+extern fn SteamAPI_SteamNetworkingConfigValue_t_SetPtr(self: ?*anyopaque, eVal: ESteamNetworkingConfigValue, data: [*c]u8) callconv(.c) void;
+extern fn SteamAPI_SteamNetworkingConfigValue_t_SetString(self: ?*anyopaque, eVal: ESteamNetworkingConfigValue, data: [*c]const u8) callconv(.c) void;
 pub const SteamDatagramHostedAddress = extern struct {
     m_cbSize: i32 align(4) = 0,
     m_data: [128]u8 align(1),
@@ -5823,9 +5823,9 @@ pub const SteamDatagramHostedAddress = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_SteamDatagramHostedAddress_Clear(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_SteamDatagramHostedAddress_GetPopID(self: ?*anyopaque) callconv(.C) SteamNetworkingPOPID;
-extern fn SteamAPI_SteamDatagramHostedAddress_SetDevAddress(self: ?*anyopaque, nIP: uint32, nPort: uint16, popid: SteamNetworkingPOPID) callconv(.C) void;
+extern fn SteamAPI_SteamDatagramHostedAddress_Clear(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_SteamDatagramHostedAddress_GetPopID(self: ?*anyopaque) callconv(.c) SteamNetworkingPOPID;
+extern fn SteamAPI_SteamDatagramHostedAddress_SetDevAddress(self: ?*anyopaque, nIP: uint32, nPort: uint16, popid: SteamNetworkingPOPID) callconv(.c) void;
 pub const SteamDatagramGameCoordinatorServerLogin = extern struct {
     m_identity: SteamNetworkingIdentity align(1),
     m_routing: SteamDatagramHostedAddress align(4),
@@ -5990,43 +5990,43 @@ pub const ISteamClient = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamClient_CreateSteamPipe(self: ?*anyopaque) callconv(.C) HSteamPipe;
-extern fn SteamAPI_ISteamClient_BReleaseSteamPipe(self: ?*anyopaque, hSteamPipe: HSteamPipe) callconv(.C) bool;
-extern fn SteamAPI_ISteamClient_ConnectToGlobalUser(self: ?*anyopaque, hSteamPipe: HSteamPipe) callconv(.C) HSteamUser;
-extern fn SteamAPI_ISteamClient_CreateLocalUser(self: ?*anyopaque, phSteamPipe: [*c]HSteamPipe, eAccountType: EAccountType) callconv(.C) HSteamUser;
-extern fn SteamAPI_ISteamClient_ReleaseUser(self: ?*anyopaque, hSteamPipe: HSteamPipe, hUser: HSteamUser) callconv(.C) void;
-extern fn SteamAPI_ISteamClient_GetISteamUser(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamUser;
-extern fn SteamAPI_ISteamClient_GetISteamGameServer(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamGameServer;
-extern fn SteamAPI_ISteamClient_SetLocalIPBinding(self: ?*anyopaque, unIP: [*c]const SteamIPAddress_t, usPort: uint16) callconv(.C) void;
-extern fn SteamAPI_ISteamClient_GetISteamFriends(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamFriends;
-extern fn SteamAPI_ISteamClient_GetISteamUtils(self: ?*anyopaque, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamUtils;
-extern fn SteamAPI_ISteamClient_GetISteamMatchmaking(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamMatchmaking;
-extern fn SteamAPI_ISteamClient_GetISteamMatchmakingServers(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamMatchmakingServers;
-extern fn SteamAPI_ISteamClient_GetISteamGenericInterface(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]u8;
-extern fn SteamAPI_ISteamClient_GetISteamUserStats(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamUserStats;
-extern fn SteamAPI_ISteamClient_GetISteamGameServerStats(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamGameServerStats;
-extern fn SteamAPI_ISteamClient_GetISteamApps(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamApps;
-extern fn SteamAPI_ISteamClient_GetISteamNetworking(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamNetworking;
-extern fn SteamAPI_ISteamClient_GetISteamRemoteStorage(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamRemoteStorage;
-extern fn SteamAPI_ISteamClient_GetISteamScreenshots(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamScreenshots;
-extern fn SteamAPI_ISteamClient_GetISteamGameSearch(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamGameSearch;
-extern fn SteamAPI_ISteamClient_GetIPCCallCount(self: ?*anyopaque) callconv(.C) uint32;
-extern fn SteamAPI_ISteamClient_SetWarningMessageHook(self: ?*anyopaque, pFunction: SteamAPIWarningMessageHook_t) callconv(.C) void;
-extern fn SteamAPI_ISteamClient_BShutdownIfAllPipesClosed(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamClient_GetISteamHTTP(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamHTTP;
-extern fn SteamAPI_ISteamClient_GetISteamController(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamController;
-extern fn SteamAPI_ISteamClient_GetISteamUGC(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamUGC;
-extern fn SteamAPI_ISteamClient_GetISteamAppList(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamAppList;
-extern fn SteamAPI_ISteamClient_GetISteamMusic(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamMusic;
-extern fn SteamAPI_ISteamClient_GetISteamMusicRemote(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamMusicRemote;
-extern fn SteamAPI_ISteamClient_GetISteamHTMLSurface(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamHTMLSurface;
-extern fn SteamAPI_ISteamClient_GetISteamInventory(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamInventory;
-extern fn SteamAPI_ISteamClient_GetISteamVideo(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamVideo;
-extern fn SteamAPI_ISteamClient_GetISteamParentalSettings(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamParentalSettings;
-extern fn SteamAPI_ISteamClient_GetISteamInput(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamInput;
-extern fn SteamAPI_ISteamClient_GetISteamParties(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamParties;
-extern fn SteamAPI_ISteamClient_GetISteamRemotePlay(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.C) [*c]ISteamRemotePlay;
-extern fn SteamAPI_SteamUser_v023() callconv(.C) [*c]ISteamUser;
+extern fn SteamAPI_ISteamClient_CreateSteamPipe(self: ?*anyopaque) callconv(.c) HSteamPipe;
+extern fn SteamAPI_ISteamClient_BReleaseSteamPipe(self: ?*anyopaque, hSteamPipe: HSteamPipe) callconv(.c) bool;
+extern fn SteamAPI_ISteamClient_ConnectToGlobalUser(self: ?*anyopaque, hSteamPipe: HSteamPipe) callconv(.c) HSteamUser;
+extern fn SteamAPI_ISteamClient_CreateLocalUser(self: ?*anyopaque, phSteamPipe: [*c]HSteamPipe, eAccountType: EAccountType) callconv(.c) HSteamUser;
+extern fn SteamAPI_ISteamClient_ReleaseUser(self: ?*anyopaque, hSteamPipe: HSteamPipe, hUser: HSteamUser) callconv(.c) void;
+extern fn SteamAPI_ISteamClient_GetISteamUser(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamUser;
+extern fn SteamAPI_ISteamClient_GetISteamGameServer(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamGameServer;
+extern fn SteamAPI_ISteamClient_SetLocalIPBinding(self: ?*anyopaque, unIP: [*c]const SteamIPAddress_t, usPort: uint16) callconv(.c) void;
+extern fn SteamAPI_ISteamClient_GetISteamFriends(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamFriends;
+extern fn SteamAPI_ISteamClient_GetISteamUtils(self: ?*anyopaque, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamUtils;
+extern fn SteamAPI_ISteamClient_GetISteamMatchmaking(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamMatchmaking;
+extern fn SteamAPI_ISteamClient_GetISteamMatchmakingServers(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamMatchmakingServers;
+extern fn SteamAPI_ISteamClient_GetISteamGenericInterface(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]u8;
+extern fn SteamAPI_ISteamClient_GetISteamUserStats(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamUserStats;
+extern fn SteamAPI_ISteamClient_GetISteamGameServerStats(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamGameServerStats;
+extern fn SteamAPI_ISteamClient_GetISteamApps(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamApps;
+extern fn SteamAPI_ISteamClient_GetISteamNetworking(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamNetworking;
+extern fn SteamAPI_ISteamClient_GetISteamRemoteStorage(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamRemoteStorage;
+extern fn SteamAPI_ISteamClient_GetISteamScreenshots(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamScreenshots;
+extern fn SteamAPI_ISteamClient_GetISteamGameSearch(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamGameSearch;
+extern fn SteamAPI_ISteamClient_GetIPCCallCount(self: ?*anyopaque) callconv(.c) uint32;
+extern fn SteamAPI_ISteamClient_SetWarningMessageHook(self: ?*anyopaque, pFunction: SteamAPIWarningMessageHook_t) callconv(.c) void;
+extern fn SteamAPI_ISteamClient_BShutdownIfAllPipesClosed(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamClient_GetISteamHTTP(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamHTTP;
+extern fn SteamAPI_ISteamClient_GetISteamController(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamController;
+extern fn SteamAPI_ISteamClient_GetISteamUGC(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamUGC;
+extern fn SteamAPI_ISteamClient_GetISteamAppList(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamAppList;
+extern fn SteamAPI_ISteamClient_GetISteamMusic(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamMusic;
+extern fn SteamAPI_ISteamClient_GetISteamMusicRemote(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamMusicRemote;
+extern fn SteamAPI_ISteamClient_GetISteamHTMLSurface(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamHTMLSurface;
+extern fn SteamAPI_ISteamClient_GetISteamInventory(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamInventory;
+extern fn SteamAPI_ISteamClient_GetISteamVideo(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamVideo;
+extern fn SteamAPI_ISteamClient_GetISteamParentalSettings(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamParentalSettings;
+extern fn SteamAPI_ISteamClient_GetISteamInput(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamInput;
+extern fn SteamAPI_ISteamClient_GetISteamParties(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamParties;
+extern fn SteamAPI_ISteamClient_GetISteamRemotePlay(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamRemotePlay;
+extern fn SteamAPI_SteamUser_v023() callconv(.c) [*c]ISteamUser;
 /// user
 pub fn SteamUser() ISteamUser {
     return ISteamUser{ .ptr = SteamAPI_SteamUser_v023() };
@@ -6170,40 +6170,40 @@ pub const ISteamUser = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamUser_GetHSteamUser(self: ?*anyopaque) callconv(.C) HSteamUser;
-extern fn SteamAPI_ISteamUser_BLoggedOn(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamUser_GetSteamID(self: ?*anyopaque) callconv(.C) CSteamID;
-extern fn SteamAPI_ISteamUser_InitiateGameConnection_DEPRECATED(self: ?*anyopaque, pAuthBlob: [*c]u8, cbMaxAuthBlob: i32, steamIDGameServer: CSteamID, unIPServer: uint32, usPortServer: uint16, bSecure: bool) callconv(.C) i32;
-extern fn SteamAPI_ISteamUser_TerminateGameConnection_DEPRECATED(self: ?*anyopaque, unIPServer: uint32, usPortServer: uint16) callconv(.C) void;
-extern fn SteamAPI_ISteamUser_TrackAppUsageEvent(self: ?*anyopaque, gameID: CGameID, eAppUsageEvent: i32, pchExtraInfo: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_ISteamUser_GetUserDataFolder(self: ?*anyopaque, pchBuffer: [*c]u8, cubBuffer: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUser_StartVoiceRecording(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamUser_StopVoiceRecording(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamUser_GetAvailableVoice(self: ?*anyopaque, pcbCompressed: [*c]uint32, pcbUncompressed_Deprecated: [*c]uint32, nUncompressedVoiceDesiredSampleRate_Deprecated: uint32) callconv(.C) EVoiceResult;
-extern fn SteamAPI_ISteamUser_GetVoice(self: ?*anyopaque, bWantCompressed: bool, pDestBuffer: [*c]u8, cbDestBufferSize: uint32, nBytesWritten: [*c]uint32, bWantUncompressed_Deprecated: bool, pUncompressedDestBuffer_Deprecated: [*c]u8, cbUncompressedDestBufferSize_Deprecated: uint32, nUncompressBytesWritten_Deprecated: [*c]uint32, nUncompressedVoiceDesiredSampleRate_Deprecated: uint32) callconv(.C) EVoiceResult;
-extern fn SteamAPI_ISteamUser_DecompressVoice(self: ?*anyopaque, pCompressed: [*c]const u8, cbCompressed: uint32, pDestBuffer: [*c]u8, cbDestBufferSize: uint32, nBytesWritten: [*c]uint32, nDesiredSampleRate: uint32) callconv(.C) EVoiceResult;
-extern fn SteamAPI_ISteamUser_GetVoiceOptimalSampleRate(self: ?*anyopaque) callconv(.C) uint32;
-extern fn SteamAPI_ISteamUser_GetAuthSessionTicket(self: ?*anyopaque, pTicket: [*c]u8, cbMaxTicket: i32, pcbTicket: [*c]uint32, pSteamNetworkingIdentity: [*c]const SteamNetworkingIdentity) callconv(.C) HAuthTicket;
-extern fn SteamAPI_ISteamUser_GetAuthTicketForWebApi(self: ?*anyopaque, pchIdentity: [*c]const u8) callconv(.C) HAuthTicket;
-extern fn SteamAPI_ISteamUser_BeginAuthSession(self: ?*anyopaque, pAuthTicket: [*c]const u8, cbAuthTicket: i32, steamID: CSteamID) callconv(.C) EBeginAuthSessionResult;
-extern fn SteamAPI_ISteamUser_EndAuthSession(self: ?*anyopaque, steamID: CSteamID) callconv(.C) void;
-extern fn SteamAPI_ISteamUser_CancelAuthTicket(self: ?*anyopaque, hAuthTicket: HAuthTicket) callconv(.C) void;
-extern fn SteamAPI_ISteamUser_UserHasLicenseForApp(self: ?*anyopaque, steamID: CSteamID, appID: AppId_t) callconv(.C) EUserHasLicenseForAppResult;
-extern fn SteamAPI_ISteamUser_BIsBehindNAT(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamUser_AdvertiseGame(self: ?*anyopaque, steamIDGameServer: CSteamID, unIPServer: uint32, usPortServer: uint16) callconv(.C) void;
-extern fn SteamAPI_ISteamUser_RequestEncryptedAppTicket(self: ?*anyopaque, pDataToInclude: [*c]u8, cbDataToInclude: i32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUser_GetEncryptedAppTicket(self: ?*anyopaque, pTicket: [*c]u8, cbMaxTicket: i32, pcbTicket: [*c]uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUser_GetGameBadgeLevel(self: ?*anyopaque, nSeries: i32, bFoil: bool) callconv(.C) i32;
-extern fn SteamAPI_ISteamUser_GetPlayerSteamLevel(self: ?*anyopaque) callconv(.C) i32;
-extern fn SteamAPI_ISteamUser_RequestStoreAuthURL(self: ?*anyopaque, pchRedirectURL: [*c]const u8) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUser_BIsPhoneVerified(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamUser_BIsTwoFactorEnabled(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamUser_BIsPhoneIdentifying(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamUser_BIsPhoneRequiringVerification(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamUser_GetMarketEligibility(self: ?*anyopaque) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUser_GetDurationControl(self: ?*anyopaque) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUser_BSetDurationControlOnlineState(self: ?*anyopaque, eNewState: EDurationControlOnlineState) callconv(.C) bool;
-extern fn SteamAPI_SteamFriends_v017() callconv(.C) [*c]ISteamFriends;
+extern fn SteamAPI_ISteamUser_GetHSteamUser(self: ?*anyopaque) callconv(.c) HSteamUser;
+extern fn SteamAPI_ISteamUser_BLoggedOn(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamUser_GetSteamID(self: ?*anyopaque) callconv(.c) CSteamID;
+extern fn SteamAPI_ISteamUser_InitiateGameConnection_DEPRECATED(self: ?*anyopaque, pAuthBlob: [*c]u8, cbMaxAuthBlob: i32, steamIDGameServer: CSteamID, unIPServer: uint32, usPortServer: uint16, bSecure: bool) callconv(.c) i32;
+extern fn SteamAPI_ISteamUser_TerminateGameConnection_DEPRECATED(self: ?*anyopaque, unIPServer: uint32, usPortServer: uint16) callconv(.c) void;
+extern fn SteamAPI_ISteamUser_TrackAppUsageEvent(self: ?*anyopaque, gameID: CGameID, eAppUsageEvent: i32, pchExtraInfo: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamUser_GetUserDataFolder(self: ?*anyopaque, pchBuffer: [*c]u8, cubBuffer: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUser_StartVoiceRecording(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamUser_StopVoiceRecording(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamUser_GetAvailableVoice(self: ?*anyopaque, pcbCompressed: [*c]uint32, pcbUncompressed_Deprecated: [*c]uint32, nUncompressedVoiceDesiredSampleRate_Deprecated: uint32) callconv(.c) EVoiceResult;
+extern fn SteamAPI_ISteamUser_GetVoice(self: ?*anyopaque, bWantCompressed: bool, pDestBuffer: [*c]u8, cbDestBufferSize: uint32, nBytesWritten: [*c]uint32, bWantUncompressed_Deprecated: bool, pUncompressedDestBuffer_Deprecated: [*c]u8, cbUncompressedDestBufferSize_Deprecated: uint32, nUncompressBytesWritten_Deprecated: [*c]uint32, nUncompressedVoiceDesiredSampleRate_Deprecated: uint32) callconv(.c) EVoiceResult;
+extern fn SteamAPI_ISteamUser_DecompressVoice(self: ?*anyopaque, pCompressed: [*c]const u8, cbCompressed: uint32, pDestBuffer: [*c]u8, cbDestBufferSize: uint32, nBytesWritten: [*c]uint32, nDesiredSampleRate: uint32) callconv(.c) EVoiceResult;
+extern fn SteamAPI_ISteamUser_GetVoiceOptimalSampleRate(self: ?*anyopaque) callconv(.c) uint32;
+extern fn SteamAPI_ISteamUser_GetAuthSessionTicket(self: ?*anyopaque, pTicket: [*c]u8, cbMaxTicket: i32, pcbTicket: [*c]uint32, pSteamNetworkingIdentity: [*c]const SteamNetworkingIdentity) callconv(.c) HAuthTicket;
+extern fn SteamAPI_ISteamUser_GetAuthTicketForWebApi(self: ?*anyopaque, pchIdentity: [*c]const u8) callconv(.c) HAuthTicket;
+extern fn SteamAPI_ISteamUser_BeginAuthSession(self: ?*anyopaque, pAuthTicket: [*c]const u8, cbAuthTicket: i32, steamID: CSteamID) callconv(.c) EBeginAuthSessionResult;
+extern fn SteamAPI_ISteamUser_EndAuthSession(self: ?*anyopaque, steamID: CSteamID) callconv(.c) void;
+extern fn SteamAPI_ISteamUser_CancelAuthTicket(self: ?*anyopaque, hAuthTicket: HAuthTicket) callconv(.c) void;
+extern fn SteamAPI_ISteamUser_UserHasLicenseForApp(self: ?*anyopaque, steamID: CSteamID, appID: AppId_t) callconv(.c) EUserHasLicenseForAppResult;
+extern fn SteamAPI_ISteamUser_BIsBehindNAT(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamUser_AdvertiseGame(self: ?*anyopaque, steamIDGameServer: CSteamID, unIPServer: uint32, usPortServer: uint16) callconv(.c) void;
+extern fn SteamAPI_ISteamUser_RequestEncryptedAppTicket(self: ?*anyopaque, pDataToInclude: [*c]u8, cbDataToInclude: i32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUser_GetEncryptedAppTicket(self: ?*anyopaque, pTicket: [*c]u8, cbMaxTicket: i32, pcbTicket: [*c]uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUser_GetGameBadgeLevel(self: ?*anyopaque, nSeries: i32, bFoil: bool) callconv(.c) i32;
+extern fn SteamAPI_ISteamUser_GetPlayerSteamLevel(self: ?*anyopaque) callconv(.c) i32;
+extern fn SteamAPI_ISteamUser_RequestStoreAuthURL(self: ?*anyopaque, pchRedirectURL: [*c]const u8) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUser_BIsPhoneVerified(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamUser_BIsTwoFactorEnabled(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamUser_BIsPhoneIdentifying(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamUser_BIsPhoneRequiringVerification(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamUser_GetMarketEligibility(self: ?*anyopaque) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUser_GetDurationControl(self: ?*anyopaque) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUser_BSetDurationControlOnlineState(self: ?*anyopaque, eNewState: EDurationControlOnlineState) callconv(.c) bool;
+extern fn SteamAPI_SteamFriends_v017() callconv(.c) [*c]ISteamFriends;
 /// user
 pub fn SteamFriends() ISteamFriends {
     return ISteamFriends{ .ptr = SteamAPI_SteamFriends_v017() };
@@ -6535,92 +6535,92 @@ pub const ISteamFriends = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamFriends_GetPersonaName(self: ?*anyopaque) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamFriends_SetPersonaName(self: ?*anyopaque, pchPersonaName: [*c]const u8) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamFriends_GetPersonaState(self: ?*anyopaque) callconv(.C) EPersonaState;
-extern fn SteamAPI_ISteamFriends_GetFriendCount(self: ?*anyopaque, iFriendFlags: i32) callconv(.C) i32;
-extern fn SteamAPI_ISteamFriends_GetFriendByIndex(self: ?*anyopaque, iFriend: i32, iFriendFlags: i32) callconv(.C) CSteamID;
-extern fn SteamAPI_ISteamFriends_GetFriendRelationship(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.C) EFriendRelationship;
-extern fn SteamAPI_ISteamFriends_GetFriendPersonaState(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.C) EPersonaState;
-extern fn SteamAPI_ISteamFriends_GetFriendPersonaName(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamFriends_GetFriendGamePlayed(self: ?*anyopaque, steamIDFriend: CSteamID, pFriendGameInfo: [*c]FriendGameInfo_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamFriends_GetFriendPersonaNameHistory(self: ?*anyopaque, steamIDFriend: CSteamID, iPersonaName: i32) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamFriends_GetFriendSteamLevel(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.C) i32;
-extern fn SteamAPI_ISteamFriends_GetPlayerNickname(self: ?*anyopaque, steamIDPlayer: CSteamID) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamFriends_GetFriendsGroupCount(self: ?*anyopaque) callconv(.C) i32;
-extern fn SteamAPI_ISteamFriends_GetFriendsGroupIDByIndex(self: ?*anyopaque, iFG: i32) callconv(.C) FriendsGroupID_t;
-extern fn SteamAPI_ISteamFriends_GetFriendsGroupName(self: ?*anyopaque, friendsGroupID: FriendsGroupID_t) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamFriends_GetFriendsGroupMembersCount(self: ?*anyopaque, friendsGroupID: FriendsGroupID_t) callconv(.C) i32;
-extern fn SteamAPI_ISteamFriends_GetFriendsGroupMembersList(self: ?*anyopaque, friendsGroupID: FriendsGroupID_t, pOutSteamIDMembers: [*c]CSteamID, nMembersCount: i32) callconv(.C) void;
-extern fn SteamAPI_ISteamFriends_HasFriend(self: ?*anyopaque, steamIDFriend: CSteamID, iFriendFlags: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamFriends_GetClanCount(self: ?*anyopaque) callconv(.C) i32;
-extern fn SteamAPI_ISteamFriends_GetClanByIndex(self: ?*anyopaque, iClan: i32) callconv(.C) CSteamID;
-extern fn SteamAPI_ISteamFriends_GetClanName(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamFriends_GetClanTag(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamFriends_GetClanActivityCounts(self: ?*anyopaque, steamIDClan: CSteamID, pnOnline: [*c]i32, pnInGame: [*c]i32, pnChatting: [*c]i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamFriends_DownloadClanActivityCounts(self: ?*anyopaque, psteamIDClans: [*c]CSteamID, cClansToRequest: i32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamFriends_GetFriendCountFromSource(self: ?*anyopaque, steamIDSource: CSteamID) callconv(.C) i32;
-extern fn SteamAPI_ISteamFriends_GetFriendFromSourceByIndex(self: ?*anyopaque, steamIDSource: CSteamID, iFriend: i32) callconv(.C) CSteamID;
-extern fn SteamAPI_ISteamFriends_IsUserInSource(self: ?*anyopaque, steamIDUser: CSteamID, steamIDSource: CSteamID) callconv(.C) bool;
-extern fn SteamAPI_ISteamFriends_SetInGameVoiceSpeaking(self: ?*anyopaque, steamIDUser: CSteamID, bSpeaking: bool) callconv(.C) void;
-extern fn SteamAPI_ISteamFriends_ActivateGameOverlay(self: ?*anyopaque, pchDialog: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_ISteamFriends_ActivateGameOverlayToUser(self: ?*anyopaque, pchDialog: [*c]const u8, steamID: CSteamID) callconv(.C) void;
-extern fn SteamAPI_ISteamFriends_ActivateGameOverlayToWebPage(self: ?*anyopaque, pchURL: [*c]const u8, eMode: EActivateGameOverlayToWebPageMode) callconv(.C) void;
-extern fn SteamAPI_ISteamFriends_ActivateGameOverlayToStore(self: ?*anyopaque, nAppID: AppId_t, eFlag: EOverlayToStoreFlag) callconv(.C) void;
-extern fn SteamAPI_ISteamFriends_SetPlayedWith(self: ?*anyopaque, steamIDUserPlayedWith: CSteamID) callconv(.C) void;
-extern fn SteamAPI_ISteamFriends_ActivateGameOverlayInviteDialog(self: ?*anyopaque, steamIDLobby: CSteamID) callconv(.C) void;
-extern fn SteamAPI_ISteamFriends_GetSmallFriendAvatar(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.C) i32;
-extern fn SteamAPI_ISteamFriends_GetMediumFriendAvatar(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.C) i32;
-extern fn SteamAPI_ISteamFriends_GetLargeFriendAvatar(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.C) i32;
-extern fn SteamAPI_ISteamFriends_RequestUserInformation(self: ?*anyopaque, steamIDUser: CSteamID, bRequireNameOnly: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamFriends_RequestClanOfficerList(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamFriends_GetClanOwner(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.C) CSteamID;
-extern fn SteamAPI_ISteamFriends_GetClanOfficerCount(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.C) i32;
-extern fn SteamAPI_ISteamFriends_GetClanOfficerByIndex(self: ?*anyopaque, steamIDClan: CSteamID, iOfficer: i32) callconv(.C) CSteamID;
-extern fn SteamAPI_ISteamFriends_GetUserRestrictions(self: ?*anyopaque) callconv(.C) uint32;
-extern fn SteamAPI_ISteamFriends_SetRichPresence(self: ?*anyopaque, pchKey: [*c]const u8, pchValue: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamFriends_ClearRichPresence(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamFriends_GetFriendRichPresence(self: ?*anyopaque, steamIDFriend: CSteamID, pchKey: [*c]const u8) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamFriends_GetFriendRichPresenceKeyCount(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.C) i32;
-extern fn SteamAPI_ISteamFriends_GetFriendRichPresenceKeyByIndex(self: ?*anyopaque, steamIDFriend: CSteamID, iKey: i32) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamFriends_RequestFriendRichPresence(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.C) void;
-extern fn SteamAPI_ISteamFriends_InviteUserToGame(self: ?*anyopaque, steamIDFriend: CSteamID, pchConnectString: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamFriends_GetCoplayFriendCount(self: ?*anyopaque) callconv(.C) i32;
-extern fn SteamAPI_ISteamFriends_GetCoplayFriend(self: ?*anyopaque, iCoplayFriend: i32) callconv(.C) CSteamID;
-extern fn SteamAPI_ISteamFriends_GetFriendCoplayTime(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.C) i32;
-extern fn SteamAPI_ISteamFriends_GetFriendCoplayGame(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.C) AppId_t;
-extern fn SteamAPI_ISteamFriends_JoinClanChatRoom(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamFriends_LeaveClanChatRoom(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.C) bool;
-extern fn SteamAPI_ISteamFriends_GetClanChatMemberCount(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.C) i32;
-extern fn SteamAPI_ISteamFriends_GetChatMemberByIndex(self: ?*anyopaque, steamIDClan: CSteamID, iUser: i32) callconv(.C) CSteamID;
-extern fn SteamAPI_ISteamFriends_SendClanChatMessage(self: ?*anyopaque, steamIDClanChat: CSteamID, pchText: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamFriends_GetClanChatMessage(self: ?*anyopaque, steamIDClanChat: CSteamID, iMessage: i32, prgchText: [*c]u8, cchTextMax: i32, peChatEntryType: [*c]EChatEntryType, psteamidChatter: [*c]CSteamID) callconv(.C) i32;
-extern fn SteamAPI_ISteamFriends_IsClanChatAdmin(self: ?*anyopaque, steamIDClanChat: CSteamID, steamIDUser: CSteamID) callconv(.C) bool;
-extern fn SteamAPI_ISteamFriends_IsClanChatWindowOpenInSteam(self: ?*anyopaque, steamIDClanChat: CSteamID) callconv(.C) bool;
-extern fn SteamAPI_ISteamFriends_OpenClanChatWindowInSteam(self: ?*anyopaque, steamIDClanChat: CSteamID) callconv(.C) bool;
-extern fn SteamAPI_ISteamFriends_CloseClanChatWindowInSteam(self: ?*anyopaque, steamIDClanChat: CSteamID) callconv(.C) bool;
-extern fn SteamAPI_ISteamFriends_SetListenForFriendsMessages(self: ?*anyopaque, bInterceptEnabled: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamFriends_ReplyToFriendMessage(self: ?*anyopaque, steamIDFriend: CSteamID, pchMsgToSend: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamFriends_GetFriendMessage(self: ?*anyopaque, steamIDFriend: CSteamID, iMessageID: i32, pvData: [*c]u8, cubData: i32, peChatEntryType: [*c]EChatEntryType) callconv(.C) i32;
-extern fn SteamAPI_ISteamFriends_GetFollowerCount(self: ?*anyopaque, steamID: CSteamID) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamFriends_IsFollowing(self: ?*anyopaque, steamID: CSteamID) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamFriends_EnumerateFollowingList(self: ?*anyopaque, unStartIndex: uint32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamFriends_IsClanPublic(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.C) bool;
-extern fn SteamAPI_ISteamFriends_IsClanOfficialGameGroup(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.C) bool;
-extern fn SteamAPI_ISteamFriends_GetNumChatsWithUnreadPriorityMessages(self: ?*anyopaque) callconv(.C) i32;
-extern fn SteamAPI_ISteamFriends_ActivateGameOverlayRemotePlayTogetherInviteDialog(self: ?*anyopaque, steamIDLobby: CSteamID) callconv(.C) void;
-extern fn SteamAPI_ISteamFriends_RegisterProtocolInOverlayBrowser(self: ?*anyopaque, pchProtocol: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamFriends_ActivateGameOverlayInviteDialogConnectString(self: ?*anyopaque, pchConnectString: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_ISteamFriends_RequestEquippedProfileItems(self: ?*anyopaque, steamID: CSteamID) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamFriends_BHasEquippedProfileItem(self: ?*anyopaque, steamID: CSteamID, itemType: ECommunityProfileItemType) callconv(.C) bool;
-extern fn SteamAPI_ISteamFriends_GetProfileItemPropertyString(self: ?*anyopaque, steamID: CSteamID, itemType: ECommunityProfileItemType, prop: ECommunityProfileItemProperty) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamFriends_GetProfileItemPropertyUint(self: ?*anyopaque, steamID: CSteamID, itemType: ECommunityProfileItemType, prop: ECommunityProfileItemProperty) callconv(.C) uint32;
-extern fn SteamAPI_SteamUtils_v010() callconv(.C) [*c]ISteamUtils;
+extern fn SteamAPI_ISteamFriends_GetPersonaName(self: ?*anyopaque) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamFriends_SetPersonaName(self: ?*anyopaque, pchPersonaName: [*c]const u8) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamFriends_GetPersonaState(self: ?*anyopaque) callconv(.c) EPersonaState;
+extern fn SteamAPI_ISteamFriends_GetFriendCount(self: ?*anyopaque, iFriendFlags: i32) callconv(.c) i32;
+extern fn SteamAPI_ISteamFriends_GetFriendByIndex(self: ?*anyopaque, iFriend: i32, iFriendFlags: i32) callconv(.c) CSteamID;
+extern fn SteamAPI_ISteamFriends_GetFriendRelationship(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.c) EFriendRelationship;
+extern fn SteamAPI_ISteamFriends_GetFriendPersonaState(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.c) EPersonaState;
+extern fn SteamAPI_ISteamFriends_GetFriendPersonaName(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamFriends_GetFriendGamePlayed(self: ?*anyopaque, steamIDFriend: CSteamID, pFriendGameInfo: [*c]FriendGameInfo_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamFriends_GetFriendPersonaNameHistory(self: ?*anyopaque, steamIDFriend: CSteamID, iPersonaName: i32) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamFriends_GetFriendSteamLevel(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.c) i32;
+extern fn SteamAPI_ISteamFriends_GetPlayerNickname(self: ?*anyopaque, steamIDPlayer: CSteamID) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamFriends_GetFriendsGroupCount(self: ?*anyopaque) callconv(.c) i32;
+extern fn SteamAPI_ISteamFriends_GetFriendsGroupIDByIndex(self: ?*anyopaque, iFG: i32) callconv(.c) FriendsGroupID_t;
+extern fn SteamAPI_ISteamFriends_GetFriendsGroupName(self: ?*anyopaque, friendsGroupID: FriendsGroupID_t) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamFriends_GetFriendsGroupMembersCount(self: ?*anyopaque, friendsGroupID: FriendsGroupID_t) callconv(.c) i32;
+extern fn SteamAPI_ISteamFriends_GetFriendsGroupMembersList(self: ?*anyopaque, friendsGroupID: FriendsGroupID_t, pOutSteamIDMembers: [*c]CSteamID, nMembersCount: i32) callconv(.c) void;
+extern fn SteamAPI_ISteamFriends_HasFriend(self: ?*anyopaque, steamIDFriend: CSteamID, iFriendFlags: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamFriends_GetClanCount(self: ?*anyopaque) callconv(.c) i32;
+extern fn SteamAPI_ISteamFriends_GetClanByIndex(self: ?*anyopaque, iClan: i32) callconv(.c) CSteamID;
+extern fn SteamAPI_ISteamFriends_GetClanName(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamFriends_GetClanTag(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamFriends_GetClanActivityCounts(self: ?*anyopaque, steamIDClan: CSteamID, pnOnline: [*c]i32, pnInGame: [*c]i32, pnChatting: [*c]i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamFriends_DownloadClanActivityCounts(self: ?*anyopaque, psteamIDClans: [*c]CSteamID, cClansToRequest: i32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamFriends_GetFriendCountFromSource(self: ?*anyopaque, steamIDSource: CSteamID) callconv(.c) i32;
+extern fn SteamAPI_ISteamFriends_GetFriendFromSourceByIndex(self: ?*anyopaque, steamIDSource: CSteamID, iFriend: i32) callconv(.c) CSteamID;
+extern fn SteamAPI_ISteamFriends_IsUserInSource(self: ?*anyopaque, steamIDUser: CSteamID, steamIDSource: CSteamID) callconv(.c) bool;
+extern fn SteamAPI_ISteamFriends_SetInGameVoiceSpeaking(self: ?*anyopaque, steamIDUser: CSteamID, bSpeaking: bool) callconv(.c) void;
+extern fn SteamAPI_ISteamFriends_ActivateGameOverlay(self: ?*anyopaque, pchDialog: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamFriends_ActivateGameOverlayToUser(self: ?*anyopaque, pchDialog: [*c]const u8, steamID: CSteamID) callconv(.c) void;
+extern fn SteamAPI_ISteamFriends_ActivateGameOverlayToWebPage(self: ?*anyopaque, pchURL: [*c]const u8, eMode: EActivateGameOverlayToWebPageMode) callconv(.c) void;
+extern fn SteamAPI_ISteamFriends_ActivateGameOverlayToStore(self: ?*anyopaque, nAppID: AppId_t, eFlag: EOverlayToStoreFlag) callconv(.c) void;
+extern fn SteamAPI_ISteamFriends_SetPlayedWith(self: ?*anyopaque, steamIDUserPlayedWith: CSteamID) callconv(.c) void;
+extern fn SteamAPI_ISteamFriends_ActivateGameOverlayInviteDialog(self: ?*anyopaque, steamIDLobby: CSteamID) callconv(.c) void;
+extern fn SteamAPI_ISteamFriends_GetSmallFriendAvatar(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.c) i32;
+extern fn SteamAPI_ISteamFriends_GetMediumFriendAvatar(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.c) i32;
+extern fn SteamAPI_ISteamFriends_GetLargeFriendAvatar(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.c) i32;
+extern fn SteamAPI_ISteamFriends_RequestUserInformation(self: ?*anyopaque, steamIDUser: CSteamID, bRequireNameOnly: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamFriends_RequestClanOfficerList(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamFriends_GetClanOwner(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.c) CSteamID;
+extern fn SteamAPI_ISteamFriends_GetClanOfficerCount(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.c) i32;
+extern fn SteamAPI_ISteamFriends_GetClanOfficerByIndex(self: ?*anyopaque, steamIDClan: CSteamID, iOfficer: i32) callconv(.c) CSteamID;
+extern fn SteamAPI_ISteamFriends_GetUserRestrictions(self: ?*anyopaque) callconv(.c) uint32;
+extern fn SteamAPI_ISteamFriends_SetRichPresence(self: ?*anyopaque, pchKey: [*c]const u8, pchValue: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamFriends_ClearRichPresence(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamFriends_GetFriendRichPresence(self: ?*anyopaque, steamIDFriend: CSteamID, pchKey: [*c]const u8) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamFriends_GetFriendRichPresenceKeyCount(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.c) i32;
+extern fn SteamAPI_ISteamFriends_GetFriendRichPresenceKeyByIndex(self: ?*anyopaque, steamIDFriend: CSteamID, iKey: i32) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamFriends_RequestFriendRichPresence(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.c) void;
+extern fn SteamAPI_ISteamFriends_InviteUserToGame(self: ?*anyopaque, steamIDFriend: CSteamID, pchConnectString: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamFriends_GetCoplayFriendCount(self: ?*anyopaque) callconv(.c) i32;
+extern fn SteamAPI_ISteamFriends_GetCoplayFriend(self: ?*anyopaque, iCoplayFriend: i32) callconv(.c) CSteamID;
+extern fn SteamAPI_ISteamFriends_GetFriendCoplayTime(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.c) i32;
+extern fn SteamAPI_ISteamFriends_GetFriendCoplayGame(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.c) AppId_t;
+extern fn SteamAPI_ISteamFriends_JoinClanChatRoom(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamFriends_LeaveClanChatRoom(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.c) bool;
+extern fn SteamAPI_ISteamFriends_GetClanChatMemberCount(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.c) i32;
+extern fn SteamAPI_ISteamFriends_GetChatMemberByIndex(self: ?*anyopaque, steamIDClan: CSteamID, iUser: i32) callconv(.c) CSteamID;
+extern fn SteamAPI_ISteamFriends_SendClanChatMessage(self: ?*anyopaque, steamIDClanChat: CSteamID, pchText: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamFriends_GetClanChatMessage(self: ?*anyopaque, steamIDClanChat: CSteamID, iMessage: i32, prgchText: [*c]u8, cchTextMax: i32, peChatEntryType: [*c]EChatEntryType, psteamidChatter: [*c]CSteamID) callconv(.c) i32;
+extern fn SteamAPI_ISteamFriends_IsClanChatAdmin(self: ?*anyopaque, steamIDClanChat: CSteamID, steamIDUser: CSteamID) callconv(.c) bool;
+extern fn SteamAPI_ISteamFriends_IsClanChatWindowOpenInSteam(self: ?*anyopaque, steamIDClanChat: CSteamID) callconv(.c) bool;
+extern fn SteamAPI_ISteamFriends_OpenClanChatWindowInSteam(self: ?*anyopaque, steamIDClanChat: CSteamID) callconv(.c) bool;
+extern fn SteamAPI_ISteamFriends_CloseClanChatWindowInSteam(self: ?*anyopaque, steamIDClanChat: CSteamID) callconv(.c) bool;
+extern fn SteamAPI_ISteamFriends_SetListenForFriendsMessages(self: ?*anyopaque, bInterceptEnabled: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamFriends_ReplyToFriendMessage(self: ?*anyopaque, steamIDFriend: CSteamID, pchMsgToSend: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamFriends_GetFriendMessage(self: ?*anyopaque, steamIDFriend: CSteamID, iMessageID: i32, pvData: [*c]u8, cubData: i32, peChatEntryType: [*c]EChatEntryType) callconv(.c) i32;
+extern fn SteamAPI_ISteamFriends_GetFollowerCount(self: ?*anyopaque, steamID: CSteamID) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamFriends_IsFollowing(self: ?*anyopaque, steamID: CSteamID) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamFriends_EnumerateFollowingList(self: ?*anyopaque, unStartIndex: uint32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamFriends_IsClanPublic(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.c) bool;
+extern fn SteamAPI_ISteamFriends_IsClanOfficialGameGroup(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.c) bool;
+extern fn SteamAPI_ISteamFriends_GetNumChatsWithUnreadPriorityMessages(self: ?*anyopaque) callconv(.c) i32;
+extern fn SteamAPI_ISteamFriends_ActivateGameOverlayRemotePlayTogetherInviteDialog(self: ?*anyopaque, steamIDLobby: CSteamID) callconv(.c) void;
+extern fn SteamAPI_ISteamFriends_RegisterProtocolInOverlayBrowser(self: ?*anyopaque, pchProtocol: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamFriends_ActivateGameOverlayInviteDialogConnectString(self: ?*anyopaque, pchConnectString: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamFriends_RequestEquippedProfileItems(self: ?*anyopaque, steamID: CSteamID) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamFriends_BHasEquippedProfileItem(self: ?*anyopaque, steamID: CSteamID, itemType: ECommunityProfileItemType) callconv(.c) bool;
+extern fn SteamAPI_ISteamFriends_GetProfileItemPropertyString(self: ?*anyopaque, steamID: CSteamID, itemType: ECommunityProfileItemType, prop: ECommunityProfileItemProperty) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamFriends_GetProfileItemPropertyUint(self: ?*anyopaque, steamID: CSteamID, itemType: ECommunityProfileItemType, prop: ECommunityProfileItemProperty) callconv(.c) uint32;
+extern fn SteamAPI_SteamUtils_v010() callconv(.c) [*c]ISteamUtils;
 /// user
 pub fn SteamUtils() ISteamUtils {
     return ISteamUtils{ .ptr = SteamAPI_SteamUtils_v010() };
 }
-extern fn SteamAPI_SteamGameServerUtils_v010() callconv(.C) [*c]ISteamUtils;
+extern fn SteamAPI_SteamGameServerUtils_v010() callconv(.c) [*c]ISteamUtils;
 /// gameserver
 pub fn SteamGameServerUtils() ISteamUtils {
     return ISteamUtils{ .ptr = SteamAPI_SteamGameServerUtils_v010() };
@@ -6776,43 +6776,43 @@ pub const ISteamUtils = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamUtils_GetSecondsSinceAppActive(self: ?*anyopaque) callconv(.C) uint32;
-extern fn SteamAPI_ISteamUtils_GetSecondsSinceComputerActive(self: ?*anyopaque) callconv(.C) uint32;
-extern fn SteamAPI_ISteamUtils_GetConnectedUniverse(self: ?*anyopaque) callconv(.C) EUniverse;
-extern fn SteamAPI_ISteamUtils_GetServerRealTime(self: ?*anyopaque) callconv(.C) uint32;
-extern fn SteamAPI_ISteamUtils_GetIPCountry(self: ?*anyopaque) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamUtils_GetImageSize(self: ?*anyopaque, iImage: i32, pnWidth: [*c]uint32, pnHeight: [*c]uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUtils_GetImageRGBA(self: ?*anyopaque, iImage: i32, pubDest: [*c]uint8, nDestBufferSize: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUtils_GetCurrentBatteryPower(self: ?*anyopaque) callconv(.C) uint8;
-extern fn SteamAPI_ISteamUtils_GetAppID(self: ?*anyopaque) callconv(.C) uint32;
-extern fn SteamAPI_ISteamUtils_SetOverlayNotificationPosition(self: ?*anyopaque, eNotificationPosition: ENotificationPosition) callconv(.C) void;
-extern fn SteamAPI_ISteamUtils_IsAPICallCompleted(self: ?*anyopaque, hSteamAPICall: SteamAPICall_t, pbFailed: [*c]bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamUtils_GetAPICallFailureReason(self: ?*anyopaque, hSteamAPICall: SteamAPICall_t) callconv(.C) ESteamAPICallFailure;
-extern fn SteamAPI_ISteamUtils_GetAPICallResult(self: ?*anyopaque, hSteamAPICall: SteamAPICall_t, pCallback: [*c]u8, cubCallback: i32, iCallbackExpected: i32, pbFailed: [*c]bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamUtils_GetIPCCallCount(self: ?*anyopaque) callconv(.C) uint32;
-extern fn SteamAPI_ISteamUtils_SetWarningMessageHook(self: ?*anyopaque, pFunction: SteamAPIWarningMessageHook_t) callconv(.C) void;
-extern fn SteamAPI_ISteamUtils_IsOverlayEnabled(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamUtils_BOverlayNeedsPresent(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamUtils_CheckFileSignature(self: ?*anyopaque, szFileName: [*c]const u8) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUtils_ShowGamepadTextInput(self: ?*anyopaque, eInputMode: EGamepadTextInputMode, eLineInputMode: EGamepadTextInputLineMode, pchDescription: [*c]const u8, unCharMax: uint32, pchExistingText: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUtils_GetEnteredGamepadTextLength(self: ?*anyopaque) callconv(.C) uint32;
-extern fn SteamAPI_ISteamUtils_GetEnteredGamepadTextInput(self: ?*anyopaque, pchText: [*c]u8, cchText: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUtils_GetSteamUILanguage(self: ?*anyopaque) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamUtils_IsSteamRunningInVR(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamUtils_SetOverlayNotificationInset(self: ?*anyopaque, nHorizontalInset: i32, nVerticalInset: i32) callconv(.C) void;
-extern fn SteamAPI_ISteamUtils_IsSteamInBigPictureMode(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamUtils_StartVRDashboard(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamUtils_IsVRHeadsetStreamingEnabled(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamUtils_SetVRHeadsetStreamingEnabled(self: ?*anyopaque, bEnabled: bool) callconv(.C) void;
-extern fn SteamAPI_ISteamUtils_IsSteamChinaLauncher(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamUtils_InitFilterText(self: ?*anyopaque, unFilterOptions: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUtils_FilterText(self: ?*anyopaque, eContext: ETextFilteringContext, sourceSteamID: CSteamID, pchInputMessage: [*c]const u8, pchOutFilteredText: [*c]u8, nByteSizeOutFilteredText: uint32) callconv(.C) i32;
-extern fn SteamAPI_ISteamUtils_GetIPv6ConnectivityState(self: ?*anyopaque, eProtocol: ESteamIPv6ConnectivityProtocol) callconv(.C) ESteamIPv6ConnectivityState;
-extern fn SteamAPI_ISteamUtils_IsSteamRunningOnSteamDeck(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamUtils_ShowFloatingGamepadTextInput(self: ?*anyopaque, eKeyboardMode: EFloatingGamepadTextInputMode, nTextFieldXPosition: i32, nTextFieldYPosition: i32, nTextFieldWidth: i32, nTextFieldHeight: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUtils_SetGameLauncherMode(self: ?*anyopaque, bLauncherMode: bool) callconv(.C) void;
-extern fn SteamAPI_ISteamUtils_DismissFloatingGamepadTextInput(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_SteamMatchmaking_v009() callconv(.C) [*c]ISteamMatchmaking;
+extern fn SteamAPI_ISteamUtils_GetSecondsSinceAppActive(self: ?*anyopaque) callconv(.c) uint32;
+extern fn SteamAPI_ISteamUtils_GetSecondsSinceComputerActive(self: ?*anyopaque) callconv(.c) uint32;
+extern fn SteamAPI_ISteamUtils_GetConnectedUniverse(self: ?*anyopaque) callconv(.c) EUniverse;
+extern fn SteamAPI_ISteamUtils_GetServerRealTime(self: ?*anyopaque) callconv(.c) uint32;
+extern fn SteamAPI_ISteamUtils_GetIPCountry(self: ?*anyopaque) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamUtils_GetImageSize(self: ?*anyopaque, iImage: i32, pnWidth: [*c]uint32, pnHeight: [*c]uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUtils_GetImageRGBA(self: ?*anyopaque, iImage: i32, pubDest: [*c]uint8, nDestBufferSize: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUtils_GetCurrentBatteryPower(self: ?*anyopaque) callconv(.c) uint8;
+extern fn SteamAPI_ISteamUtils_GetAppID(self: ?*anyopaque) callconv(.c) uint32;
+extern fn SteamAPI_ISteamUtils_SetOverlayNotificationPosition(self: ?*anyopaque, eNotificationPosition: ENotificationPosition) callconv(.c) void;
+extern fn SteamAPI_ISteamUtils_IsAPICallCompleted(self: ?*anyopaque, hSteamAPICall: SteamAPICall_t, pbFailed: [*c]bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamUtils_GetAPICallFailureReason(self: ?*anyopaque, hSteamAPICall: SteamAPICall_t) callconv(.c) ESteamAPICallFailure;
+extern fn SteamAPI_ISteamUtils_GetAPICallResult(self: ?*anyopaque, hSteamAPICall: SteamAPICall_t, pCallback: [*c]u8, cubCallback: i32, iCallbackExpected: i32, pbFailed: [*c]bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamUtils_GetIPCCallCount(self: ?*anyopaque) callconv(.c) uint32;
+extern fn SteamAPI_ISteamUtils_SetWarningMessageHook(self: ?*anyopaque, pFunction: SteamAPIWarningMessageHook_t) callconv(.c) void;
+extern fn SteamAPI_ISteamUtils_IsOverlayEnabled(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamUtils_BOverlayNeedsPresent(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamUtils_CheckFileSignature(self: ?*anyopaque, szFileName: [*c]const u8) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUtils_ShowGamepadTextInput(self: ?*anyopaque, eInputMode: EGamepadTextInputMode, eLineInputMode: EGamepadTextInputLineMode, pchDescription: [*c]const u8, unCharMax: uint32, pchExistingText: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUtils_GetEnteredGamepadTextLength(self: ?*anyopaque) callconv(.c) uint32;
+extern fn SteamAPI_ISteamUtils_GetEnteredGamepadTextInput(self: ?*anyopaque, pchText: [*c]u8, cchText: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUtils_GetSteamUILanguage(self: ?*anyopaque) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamUtils_IsSteamRunningInVR(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamUtils_SetOverlayNotificationInset(self: ?*anyopaque, nHorizontalInset: i32, nVerticalInset: i32) callconv(.c) void;
+extern fn SteamAPI_ISteamUtils_IsSteamInBigPictureMode(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamUtils_StartVRDashboard(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamUtils_IsVRHeadsetStreamingEnabled(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamUtils_SetVRHeadsetStreamingEnabled(self: ?*anyopaque, bEnabled: bool) callconv(.c) void;
+extern fn SteamAPI_ISteamUtils_IsSteamChinaLauncher(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamUtils_InitFilterText(self: ?*anyopaque, unFilterOptions: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUtils_FilterText(self: ?*anyopaque, eContext: ETextFilteringContext, sourceSteamID: CSteamID, pchInputMessage: [*c]const u8, pchOutFilteredText: [*c]u8, nByteSizeOutFilteredText: uint32) callconv(.c) i32;
+extern fn SteamAPI_ISteamUtils_GetIPv6ConnectivityState(self: ?*anyopaque, eProtocol: ESteamIPv6ConnectivityProtocol) callconv(.c) ESteamIPv6ConnectivityState;
+extern fn SteamAPI_ISteamUtils_IsSteamRunningOnSteamDeck(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamUtils_ShowFloatingGamepadTextInput(self: ?*anyopaque, eKeyboardMode: EFloatingGamepadTextInputMode, nTextFieldXPosition: i32, nTextFieldYPosition: i32, nTextFieldWidth: i32, nTextFieldHeight: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUtils_SetGameLauncherMode(self: ?*anyopaque, bLauncherMode: bool) callconv(.c) void;
+extern fn SteamAPI_ISteamUtils_DismissFloatingGamepadTextInput(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_SteamMatchmaking_v009() callconv(.c) [*c]ISteamMatchmaking;
 /// user
 pub fn SteamMatchmaking() ISteamMatchmaking {
     return ISteamMatchmaking{ .ptr = SteamAPI_SteamMatchmaking_v009() };
@@ -6976,44 +6976,44 @@ pub const ISteamMatchmaking = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamMatchmaking_GetFavoriteGameCount(self: ?*anyopaque) callconv(.C) i32;
-extern fn SteamAPI_ISteamMatchmaking_GetFavoriteGame(self: ?*anyopaque, iGame: i32, pnAppID: [*c]AppId_t, pnIP: [*c]uint32, pnConnPort: [*c]uint16, pnQueryPort: [*c]uint16, punFlags: [*c]uint32, pRTime32LastPlayedOnServer: [*c]uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamMatchmaking_AddFavoriteGame(self: ?*anyopaque, nAppID: AppId_t, nIP: uint32, nConnPort: uint16, nQueryPort: uint16, unFlags: uint32, rTime32LastPlayedOnServer: uint32) callconv(.C) i32;
-extern fn SteamAPI_ISteamMatchmaking_RemoveFavoriteGame(self: ?*anyopaque, nAppID: AppId_t, nIP: uint32, nConnPort: uint16, nQueryPort: uint16, unFlags: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamMatchmaking_RequestLobbyList(self: ?*anyopaque) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamMatchmaking_AddRequestLobbyListStringFilter(self: ?*anyopaque, pchKeyToMatch: [*c]const u8, pchValueToMatch: [*c]const u8, eComparisonType: ELobbyComparison) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmaking_AddRequestLobbyListNumericalFilter(self: ?*anyopaque, pchKeyToMatch: [*c]const u8, nValueToMatch: i32, eComparisonType: ELobbyComparison) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmaking_AddRequestLobbyListNearValueFilter(self: ?*anyopaque, pchKeyToMatch: [*c]const u8, nValueToBeCloseTo: i32) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmaking_AddRequestLobbyListFilterSlotsAvailable(self: ?*anyopaque, nSlotsAvailable: i32) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmaking_AddRequestLobbyListDistanceFilter(self: ?*anyopaque, eLobbyDistanceFilter: ELobbyDistanceFilter) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmaking_AddRequestLobbyListResultCountFilter(self: ?*anyopaque, cMaxResults: i32) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmaking_AddRequestLobbyListCompatibleMembersFilter(self: ?*anyopaque, steamIDLobby: CSteamID) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmaking_GetLobbyByIndex(self: ?*anyopaque, iLobby: i32) callconv(.C) CSteamID;
-extern fn SteamAPI_ISteamMatchmaking_CreateLobby(self: ?*anyopaque, eLobbyType: ELobbyType, cMaxMembers: i32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamMatchmaking_JoinLobby(self: ?*anyopaque, steamIDLobby: CSteamID) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamMatchmaking_LeaveLobby(self: ?*anyopaque, steamIDLobby: CSteamID) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmaking_InviteUserToLobby(self: ?*anyopaque, steamIDLobby: CSteamID, steamIDInvitee: CSteamID) callconv(.C) bool;
-extern fn SteamAPI_ISteamMatchmaking_GetNumLobbyMembers(self: ?*anyopaque, steamIDLobby: CSteamID) callconv(.C) i32;
-extern fn SteamAPI_ISteamMatchmaking_GetLobbyMemberByIndex(self: ?*anyopaque, steamIDLobby: CSteamID, iMember: i32) callconv(.C) CSteamID;
-extern fn SteamAPI_ISteamMatchmaking_GetLobbyData(self: ?*anyopaque, steamIDLobby: CSteamID, pchKey: [*c]const u8) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamMatchmaking_SetLobbyData(self: ?*anyopaque, steamIDLobby: CSteamID, pchKey: [*c]const u8, pchValue: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamMatchmaking_GetLobbyDataCount(self: ?*anyopaque, steamIDLobby: CSteamID) callconv(.C) i32;
-extern fn SteamAPI_ISteamMatchmaking_GetLobbyDataByIndex(self: ?*anyopaque, steamIDLobby: CSteamID, iLobbyData: i32, pchKey: [*c]u8, cchKeyBufferSize: i32, pchValue: [*c]u8, cchValueBufferSize: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamMatchmaking_DeleteLobbyData(self: ?*anyopaque, steamIDLobby: CSteamID, pchKey: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamMatchmaking_GetLobbyMemberData(self: ?*anyopaque, steamIDLobby: CSteamID, steamIDUser: CSteamID, pchKey: [*c]const u8) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamMatchmaking_SetLobbyMemberData(self: ?*anyopaque, steamIDLobby: CSteamID, pchKey: [*c]const u8, pchValue: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmaking_SendLobbyChatMsg(self: ?*anyopaque, steamIDLobby: CSteamID, pvMsgBody: [*c]const u8, cubMsgBody: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamMatchmaking_GetLobbyChatEntry(self: ?*anyopaque, steamIDLobby: CSteamID, iChatID: i32, pSteamIDUser: [*c]CSteamID, pvData: [*c]u8, cubData: i32, peChatEntryType: [*c]EChatEntryType) callconv(.C) i32;
-extern fn SteamAPI_ISteamMatchmaking_RequestLobbyData(self: ?*anyopaque, steamIDLobby: CSteamID) callconv(.C) bool;
-extern fn SteamAPI_ISteamMatchmaking_SetLobbyGameServer(self: ?*anyopaque, steamIDLobby: CSteamID, unGameServerIP: uint32, unGameServerPort: uint16, steamIDGameServer: CSteamID) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmaking_GetLobbyGameServer(self: ?*anyopaque, steamIDLobby: CSteamID, punGameServerIP: [*c]uint32, punGameServerPort: [*c]uint16, psteamIDGameServer: [*c]CSteamID) callconv(.C) bool;
-extern fn SteamAPI_ISteamMatchmaking_SetLobbyMemberLimit(self: ?*anyopaque, steamIDLobby: CSteamID, cMaxMembers: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamMatchmaking_GetLobbyMemberLimit(self: ?*anyopaque, steamIDLobby: CSteamID) callconv(.C) i32;
-extern fn SteamAPI_ISteamMatchmaking_SetLobbyType(self: ?*anyopaque, steamIDLobby: CSteamID, eLobbyType: ELobbyType) callconv(.C) bool;
-extern fn SteamAPI_ISteamMatchmaking_SetLobbyJoinable(self: ?*anyopaque, steamIDLobby: CSteamID, bLobbyJoinable: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamMatchmaking_GetLobbyOwner(self: ?*anyopaque, steamIDLobby: CSteamID) callconv(.C) CSteamID;
-extern fn SteamAPI_ISteamMatchmaking_SetLobbyOwner(self: ?*anyopaque, steamIDLobby: CSteamID, steamIDNewOwner: CSteamID) callconv(.C) bool;
-extern fn SteamAPI_ISteamMatchmaking_SetLinkedLobby(self: ?*anyopaque, steamIDLobby: CSteamID, steamIDLobbyDependent: CSteamID) callconv(.C) bool;
+extern fn SteamAPI_ISteamMatchmaking_GetFavoriteGameCount(self: ?*anyopaque) callconv(.c) i32;
+extern fn SteamAPI_ISteamMatchmaking_GetFavoriteGame(self: ?*anyopaque, iGame: i32, pnAppID: [*c]AppId_t, pnIP: [*c]uint32, pnConnPort: [*c]uint16, pnQueryPort: [*c]uint16, punFlags: [*c]uint32, pRTime32LastPlayedOnServer: [*c]uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamMatchmaking_AddFavoriteGame(self: ?*anyopaque, nAppID: AppId_t, nIP: uint32, nConnPort: uint16, nQueryPort: uint16, unFlags: uint32, rTime32LastPlayedOnServer: uint32) callconv(.c) i32;
+extern fn SteamAPI_ISteamMatchmaking_RemoveFavoriteGame(self: ?*anyopaque, nAppID: AppId_t, nIP: uint32, nConnPort: uint16, nQueryPort: uint16, unFlags: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamMatchmaking_RequestLobbyList(self: ?*anyopaque) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamMatchmaking_AddRequestLobbyListStringFilter(self: ?*anyopaque, pchKeyToMatch: [*c]const u8, pchValueToMatch: [*c]const u8, eComparisonType: ELobbyComparison) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmaking_AddRequestLobbyListNumericalFilter(self: ?*anyopaque, pchKeyToMatch: [*c]const u8, nValueToMatch: i32, eComparisonType: ELobbyComparison) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmaking_AddRequestLobbyListNearValueFilter(self: ?*anyopaque, pchKeyToMatch: [*c]const u8, nValueToBeCloseTo: i32) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmaking_AddRequestLobbyListFilterSlotsAvailable(self: ?*anyopaque, nSlotsAvailable: i32) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmaking_AddRequestLobbyListDistanceFilter(self: ?*anyopaque, eLobbyDistanceFilter: ELobbyDistanceFilter) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmaking_AddRequestLobbyListResultCountFilter(self: ?*anyopaque, cMaxResults: i32) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmaking_AddRequestLobbyListCompatibleMembersFilter(self: ?*anyopaque, steamIDLobby: CSteamID) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmaking_GetLobbyByIndex(self: ?*anyopaque, iLobby: i32) callconv(.c) CSteamID;
+extern fn SteamAPI_ISteamMatchmaking_CreateLobby(self: ?*anyopaque, eLobbyType: ELobbyType, cMaxMembers: i32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamMatchmaking_JoinLobby(self: ?*anyopaque, steamIDLobby: CSteamID) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamMatchmaking_LeaveLobby(self: ?*anyopaque, steamIDLobby: CSteamID) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmaking_InviteUserToLobby(self: ?*anyopaque, steamIDLobby: CSteamID, steamIDInvitee: CSteamID) callconv(.c) bool;
+extern fn SteamAPI_ISteamMatchmaking_GetNumLobbyMembers(self: ?*anyopaque, steamIDLobby: CSteamID) callconv(.c) i32;
+extern fn SteamAPI_ISteamMatchmaking_GetLobbyMemberByIndex(self: ?*anyopaque, steamIDLobby: CSteamID, iMember: i32) callconv(.c) CSteamID;
+extern fn SteamAPI_ISteamMatchmaking_GetLobbyData(self: ?*anyopaque, steamIDLobby: CSteamID, pchKey: [*c]const u8) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamMatchmaking_SetLobbyData(self: ?*anyopaque, steamIDLobby: CSteamID, pchKey: [*c]const u8, pchValue: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamMatchmaking_GetLobbyDataCount(self: ?*anyopaque, steamIDLobby: CSteamID) callconv(.c) i32;
+extern fn SteamAPI_ISteamMatchmaking_GetLobbyDataByIndex(self: ?*anyopaque, steamIDLobby: CSteamID, iLobbyData: i32, pchKey: [*c]u8, cchKeyBufferSize: i32, pchValue: [*c]u8, cchValueBufferSize: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamMatchmaking_DeleteLobbyData(self: ?*anyopaque, steamIDLobby: CSteamID, pchKey: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamMatchmaking_GetLobbyMemberData(self: ?*anyopaque, steamIDLobby: CSteamID, steamIDUser: CSteamID, pchKey: [*c]const u8) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamMatchmaking_SetLobbyMemberData(self: ?*anyopaque, steamIDLobby: CSteamID, pchKey: [*c]const u8, pchValue: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmaking_SendLobbyChatMsg(self: ?*anyopaque, steamIDLobby: CSteamID, pvMsgBody: [*c]const u8, cubMsgBody: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamMatchmaking_GetLobbyChatEntry(self: ?*anyopaque, steamIDLobby: CSteamID, iChatID: i32, pSteamIDUser: [*c]CSteamID, pvData: [*c]u8, cubData: i32, peChatEntryType: [*c]EChatEntryType) callconv(.c) i32;
+extern fn SteamAPI_ISteamMatchmaking_RequestLobbyData(self: ?*anyopaque, steamIDLobby: CSteamID) callconv(.c) bool;
+extern fn SteamAPI_ISteamMatchmaking_SetLobbyGameServer(self: ?*anyopaque, steamIDLobby: CSteamID, unGameServerIP: uint32, unGameServerPort: uint16, steamIDGameServer: CSteamID) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmaking_GetLobbyGameServer(self: ?*anyopaque, steamIDLobby: CSteamID, punGameServerIP: [*c]uint32, punGameServerPort: [*c]uint16, psteamIDGameServer: [*c]CSteamID) callconv(.c) bool;
+extern fn SteamAPI_ISteamMatchmaking_SetLobbyMemberLimit(self: ?*anyopaque, steamIDLobby: CSteamID, cMaxMembers: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamMatchmaking_GetLobbyMemberLimit(self: ?*anyopaque, steamIDLobby: CSteamID) callconv(.c) i32;
+extern fn SteamAPI_ISteamMatchmaking_SetLobbyType(self: ?*anyopaque, steamIDLobby: CSteamID, eLobbyType: ELobbyType) callconv(.c) bool;
+extern fn SteamAPI_ISteamMatchmaking_SetLobbyJoinable(self: ?*anyopaque, steamIDLobby: CSteamID, bLobbyJoinable: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamMatchmaking_GetLobbyOwner(self: ?*anyopaque, steamIDLobby: CSteamID) callconv(.c) CSteamID;
+extern fn SteamAPI_ISteamMatchmaking_SetLobbyOwner(self: ?*anyopaque, steamIDLobby: CSteamID, steamIDNewOwner: CSteamID) callconv(.c) bool;
+extern fn SteamAPI_ISteamMatchmaking_SetLinkedLobby(self: ?*anyopaque, steamIDLobby: CSteamID, steamIDLobbyDependent: CSteamID) callconv(.c) bool;
 
 pub const ISteamMatchmakingServerListResponse = extern struct {
     ptr: ?*anyopaque,
@@ -7033,9 +7033,9 @@ pub const ISteamMatchmakingServerListResponse = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamMatchmakingServerListResponse_ServerResponded(self: ?*anyopaque, hRequest: HServerListRequest, iServer: i32) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmakingServerListResponse_ServerFailedToRespond(self: ?*anyopaque, hRequest: HServerListRequest, iServer: i32) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmakingServerListResponse_RefreshComplete(self: ?*anyopaque, hRequest: HServerListRequest, response: EMatchMakingServerResponse) callconv(.C) void;
+extern fn SteamAPI_ISteamMatchmakingServerListResponse_ServerResponded(self: ?*anyopaque, hRequest: HServerListRequest, iServer: i32) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmakingServerListResponse_ServerFailedToRespond(self: ?*anyopaque, hRequest: HServerListRequest, iServer: i32) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmakingServerListResponse_RefreshComplete(self: ?*anyopaque, hRequest: HServerListRequest, response: EMatchMakingServerResponse) callconv(.c) void;
 
 pub const ISteamMatchmakingPingResponse = extern struct {
     ptr: ?*anyopaque,
@@ -7051,8 +7051,8 @@ pub const ISteamMatchmakingPingResponse = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamMatchmakingPingResponse_ServerResponded(self: ?*anyopaque, server: [*c]gameserveritem_t) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmakingPingResponse_ServerFailedToRespond(self: ?*anyopaque) callconv(.C) void;
+extern fn SteamAPI_ISteamMatchmakingPingResponse_ServerResponded(self: ?*anyopaque, server: [*c]gameserveritem_t) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmakingPingResponse_ServerFailedToRespond(self: ?*anyopaque) callconv(.c) void;
 
 pub const ISteamMatchmakingPlayersResponse = extern struct {
     ptr: ?*anyopaque,
@@ -7072,9 +7072,9 @@ pub const ISteamMatchmakingPlayersResponse = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamMatchmakingPlayersResponse_AddPlayerToList(self: ?*anyopaque, pchName: [*c]const u8, nScore: i32, flTimePlayed: f32) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmakingPlayersResponse_PlayersFailedToRespond(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmakingPlayersResponse_PlayersRefreshComplete(self: ?*anyopaque) callconv(.C) void;
+extern fn SteamAPI_ISteamMatchmakingPlayersResponse_AddPlayerToList(self: ?*anyopaque, pchName: [*c]const u8, nScore: i32, flTimePlayed: f32) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmakingPlayersResponse_PlayersFailedToRespond(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmakingPlayersResponse_PlayersRefreshComplete(self: ?*anyopaque) callconv(.c) void;
 
 pub const ISteamMatchmakingRulesResponse = extern struct {
     ptr: ?*anyopaque,
@@ -7094,10 +7094,10 @@ pub const ISteamMatchmakingRulesResponse = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamMatchmakingRulesResponse_RulesResponded(self: ?*anyopaque, pchRule: [*c]const u8, pchValue: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmakingRulesResponse_RulesFailedToRespond(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmakingRulesResponse_RulesRefreshComplete(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_SteamMatchmakingServers_v002() callconv(.C) [*c]ISteamMatchmakingServers;
+extern fn SteamAPI_ISteamMatchmakingRulesResponse_RulesResponded(self: ?*anyopaque, pchRule: [*c]const u8, pchValue: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmakingRulesResponse_RulesFailedToRespond(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmakingRulesResponse_RulesRefreshComplete(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_SteamMatchmakingServers_v002() callconv(.c) [*c]ISteamMatchmakingServers;
 /// user
 pub fn SteamMatchmakingServers() ISteamMatchmakingServers {
     return ISteamMatchmakingServers{ .ptr = SteamAPI_SteamMatchmakingServers_v002() };
@@ -7177,24 +7177,24 @@ pub const ISteamMatchmakingServers = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamMatchmakingServers_RequestInternetServerList(self: ?*anyopaque, iApp: AppId_t, ppchFilters: [*c][*c]MatchMakingKeyValuePair_t, nFilters: uint32, pRequestServersResponse: [*c]ISteamMatchmakingServerListResponse) callconv(.C) HServerListRequest;
-extern fn SteamAPI_ISteamMatchmakingServers_RequestLANServerList(self: ?*anyopaque, iApp: AppId_t, pRequestServersResponse: [*c]ISteamMatchmakingServerListResponse) callconv(.C) HServerListRequest;
-extern fn SteamAPI_ISteamMatchmakingServers_RequestFriendsServerList(self: ?*anyopaque, iApp: AppId_t, ppchFilters: [*c][*c]MatchMakingKeyValuePair_t, nFilters: uint32, pRequestServersResponse: [*c]ISteamMatchmakingServerListResponse) callconv(.C) HServerListRequest;
-extern fn SteamAPI_ISteamMatchmakingServers_RequestFavoritesServerList(self: ?*anyopaque, iApp: AppId_t, ppchFilters: [*c][*c]MatchMakingKeyValuePair_t, nFilters: uint32, pRequestServersResponse: [*c]ISteamMatchmakingServerListResponse) callconv(.C) HServerListRequest;
-extern fn SteamAPI_ISteamMatchmakingServers_RequestHistoryServerList(self: ?*anyopaque, iApp: AppId_t, ppchFilters: [*c][*c]MatchMakingKeyValuePair_t, nFilters: uint32, pRequestServersResponse: [*c]ISteamMatchmakingServerListResponse) callconv(.C) HServerListRequest;
-extern fn SteamAPI_ISteamMatchmakingServers_RequestSpectatorServerList(self: ?*anyopaque, iApp: AppId_t, ppchFilters: [*c][*c]MatchMakingKeyValuePair_t, nFilters: uint32, pRequestServersResponse: [*c]ISteamMatchmakingServerListResponse) callconv(.C) HServerListRequest;
-extern fn SteamAPI_ISteamMatchmakingServers_ReleaseRequest(self: ?*anyopaque, hServerListRequest: HServerListRequest) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmakingServers_GetServerDetails(self: ?*anyopaque, hRequest: HServerListRequest, iServer: i32) callconv(.C) [*c]gameserveritem_t;
-extern fn SteamAPI_ISteamMatchmakingServers_CancelQuery(self: ?*anyopaque, hRequest: HServerListRequest) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmakingServers_RefreshQuery(self: ?*anyopaque, hRequest: HServerListRequest) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmakingServers_IsRefreshing(self: ?*anyopaque, hRequest: HServerListRequest) callconv(.C) bool;
-extern fn SteamAPI_ISteamMatchmakingServers_GetServerCount(self: ?*anyopaque, hRequest: HServerListRequest) callconv(.C) i32;
-extern fn SteamAPI_ISteamMatchmakingServers_RefreshServer(self: ?*anyopaque, hRequest: HServerListRequest, iServer: i32) callconv(.C) void;
-extern fn SteamAPI_ISteamMatchmakingServers_PingServer(self: ?*anyopaque, unIP: uint32, usPort: uint16, pRequestServersResponse: [*c]ISteamMatchmakingPingResponse) callconv(.C) HServerQuery;
-extern fn SteamAPI_ISteamMatchmakingServers_PlayerDetails(self: ?*anyopaque, unIP: uint32, usPort: uint16, pRequestServersResponse: [*c]ISteamMatchmakingPlayersResponse) callconv(.C) HServerQuery;
-extern fn SteamAPI_ISteamMatchmakingServers_ServerRules(self: ?*anyopaque, unIP: uint32, usPort: uint16, pRequestServersResponse: [*c]ISteamMatchmakingRulesResponse) callconv(.C) HServerQuery;
-extern fn SteamAPI_ISteamMatchmakingServers_CancelServerQuery(self: ?*anyopaque, hServerQuery: HServerQuery) callconv(.C) void;
-extern fn SteamAPI_SteamGameSearch_v001() callconv(.C) [*c]ISteamGameSearch;
+extern fn SteamAPI_ISteamMatchmakingServers_RequestInternetServerList(self: ?*anyopaque, iApp: AppId_t, ppchFilters: [*c][*c]MatchMakingKeyValuePair_t, nFilters: uint32, pRequestServersResponse: [*c]ISteamMatchmakingServerListResponse) callconv(.c) HServerListRequest;
+extern fn SteamAPI_ISteamMatchmakingServers_RequestLANServerList(self: ?*anyopaque, iApp: AppId_t, pRequestServersResponse: [*c]ISteamMatchmakingServerListResponse) callconv(.c) HServerListRequest;
+extern fn SteamAPI_ISteamMatchmakingServers_RequestFriendsServerList(self: ?*anyopaque, iApp: AppId_t, ppchFilters: [*c][*c]MatchMakingKeyValuePair_t, nFilters: uint32, pRequestServersResponse: [*c]ISteamMatchmakingServerListResponse) callconv(.c) HServerListRequest;
+extern fn SteamAPI_ISteamMatchmakingServers_RequestFavoritesServerList(self: ?*anyopaque, iApp: AppId_t, ppchFilters: [*c][*c]MatchMakingKeyValuePair_t, nFilters: uint32, pRequestServersResponse: [*c]ISteamMatchmakingServerListResponse) callconv(.c) HServerListRequest;
+extern fn SteamAPI_ISteamMatchmakingServers_RequestHistoryServerList(self: ?*anyopaque, iApp: AppId_t, ppchFilters: [*c][*c]MatchMakingKeyValuePair_t, nFilters: uint32, pRequestServersResponse: [*c]ISteamMatchmakingServerListResponse) callconv(.c) HServerListRequest;
+extern fn SteamAPI_ISteamMatchmakingServers_RequestSpectatorServerList(self: ?*anyopaque, iApp: AppId_t, ppchFilters: [*c][*c]MatchMakingKeyValuePair_t, nFilters: uint32, pRequestServersResponse: [*c]ISteamMatchmakingServerListResponse) callconv(.c) HServerListRequest;
+extern fn SteamAPI_ISteamMatchmakingServers_ReleaseRequest(self: ?*anyopaque, hServerListRequest: HServerListRequest) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmakingServers_GetServerDetails(self: ?*anyopaque, hRequest: HServerListRequest, iServer: i32) callconv(.c) [*c]gameserveritem_t;
+extern fn SteamAPI_ISteamMatchmakingServers_CancelQuery(self: ?*anyopaque, hRequest: HServerListRequest) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmakingServers_RefreshQuery(self: ?*anyopaque, hRequest: HServerListRequest) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmakingServers_IsRefreshing(self: ?*anyopaque, hRequest: HServerListRequest) callconv(.c) bool;
+extern fn SteamAPI_ISteamMatchmakingServers_GetServerCount(self: ?*anyopaque, hRequest: HServerListRequest) callconv(.c) i32;
+extern fn SteamAPI_ISteamMatchmakingServers_RefreshServer(self: ?*anyopaque, hRequest: HServerListRequest, iServer: i32) callconv(.c) void;
+extern fn SteamAPI_ISteamMatchmakingServers_PingServer(self: ?*anyopaque, unIP: uint32, usPort: uint16, pRequestServersResponse: [*c]ISteamMatchmakingPingResponse) callconv(.c) HServerQuery;
+extern fn SteamAPI_ISteamMatchmakingServers_PlayerDetails(self: ?*anyopaque, unIP: uint32, usPort: uint16, pRequestServersResponse: [*c]ISteamMatchmakingPlayersResponse) callconv(.c) HServerQuery;
+extern fn SteamAPI_ISteamMatchmakingServers_ServerRules(self: ?*anyopaque, unIP: uint32, usPort: uint16, pRequestServersResponse: [*c]ISteamMatchmakingRulesResponse) callconv(.c) HServerQuery;
+extern fn SteamAPI_ISteamMatchmakingServers_CancelServerQuery(self: ?*anyopaque, hServerQuery: HServerQuery) callconv(.c) void;
+extern fn SteamAPI_SteamGameSearch_v001() callconv(.c) [*c]ISteamGameSearch;
 /// user
 pub fn SteamGameSearch() ISteamGameSearch {
     return ISteamGameSearch{ .ptr = SteamAPI_SteamGameSearch_v001() };
@@ -7262,21 +7262,21 @@ pub const ISteamGameSearch = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamGameSearch_AddGameSearchParams(self: ?*anyopaque, pchKeyToFind: [*c]const u8, pchValuesToFind: [*c]const u8) callconv(.C) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_SearchForGameWithLobby(self: ?*anyopaque, steamIDLobby: CSteamID, nPlayerMin: i32, nPlayerMax: i32) callconv(.C) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_SearchForGameSolo(self: ?*anyopaque, nPlayerMin: i32, nPlayerMax: i32) callconv(.C) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_AcceptGame(self: ?*anyopaque) callconv(.C) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_DeclineGame(self: ?*anyopaque) callconv(.C) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_RetrieveConnectionDetails(self: ?*anyopaque, steamIDHost: CSteamID, pchConnectionDetails: [*c]u8, cubConnectionDetails: i32) callconv(.C) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_EndGameSearch(self: ?*anyopaque) callconv(.C) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_SetGameHostParams(self: ?*anyopaque, pchKey: [*c]const u8, pchValue: [*c]const u8) callconv(.C) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_SetConnectionDetails(self: ?*anyopaque, pchConnectionDetails: [*c]const u8, cubConnectionDetails: i32) callconv(.C) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_RequestPlayersForGame(self: ?*anyopaque, nPlayerMin: i32, nPlayerMax: i32, nMaxTeamSize: i32) callconv(.C) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_HostConfirmGameStart(self: ?*anyopaque, ullUniqueGameID: uint64) callconv(.C) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_CancelRequestPlayersForGame(self: ?*anyopaque) callconv(.C) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_SubmitPlayerResult(self: ?*anyopaque, ullUniqueGameID: uint64, steamIDPlayer: CSteamID, EPlayerResult: EPlayerResult_t) callconv(.C) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_EndGame(self: ?*anyopaque, ullUniqueGameID: uint64) callconv(.C) EGameSearchErrorCode_t;
-extern fn SteamAPI_SteamParties_v002() callconv(.C) [*c]ISteamParties;
+extern fn SteamAPI_ISteamGameSearch_AddGameSearchParams(self: ?*anyopaque, pchKeyToFind: [*c]const u8, pchValuesToFind: [*c]const u8) callconv(.c) EGameSearchErrorCode_t;
+extern fn SteamAPI_ISteamGameSearch_SearchForGameWithLobby(self: ?*anyopaque, steamIDLobby: CSteamID, nPlayerMin: i32, nPlayerMax: i32) callconv(.c) EGameSearchErrorCode_t;
+extern fn SteamAPI_ISteamGameSearch_SearchForGameSolo(self: ?*anyopaque, nPlayerMin: i32, nPlayerMax: i32) callconv(.c) EGameSearchErrorCode_t;
+extern fn SteamAPI_ISteamGameSearch_AcceptGame(self: ?*anyopaque) callconv(.c) EGameSearchErrorCode_t;
+extern fn SteamAPI_ISteamGameSearch_DeclineGame(self: ?*anyopaque) callconv(.c) EGameSearchErrorCode_t;
+extern fn SteamAPI_ISteamGameSearch_RetrieveConnectionDetails(self: ?*anyopaque, steamIDHost: CSteamID, pchConnectionDetails: [*c]u8, cubConnectionDetails: i32) callconv(.c) EGameSearchErrorCode_t;
+extern fn SteamAPI_ISteamGameSearch_EndGameSearch(self: ?*anyopaque) callconv(.c) EGameSearchErrorCode_t;
+extern fn SteamAPI_ISteamGameSearch_SetGameHostParams(self: ?*anyopaque, pchKey: [*c]const u8, pchValue: [*c]const u8) callconv(.c) EGameSearchErrorCode_t;
+extern fn SteamAPI_ISteamGameSearch_SetConnectionDetails(self: ?*anyopaque, pchConnectionDetails: [*c]const u8, cubConnectionDetails: i32) callconv(.c) EGameSearchErrorCode_t;
+extern fn SteamAPI_ISteamGameSearch_RequestPlayersForGame(self: ?*anyopaque, nPlayerMin: i32, nPlayerMax: i32, nMaxTeamSize: i32) callconv(.c) EGameSearchErrorCode_t;
+extern fn SteamAPI_ISteamGameSearch_HostConfirmGameStart(self: ?*anyopaque, ullUniqueGameID: uint64) callconv(.c) EGameSearchErrorCode_t;
+extern fn SteamAPI_ISteamGameSearch_CancelRequestPlayersForGame(self: ?*anyopaque) callconv(.c) EGameSearchErrorCode_t;
+extern fn SteamAPI_ISteamGameSearch_SubmitPlayerResult(self: ?*anyopaque, ullUniqueGameID: uint64, steamIDPlayer: CSteamID, EPlayerResult: EPlayerResult_t) callconv(.c) EGameSearchErrorCode_t;
+extern fn SteamAPI_ISteamGameSearch_EndGame(self: ?*anyopaque, ullUniqueGameID: uint64) callconv(.c) EGameSearchErrorCode_t;
+extern fn SteamAPI_SteamParties_v002() callconv(.c) [*c]ISteamParties;
 /// user
 pub fn SteamParties() ISteamParties {
     return ISteamParties{ .ptr = SteamAPI_SteamParties_v002() };
@@ -7330,25 +7330,25 @@ pub const ISteamParties = extern struct {
         return SteamAPI_ISteamParties_DestroyBeacon(self.ptr, ulBeacon);
     }
 
-    pub fn GetBeaconLocationData(self: *const Self, BeaconLocation: SteamPartyBeaconLocation_t, eData: ESteamPartyBeaconLocationData, pchDataStringOut: []u8) bool {
-        return SteamAPI_ISteamParties_GetBeaconLocationData(self.ptr, BeaconLocation, eData, pchDataStringOut.ptr, @intCast(pchDataStringOut.len));
-    }
+    //pub fn GetBeaconLocationData(self: *const Self, BeaconLocation: SteamPartyBeaconLocation_t, eData: ESteamPartyBeaconLocationData, pchDataStringOut: []u8) bool {
+    //    return SteamAPI_ISteamParties_GetBeaconLocationData(self.ptr, BeaconLocation, eData, pchDataStringOut.ptr, @intCast(pchDataStringOut.len));
+    // }
 };
 
 // static functions
-extern fn SteamAPI_ISteamParties_GetNumActiveBeacons(self: ?*anyopaque) callconv(.C) uint32;
-extern fn SteamAPI_ISteamParties_GetBeaconByIndex(self: ?*anyopaque, unIndex: uint32) callconv(.C) PartyBeaconID_t;
-extern fn SteamAPI_ISteamParties_GetBeaconDetails(self: ?*anyopaque, ulBeaconID: PartyBeaconID_t, pSteamIDBeaconOwner: [*c]CSteamID, pLocation: [*c]SteamPartyBeaconLocation_t, pchMetadata: [*c]u8, cchMetadata: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamParties_JoinParty(self: ?*anyopaque, ulBeaconID: PartyBeaconID_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamParties_GetNumAvailableBeaconLocations(self: ?*anyopaque, puNumLocations: [*c]uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamParties_GetAvailableBeaconLocations(self: ?*anyopaque, pLocationList: [*c]SteamPartyBeaconLocation_t, uMaxNumLocations: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamParties_CreateBeacon(self: ?*anyopaque, unOpenSlots: uint32, pBeaconLocation: [*c]SteamPartyBeaconLocation_t, pchConnectString: [*c]const u8, pchMetadata: [*c]const u8) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamParties_OnReservationCompleted(self: ?*anyopaque, ulBeacon: PartyBeaconID_t, steamIDUser: CSteamID) callconv(.C) void;
-extern fn SteamAPI_ISteamParties_CancelReservation(self: ?*anyopaque, ulBeacon: PartyBeaconID_t, steamIDUser: CSteamID) callconv(.C) void;
-extern fn SteamAPI_ISteamParties_ChangeNumOpenSlots(self: ?*anyopaque, ulBeacon: PartyBeaconID_t, unOpenSlots: uint32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamParties_DestroyBeacon(self: ?*anyopaque, ulBeacon: PartyBeaconID_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamParties_GetBeaconLocationData(self: ?*anyopaque, BeaconLocation: SteamPartyBeaconLocation_t, eData: ESteamPartyBeaconLocationData, pchDataStringOut: [*c]u8, cchDataStringOut: i32) callconv(.C) bool;
-extern fn SteamAPI_SteamRemoteStorage_v016() callconv(.C) [*c]ISteamRemoteStorage;
+extern fn SteamAPI_ISteamParties_GetNumActiveBeacons(self: ?*anyopaque) callconv(.c) uint32;
+extern fn SteamAPI_ISteamParties_GetBeaconByIndex(self: ?*anyopaque, unIndex: uint32) callconv(.c) PartyBeaconID_t;
+extern fn SteamAPI_ISteamParties_GetBeaconDetails(self: ?*anyopaque, ulBeaconID: PartyBeaconID_t, pSteamIDBeaconOwner: [*c]CSteamID, pLocation: [*c]SteamPartyBeaconLocation_t, pchMetadata: [*c]u8, cchMetadata: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamParties_JoinParty(self: ?*anyopaque, ulBeaconID: PartyBeaconID_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamParties_GetNumAvailableBeaconLocations(self: ?*anyopaque, puNumLocations: [*c]uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamParties_GetAvailableBeaconLocations(self: ?*anyopaque, pLocationList: [*c]SteamPartyBeaconLocation_t, uMaxNumLocations: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamParties_CreateBeacon(self: ?*anyopaque, unOpenSlots: uint32, pBeaconLocation: [*c]SteamPartyBeaconLocation_t, pchConnectString: [*c]const u8, pchMetadata: [*c]const u8) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamParties_OnReservationCompleted(self: ?*anyopaque, ulBeacon: PartyBeaconID_t, steamIDUser: CSteamID) callconv(.c) void;
+extern fn SteamAPI_ISteamParties_CancelReservation(self: ?*anyopaque, ulBeacon: PartyBeaconID_t, steamIDUser: CSteamID) callconv(.c) void;
+extern fn SteamAPI_ISteamParties_ChangeNumOpenSlots(self: ?*anyopaque, ulBeacon: PartyBeaconID_t, unOpenSlots: uint32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamParties_DestroyBeacon(self: ?*anyopaque, ulBeacon: PartyBeaconID_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamParties_GetBeaconLocationData(self: ?*anyopaque, BeaconLocation: SteamPartyBeaconLocation_t, eData: ESteamPartyBeaconLocationData, pchDataStringOut: [*c]u8, cchDataStringOut: i32) callconv(.c) bool;
+extern fn SteamAPI_SteamRemoteStorage_v016() callconv(.c) [*c]ISteamRemoteStorage;
 /// user
 pub fn SteamRemoteStorage() ISteamRemoteStorage {
     return ISteamRemoteStorage{ .ptr = SteamAPI_SteamRemoteStorage_v016() };
@@ -7596,66 +7596,66 @@ pub const ISteamRemoteStorage = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamRemoteStorage_FileWrite(self: ?*anyopaque, pchFile: [*c]const u8, pvData: [*c]const u8, cubData: int32) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_FileRead(self: ?*anyopaque, pchFile: [*c]const u8, pvData: [*c]u8, cubDataToRead: int32) callconv(.C) int32;
-extern fn SteamAPI_ISteamRemoteStorage_FileWriteAsync(self: ?*anyopaque, pchFile: [*c]const u8, pvData: [*c]const u8, cubData: uint32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_FileReadAsync(self: ?*anyopaque, pchFile: [*c]const u8, nOffset: uint32, cubToRead: uint32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_FileReadAsyncComplete(self: ?*anyopaque, hReadCall: SteamAPICall_t, pvBuffer: [*c]u8, cubToRead: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_FileForget(self: ?*anyopaque, pchFile: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_FileDelete(self: ?*anyopaque, pchFile: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_FileShare(self: ?*anyopaque, pchFile: [*c]const u8) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_SetSyncPlatforms(self: ?*anyopaque, pchFile: [*c]const u8, eRemoteStoragePlatform: ERemoteStoragePlatform) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_FileWriteStreamOpen(self: ?*anyopaque, pchFile: [*c]const u8) callconv(.C) UGCFileWriteStreamHandle_t;
-extern fn SteamAPI_ISteamRemoteStorage_FileWriteStreamWriteChunk(self: ?*anyopaque, writeHandle: UGCFileWriteStreamHandle_t, pvData: [*c]const u8, cubData: int32) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_FileWriteStreamClose(self: ?*anyopaque, writeHandle: UGCFileWriteStreamHandle_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_FileWriteStreamCancel(self: ?*anyopaque, writeHandle: UGCFileWriteStreamHandle_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_FileExists(self: ?*anyopaque, pchFile: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_FilePersisted(self: ?*anyopaque, pchFile: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_GetFileSize(self: ?*anyopaque, pchFile: [*c]const u8) callconv(.C) int32;
-extern fn SteamAPI_ISteamRemoteStorage_GetFileTimestamp(self: ?*anyopaque, pchFile: [*c]const u8) callconv(.C) int64;
-extern fn SteamAPI_ISteamRemoteStorage_GetSyncPlatforms(self: ?*anyopaque, pchFile: [*c]const u8) callconv(.C) ERemoteStoragePlatform;
-extern fn SteamAPI_ISteamRemoteStorage_GetFileCount(self: ?*anyopaque) callconv(.C) int32;
-extern fn SteamAPI_ISteamRemoteStorage_GetFileNameAndSize(self: ?*anyopaque, iFile: i32, pnFileSizeInBytes: [*c]int32) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamRemoteStorage_GetQuota(self: ?*anyopaque, pnTotalBytes: [*c]uint64, puAvailableBytes: [*c]uint64) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_IsCloudEnabledForAccount(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_IsCloudEnabledForApp(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_SetCloudEnabledForApp(self: ?*anyopaque, bEnabled: bool) callconv(.C) void;
-extern fn SteamAPI_ISteamRemoteStorage_UGCDownload(self: ?*anyopaque, hContent: UGCHandle_t, unPriority: uint32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_GetUGCDownloadProgress(self: ?*anyopaque, hContent: UGCHandle_t, pnBytesDownloaded: [*c]int32, pnBytesExpected: [*c]int32) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_GetUGCDetails(self: ?*anyopaque, hContent: UGCHandle_t, pnAppID: [*c]AppId_t, ppchName: [*c][*c]u8, pnFileSizeInBytes: [*c]int32, pSteamIDOwner: [*c]CSteamID) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_UGCRead(self: ?*anyopaque, hContent: UGCHandle_t, pvData: [*c]u8, cubDataToRead: int32, cOffset: uint32, eAction: EUGCReadAction) callconv(.C) int32;
-extern fn SteamAPI_ISteamRemoteStorage_GetCachedUGCCount(self: ?*anyopaque) callconv(.C) int32;
-extern fn SteamAPI_ISteamRemoteStorage_GetCachedUGCHandle(self: ?*anyopaque, iCachedContent: int32) callconv(.C) UGCHandle_t;
-extern fn SteamAPI_ISteamRemoteStorage_PublishWorkshopFile(self: ?*anyopaque, pchFile: [*c]const u8, pchPreviewFile: [*c]const u8, nConsumerAppId: AppId_t, pchTitle: [*c]const u8, pchDescription: [*c]const u8, eVisibility: ERemoteStoragePublishedFileVisibility, pTags: [*c]SteamParamStringArray_t, eWorkshopFileType: EWorkshopFileType) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_CreatePublishedFileUpdateRequest(self: ?*anyopaque, unPublishedFileId: PublishedFileId_t) callconv(.C) PublishedFileUpdateHandle_t;
-extern fn SteamAPI_ISteamRemoteStorage_UpdatePublishedFileFile(self: ?*anyopaque, updateHandle: PublishedFileUpdateHandle_t, pchFile: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_UpdatePublishedFilePreviewFile(self: ?*anyopaque, updateHandle: PublishedFileUpdateHandle_t, pchPreviewFile: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_UpdatePublishedFileTitle(self: ?*anyopaque, updateHandle: PublishedFileUpdateHandle_t, pchTitle: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_UpdatePublishedFileDescription(self: ?*anyopaque, updateHandle: PublishedFileUpdateHandle_t, pchDescription: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_UpdatePublishedFileVisibility(self: ?*anyopaque, updateHandle: PublishedFileUpdateHandle_t, eVisibility: ERemoteStoragePublishedFileVisibility) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_UpdatePublishedFileTags(self: ?*anyopaque, updateHandle: PublishedFileUpdateHandle_t, pTags: [*c]SteamParamStringArray_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_CommitPublishedFileUpdate(self: ?*anyopaque, updateHandle: PublishedFileUpdateHandle_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_GetPublishedFileDetails(self: ?*anyopaque, unPublishedFileId: PublishedFileId_t, unMaxSecondsOld: uint32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_DeletePublishedFile(self: ?*anyopaque, unPublishedFileId: PublishedFileId_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_EnumerateUserPublishedFiles(self: ?*anyopaque, unStartIndex: uint32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_SubscribePublishedFile(self: ?*anyopaque, unPublishedFileId: PublishedFileId_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_EnumerateUserSubscribedFiles(self: ?*anyopaque, unStartIndex: uint32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_UnsubscribePublishedFile(self: ?*anyopaque, unPublishedFileId: PublishedFileId_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_UpdatePublishedFileSetChangeDescription(self: ?*anyopaque, updateHandle: PublishedFileUpdateHandle_t, pchChangeDescription: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_GetPublishedItemVoteDetails(self: ?*anyopaque, unPublishedFileId: PublishedFileId_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_UpdateUserPublishedItemVote(self: ?*anyopaque, unPublishedFileId: PublishedFileId_t, bVoteUp: bool) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_GetUserPublishedItemVoteDetails(self: ?*anyopaque, unPublishedFileId: PublishedFileId_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_EnumerateUserSharedWorkshopFiles(self: ?*anyopaque, steamId: CSteamID, unStartIndex: uint32, pRequiredTags: [*c]SteamParamStringArray_t, pExcludedTags: [*c]SteamParamStringArray_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_PublishVideo(self: ?*anyopaque, eVideoProvider: EWorkshopVideoProvider, pchVideoAccount: [*c]const u8, pchVideoIdentifier: [*c]const u8, pchPreviewFile: [*c]const u8, nConsumerAppId: AppId_t, pchTitle: [*c]const u8, pchDescription: [*c]const u8, eVisibility: ERemoteStoragePublishedFileVisibility, pTags: [*c]SteamParamStringArray_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_SetUserPublishedFileAction(self: ?*anyopaque, unPublishedFileId: PublishedFileId_t, eAction: EWorkshopFileAction) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_EnumeratePublishedFilesByUserAction(self: ?*anyopaque, eAction: EWorkshopFileAction, unStartIndex: uint32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_EnumeratePublishedWorkshopFiles(self: ?*anyopaque, eEnumerationType: EWorkshopEnumerationType, unStartIndex: uint32, unCount: uint32, unDays: uint32, pTags: [*c]SteamParamStringArray_t, pUserTags: [*c]SteamParamStringArray_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_UGCDownloadToLocation(self: ?*anyopaque, hContent: UGCHandle_t, pchLocation: [*c]const u8, unPriority: uint32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamRemoteStorage_GetLocalFileChangeCount(self: ?*anyopaque) callconv(.C) int32;
-extern fn SteamAPI_ISteamRemoteStorage_GetLocalFileChange(self: ?*anyopaque, iFile: i32, pEChangeType: [*c]ERemoteStorageLocalFileChange, pEFilePathType: [*c]ERemoteStorageFilePathType) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamRemoteStorage_BeginFileWriteBatch(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemoteStorage_EndFileWriteBatch(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_SteamUserStats_v012() callconv(.C) [*c]ISteamUserStats;
+extern fn SteamAPI_ISteamRemoteStorage_FileWrite(self: ?*anyopaque, pchFile: [*c]const u8, pvData: [*c]const u8, cubData: int32) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_FileRead(self: ?*anyopaque, pchFile: [*c]const u8, pvData: [*c]u8, cubDataToRead: int32) callconv(.c) int32;
+extern fn SteamAPI_ISteamRemoteStorage_FileWriteAsync(self: ?*anyopaque, pchFile: [*c]const u8, pvData: [*c]const u8, cubData: uint32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_FileReadAsync(self: ?*anyopaque, pchFile: [*c]const u8, nOffset: uint32, cubToRead: uint32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_FileReadAsyncComplete(self: ?*anyopaque, hReadCall: SteamAPICall_t, pvBuffer: [*c]u8, cubToRead: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_FileForget(self: ?*anyopaque, pchFile: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_FileDelete(self: ?*anyopaque, pchFile: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_FileShare(self: ?*anyopaque, pchFile: [*c]const u8) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_SetSyncPlatforms(self: ?*anyopaque, pchFile: [*c]const u8, eRemoteStoragePlatform: ERemoteStoragePlatform) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_FileWriteStreamOpen(self: ?*anyopaque, pchFile: [*c]const u8) callconv(.c) UGCFileWriteStreamHandle_t;
+extern fn SteamAPI_ISteamRemoteStorage_FileWriteStreamWriteChunk(self: ?*anyopaque, writeHandle: UGCFileWriteStreamHandle_t, pvData: [*c]const u8, cubData: int32) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_FileWriteStreamClose(self: ?*anyopaque, writeHandle: UGCFileWriteStreamHandle_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_FileWriteStreamCancel(self: ?*anyopaque, writeHandle: UGCFileWriteStreamHandle_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_FileExists(self: ?*anyopaque, pchFile: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_FilePersisted(self: ?*anyopaque, pchFile: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_GetFileSize(self: ?*anyopaque, pchFile: [*c]const u8) callconv(.c) int32;
+extern fn SteamAPI_ISteamRemoteStorage_GetFileTimestamp(self: ?*anyopaque, pchFile: [*c]const u8) callconv(.c) int64;
+extern fn SteamAPI_ISteamRemoteStorage_GetSyncPlatforms(self: ?*anyopaque, pchFile: [*c]const u8) callconv(.c) ERemoteStoragePlatform;
+extern fn SteamAPI_ISteamRemoteStorage_GetFileCount(self: ?*anyopaque) callconv(.c) int32;
+extern fn SteamAPI_ISteamRemoteStorage_GetFileNameAndSize(self: ?*anyopaque, iFile: i32, pnFileSizeInBytes: [*c]int32) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamRemoteStorage_GetQuota(self: ?*anyopaque, pnTotalBytes: [*c]uint64, puAvailableBytes: [*c]uint64) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_IsCloudEnabledForAccount(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_IsCloudEnabledForApp(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_SetCloudEnabledForApp(self: ?*anyopaque, bEnabled: bool) callconv(.c) void;
+extern fn SteamAPI_ISteamRemoteStorage_UGCDownload(self: ?*anyopaque, hContent: UGCHandle_t, unPriority: uint32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_GetUGCDownloadProgress(self: ?*anyopaque, hContent: UGCHandle_t, pnBytesDownloaded: [*c]int32, pnBytesExpected: [*c]int32) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_GetUGCDetails(self: ?*anyopaque, hContent: UGCHandle_t, pnAppID: [*c]AppId_t, ppchName: [*c][*c]u8, pnFileSizeInBytes: [*c]int32, pSteamIDOwner: [*c]CSteamID) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_UGCRead(self: ?*anyopaque, hContent: UGCHandle_t, pvData: [*c]u8, cubDataToRead: int32, cOffset: uint32, eAction: EUGCReadAction) callconv(.c) int32;
+extern fn SteamAPI_ISteamRemoteStorage_GetCachedUGCCount(self: ?*anyopaque) callconv(.c) int32;
+extern fn SteamAPI_ISteamRemoteStorage_GetCachedUGCHandle(self: ?*anyopaque, iCachedContent: int32) callconv(.c) UGCHandle_t;
+extern fn SteamAPI_ISteamRemoteStorage_PublishWorkshopFile(self: ?*anyopaque, pchFile: [*c]const u8, pchPreviewFile: [*c]const u8, nConsumerAppId: AppId_t, pchTitle: [*c]const u8, pchDescription: [*c]const u8, eVisibility: ERemoteStoragePublishedFileVisibility, pTags: [*c]SteamParamStringArray_t, eWorkshopFileType: EWorkshopFileType) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_CreatePublishedFileUpdateRequest(self: ?*anyopaque, unPublishedFileId: PublishedFileId_t) callconv(.c) PublishedFileUpdateHandle_t;
+extern fn SteamAPI_ISteamRemoteStorage_UpdatePublishedFileFile(self: ?*anyopaque, updateHandle: PublishedFileUpdateHandle_t, pchFile: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_UpdatePublishedFilePreviewFile(self: ?*anyopaque, updateHandle: PublishedFileUpdateHandle_t, pchPreviewFile: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_UpdatePublishedFileTitle(self: ?*anyopaque, updateHandle: PublishedFileUpdateHandle_t, pchTitle: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_UpdatePublishedFileDescription(self: ?*anyopaque, updateHandle: PublishedFileUpdateHandle_t, pchDescription: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_UpdatePublishedFileVisibility(self: ?*anyopaque, updateHandle: PublishedFileUpdateHandle_t, eVisibility: ERemoteStoragePublishedFileVisibility) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_UpdatePublishedFileTags(self: ?*anyopaque, updateHandle: PublishedFileUpdateHandle_t, pTags: [*c]SteamParamStringArray_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_CommitPublishedFileUpdate(self: ?*anyopaque, updateHandle: PublishedFileUpdateHandle_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_GetPublishedFileDetails(self: ?*anyopaque, unPublishedFileId: PublishedFileId_t, unMaxSecondsOld: uint32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_DeletePublishedFile(self: ?*anyopaque, unPublishedFileId: PublishedFileId_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_EnumerateUserPublishedFiles(self: ?*anyopaque, unStartIndex: uint32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_SubscribePublishedFile(self: ?*anyopaque, unPublishedFileId: PublishedFileId_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_EnumerateUserSubscribedFiles(self: ?*anyopaque, unStartIndex: uint32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_UnsubscribePublishedFile(self: ?*anyopaque, unPublishedFileId: PublishedFileId_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_UpdatePublishedFileSetChangeDescription(self: ?*anyopaque, updateHandle: PublishedFileUpdateHandle_t, pchChangeDescription: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_GetPublishedItemVoteDetails(self: ?*anyopaque, unPublishedFileId: PublishedFileId_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_UpdateUserPublishedItemVote(self: ?*anyopaque, unPublishedFileId: PublishedFileId_t, bVoteUp: bool) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_GetUserPublishedItemVoteDetails(self: ?*anyopaque, unPublishedFileId: PublishedFileId_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_EnumerateUserSharedWorkshopFiles(self: ?*anyopaque, steamId: CSteamID, unStartIndex: uint32, pRequiredTags: [*c]SteamParamStringArray_t, pExcludedTags: [*c]SteamParamStringArray_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_PublishVideo(self: ?*anyopaque, eVideoProvider: EWorkshopVideoProvider, pchVideoAccount: [*c]const u8, pchVideoIdentifier: [*c]const u8, pchPreviewFile: [*c]const u8, nConsumerAppId: AppId_t, pchTitle: [*c]const u8, pchDescription: [*c]const u8, eVisibility: ERemoteStoragePublishedFileVisibility, pTags: [*c]SteamParamStringArray_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_SetUserPublishedFileAction(self: ?*anyopaque, unPublishedFileId: PublishedFileId_t, eAction: EWorkshopFileAction) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_EnumeratePublishedFilesByUserAction(self: ?*anyopaque, eAction: EWorkshopFileAction, unStartIndex: uint32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_EnumeratePublishedWorkshopFiles(self: ?*anyopaque, eEnumerationType: EWorkshopEnumerationType, unStartIndex: uint32, unCount: uint32, unDays: uint32, pTags: [*c]SteamParamStringArray_t, pUserTags: [*c]SteamParamStringArray_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_UGCDownloadToLocation(self: ?*anyopaque, hContent: UGCHandle_t, pchLocation: [*c]const u8, unPriority: uint32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamRemoteStorage_GetLocalFileChangeCount(self: ?*anyopaque) callconv(.c) int32;
+extern fn SteamAPI_ISteamRemoteStorage_GetLocalFileChange(self: ?*anyopaque, iFile: i32, pEChangeType: [*c]ERemoteStorageLocalFileChange, pEFilePathType: [*c]ERemoteStorageFilePathType) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamRemoteStorage_BeginFileWriteBatch(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemoteStorage_EndFileWriteBatch(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_SteamUserStats_v012() callconv(.c) [*c]ISteamUserStats;
 /// user
 pub fn SteamUserStats() ISteamUserStats {
     return ISteamUserStats{ .ptr = SteamAPI_SteamUserStats_v012() };
@@ -7847,52 +7847,52 @@ pub const ISteamUserStats = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamUserStats_RequestCurrentStats(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_GetStatInt32(self: ?*anyopaque, pchName: [*c]const u8, pData: [*c]int32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_GetStatFloat(self: ?*anyopaque, pchName: [*c]const u8, pData: [*c]f32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_SetStatInt32(self: ?*anyopaque, pchName: [*c]const u8, nData: int32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_SetStatFloat(self: ?*anyopaque, pchName: [*c]const u8, fData: f32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_UpdateAvgRateStat(self: ?*anyopaque, pchName: [*c]const u8, flCountThisSession: f32, dSessionLength: f64) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_GetAchievement(self: ?*anyopaque, pchName: [*c]const u8, pbAchieved: [*c]bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_SetAchievement(self: ?*anyopaque, pchName: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_ClearAchievement(self: ?*anyopaque, pchName: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_GetAchievementAndUnlockTime(self: ?*anyopaque, pchName: [*c]const u8, pbAchieved: [*c]bool, punUnlockTime: [*c]uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_StoreStats(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_GetAchievementIcon(self: ?*anyopaque, pchName: [*c]const u8) callconv(.C) i32;
-extern fn SteamAPI_ISteamUserStats_GetAchievementDisplayAttribute(self: ?*anyopaque, pchName: [*c]const u8, pchKey: [*c]const u8) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamUserStats_IndicateAchievementProgress(self: ?*anyopaque, pchName: [*c]const u8, nCurProgress: uint32, nMaxProgress: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_GetNumAchievements(self: ?*anyopaque) callconv(.C) uint32;
-extern fn SteamAPI_ISteamUserStats_GetAchievementName(self: ?*anyopaque, iAchievement: uint32) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamUserStats_RequestUserStats(self: ?*anyopaque, steamIDUser: CSteamID) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUserStats_GetUserStatInt32(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8, pData: [*c]int32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_GetUserStatFloat(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8, pData: [*c]f32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_GetUserAchievement(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8, pbAchieved: [*c]bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_GetUserAchievementAndUnlockTime(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8, pbAchieved: [*c]bool, punUnlockTime: [*c]uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_ResetAllStats(self: ?*anyopaque, bAchievementsToo: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_FindOrCreateLeaderboard(self: ?*anyopaque, pchLeaderboardName: [*c]const u8, eLeaderboardSortMethod: ELeaderboardSortMethod, eLeaderboardDisplayType: ELeaderboardDisplayType) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUserStats_FindLeaderboard(self: ?*anyopaque, pchLeaderboardName: [*c]const u8) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUserStats_GetLeaderboardName(self: ?*anyopaque, hSteamLeaderboard: SteamLeaderboard_t) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamUserStats_GetLeaderboardEntryCount(self: ?*anyopaque, hSteamLeaderboard: SteamLeaderboard_t) callconv(.C) i32;
-extern fn SteamAPI_ISteamUserStats_GetLeaderboardSortMethod(self: ?*anyopaque, hSteamLeaderboard: SteamLeaderboard_t) callconv(.C) ELeaderboardSortMethod;
-extern fn SteamAPI_ISteamUserStats_GetLeaderboardDisplayType(self: ?*anyopaque, hSteamLeaderboard: SteamLeaderboard_t) callconv(.C) ELeaderboardDisplayType;
-extern fn SteamAPI_ISteamUserStats_DownloadLeaderboardEntries(self: ?*anyopaque, hSteamLeaderboard: SteamLeaderboard_t, eLeaderboardDataRequest: ELeaderboardDataRequest, nRangeStart: i32, nRangeEnd: i32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUserStats_DownloadLeaderboardEntriesForUsers(self: ?*anyopaque, hSteamLeaderboard: SteamLeaderboard_t, prgUsers: [*c]CSteamID, cUsers: i32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUserStats_GetDownloadedLeaderboardEntry(self: ?*anyopaque, hSteamLeaderboardEntries: SteamLeaderboardEntries_t, index: i32, pLeaderboardEntry: [*c]LeaderboardEntry_t, pDetails: [*c]int32, cDetailsMax: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_UploadLeaderboardScore(self: ?*anyopaque, hSteamLeaderboard: SteamLeaderboard_t, eLeaderboardUploadScoreMethod: ELeaderboardUploadScoreMethod, nScore: int32, pScoreDetails: [*c]const int32, cScoreDetailsCount: i32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUserStats_AttachLeaderboardUGC(self: ?*anyopaque, hSteamLeaderboard: SteamLeaderboard_t, hUGC: UGCHandle_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUserStats_GetNumberOfCurrentPlayers(self: ?*anyopaque) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUserStats_RequestGlobalAchievementPercentages(self: ?*anyopaque) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUserStats_GetMostAchievedAchievementInfo(self: ?*anyopaque, pchName: [*c]u8, unNameBufLen: uint32, pflPercent: [*c]f32, pbAchieved: [*c]bool) callconv(.C) i32;
-extern fn SteamAPI_ISteamUserStats_GetNextMostAchievedAchievementInfo(self: ?*anyopaque, iIteratorPrevious: i32, pchName: [*c]u8, unNameBufLen: uint32, pflPercent: [*c]f32, pbAchieved: [*c]bool) callconv(.C) i32;
-extern fn SteamAPI_ISteamUserStats_GetAchievementAchievedPercent(self: ?*anyopaque, pchName: [*c]const u8, pflPercent: [*c]f32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_RequestGlobalStats(self: ?*anyopaque, nHistoryDays: i32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUserStats_GetGlobalStatInt64(self: ?*anyopaque, pchStatName: [*c]const u8, pData: [*c]int64) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_GetGlobalStatDouble(self: ?*anyopaque, pchStatName: [*c]const u8, pData: [*c]f64) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_GetGlobalStatHistoryInt64(self: ?*anyopaque, pchStatName: [*c]const u8, pData: [*c]int64, cubData: uint32) callconv(.C) int32;
-extern fn SteamAPI_ISteamUserStats_GetGlobalStatHistoryDouble(self: ?*anyopaque, pchStatName: [*c]const u8, pData: [*c]f64, cubData: uint32) callconv(.C) int32;
-extern fn SteamAPI_ISteamUserStats_GetAchievementProgressLimitsInt32(self: ?*anyopaque, pchName: [*c]const u8, pnMinProgress: [*c]int32, pnMaxProgress: [*c]int32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUserStats_GetAchievementProgressLimitsFloat(self: ?*anyopaque, pchName: [*c]const u8, pfMinProgress: [*c]f32, pfMaxProgress: [*c]f32) callconv(.C) bool;
-extern fn SteamAPI_SteamApps_v008() callconv(.C) [*c]ISteamApps;
+extern fn SteamAPI_ISteamUserStats_RequestCurrentStats(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_GetStatInt32(self: ?*anyopaque, pchName: [*c]const u8, pData: [*c]int32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_GetStatFloat(self: ?*anyopaque, pchName: [*c]const u8, pData: [*c]f32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_SetStatInt32(self: ?*anyopaque, pchName: [*c]const u8, nData: int32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_SetStatFloat(self: ?*anyopaque, pchName: [*c]const u8, fData: f32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_UpdateAvgRateStat(self: ?*anyopaque, pchName: [*c]const u8, flCountThisSession: f32, dSessionLength: f64) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_GetAchievement(self: ?*anyopaque, pchName: [*c]const u8, pbAchieved: [*c]bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_SetAchievement(self: ?*anyopaque, pchName: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_ClearAchievement(self: ?*anyopaque, pchName: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_GetAchievementAndUnlockTime(self: ?*anyopaque, pchName: [*c]const u8, pbAchieved: [*c]bool, punUnlockTime: [*c]uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_StoreStats(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_GetAchievementIcon(self: ?*anyopaque, pchName: [*c]const u8) callconv(.c) i32;
+extern fn SteamAPI_ISteamUserStats_GetAchievementDisplayAttribute(self: ?*anyopaque, pchName: [*c]const u8, pchKey: [*c]const u8) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamUserStats_IndicateAchievementProgress(self: ?*anyopaque, pchName: [*c]const u8, nCurProgress: uint32, nMaxProgress: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_GetNumAchievements(self: ?*anyopaque) callconv(.c) uint32;
+extern fn SteamAPI_ISteamUserStats_GetAchievementName(self: ?*anyopaque, iAchievement: uint32) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamUserStats_RequestUserStats(self: ?*anyopaque, steamIDUser: CSteamID) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUserStats_GetUserStatInt32(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8, pData: [*c]int32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_GetUserStatFloat(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8, pData: [*c]f32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_GetUserAchievement(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8, pbAchieved: [*c]bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_GetUserAchievementAndUnlockTime(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8, pbAchieved: [*c]bool, punUnlockTime: [*c]uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_ResetAllStats(self: ?*anyopaque, bAchievementsToo: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_FindOrCreateLeaderboard(self: ?*anyopaque, pchLeaderboardName: [*c]const u8, eLeaderboardSortMethod: ELeaderboardSortMethod, eLeaderboardDisplayType: ELeaderboardDisplayType) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUserStats_FindLeaderboard(self: ?*anyopaque, pchLeaderboardName: [*c]const u8) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUserStats_GetLeaderboardName(self: ?*anyopaque, hSteamLeaderboard: SteamLeaderboard_t) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamUserStats_GetLeaderboardEntryCount(self: ?*anyopaque, hSteamLeaderboard: SteamLeaderboard_t) callconv(.c) i32;
+extern fn SteamAPI_ISteamUserStats_GetLeaderboardSortMethod(self: ?*anyopaque, hSteamLeaderboard: SteamLeaderboard_t) callconv(.c) ELeaderboardSortMethod;
+extern fn SteamAPI_ISteamUserStats_GetLeaderboardDisplayType(self: ?*anyopaque, hSteamLeaderboard: SteamLeaderboard_t) callconv(.c) ELeaderboardDisplayType;
+extern fn SteamAPI_ISteamUserStats_DownloadLeaderboardEntries(self: ?*anyopaque, hSteamLeaderboard: SteamLeaderboard_t, eLeaderboardDataRequest: ELeaderboardDataRequest, nRangeStart: i32, nRangeEnd: i32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUserStats_DownloadLeaderboardEntriesForUsers(self: ?*anyopaque, hSteamLeaderboard: SteamLeaderboard_t, prgUsers: [*c]CSteamID, cUsers: i32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUserStats_GetDownloadedLeaderboardEntry(self: ?*anyopaque, hSteamLeaderboardEntries: SteamLeaderboardEntries_t, index: i32, pLeaderboardEntry: [*c]LeaderboardEntry_t, pDetails: [*c]int32, cDetailsMax: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_UploadLeaderboardScore(self: ?*anyopaque, hSteamLeaderboard: SteamLeaderboard_t, eLeaderboardUploadScoreMethod: ELeaderboardUploadScoreMethod, nScore: int32, pScoreDetails: [*c]const int32, cScoreDetailsCount: i32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUserStats_AttachLeaderboardUGC(self: ?*anyopaque, hSteamLeaderboard: SteamLeaderboard_t, hUGC: UGCHandle_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUserStats_GetNumberOfCurrentPlayers(self: ?*anyopaque) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUserStats_RequestGlobalAchievementPercentages(self: ?*anyopaque) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUserStats_GetMostAchievedAchievementInfo(self: ?*anyopaque, pchName: [*c]u8, unNameBufLen: uint32, pflPercent: [*c]f32, pbAchieved: [*c]bool) callconv(.c) i32;
+extern fn SteamAPI_ISteamUserStats_GetNextMostAchievedAchievementInfo(self: ?*anyopaque, iIteratorPrevious: i32, pchName: [*c]u8, unNameBufLen: uint32, pflPercent: [*c]f32, pbAchieved: [*c]bool) callconv(.c) i32;
+extern fn SteamAPI_ISteamUserStats_GetAchievementAchievedPercent(self: ?*anyopaque, pchName: [*c]const u8, pflPercent: [*c]f32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_RequestGlobalStats(self: ?*anyopaque, nHistoryDays: i32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUserStats_GetGlobalStatInt64(self: ?*anyopaque, pchStatName: [*c]const u8, pData: [*c]int64) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_GetGlobalStatDouble(self: ?*anyopaque, pchStatName: [*c]const u8, pData: [*c]f64) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_GetGlobalStatHistoryInt64(self: ?*anyopaque, pchStatName: [*c]const u8, pData: [*c]int64, cubData: uint32) callconv(.c) int32;
+extern fn SteamAPI_ISteamUserStats_GetGlobalStatHistoryDouble(self: ?*anyopaque, pchStatName: [*c]const u8, pData: [*c]f64, cubData: uint32) callconv(.c) int32;
+extern fn SteamAPI_ISteamUserStats_GetAchievementProgressLimitsInt32(self: ?*anyopaque, pchName: [*c]const u8, pnMinProgress: [*c]int32, pnMaxProgress: [*c]int32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUserStats_GetAchievementProgressLimitsFloat(self: ?*anyopaque, pchName: [*c]const u8, pfMinProgress: [*c]f32, pfMaxProgress: [*c]f32) callconv(.c) bool;
+extern fn SteamAPI_SteamApps_v008() callconv(.c) [*c]ISteamApps;
 /// user
 pub fn SteamApps() ISteamApps {
     return ISteamApps{ .ptr = SteamAPI_SteamApps_v008() };
@@ -8024,42 +8024,42 @@ pub const ISteamApps = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamApps_BIsSubscribed(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamApps_BIsLowViolence(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamApps_BIsCybercafe(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamApps_BIsVACBanned(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamApps_GetCurrentGameLanguage(self: ?*anyopaque) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamApps_GetAvailableGameLanguages(self: ?*anyopaque) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamApps_BIsSubscribedApp(self: ?*anyopaque, appID: AppId_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamApps_BIsDlcInstalled(self: ?*anyopaque, appID: AppId_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamApps_GetEarliestPurchaseUnixTime(self: ?*anyopaque, nAppID: AppId_t) callconv(.C) uint32;
-extern fn SteamAPI_ISteamApps_BIsSubscribedFromFreeWeekend(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamApps_GetDLCCount(self: ?*anyopaque) callconv(.C) i32;
-extern fn SteamAPI_ISteamApps_BGetDLCDataByIndex(self: ?*anyopaque, iDLC: i32, pAppID: [*c]AppId_t, pbAvailable: [*c]bool, pchName: [*c]u8, cchNameBufferSize: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamApps_InstallDLC(self: ?*anyopaque, nAppID: AppId_t) callconv(.C) void;
-extern fn SteamAPI_ISteamApps_UninstallDLC(self: ?*anyopaque, nAppID: AppId_t) callconv(.C) void;
-extern fn SteamAPI_ISteamApps_RequestAppProofOfPurchaseKey(self: ?*anyopaque, nAppID: AppId_t) callconv(.C) void;
-extern fn SteamAPI_ISteamApps_GetCurrentBetaName(self: ?*anyopaque, pchName: [*c]u8, cchNameBufferSize: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamApps_MarkContentCorrupt(self: ?*anyopaque, bMissingFilesOnly: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamApps_GetInstalledDepots(self: ?*anyopaque, appID: AppId_t, pvecDepots: [*c]DepotId_t, cMaxDepots: uint32) callconv(.C) uint32;
-extern fn SteamAPI_ISteamApps_GetAppInstallDir(self: ?*anyopaque, appID: AppId_t, pchFolder: [*c]u8, cchFolderBufferSize: uint32) callconv(.C) uint32;
-extern fn SteamAPI_ISteamApps_BIsAppInstalled(self: ?*anyopaque, appID: AppId_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamApps_GetAppOwner(self: ?*anyopaque) callconv(.C) CSteamID;
-extern fn SteamAPI_ISteamApps_GetLaunchQueryParam(self: ?*anyopaque, pchKey: [*c]const u8) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamApps_GetDlcDownloadProgress(self: ?*anyopaque, nAppID: AppId_t, punBytesDownloaded: [*c]uint64, punBytesTotal: [*c]uint64) callconv(.C) bool;
-extern fn SteamAPI_ISteamApps_GetAppBuildId(self: ?*anyopaque) callconv(.C) i32;
-extern fn SteamAPI_ISteamApps_RequestAllProofOfPurchaseKeys(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamApps_GetFileDetails(self: ?*anyopaque, pszFileName: [*c]const u8) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamApps_GetLaunchCommandLine(self: ?*anyopaque, pszCommandLine: [*c]u8, cubCommandLine: i32) callconv(.C) i32;
-extern fn SteamAPI_ISteamApps_BIsSubscribedFromFamilySharing(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamApps_BIsTimedTrial(self: ?*anyopaque, punSecondsAllowed: [*c]uint32, punSecondsPlayed: [*c]uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamApps_SetDlcContext(self: ?*anyopaque, nAppID: AppId_t) callconv(.C) bool;
-extern fn SteamAPI_SteamNetworking_v006() callconv(.C) [*c]ISteamNetworking;
+extern fn SteamAPI_ISteamApps_BIsSubscribed(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamApps_BIsLowViolence(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamApps_BIsCybercafe(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamApps_BIsVACBanned(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamApps_GetCurrentGameLanguage(self: ?*anyopaque) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamApps_GetAvailableGameLanguages(self: ?*anyopaque) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamApps_BIsSubscribedApp(self: ?*anyopaque, appID: AppId_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamApps_BIsDlcInstalled(self: ?*anyopaque, appID: AppId_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamApps_GetEarliestPurchaseUnixTime(self: ?*anyopaque, nAppID: AppId_t) callconv(.c) uint32;
+extern fn SteamAPI_ISteamApps_BIsSubscribedFromFreeWeekend(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamApps_GetDLCCount(self: ?*anyopaque) callconv(.c) i32;
+extern fn SteamAPI_ISteamApps_BGetDLCDataByIndex(self: ?*anyopaque, iDLC: i32, pAppID: [*c]AppId_t, pbAvailable: [*c]bool, pchName: [*c]u8, cchNameBufferSize: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamApps_InstallDLC(self: ?*anyopaque, nAppID: AppId_t) callconv(.c) void;
+extern fn SteamAPI_ISteamApps_UninstallDLC(self: ?*anyopaque, nAppID: AppId_t) callconv(.c) void;
+extern fn SteamAPI_ISteamApps_RequestAppProofOfPurchaseKey(self: ?*anyopaque, nAppID: AppId_t) callconv(.c) void;
+extern fn SteamAPI_ISteamApps_GetCurrentBetaName(self: ?*anyopaque, pchName: [*c]u8, cchNameBufferSize: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamApps_MarkContentCorrupt(self: ?*anyopaque, bMissingFilesOnly: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamApps_GetInstalledDepots(self: ?*anyopaque, appID: AppId_t, pvecDepots: [*c]DepotId_t, cMaxDepots: uint32) callconv(.c) uint32;
+extern fn SteamAPI_ISteamApps_GetAppInstallDir(self: ?*anyopaque, appID: AppId_t, pchFolder: [*c]u8, cchFolderBufferSize: uint32) callconv(.c) uint32;
+extern fn SteamAPI_ISteamApps_BIsAppInstalled(self: ?*anyopaque, appID: AppId_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamApps_GetAppOwner(self: ?*anyopaque) callconv(.c) CSteamID;
+extern fn SteamAPI_ISteamApps_GetLaunchQueryParam(self: ?*anyopaque, pchKey: [*c]const u8) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamApps_GetDlcDownloadProgress(self: ?*anyopaque, nAppID: AppId_t, punBytesDownloaded: [*c]uint64, punBytesTotal: [*c]uint64) callconv(.c) bool;
+extern fn SteamAPI_ISteamApps_GetAppBuildId(self: ?*anyopaque) callconv(.c) i32;
+extern fn SteamAPI_ISteamApps_RequestAllProofOfPurchaseKeys(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamApps_GetFileDetails(self: ?*anyopaque, pszFileName: [*c]const u8) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamApps_GetLaunchCommandLine(self: ?*anyopaque, pszCommandLine: [*c]u8, cubCommandLine: i32) callconv(.c) i32;
+extern fn SteamAPI_ISteamApps_BIsSubscribedFromFamilySharing(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamApps_BIsTimedTrial(self: ?*anyopaque, punSecondsAllowed: [*c]uint32, punSecondsPlayed: [*c]uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamApps_SetDlcContext(self: ?*anyopaque, nAppID: AppId_t) callconv(.c) bool;
+extern fn SteamAPI_SteamNetworking_v006() callconv(.c) [*c]ISteamNetworking;
 /// user
 pub fn SteamNetworking() ISteamNetworking {
     return ISteamNetworking{ .ptr = SteamAPI_SteamNetworking_v006() };
 }
-extern fn SteamAPI_SteamGameServerNetworking_v006() callconv(.C) [*c]ISteamNetworking;
+extern fn SteamAPI_SteamGameServerNetworking_v006() callconv(.c) [*c]ISteamNetworking;
 /// gameserver
 pub fn SteamGameServerNetworking() ISteamNetworking {
     return ISteamNetworking{ .ptr = SteamAPI_SteamGameServerNetworking_v006() };
@@ -8159,29 +8159,29 @@ pub const ISteamNetworking = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamNetworking_SendP2PPacket(self: ?*anyopaque, steamIDRemote: CSteamID, pubData: [*c]const u8, cubData: uint32, eP2PSendType: EP2PSend, nChannel: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworking_IsP2PPacketAvailable(self: ?*anyopaque, pcubMsgSize: [*c]uint32, nChannel: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworking_ReadP2PPacket(self: ?*anyopaque, pubDest: [*c]u8, cubDest: uint32, pcubMsgSize: [*c]uint32, psteamIDRemote: [*c]CSteamID, nChannel: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworking_AcceptP2PSessionWithUser(self: ?*anyopaque, steamIDRemote: CSteamID) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworking_CloseP2PSessionWithUser(self: ?*anyopaque, steamIDRemote: CSteamID) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworking_CloseP2PChannelWithUser(self: ?*anyopaque, steamIDRemote: CSteamID, nChannel: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworking_GetP2PSessionState(self: ?*anyopaque, steamIDRemote: CSteamID, pConnectionState: [*c]P2PSessionState_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworking_AllowP2PPacketRelay(self: ?*anyopaque, bAllow: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworking_CreateListenSocket(self: ?*anyopaque, nVirtualP2PPort: i32, nIP: SteamIPAddress_t, nPort: uint16, bAllowUseOfPacketRelay: bool) callconv(.C) SNetListenSocket_t;
-extern fn SteamAPI_ISteamNetworking_CreateP2PConnectionSocket(self: ?*anyopaque, steamIDTarget: CSteamID, nVirtualPort: i32, nTimeoutSec: i32, bAllowUseOfPacketRelay: bool) callconv(.C) SNetSocket_t;
-extern fn SteamAPI_ISteamNetworking_CreateConnectionSocket(self: ?*anyopaque, nIP: SteamIPAddress_t, nPort: uint16, nTimeoutSec: i32) callconv(.C) SNetSocket_t;
-extern fn SteamAPI_ISteamNetworking_DestroySocket(self: ?*anyopaque, hSocket: SNetSocket_t, bNotifyRemoteEnd: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworking_DestroyListenSocket(self: ?*anyopaque, hSocket: SNetListenSocket_t, bNotifyRemoteEnd: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworking_SendDataOnSocket(self: ?*anyopaque, hSocket: SNetSocket_t, pubData: [*c]u8, cubData: uint32, bReliable: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworking_IsDataAvailableOnSocket(self: ?*anyopaque, hSocket: SNetSocket_t, pcubMsgSize: [*c]uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworking_RetrieveDataFromSocket(self: ?*anyopaque, hSocket: SNetSocket_t, pubDest: [*c]u8, cubDest: uint32, pcubMsgSize: [*c]uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworking_IsDataAvailable(self: ?*anyopaque, hListenSocket: SNetListenSocket_t, pcubMsgSize: [*c]uint32, phSocket: [*c]SNetSocket_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworking_RetrieveData(self: ?*anyopaque, hListenSocket: SNetListenSocket_t, pubDest: [*c]u8, cubDest: uint32, pcubMsgSize: [*c]uint32, phSocket: [*c]SNetSocket_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworking_GetSocketInfo(self: ?*anyopaque, hSocket: SNetSocket_t, pSteamIDRemote: [*c]CSteamID, peSocketStatus: [*c]i32, punIPRemote: [*c]SteamIPAddress_t, punPortRemote: [*c]uint16) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworking_GetListenSocketInfo(self: ?*anyopaque, hListenSocket: SNetListenSocket_t, pnIP: [*c]SteamIPAddress_t, pnPort: [*c]uint16) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworking_GetSocketConnectionType(self: ?*anyopaque, hSocket: SNetSocket_t) callconv(.C) ESNetSocketConnectionType;
-extern fn SteamAPI_ISteamNetworking_GetMaxPacketSize(self: ?*anyopaque, hSocket: SNetSocket_t) callconv(.C) i32;
-extern fn SteamAPI_SteamScreenshots_v003() callconv(.C) [*c]ISteamScreenshots;
+extern fn SteamAPI_ISteamNetworking_SendP2PPacket(self: ?*anyopaque, steamIDRemote: CSteamID, pubData: [*c]const u8, cubData: uint32, eP2PSendType: EP2PSend, nChannel: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworking_IsP2PPacketAvailable(self: ?*anyopaque, pcubMsgSize: [*c]uint32, nChannel: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworking_ReadP2PPacket(self: ?*anyopaque, pubDest: [*c]u8, cubDest: uint32, pcubMsgSize: [*c]uint32, psteamIDRemote: [*c]CSteamID, nChannel: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworking_AcceptP2PSessionWithUser(self: ?*anyopaque, steamIDRemote: CSteamID) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworking_CloseP2PSessionWithUser(self: ?*anyopaque, steamIDRemote: CSteamID) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworking_CloseP2PChannelWithUser(self: ?*anyopaque, steamIDRemote: CSteamID, nChannel: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworking_GetP2PSessionState(self: ?*anyopaque, steamIDRemote: CSteamID, pConnectionState: [*c]P2PSessionState_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworking_AllowP2PPacketRelay(self: ?*anyopaque, bAllow: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworking_CreateListenSocket(self: ?*anyopaque, nVirtualP2PPort: i32, nIP: SteamIPAddress_t, nPort: uint16, bAllowUseOfPacketRelay: bool) callconv(.c) SNetListenSocket_t;
+extern fn SteamAPI_ISteamNetworking_CreateP2PConnectionSocket(self: ?*anyopaque, steamIDTarget: CSteamID, nVirtualPort: i32, nTimeoutSec: i32, bAllowUseOfPacketRelay: bool) callconv(.c) SNetSocket_t;
+extern fn SteamAPI_ISteamNetworking_CreateConnectionSocket(self: ?*anyopaque, nIP: SteamIPAddress_t, nPort: uint16, nTimeoutSec: i32) callconv(.c) SNetSocket_t;
+extern fn SteamAPI_ISteamNetworking_DestroySocket(self: ?*anyopaque, hSocket: SNetSocket_t, bNotifyRemoteEnd: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworking_DestroyListenSocket(self: ?*anyopaque, hSocket: SNetListenSocket_t, bNotifyRemoteEnd: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworking_SendDataOnSocket(self: ?*anyopaque, hSocket: SNetSocket_t, pubData: [*c]u8, cubData: uint32, bReliable: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworking_IsDataAvailableOnSocket(self: ?*anyopaque, hSocket: SNetSocket_t, pcubMsgSize: [*c]uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworking_RetrieveDataFromSocket(self: ?*anyopaque, hSocket: SNetSocket_t, pubDest: [*c]u8, cubDest: uint32, pcubMsgSize: [*c]uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworking_IsDataAvailable(self: ?*anyopaque, hListenSocket: SNetListenSocket_t, pcubMsgSize: [*c]uint32, phSocket: [*c]SNetSocket_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworking_RetrieveData(self: ?*anyopaque, hListenSocket: SNetListenSocket_t, pubDest: [*c]u8, cubDest: uint32, pcubMsgSize: [*c]uint32, phSocket: [*c]SNetSocket_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworking_GetSocketInfo(self: ?*anyopaque, hSocket: SNetSocket_t, pSteamIDRemote: [*c]CSteamID, peSocketStatus: [*c]i32, punIPRemote: [*c]SteamIPAddress_t, punPortRemote: [*c]uint16) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworking_GetListenSocketInfo(self: ?*anyopaque, hListenSocket: SNetListenSocket_t, pnIP: [*c]SteamIPAddress_t, pnPort: [*c]uint16) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworking_GetSocketConnectionType(self: ?*anyopaque, hSocket: SNetSocket_t) callconv(.c) ESNetSocketConnectionType;
+extern fn SteamAPI_ISteamNetworking_GetMaxPacketSize(self: ?*anyopaque, hSocket: SNetSocket_t) callconv(.c) i32;
+extern fn SteamAPI_SteamScreenshots_v003() callconv(.c) [*c]ISteamScreenshots;
 /// user
 pub fn SteamScreenshots() ISteamScreenshots {
     return ISteamScreenshots{ .ptr = SteamAPI_SteamScreenshots_v003() };
@@ -8229,16 +8229,16 @@ pub const ISteamScreenshots = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamScreenshots_WriteScreenshot(self: ?*anyopaque, pubRGB: [*c]u8, cubRGB: uint32, nWidth: i32, nHeight: i32) callconv(.C) ScreenshotHandle;
-extern fn SteamAPI_ISteamScreenshots_AddScreenshotToLibrary(self: ?*anyopaque, pchFilename: [*c]const u8, pchThumbnailFilename: [*c]const u8, nWidth: i32, nHeight: i32) callconv(.C) ScreenshotHandle;
-extern fn SteamAPI_ISteamScreenshots_TriggerScreenshot(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamScreenshots_HookScreenshots(self: ?*anyopaque, bHook: bool) callconv(.C) void;
-extern fn SteamAPI_ISteamScreenshots_SetLocation(self: ?*anyopaque, hScreenshot: ScreenshotHandle, pchLocation: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamScreenshots_TagUser(self: ?*anyopaque, hScreenshot: ScreenshotHandle, steamID: CSteamID) callconv(.C) bool;
-extern fn SteamAPI_ISteamScreenshots_TagPublishedFile(self: ?*anyopaque, hScreenshot: ScreenshotHandle, unPublishedFileID: PublishedFileId_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamScreenshots_IsScreenshotsHooked(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamScreenshots_AddVRScreenshotToLibrary(self: ?*anyopaque, eType: EVRScreenshotType, pchFilename: [*c]const u8, pchVRFilename: [*c]const u8) callconv(.C) ScreenshotHandle;
-extern fn SteamAPI_SteamMusic_v001() callconv(.C) [*c]ISteamMusic;
+extern fn SteamAPI_ISteamScreenshots_WriteScreenshot(self: ?*anyopaque, pubRGB: [*c]u8, cubRGB: uint32, nWidth: i32, nHeight: i32) callconv(.c) ScreenshotHandle;
+extern fn SteamAPI_ISteamScreenshots_AddScreenshotToLibrary(self: ?*anyopaque, pchFilename: [*c]const u8, pchThumbnailFilename: [*c]const u8, nWidth: i32, nHeight: i32) callconv(.c) ScreenshotHandle;
+extern fn SteamAPI_ISteamScreenshots_TriggerScreenshot(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamScreenshots_HookScreenshots(self: ?*anyopaque, bHook: bool) callconv(.c) void;
+extern fn SteamAPI_ISteamScreenshots_SetLocation(self: ?*anyopaque, hScreenshot: ScreenshotHandle, pchLocation: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamScreenshots_TagUser(self: ?*anyopaque, hScreenshot: ScreenshotHandle, steamID: CSteamID) callconv(.c) bool;
+extern fn SteamAPI_ISteamScreenshots_TagPublishedFile(self: ?*anyopaque, hScreenshot: ScreenshotHandle, unPublishedFileID: PublishedFileId_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamScreenshots_IsScreenshotsHooked(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamScreenshots_AddVRScreenshotToLibrary(self: ?*anyopaque, eType: EVRScreenshotType, pchFilename: [*c]const u8, pchVRFilename: [*c]const u8) callconv(.c) ScreenshotHandle;
+extern fn SteamAPI_SteamMusic_v001() callconv(.c) [*c]ISteamMusic;
 /// user
 pub fn SteamMusic() ISteamMusic {
     return ISteamMusic{ .ptr = SteamAPI_SteamMusic_v001() };
@@ -8286,16 +8286,16 @@ pub const ISteamMusic = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamMusic_BIsEnabled(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusic_BIsPlaying(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusic_GetPlaybackStatus(self: ?*anyopaque) callconv(.C) AudioPlayback_Status;
-extern fn SteamAPI_ISteamMusic_Play(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamMusic_Pause(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamMusic_PlayPrevious(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamMusic_PlayNext(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamMusic_SetVolume(self: ?*anyopaque, flVolume: f32) callconv(.C) void;
-extern fn SteamAPI_ISteamMusic_GetVolume(self: ?*anyopaque) callconv(.C) f32;
-extern fn SteamAPI_SteamMusicRemote_v001() callconv(.C) [*c]ISteamMusicRemote;
+extern fn SteamAPI_ISteamMusic_BIsEnabled(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusic_BIsPlaying(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusic_GetPlaybackStatus(self: ?*anyopaque) callconv(.c) AudioPlayback_Status;
+extern fn SteamAPI_ISteamMusic_Play(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamMusic_Pause(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamMusic_PlayPrevious(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamMusic_PlayNext(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamMusic_SetVolume(self: ?*anyopaque, flVolume: f32) callconv(.c) void;
+extern fn SteamAPI_ISteamMusic_GetVolume(self: ?*anyopaque) callconv(.c) f32;
+extern fn SteamAPI_SteamMusicRemote_v001() callconv(.c) [*c]ISteamMusicRemote;
 /// user
 pub fn SteamMusicRemote() ISteamMusicRemote {
     return ISteamMusicRemote{ .ptr = SteamAPI_SteamMusicRemote_v001() };
@@ -8435,44 +8435,44 @@ pub const ISteamMusicRemote = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamMusicRemote_RegisterSteamMusicRemote(self: ?*anyopaque, pchName: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_DeregisterSteamMusicRemote(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_BIsCurrentMusicRemote(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_BActivationSuccess(self: ?*anyopaque, bValue: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_SetDisplayName(self: ?*anyopaque, pchDisplayName: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_SetPNGIcon_64x64(self: ?*anyopaque, pvBuffer: [*c]u8, cbBufferLength: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_EnablePlayPrevious(self: ?*anyopaque, bValue: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_EnablePlayNext(self: ?*anyopaque, bValue: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_EnableShuffled(self: ?*anyopaque, bValue: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_EnableLooped(self: ?*anyopaque, bValue: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_EnableQueue(self: ?*anyopaque, bValue: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_EnablePlaylists(self: ?*anyopaque, bValue: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_UpdatePlaybackStatus(self: ?*anyopaque, nStatus: AudioPlayback_Status) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_UpdateShuffled(self: ?*anyopaque, bValue: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_UpdateLooped(self: ?*anyopaque, bValue: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_UpdateVolume(self: ?*anyopaque, flValue: f32) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_CurrentEntryWillChange(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_CurrentEntryIsAvailable(self: ?*anyopaque, bAvailable: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_UpdateCurrentEntryText(self: ?*anyopaque, pchText: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_UpdateCurrentEntryElapsedSeconds(self: ?*anyopaque, nValue: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_UpdateCurrentEntryCoverArt(self: ?*anyopaque, pvBuffer: [*c]u8, cbBufferLength: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_CurrentEntryDidChange(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_QueueWillChange(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_ResetQueueEntries(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_SetQueueEntry(self: ?*anyopaque, nID: i32, nPosition: i32, pchEntryText: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_SetCurrentQueueEntry(self: ?*anyopaque, nID: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_QueueDidChange(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_PlaylistWillChange(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_ResetPlaylistEntries(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_SetPlaylistEntry(self: ?*anyopaque, nID: i32, nPosition: i32, pchEntryText: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_SetCurrentPlaylistEntry(self: ?*anyopaque, nID: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamMusicRemote_PlaylistDidChange(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_SteamHTTP_v003() callconv(.C) [*c]ISteamHTTP;
+extern fn SteamAPI_ISteamMusicRemote_RegisterSteamMusicRemote(self: ?*anyopaque, pchName: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_DeregisterSteamMusicRemote(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_BIsCurrentMusicRemote(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_BActivationSuccess(self: ?*anyopaque, bValue: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_SetDisplayName(self: ?*anyopaque, pchDisplayName: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_SetPNGIcon_64x64(self: ?*anyopaque, pvBuffer: [*c]u8, cbBufferLength: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_EnablePlayPrevious(self: ?*anyopaque, bValue: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_EnablePlayNext(self: ?*anyopaque, bValue: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_EnableShuffled(self: ?*anyopaque, bValue: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_EnableLooped(self: ?*anyopaque, bValue: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_EnableQueue(self: ?*anyopaque, bValue: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_EnablePlaylists(self: ?*anyopaque, bValue: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_UpdatePlaybackStatus(self: ?*anyopaque, nStatus: AudioPlayback_Status) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_UpdateShuffled(self: ?*anyopaque, bValue: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_UpdateLooped(self: ?*anyopaque, bValue: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_UpdateVolume(self: ?*anyopaque, flValue: f32) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_CurrentEntryWillChange(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_CurrentEntryIsAvailable(self: ?*anyopaque, bAvailable: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_UpdateCurrentEntryText(self: ?*anyopaque, pchText: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_UpdateCurrentEntryElapsedSeconds(self: ?*anyopaque, nValue: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_UpdateCurrentEntryCoverArt(self: ?*anyopaque, pvBuffer: [*c]u8, cbBufferLength: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_CurrentEntryDidChange(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_QueueWillChange(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_ResetQueueEntries(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_SetQueueEntry(self: ?*anyopaque, nID: i32, nPosition: i32, pchEntryText: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_SetCurrentQueueEntry(self: ?*anyopaque, nID: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_QueueDidChange(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_PlaylistWillChange(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_ResetPlaylistEntries(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_SetPlaylistEntry(self: ?*anyopaque, nID: i32, nPosition: i32, pchEntryText: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_SetCurrentPlaylistEntry(self: ?*anyopaque, nID: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamMusicRemote_PlaylistDidChange(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_SteamHTTP_v003() callconv(.c) [*c]ISteamHTTP;
 /// user
 pub fn SteamHTTP() ISteamHTTP {
     return ISteamHTTP{ .ptr = SteamAPI_SteamHTTP_v003() };
 }
-extern fn SteamAPI_SteamGameServerHTTP_v003() callconv(.C) [*c]ISteamHTTP;
+extern fn SteamAPI_SteamGameServerHTTP_v003() callconv(.c) [*c]ISteamHTTP;
 /// gameserver
 pub fn SteamGameServerHTTP() ISteamHTTP {
     return ISteamHTTP{ .ptr = SteamAPI_SteamGameServerHTTP_v003() };
@@ -8584,32 +8584,32 @@ pub const ISteamHTTP = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamHTTP_CreateHTTPRequest(self: ?*anyopaque, eHTTPRequestMethod: EHTTPMethod, pchAbsoluteURL: [*c]const u8) callconv(.C) HTTPRequestHandle;
-extern fn SteamAPI_ISteamHTTP_SetHTTPRequestContextValue(self: ?*anyopaque, hRequest: HTTPRequestHandle, ulContextValue: uint64) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_SetHTTPRequestNetworkActivityTimeout(self: ?*anyopaque, hRequest: HTTPRequestHandle, unTimeoutSeconds: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_SetHTTPRequestHeaderValue(self: ?*anyopaque, hRequest: HTTPRequestHandle, pchHeaderName: [*c]const u8, pchHeaderValue: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_SetHTTPRequestGetOrPostParameter(self: ?*anyopaque, hRequest: HTTPRequestHandle, pchParamName: [*c]const u8, pchParamValue: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_SendHTTPRequest(self: ?*anyopaque, hRequest: HTTPRequestHandle, pCallHandle: [*c]SteamAPICall_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_SendHTTPRequestAndStreamResponse(self: ?*anyopaque, hRequest: HTTPRequestHandle, pCallHandle: [*c]SteamAPICall_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_DeferHTTPRequest(self: ?*anyopaque, hRequest: HTTPRequestHandle) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_PrioritizeHTTPRequest(self: ?*anyopaque, hRequest: HTTPRequestHandle) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_GetHTTPResponseHeaderSize(self: ?*anyopaque, hRequest: HTTPRequestHandle, pchHeaderName: [*c]const u8, unResponseHeaderSize: [*c]uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_GetHTTPResponseHeaderValue(self: ?*anyopaque, hRequest: HTTPRequestHandle, pchHeaderName: [*c]const u8, pHeaderValueBuffer: [*c]uint8, unBufferSize: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_GetHTTPResponseBodySize(self: ?*anyopaque, hRequest: HTTPRequestHandle, unBodySize: [*c]uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_GetHTTPResponseBodyData(self: ?*anyopaque, hRequest: HTTPRequestHandle, pBodyDataBuffer: [*c]uint8, unBufferSize: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_GetHTTPStreamingResponseBodyData(self: ?*anyopaque, hRequest: HTTPRequestHandle, cOffset: uint32, pBodyDataBuffer: [*c]uint8, unBufferSize: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_ReleaseHTTPRequest(self: ?*anyopaque, hRequest: HTTPRequestHandle) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_GetHTTPDownloadProgressPct(self: ?*anyopaque, hRequest: HTTPRequestHandle, pflPercentOut: [*c]f32) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_SetHTTPRequestRawPostBody(self: ?*anyopaque, hRequest: HTTPRequestHandle, pchContentType: [*c]const u8, pubBody: [*c]uint8, unBodyLen: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_CreateCookieContainer(self: ?*anyopaque, bAllowResponsesToModify: bool) callconv(.C) HTTPCookieContainerHandle;
-extern fn SteamAPI_ISteamHTTP_ReleaseCookieContainer(self: ?*anyopaque, hCookieContainer: HTTPCookieContainerHandle) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_SetCookie(self: ?*anyopaque, hCookieContainer: HTTPCookieContainerHandle, pchHost: [*c]const u8, pchUrl: [*c]const u8, pchCookie: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_SetHTTPRequestCookieContainer(self: ?*anyopaque, hRequest: HTTPRequestHandle, hCookieContainer: HTTPCookieContainerHandle) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_SetHTTPRequestUserAgentInfo(self: ?*anyopaque, hRequest: HTTPRequestHandle, pchUserAgentInfo: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_SetHTTPRequestRequiresVerifiedCertificate(self: ?*anyopaque, hRequest: HTTPRequestHandle, bRequireVerifiedCertificate: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_SetHTTPRequestAbsoluteTimeoutMS(self: ?*anyopaque, hRequest: HTTPRequestHandle, unMilliseconds: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTTP_GetHTTPRequestWasTimedOut(self: ?*anyopaque, hRequest: HTTPRequestHandle, pbWasTimedOut: [*c]bool) callconv(.C) bool;
-extern fn SteamAPI_SteamInput_v006() callconv(.C) [*c]ISteamInput;
+extern fn SteamAPI_ISteamHTTP_CreateHTTPRequest(self: ?*anyopaque, eHTTPRequestMethod: EHTTPMethod, pchAbsoluteURL: [*c]const u8) callconv(.c) HTTPRequestHandle;
+extern fn SteamAPI_ISteamHTTP_SetHTTPRequestContextValue(self: ?*anyopaque, hRequest: HTTPRequestHandle, ulContextValue: uint64) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_SetHTTPRequestNetworkActivityTimeout(self: ?*anyopaque, hRequest: HTTPRequestHandle, unTimeoutSeconds: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_SetHTTPRequestHeaderValue(self: ?*anyopaque, hRequest: HTTPRequestHandle, pchHeaderName: [*c]const u8, pchHeaderValue: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_SetHTTPRequestGetOrPostParameter(self: ?*anyopaque, hRequest: HTTPRequestHandle, pchParamName: [*c]const u8, pchParamValue: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_SendHTTPRequest(self: ?*anyopaque, hRequest: HTTPRequestHandle, pCallHandle: [*c]SteamAPICall_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_SendHTTPRequestAndStreamResponse(self: ?*anyopaque, hRequest: HTTPRequestHandle, pCallHandle: [*c]SteamAPICall_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_DeferHTTPRequest(self: ?*anyopaque, hRequest: HTTPRequestHandle) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_PrioritizeHTTPRequest(self: ?*anyopaque, hRequest: HTTPRequestHandle) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_GetHTTPResponseHeaderSize(self: ?*anyopaque, hRequest: HTTPRequestHandle, pchHeaderName: [*c]const u8, unResponseHeaderSize: [*c]uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_GetHTTPResponseHeaderValue(self: ?*anyopaque, hRequest: HTTPRequestHandle, pchHeaderName: [*c]const u8, pHeaderValueBuffer: [*c]uint8, unBufferSize: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_GetHTTPResponseBodySize(self: ?*anyopaque, hRequest: HTTPRequestHandle, unBodySize: [*c]uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_GetHTTPResponseBodyData(self: ?*anyopaque, hRequest: HTTPRequestHandle, pBodyDataBuffer: [*c]uint8, unBufferSize: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_GetHTTPStreamingResponseBodyData(self: ?*anyopaque, hRequest: HTTPRequestHandle, cOffset: uint32, pBodyDataBuffer: [*c]uint8, unBufferSize: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_ReleaseHTTPRequest(self: ?*anyopaque, hRequest: HTTPRequestHandle) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_GetHTTPDownloadProgressPct(self: ?*anyopaque, hRequest: HTTPRequestHandle, pflPercentOut: [*c]f32) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_SetHTTPRequestRawPostBody(self: ?*anyopaque, hRequest: HTTPRequestHandle, pchContentType: [*c]const u8, pubBody: [*c]uint8, unBodyLen: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_CreateCookieContainer(self: ?*anyopaque, bAllowResponsesToModify: bool) callconv(.c) HTTPCookieContainerHandle;
+extern fn SteamAPI_ISteamHTTP_ReleaseCookieContainer(self: ?*anyopaque, hCookieContainer: HTTPCookieContainerHandle) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_SetCookie(self: ?*anyopaque, hCookieContainer: HTTPCookieContainerHandle, pchHost: [*c]const u8, pchUrl: [*c]const u8, pchCookie: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_SetHTTPRequestCookieContainer(self: ?*anyopaque, hRequest: HTTPRequestHandle, hCookieContainer: HTTPCookieContainerHandle) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_SetHTTPRequestUserAgentInfo(self: ?*anyopaque, hRequest: HTTPRequestHandle, pchUserAgentInfo: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_SetHTTPRequestRequiresVerifiedCertificate(self: ?*anyopaque, hRequest: HTTPRequestHandle, bRequireVerifiedCertificate: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_SetHTTPRequestAbsoluteTimeoutMS(self: ?*anyopaque, hRequest: HTTPRequestHandle, unMilliseconds: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTTP_GetHTTPRequestWasTimedOut(self: ?*anyopaque, hRequest: HTTPRequestHandle, pbWasTimedOut: [*c]bool) callconv(.c) bool;
+extern fn SteamAPI_SteamInput_v006() callconv(.c) [*c]ISteamInput;
 /// user
 pub fn SteamInput() ISteamInput {
     return ISteamInput{ .ptr = SteamAPI_SteamInput_v006() };
@@ -8813,55 +8813,55 @@ pub const ISteamInput = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamInput_Init(self: ?*anyopaque, bExplicitlyCallRunFrame: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamInput_Shutdown(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamInput_SetInputActionManifestFilePath(self: ?*anyopaque, pchInputActionManifestAbsolutePath: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamInput_RunFrame(self: ?*anyopaque, bReservedValue: bool) callconv(.C) void;
-extern fn SteamAPI_ISteamInput_BWaitForData(self: ?*anyopaque, bWaitForever: bool, unTimeout: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamInput_BNewDataAvailable(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamInput_GetConnectedControllers(self: ?*anyopaque, handlesOut: [*c]InputHandle_t) callconv(.C) i32;
-extern fn SteamAPI_ISteamInput_EnableDeviceCallbacks(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamInput_EnableActionEventCallbacks(self: ?*anyopaque, pCallback: SteamInputActionEventCallbackPointer) callconv(.C) void;
-extern fn SteamAPI_ISteamInput_GetActionSetHandle(self: ?*anyopaque, pszActionSetName: [*c]const u8) callconv(.C) InputActionSetHandle_t;
-extern fn SteamAPI_ISteamInput_ActivateActionSet(self: ?*anyopaque, inputHandle: InputHandle_t, actionSetHandle: InputActionSetHandle_t) callconv(.C) void;
-extern fn SteamAPI_ISteamInput_GetCurrentActionSet(self: ?*anyopaque, inputHandle: InputHandle_t) callconv(.C) InputActionSetHandle_t;
-extern fn SteamAPI_ISteamInput_ActivateActionSetLayer(self: ?*anyopaque, inputHandle: InputHandle_t, actionSetLayerHandle: InputActionSetHandle_t) callconv(.C) void;
-extern fn SteamAPI_ISteamInput_DeactivateActionSetLayer(self: ?*anyopaque, inputHandle: InputHandle_t, actionSetLayerHandle: InputActionSetHandle_t) callconv(.C) void;
-extern fn SteamAPI_ISteamInput_DeactivateAllActionSetLayers(self: ?*anyopaque, inputHandle: InputHandle_t) callconv(.C) void;
-extern fn SteamAPI_ISteamInput_GetActiveActionSetLayers(self: ?*anyopaque, inputHandle: InputHandle_t, handlesOut: [*c]InputActionSetHandle_t) callconv(.C) i32;
-extern fn SteamAPI_ISteamInput_GetDigitalActionHandle(self: ?*anyopaque, pszActionName: [*c]const u8) callconv(.C) InputDigitalActionHandle_t;
-extern fn SteamAPI_ISteamInput_GetDigitalActionData(self: ?*anyopaque, inputHandle: InputHandle_t, digitalActionHandle: InputDigitalActionHandle_t) callconv(.C) InputDigitalActionData_t;
-extern fn SteamAPI_ISteamInput_GetDigitalActionOrigins(self: ?*anyopaque, inputHandle: InputHandle_t, actionSetHandle: InputActionSetHandle_t, digitalActionHandle: InputDigitalActionHandle_t, originsOut: [*c]EInputActionOrigin) callconv(.C) i32;
-extern fn SteamAPI_ISteamInput_GetStringForDigitalActionName(self: ?*anyopaque, eActionHandle: InputDigitalActionHandle_t) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamInput_GetAnalogActionHandle(self: ?*anyopaque, pszActionName: [*c]const u8) callconv(.C) InputAnalogActionHandle_t;
-extern fn SteamAPI_ISteamInput_GetAnalogActionData(self: ?*anyopaque, inputHandle: InputHandle_t, analogActionHandle: InputAnalogActionHandle_t) callconv(.C) InputAnalogActionData_t;
-extern fn SteamAPI_ISteamInput_GetAnalogActionOrigins(self: ?*anyopaque, inputHandle: InputHandle_t, actionSetHandle: InputActionSetHandle_t, analogActionHandle: InputAnalogActionHandle_t, originsOut: [*c]EInputActionOrigin) callconv(.C) i32;
-extern fn SteamAPI_ISteamInput_GetGlyphPNGForActionOrigin(self: ?*anyopaque, eOrigin: EInputActionOrigin, eSize: ESteamInputGlyphSize, unFlags: uint32) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamInput_GetGlyphSVGForActionOrigin(self: ?*anyopaque, eOrigin: EInputActionOrigin, unFlags: uint32) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamInput_GetGlyphForActionOrigin_Legacy(self: ?*anyopaque, eOrigin: EInputActionOrigin) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamInput_GetStringForActionOrigin(self: ?*anyopaque, eOrigin: EInputActionOrigin) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamInput_GetStringForAnalogActionName(self: ?*anyopaque, eActionHandle: InputAnalogActionHandle_t) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamInput_StopAnalogActionMomentum(self: ?*anyopaque, inputHandle: InputHandle_t, eAction: InputAnalogActionHandle_t) callconv(.C) void;
-extern fn SteamAPI_ISteamInput_GetMotionData(self: ?*anyopaque, inputHandle: InputHandle_t) callconv(.C) InputMotionData_t;
-extern fn SteamAPI_ISteamInput_TriggerVibration(self: ?*anyopaque, inputHandle: InputHandle_t, usLeftSpeed: u16, usRightSpeed: u16) callconv(.C) void;
-extern fn SteamAPI_ISteamInput_TriggerVibrationExtended(self: ?*anyopaque, inputHandle: InputHandle_t, usLeftSpeed: u16, usRightSpeed: u16, usLeftTriggerSpeed: u16, usRightTriggerSpeed: u16) callconv(.C) void;
-extern fn SteamAPI_ISteamInput_TriggerSimpleHapticEvent(self: ?*anyopaque, inputHandle: InputHandle_t, eHapticLocation: EControllerHapticLocation, nIntensity: uint8, nGainDB: u8, nOtherIntensity: uint8, nOtherGainDB: u8) callconv(.C) void;
-extern fn SteamAPI_ISteamInput_SetLEDColor(self: ?*anyopaque, inputHandle: InputHandle_t, nColorR: uint8, nColorG: uint8, nColorB: uint8, nFlags: u32) callconv(.C) void;
-extern fn SteamAPI_ISteamInput_Legacy_TriggerHapticPulse(self: ?*anyopaque, inputHandle: InputHandle_t, eTargetPad: ESteamControllerPad, usDurationMicroSec: u16) callconv(.C) void;
-extern fn SteamAPI_ISteamInput_Legacy_TriggerRepeatedHapticPulse(self: ?*anyopaque, inputHandle: InputHandle_t, eTargetPad: ESteamControllerPad, usDurationMicroSec: u16, usOffMicroSec: u16, unRepeat: u16, nFlags: u32) callconv(.C) void;
-extern fn SteamAPI_ISteamInput_ShowBindingPanel(self: ?*anyopaque, inputHandle: InputHandle_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamInput_GetInputTypeForHandle(self: ?*anyopaque, inputHandle: InputHandle_t) callconv(.C) ESteamInputType;
-extern fn SteamAPI_ISteamInput_GetControllerForGamepadIndex(self: ?*anyopaque, nIndex: i32) callconv(.C) InputHandle_t;
-extern fn SteamAPI_ISteamInput_GetGamepadIndexForController(self: ?*anyopaque, ulinputHandle: InputHandle_t) callconv(.C) i32;
-extern fn SteamAPI_ISteamInput_GetStringForXboxOrigin(self: ?*anyopaque, eOrigin: EXboxOrigin) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamInput_GetGlyphForXboxOrigin(self: ?*anyopaque, eOrigin: EXboxOrigin) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamInput_GetActionOriginFromXboxOrigin(self: ?*anyopaque, inputHandle: InputHandle_t, eOrigin: EXboxOrigin) callconv(.C) EInputActionOrigin;
-extern fn SteamAPI_ISteamInput_TranslateActionOrigin(self: ?*anyopaque, eDestinationInputType: ESteamInputType, eSourceOrigin: EInputActionOrigin) callconv(.C) EInputActionOrigin;
-extern fn SteamAPI_ISteamInput_GetDeviceBindingRevision(self: ?*anyopaque, inputHandle: InputHandle_t, pMajor: [*c]i32, pMinor: [*c]i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamInput_GetRemotePlaySessionID(self: ?*anyopaque, inputHandle: InputHandle_t) callconv(.C) uint32;
-extern fn SteamAPI_ISteamInput_GetSessionInputConfigurationSettings(self: ?*anyopaque) callconv(.C) uint16;
-extern fn SteamAPI_ISteamInput_SetDualSenseTriggerEffect(self: ?*anyopaque, inputHandle: InputHandle_t, pParam: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_SteamController_v008() callconv(.C) [*c]ISteamController;
+extern fn SteamAPI_ISteamInput_Init(self: ?*anyopaque, bExplicitlyCallRunFrame: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamInput_Shutdown(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamInput_SetInputActionManifestFilePath(self: ?*anyopaque, pchInputActionManifestAbsolutePath: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamInput_RunFrame(self: ?*anyopaque, bReservedValue: bool) callconv(.c) void;
+extern fn SteamAPI_ISteamInput_BWaitForData(self: ?*anyopaque, bWaitForever: bool, unTimeout: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamInput_BNewDataAvailable(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamInput_GetConnectedControllers(self: ?*anyopaque, handlesOut: [*c]InputHandle_t) callconv(.c) i32;
+extern fn SteamAPI_ISteamInput_EnableDeviceCallbacks(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamInput_EnableActionEventCallbacks(self: ?*anyopaque, pCallback: SteamInputActionEventCallbackPointer) callconv(.c) void;
+extern fn SteamAPI_ISteamInput_GetActionSetHandle(self: ?*anyopaque, pszActionSetName: [*c]const u8) callconv(.c) InputActionSetHandle_t;
+extern fn SteamAPI_ISteamInput_ActivateActionSet(self: ?*anyopaque, inputHandle: InputHandle_t, actionSetHandle: InputActionSetHandle_t) callconv(.c) void;
+extern fn SteamAPI_ISteamInput_GetCurrentActionSet(self: ?*anyopaque, inputHandle: InputHandle_t) callconv(.c) InputActionSetHandle_t;
+extern fn SteamAPI_ISteamInput_ActivateActionSetLayer(self: ?*anyopaque, inputHandle: InputHandle_t, actionSetLayerHandle: InputActionSetHandle_t) callconv(.c) void;
+extern fn SteamAPI_ISteamInput_DeactivateActionSetLayer(self: ?*anyopaque, inputHandle: InputHandle_t, actionSetLayerHandle: InputActionSetHandle_t) callconv(.c) void;
+extern fn SteamAPI_ISteamInput_DeactivateAllActionSetLayers(self: ?*anyopaque, inputHandle: InputHandle_t) callconv(.c) void;
+extern fn SteamAPI_ISteamInput_GetActiveActionSetLayers(self: ?*anyopaque, inputHandle: InputHandle_t, handlesOut: [*c]InputActionSetHandle_t) callconv(.c) i32;
+extern fn SteamAPI_ISteamInput_GetDigitalActionHandle(self: ?*anyopaque, pszActionName: [*c]const u8) callconv(.c) InputDigitalActionHandle_t;
+extern fn SteamAPI_ISteamInput_GetDigitalActionData(self: ?*anyopaque, inputHandle: InputHandle_t, digitalActionHandle: InputDigitalActionHandle_t) callconv(.c) InputDigitalActionData_t;
+extern fn SteamAPI_ISteamInput_GetDigitalActionOrigins(self: ?*anyopaque, inputHandle: InputHandle_t, actionSetHandle: InputActionSetHandle_t, digitalActionHandle: InputDigitalActionHandle_t, originsOut: [*c]EInputActionOrigin) callconv(.c) i32;
+extern fn SteamAPI_ISteamInput_GetStringForDigitalActionName(self: ?*anyopaque, eActionHandle: InputDigitalActionHandle_t) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamInput_GetAnalogActionHandle(self: ?*anyopaque, pszActionName: [*c]const u8) callconv(.c) InputAnalogActionHandle_t;
+extern fn SteamAPI_ISteamInput_GetAnalogActionData(self: ?*anyopaque, inputHandle: InputHandle_t, analogActionHandle: InputAnalogActionHandle_t) callconv(.c) InputAnalogActionData_t;
+extern fn SteamAPI_ISteamInput_GetAnalogActionOrigins(self: ?*anyopaque, inputHandle: InputHandle_t, actionSetHandle: InputActionSetHandle_t, analogActionHandle: InputAnalogActionHandle_t, originsOut: [*c]EInputActionOrigin) callconv(.c) i32;
+extern fn SteamAPI_ISteamInput_GetGlyphPNGForActionOrigin(self: ?*anyopaque, eOrigin: EInputActionOrigin, eSize: ESteamInputGlyphSize, unFlags: uint32) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamInput_GetGlyphSVGForActionOrigin(self: ?*anyopaque, eOrigin: EInputActionOrigin, unFlags: uint32) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamInput_GetGlyphForActionOrigin_Legacy(self: ?*anyopaque, eOrigin: EInputActionOrigin) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamInput_GetStringForActionOrigin(self: ?*anyopaque, eOrigin: EInputActionOrigin) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamInput_GetStringForAnalogActionName(self: ?*anyopaque, eActionHandle: InputAnalogActionHandle_t) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamInput_StopAnalogActionMomentum(self: ?*anyopaque, inputHandle: InputHandle_t, eAction: InputAnalogActionHandle_t) callconv(.c) void;
+extern fn SteamAPI_ISteamInput_GetMotionData(self: ?*anyopaque, inputHandle: InputHandle_t) callconv(.c) InputMotionData_t;
+extern fn SteamAPI_ISteamInput_TriggerVibration(self: ?*anyopaque, inputHandle: InputHandle_t, usLeftSpeed: u16, usRightSpeed: u16) callconv(.c) void;
+extern fn SteamAPI_ISteamInput_TriggerVibrationExtended(self: ?*anyopaque, inputHandle: InputHandle_t, usLeftSpeed: u16, usRightSpeed: u16, usLeftTriggerSpeed: u16, usRightTriggerSpeed: u16) callconv(.c) void;
+extern fn SteamAPI_ISteamInput_TriggerSimpleHapticEvent(self: ?*anyopaque, inputHandle: InputHandle_t, eHapticLocation: EControllerHapticLocation, nIntensity: uint8, nGainDB: u8, nOtherIntensity: uint8, nOtherGainDB: u8) callconv(.c) void;
+extern fn SteamAPI_ISteamInput_SetLEDColor(self: ?*anyopaque, inputHandle: InputHandle_t, nColorR: uint8, nColorG: uint8, nColorB: uint8, nFlags: u32) callconv(.c) void;
+extern fn SteamAPI_ISteamInput_Legacy_TriggerHapticPulse(self: ?*anyopaque, inputHandle: InputHandle_t, eTargetPad: ESteamControllerPad, usDurationMicroSec: u16) callconv(.c) void;
+extern fn SteamAPI_ISteamInput_Legacy_TriggerRepeatedHapticPulse(self: ?*anyopaque, inputHandle: InputHandle_t, eTargetPad: ESteamControllerPad, usDurationMicroSec: u16, usOffMicroSec: u16, unRepeat: u16, nFlags: u32) callconv(.c) void;
+extern fn SteamAPI_ISteamInput_ShowBindingPanel(self: ?*anyopaque, inputHandle: InputHandle_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamInput_GetInputTypeForHandle(self: ?*anyopaque, inputHandle: InputHandle_t) callconv(.c) ESteamInputType;
+extern fn SteamAPI_ISteamInput_GetControllerForGamepadIndex(self: ?*anyopaque, nIndex: i32) callconv(.c) InputHandle_t;
+extern fn SteamAPI_ISteamInput_GetGamepadIndexForController(self: ?*anyopaque, ulinputHandle: InputHandle_t) callconv(.c) i32;
+extern fn SteamAPI_ISteamInput_GetStringForXboxOrigin(self: ?*anyopaque, eOrigin: EXboxOrigin) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamInput_GetGlyphForXboxOrigin(self: ?*anyopaque, eOrigin: EXboxOrigin) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamInput_GetActionOriginFromXboxOrigin(self: ?*anyopaque, inputHandle: InputHandle_t, eOrigin: EXboxOrigin) callconv(.c) EInputActionOrigin;
+extern fn SteamAPI_ISteamInput_TranslateActionOrigin(self: ?*anyopaque, eDestinationInputType: ESteamInputType, eSourceOrigin: EInputActionOrigin) callconv(.c) EInputActionOrigin;
+extern fn SteamAPI_ISteamInput_GetDeviceBindingRevision(self: ?*anyopaque, inputHandle: InputHandle_t, pMajor: [*c]i32, pMinor: [*c]i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamInput_GetRemotePlaySessionID(self: ?*anyopaque, inputHandle: InputHandle_t) callconv(.c) uint32;
+extern fn SteamAPI_ISteamInput_GetSessionInputConfigurationSettings(self: ?*anyopaque) callconv(.c) uint16;
+extern fn SteamAPI_ISteamInput_SetDualSenseTriggerEffect(self: ?*anyopaque, inputHandle: InputHandle_t, pParam: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_SteamController_v008() callconv(.c) [*c]ISteamController;
 /// user
 pub fn SteamController() ISteamController {
     return ISteamController{ .ptr = SteamAPI_SteamController_v008() };
@@ -9009,46 +9009,46 @@ pub const ISteamController = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamController_Init(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamController_Shutdown(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamController_RunFrame(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamController_GetConnectedControllers(self: ?*anyopaque, handlesOut: [*c]ControllerHandle_t) callconv(.C) i32;
-extern fn SteamAPI_ISteamController_GetActionSetHandle(self: ?*anyopaque, pszActionSetName: [*c]const u8) callconv(.C) ControllerActionSetHandle_t;
-extern fn SteamAPI_ISteamController_ActivateActionSet(self: ?*anyopaque, controllerHandle: ControllerHandle_t, actionSetHandle: ControllerActionSetHandle_t) callconv(.C) void;
-extern fn SteamAPI_ISteamController_GetCurrentActionSet(self: ?*anyopaque, controllerHandle: ControllerHandle_t) callconv(.C) ControllerActionSetHandle_t;
-extern fn SteamAPI_ISteamController_ActivateActionSetLayer(self: ?*anyopaque, controllerHandle: ControllerHandle_t, actionSetLayerHandle: ControllerActionSetHandle_t) callconv(.C) void;
-extern fn SteamAPI_ISteamController_DeactivateActionSetLayer(self: ?*anyopaque, controllerHandle: ControllerHandle_t, actionSetLayerHandle: ControllerActionSetHandle_t) callconv(.C) void;
-extern fn SteamAPI_ISteamController_DeactivateAllActionSetLayers(self: ?*anyopaque, controllerHandle: ControllerHandle_t) callconv(.C) void;
-extern fn SteamAPI_ISteamController_GetActiveActionSetLayers(self: ?*anyopaque, controllerHandle: ControllerHandle_t, handlesOut: [*c]ControllerActionSetHandle_t) callconv(.C) i32;
-extern fn SteamAPI_ISteamController_GetDigitalActionHandle(self: ?*anyopaque, pszActionName: [*c]const u8) callconv(.C) ControllerDigitalActionHandle_t;
-extern fn SteamAPI_ISteamController_GetDigitalActionData(self: ?*anyopaque, controllerHandle: ControllerHandle_t, digitalActionHandle: ControllerDigitalActionHandle_t) callconv(.C) InputDigitalActionData_t;
-extern fn SteamAPI_ISteamController_GetDigitalActionOrigins(self: ?*anyopaque, controllerHandle: ControllerHandle_t, actionSetHandle: ControllerActionSetHandle_t, digitalActionHandle: ControllerDigitalActionHandle_t, originsOut: [*c]EControllerActionOrigin) callconv(.C) i32;
-extern fn SteamAPI_ISteamController_GetAnalogActionHandle(self: ?*anyopaque, pszActionName: [*c]const u8) callconv(.C) ControllerAnalogActionHandle_t;
-extern fn SteamAPI_ISteamController_GetAnalogActionData(self: ?*anyopaque, controllerHandle: ControllerHandle_t, analogActionHandle: ControllerAnalogActionHandle_t) callconv(.C) InputAnalogActionData_t;
-extern fn SteamAPI_ISteamController_GetAnalogActionOrigins(self: ?*anyopaque, controllerHandle: ControllerHandle_t, actionSetHandle: ControllerActionSetHandle_t, analogActionHandle: ControllerAnalogActionHandle_t, originsOut: [*c]EControllerActionOrigin) callconv(.C) i32;
-extern fn SteamAPI_ISteamController_GetGlyphForActionOrigin(self: ?*anyopaque, eOrigin: EControllerActionOrigin) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamController_GetStringForActionOrigin(self: ?*anyopaque, eOrigin: EControllerActionOrigin) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamController_StopAnalogActionMomentum(self: ?*anyopaque, controllerHandle: ControllerHandle_t, eAction: ControllerAnalogActionHandle_t) callconv(.C) void;
-extern fn SteamAPI_ISteamController_GetMotionData(self: ?*anyopaque, controllerHandle: ControllerHandle_t) callconv(.C) InputMotionData_t;
-extern fn SteamAPI_ISteamController_TriggerHapticPulse(self: ?*anyopaque, controllerHandle: ControllerHandle_t, eTargetPad: ESteamControllerPad, usDurationMicroSec: u16) callconv(.C) void;
-extern fn SteamAPI_ISteamController_TriggerRepeatedHapticPulse(self: ?*anyopaque, controllerHandle: ControllerHandle_t, eTargetPad: ESteamControllerPad, usDurationMicroSec: u16, usOffMicroSec: u16, unRepeat: u16, nFlags: u32) callconv(.C) void;
-extern fn SteamAPI_ISteamController_TriggerVibration(self: ?*anyopaque, controllerHandle: ControllerHandle_t, usLeftSpeed: u16, usRightSpeed: u16) callconv(.C) void;
-extern fn SteamAPI_ISteamController_SetLEDColor(self: ?*anyopaque, controllerHandle: ControllerHandle_t, nColorR: uint8, nColorG: uint8, nColorB: uint8, nFlags: u32) callconv(.C) void;
-extern fn SteamAPI_ISteamController_ShowBindingPanel(self: ?*anyopaque, controllerHandle: ControllerHandle_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamController_GetInputTypeForHandle(self: ?*anyopaque, controllerHandle: ControllerHandle_t) callconv(.C) ESteamInputType;
-extern fn SteamAPI_ISteamController_GetControllerForGamepadIndex(self: ?*anyopaque, nIndex: i32) callconv(.C) ControllerHandle_t;
-extern fn SteamAPI_ISteamController_GetGamepadIndexForController(self: ?*anyopaque, ulControllerHandle: ControllerHandle_t) callconv(.C) i32;
-extern fn SteamAPI_ISteamController_GetStringForXboxOrigin(self: ?*anyopaque, eOrigin: EXboxOrigin) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamController_GetGlyphForXboxOrigin(self: ?*anyopaque, eOrigin: EXboxOrigin) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamController_GetActionOriginFromXboxOrigin(self: ?*anyopaque, controllerHandle: ControllerHandle_t, eOrigin: EXboxOrigin) callconv(.C) EControllerActionOrigin;
-extern fn SteamAPI_ISteamController_TranslateActionOrigin(self: ?*anyopaque, eDestinationInputType: ESteamInputType, eSourceOrigin: EControllerActionOrigin) callconv(.C) EControllerActionOrigin;
-extern fn SteamAPI_ISteamController_GetControllerBindingRevision(self: ?*anyopaque, controllerHandle: ControllerHandle_t, pMajor: [*c]i32, pMinor: [*c]i32) callconv(.C) bool;
-extern fn SteamAPI_SteamUGC_v017() callconv(.C) [*c]ISteamUGC;
+extern fn SteamAPI_ISteamController_Init(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamController_Shutdown(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamController_RunFrame(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamController_GetConnectedControllers(self: ?*anyopaque, handlesOut: [*c]ControllerHandle_t) callconv(.c) i32;
+extern fn SteamAPI_ISteamController_GetActionSetHandle(self: ?*anyopaque, pszActionSetName: [*c]const u8) callconv(.c) ControllerActionSetHandle_t;
+extern fn SteamAPI_ISteamController_ActivateActionSet(self: ?*anyopaque, controllerHandle: ControllerHandle_t, actionSetHandle: ControllerActionSetHandle_t) callconv(.c) void;
+extern fn SteamAPI_ISteamController_GetCurrentActionSet(self: ?*anyopaque, controllerHandle: ControllerHandle_t) callconv(.c) ControllerActionSetHandle_t;
+extern fn SteamAPI_ISteamController_ActivateActionSetLayer(self: ?*anyopaque, controllerHandle: ControllerHandle_t, actionSetLayerHandle: ControllerActionSetHandle_t) callconv(.c) void;
+extern fn SteamAPI_ISteamController_DeactivateActionSetLayer(self: ?*anyopaque, controllerHandle: ControllerHandle_t, actionSetLayerHandle: ControllerActionSetHandle_t) callconv(.c) void;
+extern fn SteamAPI_ISteamController_DeactivateAllActionSetLayers(self: ?*anyopaque, controllerHandle: ControllerHandle_t) callconv(.c) void;
+extern fn SteamAPI_ISteamController_GetActiveActionSetLayers(self: ?*anyopaque, controllerHandle: ControllerHandle_t, handlesOut: [*c]ControllerActionSetHandle_t) callconv(.c) i32;
+extern fn SteamAPI_ISteamController_GetDigitalActionHandle(self: ?*anyopaque, pszActionName: [*c]const u8) callconv(.c) ControllerDigitalActionHandle_t;
+extern fn SteamAPI_ISteamController_GetDigitalActionData(self: ?*anyopaque, controllerHandle: ControllerHandle_t, digitalActionHandle: ControllerDigitalActionHandle_t) callconv(.c) InputDigitalActionData_t;
+extern fn SteamAPI_ISteamController_GetDigitalActionOrigins(self: ?*anyopaque, controllerHandle: ControllerHandle_t, actionSetHandle: ControllerActionSetHandle_t, digitalActionHandle: ControllerDigitalActionHandle_t, originsOut: [*c]EControllerActionOrigin) callconv(.c) i32;
+extern fn SteamAPI_ISteamController_GetAnalogActionHandle(self: ?*anyopaque, pszActionName: [*c]const u8) callconv(.c) ControllerAnalogActionHandle_t;
+extern fn SteamAPI_ISteamController_GetAnalogActionData(self: ?*anyopaque, controllerHandle: ControllerHandle_t, analogActionHandle: ControllerAnalogActionHandle_t) callconv(.c) InputAnalogActionData_t;
+extern fn SteamAPI_ISteamController_GetAnalogActionOrigins(self: ?*anyopaque, controllerHandle: ControllerHandle_t, actionSetHandle: ControllerActionSetHandle_t, analogActionHandle: ControllerAnalogActionHandle_t, originsOut: [*c]EControllerActionOrigin) callconv(.c) i32;
+extern fn SteamAPI_ISteamController_GetGlyphForActionOrigin(self: ?*anyopaque, eOrigin: EControllerActionOrigin) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamController_GetStringForActionOrigin(self: ?*anyopaque, eOrigin: EControllerActionOrigin) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamController_StopAnalogActionMomentum(self: ?*anyopaque, controllerHandle: ControllerHandle_t, eAction: ControllerAnalogActionHandle_t) callconv(.c) void;
+extern fn SteamAPI_ISteamController_GetMotionData(self: ?*anyopaque, controllerHandle: ControllerHandle_t) callconv(.c) InputMotionData_t;
+extern fn SteamAPI_ISteamController_TriggerHapticPulse(self: ?*anyopaque, controllerHandle: ControllerHandle_t, eTargetPad: ESteamControllerPad, usDurationMicroSec: u16) callconv(.c) void;
+extern fn SteamAPI_ISteamController_TriggerRepeatedHapticPulse(self: ?*anyopaque, controllerHandle: ControllerHandle_t, eTargetPad: ESteamControllerPad, usDurationMicroSec: u16, usOffMicroSec: u16, unRepeat: u16, nFlags: u32) callconv(.c) void;
+extern fn SteamAPI_ISteamController_TriggerVibration(self: ?*anyopaque, controllerHandle: ControllerHandle_t, usLeftSpeed: u16, usRightSpeed: u16) callconv(.c) void;
+extern fn SteamAPI_ISteamController_SetLEDColor(self: ?*anyopaque, controllerHandle: ControllerHandle_t, nColorR: uint8, nColorG: uint8, nColorB: uint8, nFlags: u32) callconv(.c) void;
+extern fn SteamAPI_ISteamController_ShowBindingPanel(self: ?*anyopaque, controllerHandle: ControllerHandle_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamController_GetInputTypeForHandle(self: ?*anyopaque, controllerHandle: ControllerHandle_t) callconv(.c) ESteamInputType;
+extern fn SteamAPI_ISteamController_GetControllerForGamepadIndex(self: ?*anyopaque, nIndex: i32) callconv(.c) ControllerHandle_t;
+extern fn SteamAPI_ISteamController_GetGamepadIndexForController(self: ?*anyopaque, ulControllerHandle: ControllerHandle_t) callconv(.c) i32;
+extern fn SteamAPI_ISteamController_GetStringForXboxOrigin(self: ?*anyopaque, eOrigin: EXboxOrigin) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamController_GetGlyphForXboxOrigin(self: ?*anyopaque, eOrigin: EXboxOrigin) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamController_GetActionOriginFromXboxOrigin(self: ?*anyopaque, controllerHandle: ControllerHandle_t, eOrigin: EXboxOrigin) callconv(.c) EControllerActionOrigin;
+extern fn SteamAPI_ISteamController_TranslateActionOrigin(self: ?*anyopaque, eDestinationInputType: ESteamInputType, eSourceOrigin: EControllerActionOrigin) callconv(.c) EControllerActionOrigin;
+extern fn SteamAPI_ISteamController_GetControllerBindingRevision(self: ?*anyopaque, controllerHandle: ControllerHandle_t, pMajor: [*c]i32, pMinor: [*c]i32) callconv(.c) bool;
+extern fn SteamAPI_SteamUGC_v017() callconv(.c) [*c]ISteamUGC;
 /// user
 pub fn SteamUGC() ISteamUGC {
     return ISteamUGC{ .ptr = SteamAPI_SteamUGC_v017() };
 }
-extern fn SteamAPI_SteamGameServerUGC_v017() callconv(.C) [*c]ISteamUGC;
+extern fn SteamAPI_SteamGameServerUGC_v017() callconv(.c) [*c]ISteamUGC;
 /// gameserver
 pub fn SteamGameServerUGC() ISteamUGC {
     return ISteamUGC{ .ptr = SteamAPI_SteamGameServerUGC_v017() };
@@ -9416,96 +9416,96 @@ pub const ISteamUGC = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamUGC_CreateQueryUserUGCRequest(self: ?*anyopaque, unAccountID: AccountID_t, eListType: EUserUGCList, eMatchingUGCType: EUGCMatchingUGCType, eSortOrder: EUserUGCListSortOrder, nCreatorAppID: AppId_t, nConsumerAppID: AppId_t, unPage: uint32) callconv(.C) UGCQueryHandle_t;
-extern fn SteamAPI_ISteamUGC_CreateQueryAllUGCRequestPage(self: ?*anyopaque, eQueryType: EUGCQuery, eMatchingeMatchingUGCTypeFileType: EUGCMatchingUGCType, nCreatorAppID: AppId_t, nConsumerAppID: AppId_t, unPage: uint32) callconv(.C) UGCQueryHandle_t;
-extern fn SteamAPI_ISteamUGC_CreateQueryAllUGCRequestCursor(self: ?*anyopaque, eQueryType: EUGCQuery, eMatchingeMatchingUGCTypeFileType: EUGCMatchingUGCType, nCreatorAppID: AppId_t, nConsumerAppID: AppId_t, pchCursor: [*c]const u8) callconv(.C) UGCQueryHandle_t;
-extern fn SteamAPI_ISteamUGC_CreateQueryUGCDetailsRequest(self: ?*anyopaque, pvecPublishedFileID: [*c]PublishedFileId_t, unNumPublishedFileIDs: uint32) callconv(.C) UGCQueryHandle_t;
-extern fn SteamAPI_ISteamUGC_SendQueryUGCRequest(self: ?*anyopaque, handle: UGCQueryHandle_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUGC_GetQueryUGCResult(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, pDetails: [*c]SteamUGCDetails_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_GetQueryUGCNumTags(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32) callconv(.C) uint32;
-extern fn SteamAPI_ISteamUGC_GetQueryUGCTag(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, indexTag: uint32, pchValue: [*c]u8, cchValueSize: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_GetQueryUGCTagDisplayName(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, indexTag: uint32, pchValue: [*c]u8, cchValueSize: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_GetQueryUGCPreviewURL(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, pchURL: [*c]u8, cchURLSize: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_GetQueryUGCMetadata(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, pchMetadata: [*c]u8, cchMetadatasize: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_GetQueryUGCChildren(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, pvecPublishedFileID: [*c]PublishedFileId_t, cMaxEntries: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_GetQueryUGCStatistic(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, eStatType: EItemStatistic, pStatValue: [*c]uint64) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_GetQueryUGCNumAdditionalPreviews(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32) callconv(.C) uint32;
-extern fn SteamAPI_ISteamUGC_GetQueryUGCAdditionalPreview(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, previewIndex: uint32, pchURLOrVideoID: [*c]u8, cchURLSize: uint32, pchOriginalFileName: [*c]u8, cchOriginalFileNameSize: uint32, pPreviewType: [*c]EItemPreviewType) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_GetQueryUGCNumKeyValueTags(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32) callconv(.C) uint32;
-extern fn SteamAPI_ISteamUGC_GetQueryUGCKeyValueTag(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, keyValueTagIndex: uint32, pchKey: [*c]u8, cchKeySize: uint32, pchValue: [*c]u8, cchValueSize: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_GetQueryFirstUGCKeyValueTag(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, pchKey: [*c]const u8, pchValue: [*c]u8, cchValueSize: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_GetQueryUGCContentDescriptors(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, pvecDescriptors: [*c]EUGCContentDescriptorID, cMaxEntries: uint32) callconv(.C) uint32;
-extern fn SteamAPI_ISteamUGC_ReleaseQueryUGCRequest(self: ?*anyopaque, handle: UGCQueryHandle_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_AddRequiredTag(self: ?*anyopaque, handle: UGCQueryHandle_t, pTagName: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_AddRequiredTagGroup(self: ?*anyopaque, handle: UGCQueryHandle_t, pTagGroups: [*c]const SteamParamStringArray_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_AddExcludedTag(self: ?*anyopaque, handle: UGCQueryHandle_t, pTagName: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetReturnOnlyIDs(self: ?*anyopaque, handle: UGCQueryHandle_t, bReturnOnlyIDs: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetReturnKeyValueTags(self: ?*anyopaque, handle: UGCQueryHandle_t, bReturnKeyValueTags: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetReturnLongDescription(self: ?*anyopaque, handle: UGCQueryHandle_t, bReturnLongDescription: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetReturnMetadata(self: ?*anyopaque, handle: UGCQueryHandle_t, bReturnMetadata: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetReturnChildren(self: ?*anyopaque, handle: UGCQueryHandle_t, bReturnChildren: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetReturnAdditionalPreviews(self: ?*anyopaque, handle: UGCQueryHandle_t, bReturnAdditionalPreviews: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetReturnTotalOnly(self: ?*anyopaque, handle: UGCQueryHandle_t, bReturnTotalOnly: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetReturnPlaytimeStats(self: ?*anyopaque, handle: UGCQueryHandle_t, unDays: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetLanguage(self: ?*anyopaque, handle: UGCQueryHandle_t, pchLanguage: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetAllowCachedResponse(self: ?*anyopaque, handle: UGCQueryHandle_t, unMaxAgeSeconds: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetCloudFileNameFilter(self: ?*anyopaque, handle: UGCQueryHandle_t, pMatchCloudFileName: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetMatchAnyTag(self: ?*anyopaque, handle: UGCQueryHandle_t, bMatchAnyTag: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetSearchText(self: ?*anyopaque, handle: UGCQueryHandle_t, pSearchText: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetRankedByTrendDays(self: ?*anyopaque, handle: UGCQueryHandle_t, unDays: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetTimeCreatedDateRange(self: ?*anyopaque, handle: UGCQueryHandle_t, rtStart: RTime32, rtEnd: RTime32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetTimeUpdatedDateRange(self: ?*anyopaque, handle: UGCQueryHandle_t, rtStart: RTime32, rtEnd: RTime32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_AddRequiredKeyValueTag(self: ?*anyopaque, handle: UGCQueryHandle_t, pKey: [*c]const u8, pValue: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_RequestUGCDetails(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t, unMaxAgeSeconds: uint32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUGC_CreateItem(self: ?*anyopaque, nConsumerAppId: AppId_t, eFileType: EWorkshopFileType) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUGC_StartItemUpdate(self: ?*anyopaque, nConsumerAppId: AppId_t, nPublishedFileID: PublishedFileId_t) callconv(.C) UGCUpdateHandle_t;
-extern fn SteamAPI_ISteamUGC_SetItemTitle(self: ?*anyopaque, handle: UGCUpdateHandle_t, pchTitle: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetItemDescription(self: ?*anyopaque, handle: UGCUpdateHandle_t, pchDescription: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetItemUpdateLanguage(self: ?*anyopaque, handle: UGCUpdateHandle_t, pchLanguage: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetItemMetadata(self: ?*anyopaque, handle: UGCUpdateHandle_t, pchMetaData: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetItemVisibility(self: ?*anyopaque, handle: UGCUpdateHandle_t, eVisibility: ERemoteStoragePublishedFileVisibility) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetItemTags(self: ?*anyopaque, updateHandle: UGCUpdateHandle_t, pTags: [*c]const SteamParamStringArray_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetItemContent(self: ?*anyopaque, handle: UGCUpdateHandle_t, pszContentFolder: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetItemPreview(self: ?*anyopaque, handle: UGCUpdateHandle_t, pszPreviewFile: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SetAllowLegacyUpload(self: ?*anyopaque, handle: UGCUpdateHandle_t, bAllowLegacyUpload: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_RemoveAllItemKeyValueTags(self: ?*anyopaque, handle: UGCUpdateHandle_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_RemoveItemKeyValueTags(self: ?*anyopaque, handle: UGCUpdateHandle_t, pchKey: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_AddItemKeyValueTag(self: ?*anyopaque, handle: UGCUpdateHandle_t, pchKey: [*c]const u8, pchValue: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_AddItemPreviewFile(self: ?*anyopaque, handle: UGCUpdateHandle_t, pszPreviewFile: [*c]const u8, _type: EItemPreviewType) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_AddItemPreviewVideo(self: ?*anyopaque, handle: UGCUpdateHandle_t, pszVideoID: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_UpdateItemPreviewFile(self: ?*anyopaque, handle: UGCUpdateHandle_t, index: uint32, pszPreviewFile: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_UpdateItemPreviewVideo(self: ?*anyopaque, handle: UGCUpdateHandle_t, index: uint32, pszVideoID: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_RemoveItemPreview(self: ?*anyopaque, handle: UGCUpdateHandle_t, index: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_AddContentDescriptor(self: ?*anyopaque, handle: UGCUpdateHandle_t, descid: EUGCContentDescriptorID) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_RemoveContentDescriptor(self: ?*anyopaque, handle: UGCUpdateHandle_t, descid: EUGCContentDescriptorID) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SubmitItemUpdate(self: ?*anyopaque, handle: UGCUpdateHandle_t, pchChangeNote: [*c]const u8) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUGC_GetItemUpdateProgress(self: ?*anyopaque, handle: UGCUpdateHandle_t, punBytesProcessed: [*c]uint64, punBytesTotal: [*c]uint64) callconv(.C) EItemUpdateStatus;
-extern fn SteamAPI_ISteamUGC_SetUserItemVote(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t, bVoteUp: bool) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUGC_GetUserItemVote(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUGC_AddItemToFavorites(self: ?*anyopaque, nAppId: AppId_t, nPublishedFileID: PublishedFileId_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUGC_RemoveItemFromFavorites(self: ?*anyopaque, nAppId: AppId_t, nPublishedFileID: PublishedFileId_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUGC_SubscribeItem(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUGC_UnsubscribeItem(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUGC_GetNumSubscribedItems(self: ?*anyopaque) callconv(.C) uint32;
-extern fn SteamAPI_ISteamUGC_GetSubscribedItems(self: ?*anyopaque, pvecPublishedFileID: [*c]PublishedFileId_t, cMaxEntries: uint32) callconv(.C) uint32;
-extern fn SteamAPI_ISteamUGC_GetItemState(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t) callconv(.C) uint32;
-extern fn SteamAPI_ISteamUGC_GetItemInstallInfo(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t, punSizeOnDisk: [*c]uint64, pchFolder: [*c]u8, cchFolderSize: uint32, punTimeStamp: [*c]uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_GetItemDownloadInfo(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t, punBytesDownloaded: [*c]uint64, punBytesTotal: [*c]uint64) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_DownloadItem(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t, bHighPriority: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_BInitWorkshopForGameServer(self: ?*anyopaque, unWorkshopDepotID: DepotId_t, pszFolder: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_SuspendDownloads(self: ?*anyopaque, bSuspend: bool) callconv(.C) void;
-extern fn SteamAPI_ISteamUGC_StartPlaytimeTracking(self: ?*anyopaque, pvecPublishedFileID: [*c]PublishedFileId_t, unNumPublishedFileIDs: uint32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUGC_StopPlaytimeTracking(self: ?*anyopaque, pvecPublishedFileID: [*c]PublishedFileId_t, unNumPublishedFileIDs: uint32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUGC_StopPlaytimeTrackingForAllItems(self: ?*anyopaque) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUGC_AddDependency(self: ?*anyopaque, nParentPublishedFileID: PublishedFileId_t, nChildPublishedFileID: PublishedFileId_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUGC_RemoveDependency(self: ?*anyopaque, nParentPublishedFileID: PublishedFileId_t, nChildPublishedFileID: PublishedFileId_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUGC_AddAppDependency(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t, nAppID: AppId_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUGC_RemoveAppDependency(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t, nAppID: AppId_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUGC_GetAppDependencies(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUGC_DeleteItem(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamUGC_ShowWorkshopEULA(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamUGC_GetWorkshopEULAStatus(self: ?*anyopaque) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_SteamAppList_v001() callconv(.C) [*c]ISteamAppList;
+extern fn SteamAPI_ISteamUGC_CreateQueryUserUGCRequest(self: ?*anyopaque, unAccountID: AccountID_t, eListType: EUserUGCList, eMatchingUGCType: EUGCMatchingUGCType, eSortOrder: EUserUGCListSortOrder, nCreatorAppID: AppId_t, nConsumerAppID: AppId_t, unPage: uint32) callconv(.c) UGCQueryHandle_t;
+extern fn SteamAPI_ISteamUGC_CreateQueryAllUGCRequestPage(self: ?*anyopaque, eQueryType: EUGCQuery, eMatchingeMatchingUGCTypeFileType: EUGCMatchingUGCType, nCreatorAppID: AppId_t, nConsumerAppID: AppId_t, unPage: uint32) callconv(.c) UGCQueryHandle_t;
+extern fn SteamAPI_ISteamUGC_CreateQueryAllUGCRequestCursor(self: ?*anyopaque, eQueryType: EUGCQuery, eMatchingeMatchingUGCTypeFileType: EUGCMatchingUGCType, nCreatorAppID: AppId_t, nConsumerAppID: AppId_t, pchCursor: [*c]const u8) callconv(.c) UGCQueryHandle_t;
+extern fn SteamAPI_ISteamUGC_CreateQueryUGCDetailsRequest(self: ?*anyopaque, pvecPublishedFileID: [*c]PublishedFileId_t, unNumPublishedFileIDs: uint32) callconv(.c) UGCQueryHandle_t;
+extern fn SteamAPI_ISteamUGC_SendQueryUGCRequest(self: ?*anyopaque, handle: UGCQueryHandle_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUGC_GetQueryUGCResult(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, pDetails: [*c]SteamUGCDetails_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_GetQueryUGCNumTags(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32) callconv(.c) uint32;
+extern fn SteamAPI_ISteamUGC_GetQueryUGCTag(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, indexTag: uint32, pchValue: [*c]u8, cchValueSize: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_GetQueryUGCTagDisplayName(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, indexTag: uint32, pchValue: [*c]u8, cchValueSize: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_GetQueryUGCPreviewURL(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, pchURL: [*c]u8, cchURLSize: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_GetQueryUGCMetadata(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, pchMetadata: [*c]u8, cchMetadatasize: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_GetQueryUGCChildren(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, pvecPublishedFileID: [*c]PublishedFileId_t, cMaxEntries: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_GetQueryUGCStatistic(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, eStatType: EItemStatistic, pStatValue: [*c]uint64) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_GetQueryUGCNumAdditionalPreviews(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32) callconv(.c) uint32;
+extern fn SteamAPI_ISteamUGC_GetQueryUGCAdditionalPreview(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, previewIndex: uint32, pchURLOrVideoID: [*c]u8, cchURLSize: uint32, pchOriginalFileName: [*c]u8, cchOriginalFileNameSize: uint32, pPreviewType: [*c]EItemPreviewType) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_GetQueryUGCNumKeyValueTags(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32) callconv(.c) uint32;
+extern fn SteamAPI_ISteamUGC_GetQueryUGCKeyValueTag(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, keyValueTagIndex: uint32, pchKey: [*c]u8, cchKeySize: uint32, pchValue: [*c]u8, cchValueSize: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_GetQueryFirstUGCKeyValueTag(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, pchKey: [*c]const u8, pchValue: [*c]u8, cchValueSize: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_GetQueryUGCContentDescriptors(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, pvecDescriptors: [*c]EUGCContentDescriptorID, cMaxEntries: uint32) callconv(.c) uint32;
+extern fn SteamAPI_ISteamUGC_ReleaseQueryUGCRequest(self: ?*anyopaque, handle: UGCQueryHandle_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_AddRequiredTag(self: ?*anyopaque, handle: UGCQueryHandle_t, pTagName: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_AddRequiredTagGroup(self: ?*anyopaque, handle: UGCQueryHandle_t, pTagGroups: [*c]const SteamParamStringArray_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_AddExcludedTag(self: ?*anyopaque, handle: UGCQueryHandle_t, pTagName: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetReturnOnlyIDs(self: ?*anyopaque, handle: UGCQueryHandle_t, bReturnOnlyIDs: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetReturnKeyValueTags(self: ?*anyopaque, handle: UGCQueryHandle_t, bReturnKeyValueTags: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetReturnLongDescription(self: ?*anyopaque, handle: UGCQueryHandle_t, bReturnLongDescription: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetReturnMetadata(self: ?*anyopaque, handle: UGCQueryHandle_t, bReturnMetadata: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetReturnChildren(self: ?*anyopaque, handle: UGCQueryHandle_t, bReturnChildren: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetReturnAdditionalPreviews(self: ?*anyopaque, handle: UGCQueryHandle_t, bReturnAdditionalPreviews: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetReturnTotalOnly(self: ?*anyopaque, handle: UGCQueryHandle_t, bReturnTotalOnly: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetReturnPlaytimeStats(self: ?*anyopaque, handle: UGCQueryHandle_t, unDays: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetLanguage(self: ?*anyopaque, handle: UGCQueryHandle_t, pchLanguage: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetAllowCachedResponse(self: ?*anyopaque, handle: UGCQueryHandle_t, unMaxAgeSeconds: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetCloudFileNameFilter(self: ?*anyopaque, handle: UGCQueryHandle_t, pMatchCloudFileName: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetMatchAnyTag(self: ?*anyopaque, handle: UGCQueryHandle_t, bMatchAnyTag: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetSearchText(self: ?*anyopaque, handle: UGCQueryHandle_t, pSearchText: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetRankedByTrendDays(self: ?*anyopaque, handle: UGCQueryHandle_t, unDays: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetTimeCreatedDateRange(self: ?*anyopaque, handle: UGCQueryHandle_t, rtStart: RTime32, rtEnd: RTime32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetTimeUpdatedDateRange(self: ?*anyopaque, handle: UGCQueryHandle_t, rtStart: RTime32, rtEnd: RTime32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_AddRequiredKeyValueTag(self: ?*anyopaque, handle: UGCQueryHandle_t, pKey: [*c]const u8, pValue: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_RequestUGCDetails(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t, unMaxAgeSeconds: uint32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUGC_CreateItem(self: ?*anyopaque, nConsumerAppId: AppId_t, eFileType: EWorkshopFileType) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUGC_StartItemUpdate(self: ?*anyopaque, nConsumerAppId: AppId_t, nPublishedFileID: PublishedFileId_t) callconv(.c) UGCUpdateHandle_t;
+extern fn SteamAPI_ISteamUGC_SetItemTitle(self: ?*anyopaque, handle: UGCUpdateHandle_t, pchTitle: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetItemDescription(self: ?*anyopaque, handle: UGCUpdateHandle_t, pchDescription: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetItemUpdateLanguage(self: ?*anyopaque, handle: UGCUpdateHandle_t, pchLanguage: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetItemMetadata(self: ?*anyopaque, handle: UGCUpdateHandle_t, pchMetaData: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetItemVisibility(self: ?*anyopaque, handle: UGCUpdateHandle_t, eVisibility: ERemoteStoragePublishedFileVisibility) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetItemTags(self: ?*anyopaque, updateHandle: UGCUpdateHandle_t, pTags: [*c]const SteamParamStringArray_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetItemContent(self: ?*anyopaque, handle: UGCUpdateHandle_t, pszContentFolder: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetItemPreview(self: ?*anyopaque, handle: UGCUpdateHandle_t, pszPreviewFile: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetAllowLegacyUpload(self: ?*anyopaque, handle: UGCUpdateHandle_t, bAllowLegacyUpload: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_RemoveAllItemKeyValueTags(self: ?*anyopaque, handle: UGCUpdateHandle_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_RemoveItemKeyValueTags(self: ?*anyopaque, handle: UGCUpdateHandle_t, pchKey: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_AddItemKeyValueTag(self: ?*anyopaque, handle: UGCUpdateHandle_t, pchKey: [*c]const u8, pchValue: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_AddItemPreviewFile(self: ?*anyopaque, handle: UGCUpdateHandle_t, pszPreviewFile: [*c]const u8, _type: EItemPreviewType) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_AddItemPreviewVideo(self: ?*anyopaque, handle: UGCUpdateHandle_t, pszVideoID: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_UpdateItemPreviewFile(self: ?*anyopaque, handle: UGCUpdateHandle_t, index: uint32, pszPreviewFile: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_UpdateItemPreviewVideo(self: ?*anyopaque, handle: UGCUpdateHandle_t, index: uint32, pszVideoID: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_RemoveItemPreview(self: ?*anyopaque, handle: UGCUpdateHandle_t, index: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_AddContentDescriptor(self: ?*anyopaque, handle: UGCUpdateHandle_t, descid: EUGCContentDescriptorID) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_RemoveContentDescriptor(self: ?*anyopaque, handle: UGCUpdateHandle_t, descid: EUGCContentDescriptorID) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SubmitItemUpdate(self: ?*anyopaque, handle: UGCUpdateHandle_t, pchChangeNote: [*c]const u8) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUGC_GetItemUpdateProgress(self: ?*anyopaque, handle: UGCUpdateHandle_t, punBytesProcessed: [*c]uint64, punBytesTotal: [*c]uint64) callconv(.c) EItemUpdateStatus;
+extern fn SteamAPI_ISteamUGC_SetUserItemVote(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t, bVoteUp: bool) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUGC_GetUserItemVote(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUGC_AddItemToFavorites(self: ?*anyopaque, nAppId: AppId_t, nPublishedFileID: PublishedFileId_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUGC_RemoveItemFromFavorites(self: ?*anyopaque, nAppId: AppId_t, nPublishedFileID: PublishedFileId_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUGC_SubscribeItem(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUGC_UnsubscribeItem(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUGC_GetNumSubscribedItems(self: ?*anyopaque) callconv(.c) uint32;
+extern fn SteamAPI_ISteamUGC_GetSubscribedItems(self: ?*anyopaque, pvecPublishedFileID: [*c]PublishedFileId_t, cMaxEntries: uint32) callconv(.c) uint32;
+extern fn SteamAPI_ISteamUGC_GetItemState(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t) callconv(.c) uint32;
+extern fn SteamAPI_ISteamUGC_GetItemInstallInfo(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t, punSizeOnDisk: [*c]uint64, pchFolder: [*c]u8, cchFolderSize: uint32, punTimeStamp: [*c]uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_GetItemDownloadInfo(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t, punBytesDownloaded: [*c]uint64, punBytesTotal: [*c]uint64) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_DownloadItem(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t, bHighPriority: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_BInitWorkshopForGameServer(self: ?*anyopaque, unWorkshopDepotID: DepotId_t, pszFolder: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SuspendDownloads(self: ?*anyopaque, bSuspend: bool) callconv(.c) void;
+extern fn SteamAPI_ISteamUGC_StartPlaytimeTracking(self: ?*anyopaque, pvecPublishedFileID: [*c]PublishedFileId_t, unNumPublishedFileIDs: uint32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUGC_StopPlaytimeTracking(self: ?*anyopaque, pvecPublishedFileID: [*c]PublishedFileId_t, unNumPublishedFileIDs: uint32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUGC_StopPlaytimeTrackingForAllItems(self: ?*anyopaque) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUGC_AddDependency(self: ?*anyopaque, nParentPublishedFileID: PublishedFileId_t, nChildPublishedFileID: PublishedFileId_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUGC_RemoveDependency(self: ?*anyopaque, nParentPublishedFileID: PublishedFileId_t, nChildPublishedFileID: PublishedFileId_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUGC_AddAppDependency(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t, nAppID: AppId_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUGC_RemoveAppDependency(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t, nAppID: AppId_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUGC_GetAppDependencies(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUGC_DeleteItem(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamUGC_ShowWorkshopEULA(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_GetWorkshopEULAStatus(self: ?*anyopaque) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_SteamAppList_v001() callconv(.c) [*c]ISteamAppList;
 /// user
 pub fn SteamAppList() ISteamAppList {
     return ISteamAppList{ .ptr = SteamAPI_SteamAppList_v001() };
@@ -9537,12 +9537,12 @@ pub const ISteamAppList = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamAppList_GetNumInstalledApps(self: ?*anyopaque) callconv(.C) uint32;
-extern fn SteamAPI_ISteamAppList_GetInstalledApps(self: ?*anyopaque, pvecAppID: [*c]AppId_t, unMaxAppIDs: uint32) callconv(.C) uint32;
-extern fn SteamAPI_ISteamAppList_GetAppName(self: ?*anyopaque, nAppID: AppId_t, pchName: [*c]u8, cchNameMax: i32) callconv(.C) i32;
-extern fn SteamAPI_ISteamAppList_GetAppInstallDir(self: ?*anyopaque, nAppID: AppId_t, pchDirectory: [*c]u8, cchNameMax: i32) callconv(.C) i32;
-extern fn SteamAPI_ISteamAppList_GetAppBuildId(self: ?*anyopaque, nAppID: AppId_t) callconv(.C) i32;
-extern fn SteamAPI_SteamHTMLSurface_v005() callconv(.C) [*c]ISteamHTMLSurface;
+extern fn SteamAPI_ISteamAppList_GetNumInstalledApps(self: ?*anyopaque) callconv(.c) uint32;
+extern fn SteamAPI_ISteamAppList_GetInstalledApps(self: ?*anyopaque, pvecAppID: [*c]AppId_t, unMaxAppIDs: uint32) callconv(.c) uint32;
+extern fn SteamAPI_ISteamAppList_GetAppName(self: ?*anyopaque, nAppID: AppId_t, pchName: [*c]u8, cchNameMax: i32) callconv(.c) i32;
+extern fn SteamAPI_ISteamAppList_GetAppInstallDir(self: ?*anyopaque, nAppID: AppId_t, pchDirectory: [*c]u8, cchNameMax: i32) callconv(.c) i32;
+extern fn SteamAPI_ISteamAppList_GetAppBuildId(self: ?*anyopaque, nAppID: AppId_t) callconv(.c) i32;
+extern fn SteamAPI_SteamHTMLSurface_v005() callconv(.c) [*c]ISteamHTMLSurface;
 /// user
 pub fn SteamHTMLSurface() ISteamHTMLSurface {
     return ISteamHTMLSurface{ .ptr = SteamAPI_SteamHTMLSurface_v005() };
@@ -9765,49 +9765,49 @@ pub const ISteamHTMLSurface = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamHTMLSurface_Init(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTMLSurface_Shutdown(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamHTMLSurface_CreateBrowser(self: ?*anyopaque, pchUserAgent: [*c]const u8, pchUserCSS: [*c]const u8) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamHTMLSurface_RemoveBrowser(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_LoadURL(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, pchURL: [*c]const u8, pchPostData: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_SetSize(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, unWidth: uint32, unHeight: uint32) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_StopLoad(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_Reload(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_GoBack(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_GoForward(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_AddHeader(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, pchKey: [*c]const u8, pchValue: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_ExecuteJavascript(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, pchScript: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_MouseUp(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, eMouseButton: c_int) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_MouseDown(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, eMouseButton: c_int) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_MouseDoubleClick(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, eMouseButton: c_int) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_MouseMove(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, x: i32, y: i32) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_MouseWheel(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, nDelta: int32) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_KeyDown(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, nNativeKeyCode: uint32, eHTMLKeyModifiers: c_int, bIsSystemKey: bool) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_KeyUp(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, nNativeKeyCode: uint32, eHTMLKeyModifiers: c_int) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_KeyChar(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, cUnicodeChar: uint32, eHTMLKeyModifiers: c_int) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_SetHorizontalScroll(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, nAbsolutePixelScroll: uint32) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_SetVerticalScroll(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, nAbsolutePixelScroll: uint32) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_SetKeyFocus(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, bHasKeyFocus: bool) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_ViewSource(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_CopyToClipboard(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_PasteFromClipboard(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_Find(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, pchSearchStr: [*c]const u8, bCurrentlyInFind: bool, bReverse: bool) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_StopFind(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_GetLinkAtPosition(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, x: i32, y: i32) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_SetCookie(self: ?*anyopaque, pchHostname: [*c]const u8, pchKey: [*c]const u8, pchValue: [*c]const u8, pchPath: [*c]const u8, nExpires: RTime32, bSecure: bool, bHTTPOnly: bool) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_SetPageScaleFactor(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, flZoom: f32, nPointX: i32, nPointY: i32) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_SetBackgroundMode(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, bBackgroundMode: bool) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_SetDPIScalingFactor(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, flDPIScaling: f32) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_OpenDeveloperTools(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_AllowStartRequest(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, bAllowed: bool) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_JSDialogResponse(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, bResult: bool) callconv(.C) void;
-extern fn SteamAPI_ISteamHTMLSurface_FileLoadDialogResponse(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, pchSelectedFiles: [*c][*c]const u8) callconv(.C) void;
-extern fn SteamAPI_SteamInventory_v003() callconv(.C) [*c]ISteamInventory;
+extern fn SteamAPI_ISteamHTMLSurface_Init(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTMLSurface_Shutdown(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamHTMLSurface_CreateBrowser(self: ?*anyopaque, pchUserAgent: [*c]const u8, pchUserCSS: [*c]const u8) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamHTMLSurface_RemoveBrowser(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_LoadURL(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, pchURL: [*c]const u8, pchPostData: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_SetSize(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, unWidth: uint32, unHeight: uint32) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_StopLoad(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_Reload(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_GoBack(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_GoForward(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_AddHeader(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, pchKey: [*c]const u8, pchValue: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_ExecuteJavascript(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, pchScript: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_MouseUp(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, eMouseButton: c_int) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_MouseDown(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, eMouseButton: c_int) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_MouseDoubleClick(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, eMouseButton: c_int) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_MouseMove(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, x: i32, y: i32) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_MouseWheel(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, nDelta: int32) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_KeyDown(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, nNativeKeyCode: uint32, eHTMLKeyModifiers: c_int, bIsSystemKey: bool) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_KeyUp(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, nNativeKeyCode: uint32, eHTMLKeyModifiers: c_int) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_KeyChar(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, cUnicodeChar: uint32, eHTMLKeyModifiers: c_int) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_SetHorizontalScroll(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, nAbsolutePixelScroll: uint32) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_SetVerticalScroll(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, nAbsolutePixelScroll: uint32) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_SetKeyFocus(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, bHasKeyFocus: bool) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_ViewSource(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_CopyToClipboard(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_PasteFromClipboard(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_Find(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, pchSearchStr: [*c]const u8, bCurrentlyInFind: bool, bReverse: bool) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_StopFind(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_GetLinkAtPosition(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, x: i32, y: i32) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_SetCookie(self: ?*anyopaque, pchHostname: [*c]const u8, pchKey: [*c]const u8, pchValue: [*c]const u8, pchPath: [*c]const u8, nExpires: RTime32, bSecure: bool, bHTTPOnly: bool) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_SetPageScaleFactor(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, flZoom: f32, nPointX: i32, nPointY: i32) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_SetBackgroundMode(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, bBackgroundMode: bool) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_SetDPIScalingFactor(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, flDPIScaling: f32) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_OpenDeveloperTools(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_AllowStartRequest(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, bAllowed: bool) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_JSDialogResponse(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, bResult: bool) callconv(.c) void;
+extern fn SteamAPI_ISteamHTMLSurface_FileLoadDialogResponse(self: ?*anyopaque, unBrowserHandle: HHTMLBrowser, pchSelectedFiles: [*c][*c]const u8) callconv(.c) void;
+extern fn SteamAPI_SteamInventory_v003() callconv(.c) [*c]ISteamInventory;
 /// user
 pub fn SteamInventory() ISteamInventory {
     return ISteamInventory{ .ptr = SteamAPI_SteamInventory_v003() };
 }
-extern fn SteamAPI_SteamGameServerInventory_v003() callconv(.C) [*c]ISteamInventory;
+extern fn SteamAPI_SteamGameServerInventory_v003() callconv(.c) [*c]ISteamInventory;
 /// gameserver
 pub fn SteamGameServerInventory() ISteamInventory {
     return ISteamInventory{ .ptr = SteamAPI_SteamGameServerInventory_v003() };
@@ -9971,45 +9971,45 @@ pub const ISteamInventory = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamInventory_GetResultStatus(self: ?*anyopaque, resultHandle: SteamInventoryResult_t) callconv(.C) EResult;
-extern fn SteamAPI_ISteamInventory_GetResultItems(self: ?*anyopaque, resultHandle: SteamInventoryResult_t, pOutItemsArray: [*c]SteamItemDetails_t, punOutItemsArraySize: [*c]uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_GetResultItemProperty(self: ?*anyopaque, resultHandle: SteamInventoryResult_t, unItemIndex: uint32, pchPropertyName: [*c]const u8, pchValueBuffer: [*c]u8, punValueBufferSizeOut: [*c]uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_GetResultTimestamp(self: ?*anyopaque, resultHandle: SteamInventoryResult_t) callconv(.C) uint32;
-extern fn SteamAPI_ISteamInventory_CheckResultSteamID(self: ?*anyopaque, resultHandle: SteamInventoryResult_t, steamIDExpected: CSteamID) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_DestroyResult(self: ?*anyopaque, resultHandle: SteamInventoryResult_t) callconv(.C) void;
-extern fn SteamAPI_ISteamInventory_GetAllItems(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_GetItemsByID(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, pInstanceIDs: [*c]const SteamItemInstanceID_t, unCountInstanceIDs: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_SerializeResult(self: ?*anyopaque, resultHandle: SteamInventoryResult_t, pOutBuffer: [*c]u8, punOutBufferSize: [*c]uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_DeserializeResult(self: ?*anyopaque, pOutResultHandle: [*c]SteamInventoryResult_t, pBuffer: [*c]const u8, unBufferSize: uint32, bRESERVED_MUST_BE_FALSE: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_GenerateItems(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, pArrayItemDefs: [*c]const SteamItemDef_t, punArrayQuantity: [*c]const uint32, unArrayLength: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_GrantPromoItems(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_AddPromoItem(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, itemDef: SteamItemDef_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_AddPromoItems(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, pArrayItemDefs: [*c]const SteamItemDef_t, unArrayLength: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_ConsumeItem(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, itemConsume: SteamItemInstanceID_t, unQuantity: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_ExchangeItems(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, pArrayGenerate: [*c]const SteamItemDef_t, punArrayGenerateQuantity: [*c]const uint32, unArrayGenerateLength: uint32, pArrayDestroy: [*c]const SteamItemInstanceID_t, punArrayDestroyQuantity: [*c]const uint32, unArrayDestroyLength: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_TransferItemQuantity(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, itemIdSource: SteamItemInstanceID_t, unQuantity: uint32, itemIdDest: SteamItemInstanceID_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_SendItemDropHeartbeat(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamInventory_TriggerItemDrop(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, dropListDefinition: SteamItemDef_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_TradeItems(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, steamIDTradePartner: CSteamID, pArrayGive: [*c]const SteamItemInstanceID_t, pArrayGiveQuantity: [*c]const uint32, nArrayGiveLength: uint32, pArrayGet: [*c]const SteamItemInstanceID_t, pArrayGetQuantity: [*c]const uint32, nArrayGetLength: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_LoadItemDefinitions(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_GetItemDefinitionIDs(self: ?*anyopaque, pItemDefIDs: [*c]SteamItemDef_t, punItemDefIDsArraySize: [*c]uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_GetItemDefinitionProperty(self: ?*anyopaque, iDefinition: SteamItemDef_t, pchPropertyName: [*c]const u8, pchValueBuffer: [*c]u8, punValueBufferSizeOut: [*c]uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_RequestEligiblePromoItemDefinitionsIDs(self: ?*anyopaque, steamID: CSteamID) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamInventory_GetEligiblePromoItemDefinitionIDs(self: ?*anyopaque, steamID: CSteamID, pItemDefIDs: [*c]SteamItemDef_t, punItemDefIDsArraySize: [*c]uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_StartPurchase(self: ?*anyopaque, pArrayItemDefs: [*c]const SteamItemDef_t, punArrayQuantity: [*c]const uint32, unArrayLength: uint32) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamInventory_RequestPrices(self: ?*anyopaque) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamInventory_GetNumItemsWithPrices(self: ?*anyopaque) callconv(.C) uint32;
-extern fn SteamAPI_ISteamInventory_GetItemsWithPrices(self: ?*anyopaque, pArrayItemDefs: [*c]SteamItemDef_t, pCurrentPrices: [*c]uint64, pBasePrices: [*c]uint64, unArrayLength: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_GetItemPrice(self: ?*anyopaque, iDefinition: SteamItemDef_t, pCurrentPrice: [*c]uint64, pBasePrice: [*c]uint64) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_StartUpdateProperties(self: ?*anyopaque) callconv(.C) SteamInventoryUpdateHandle_t;
-extern fn SteamAPI_ISteamInventory_RemoveProperty(self: ?*anyopaque, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_SetPropertyString(self: ?*anyopaque, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: [*c]const u8, pchPropertyValue: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_SetPropertyBool(self: ?*anyopaque, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: [*c]const u8, bValue: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_SetPropertyInt64(self: ?*anyopaque, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: [*c]const u8, nValue: int64) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_SetPropertyFloat(self: ?*anyopaque, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: [*c]const u8, flValue: f32) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_SubmitUpdateProperties(self: ?*anyopaque, handle: SteamInventoryUpdateHandle_t, pResultHandle: [*c]SteamInventoryResult_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamInventory_InspectItem(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, pchItemToken: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_SteamVideo_v002() callconv(.C) [*c]ISteamVideo;
+extern fn SteamAPI_ISteamInventory_GetResultStatus(self: ?*anyopaque, resultHandle: SteamInventoryResult_t) callconv(.c) EResult;
+extern fn SteamAPI_ISteamInventory_GetResultItems(self: ?*anyopaque, resultHandle: SteamInventoryResult_t, pOutItemsArray: [*c]SteamItemDetails_t, punOutItemsArraySize: [*c]uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_GetResultItemProperty(self: ?*anyopaque, resultHandle: SteamInventoryResult_t, unItemIndex: uint32, pchPropertyName: [*c]const u8, pchValueBuffer: [*c]u8, punValueBufferSizeOut: [*c]uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_GetResultTimestamp(self: ?*anyopaque, resultHandle: SteamInventoryResult_t) callconv(.c) uint32;
+extern fn SteamAPI_ISteamInventory_CheckResultSteamID(self: ?*anyopaque, resultHandle: SteamInventoryResult_t, steamIDExpected: CSteamID) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_DestroyResult(self: ?*anyopaque, resultHandle: SteamInventoryResult_t) callconv(.c) void;
+extern fn SteamAPI_ISteamInventory_GetAllItems(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_GetItemsByID(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, pInstanceIDs: [*c]const SteamItemInstanceID_t, unCountInstanceIDs: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_SerializeResult(self: ?*anyopaque, resultHandle: SteamInventoryResult_t, pOutBuffer: [*c]u8, punOutBufferSize: [*c]uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_DeserializeResult(self: ?*anyopaque, pOutResultHandle: [*c]SteamInventoryResult_t, pBuffer: [*c]const u8, unBufferSize: uint32, bRESERVED_MUST_BE_FALSE: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_GenerateItems(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, pArrayItemDefs: [*c]const SteamItemDef_t, punArrayQuantity: [*c]const uint32, unArrayLength: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_GrantPromoItems(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_AddPromoItem(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, itemDef: SteamItemDef_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_AddPromoItems(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, pArrayItemDefs: [*c]const SteamItemDef_t, unArrayLength: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_ConsumeItem(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, itemConsume: SteamItemInstanceID_t, unQuantity: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_ExchangeItems(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, pArrayGenerate: [*c]const SteamItemDef_t, punArrayGenerateQuantity: [*c]const uint32, unArrayGenerateLength: uint32, pArrayDestroy: [*c]const SteamItemInstanceID_t, punArrayDestroyQuantity: [*c]const uint32, unArrayDestroyLength: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_TransferItemQuantity(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, itemIdSource: SteamItemInstanceID_t, unQuantity: uint32, itemIdDest: SteamItemInstanceID_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_SendItemDropHeartbeat(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamInventory_TriggerItemDrop(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, dropListDefinition: SteamItemDef_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_TradeItems(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, steamIDTradePartner: CSteamID, pArrayGive: [*c]const SteamItemInstanceID_t, pArrayGiveQuantity: [*c]const uint32, nArrayGiveLength: uint32, pArrayGet: [*c]const SteamItemInstanceID_t, pArrayGetQuantity: [*c]const uint32, nArrayGetLength: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_LoadItemDefinitions(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_GetItemDefinitionIDs(self: ?*anyopaque, pItemDefIDs: [*c]SteamItemDef_t, punItemDefIDsArraySize: [*c]uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_GetItemDefinitionProperty(self: ?*anyopaque, iDefinition: SteamItemDef_t, pchPropertyName: [*c]const u8, pchValueBuffer: [*c]u8, punValueBufferSizeOut: [*c]uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_RequestEligiblePromoItemDefinitionsIDs(self: ?*anyopaque, steamID: CSteamID) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamInventory_GetEligiblePromoItemDefinitionIDs(self: ?*anyopaque, steamID: CSteamID, pItemDefIDs: [*c]SteamItemDef_t, punItemDefIDsArraySize: [*c]uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_StartPurchase(self: ?*anyopaque, pArrayItemDefs: [*c]const SteamItemDef_t, punArrayQuantity: [*c]const uint32, unArrayLength: uint32) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamInventory_RequestPrices(self: ?*anyopaque) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamInventory_GetNumItemsWithPrices(self: ?*anyopaque) callconv(.c) uint32;
+extern fn SteamAPI_ISteamInventory_GetItemsWithPrices(self: ?*anyopaque, pArrayItemDefs: [*c]SteamItemDef_t, pCurrentPrices: [*c]uint64, pBasePrices: [*c]uint64, unArrayLength: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_GetItemPrice(self: ?*anyopaque, iDefinition: SteamItemDef_t, pCurrentPrice: [*c]uint64, pBasePrice: [*c]uint64) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_StartUpdateProperties(self: ?*anyopaque) callconv(.c) SteamInventoryUpdateHandle_t;
+extern fn SteamAPI_ISteamInventory_RemoveProperty(self: ?*anyopaque, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_SetPropertyString(self: ?*anyopaque, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: [*c]const u8, pchPropertyValue: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_SetPropertyBool(self: ?*anyopaque, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: [*c]const u8, bValue: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_SetPropertyInt64(self: ?*anyopaque, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: [*c]const u8, nValue: int64) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_SetPropertyFloat(self: ?*anyopaque, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: [*c]const u8, flValue: f32) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_SubmitUpdateProperties(self: ?*anyopaque, handle: SteamInventoryUpdateHandle_t, pResultHandle: [*c]SteamInventoryResult_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamInventory_InspectItem(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, pchItemToken: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_SteamVideo_v002() callconv(.c) [*c]ISteamVideo;
 /// user
 pub fn SteamVideo() ISteamVideo {
     return ISteamVideo{ .ptr = SteamAPI_SteamVideo_v002() };
@@ -10037,11 +10037,11 @@ pub const ISteamVideo = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamVideo_GetVideoURL(self: ?*anyopaque, unVideoAppID: AppId_t) callconv(.C) void;
-extern fn SteamAPI_ISteamVideo_IsBroadcasting(self: ?*anyopaque, pnNumViewers: [*c]i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamVideo_GetOPFSettings(self: ?*anyopaque, unVideoAppID: AppId_t) callconv(.C) void;
-extern fn SteamAPI_ISteamVideo_GetOPFStringForApp(self: ?*anyopaque, unVideoAppID: AppId_t, pchBuffer: [*c]u8, pnBufferSize: [*c]int32) callconv(.C) bool;
-extern fn SteamAPI_SteamParentalSettings_v001() callconv(.C) [*c]ISteamParentalSettings;
+extern fn SteamAPI_ISteamVideo_GetVideoURL(self: ?*anyopaque, unVideoAppID: AppId_t) callconv(.c) void;
+extern fn SteamAPI_ISteamVideo_IsBroadcasting(self: ?*anyopaque, pnNumViewers: [*c]i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamVideo_GetOPFSettings(self: ?*anyopaque, unVideoAppID: AppId_t) callconv(.c) void;
+extern fn SteamAPI_ISteamVideo_GetOPFStringForApp(self: ?*anyopaque, unVideoAppID: AppId_t, pchBuffer: [*c]u8, pnBufferSize: [*c]int32) callconv(.c) bool;
+extern fn SteamAPI_SteamParentalSettings_v001() callconv(.c) [*c]ISteamParentalSettings;
 /// user
 pub fn SteamParentalSettings() ISteamParentalSettings {
     return ISteamParentalSettings{ .ptr = SteamAPI_SteamParentalSettings_v001() };
@@ -10077,13 +10077,13 @@ pub const ISteamParentalSettings = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamParentalSettings_BIsParentalLockEnabled(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamParentalSettings_BIsParentalLockLocked(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamParentalSettings_BIsAppBlocked(self: ?*anyopaque, nAppID: AppId_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamParentalSettings_BIsAppInBlockList(self: ?*anyopaque, nAppID: AppId_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamParentalSettings_BIsFeatureBlocked(self: ?*anyopaque, eFeature: EParentalFeature) callconv(.C) bool;
-extern fn SteamAPI_ISteamParentalSettings_BIsFeatureInBlockList(self: ?*anyopaque, eFeature: EParentalFeature) callconv(.C) bool;
-extern fn SteamAPI_SteamRemotePlay_v001() callconv(.C) [*c]ISteamRemotePlay;
+extern fn SteamAPI_ISteamParentalSettings_BIsParentalLockEnabled(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamParentalSettings_BIsParentalLockLocked(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamParentalSettings_BIsAppBlocked(self: ?*anyopaque, nAppID: AppId_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamParentalSettings_BIsAppInBlockList(self: ?*anyopaque, nAppID: AppId_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamParentalSettings_BIsFeatureBlocked(self: ?*anyopaque, eFeature: EParentalFeature) callconv(.c) bool;
+extern fn SteamAPI_ISteamParentalSettings_BIsFeatureInBlockList(self: ?*anyopaque, eFeature: EParentalFeature) callconv(.c) bool;
+extern fn SteamAPI_SteamRemotePlay_v001() callconv(.c) [*c]ISteamRemotePlay;
 /// user
 pub fn SteamRemotePlay() ISteamRemotePlay {
     return ISteamRemotePlay{ .ptr = SteamAPI_SteamRemotePlay_v001() };
@@ -10123,19 +10123,19 @@ pub const ISteamRemotePlay = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamRemotePlay_GetSessionCount(self: ?*anyopaque) callconv(.C) uint32;
-extern fn SteamAPI_ISteamRemotePlay_GetSessionID(self: ?*anyopaque, iSessionIndex: i32) callconv(.C) RemotePlaySessionID_t;
-extern fn SteamAPI_ISteamRemotePlay_GetSessionSteamID(self: ?*anyopaque, unSessionID: RemotePlaySessionID_t) callconv(.C) CSteamID;
-extern fn SteamAPI_ISteamRemotePlay_GetSessionClientName(self: ?*anyopaque, unSessionID: RemotePlaySessionID_t) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamRemotePlay_GetSessionClientFormFactor(self: ?*anyopaque, unSessionID: RemotePlaySessionID_t) callconv(.C) ESteamDeviceFormFactor;
-extern fn SteamAPI_ISteamRemotePlay_BGetSessionClientResolution(self: ?*anyopaque, unSessionID: RemotePlaySessionID_t, pnResolutionX: [*c]i32, pnResolutionY: [*c]i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamRemotePlay_BSendRemotePlayTogetherInvite(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.C) bool;
-extern fn SteamAPI_SteamNetworkingMessages_SteamAPI_v002() callconv(.C) [*c]ISteamNetworkingMessages;
+extern fn SteamAPI_ISteamRemotePlay_GetSessionCount(self: ?*anyopaque) callconv(.c) uint32;
+extern fn SteamAPI_ISteamRemotePlay_GetSessionID(self: ?*anyopaque, iSessionIndex: i32) callconv(.c) RemotePlaySessionID_t;
+extern fn SteamAPI_ISteamRemotePlay_GetSessionSteamID(self: ?*anyopaque, unSessionID: RemotePlaySessionID_t) callconv(.c) CSteamID;
+extern fn SteamAPI_ISteamRemotePlay_GetSessionClientName(self: ?*anyopaque, unSessionID: RemotePlaySessionID_t) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamRemotePlay_GetSessionClientFormFactor(self: ?*anyopaque, unSessionID: RemotePlaySessionID_t) callconv(.c) ESteamDeviceFormFactor;
+extern fn SteamAPI_ISteamRemotePlay_BGetSessionClientResolution(self: ?*anyopaque, unSessionID: RemotePlaySessionID_t, pnResolutionX: [*c]i32, pnResolutionY: [*c]i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemotePlay_BSendRemotePlayTogetherInvite(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.c) bool;
+extern fn SteamAPI_SteamNetworkingMessages_SteamAPI_v002() callconv(.c) [*c]ISteamNetworkingMessages;
 /// user
 pub fn SteamNetworkingMessages_SteamAPI() ISteamNetworkingMessages {
     return ISteamNetworkingMessages{ .ptr = SteamAPI_SteamNetworkingMessages_SteamAPI_v002() };
 }
-extern fn SteamAPI_SteamGameServerNetworkingMessages_SteamAPI_v002() callconv(.C) [*c]ISteamNetworkingMessages;
+extern fn SteamAPI_SteamGameServerNetworkingMessages_SteamAPI_v002() callconv(.c) [*c]ISteamNetworkingMessages;
 /// gameserver
 pub fn SteamGameServerNetworkingMessages_SteamAPI() ISteamNetworkingMessages {
     return ISteamNetworkingMessages{ .ptr = SteamAPI_SteamGameServerNetworkingMessages_SteamAPI_v002() };
@@ -10171,18 +10171,18 @@ pub const ISteamNetworkingMessages = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamNetworkingMessages_SendMessageToUser(self: ?*anyopaque, identityRemote: [*c]const SteamNetworkingIdentity, pubData: [*c]const u8, cubData: uint32, nSendFlags: i32, nRemoteChannel: i32) callconv(.C) EResult;
-extern fn SteamAPI_ISteamNetworkingMessages_ReceiveMessagesOnChannel(self: ?*anyopaque, nLocalChannel: i32, ppOutMessages: [*c][*c]SteamNetworkingMessage_t, nMaxMessages: i32) callconv(.C) i32;
-extern fn SteamAPI_ISteamNetworkingMessages_AcceptSessionWithUser(self: ?*anyopaque, identityRemote: [*c]const SteamNetworkingIdentity) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingMessages_CloseSessionWithUser(self: ?*anyopaque, identityRemote: [*c]const SteamNetworkingIdentity) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingMessages_CloseChannelWithUser(self: ?*anyopaque, identityRemote: [*c]const SteamNetworkingIdentity, nLocalChannel: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingMessages_GetSessionConnectionInfo(self: ?*anyopaque, identityRemote: [*c]const SteamNetworkingIdentity, pConnectionInfo: [*c]SteamNetConnectionInfo_t, pQuickStatus: [*c]SteamNetConnectionRealTimeStatus_t) callconv(.C) ESteamNetworkingConnectionState;
-extern fn SteamAPI_SteamNetworkingSockets_SteamAPI_v012() callconv(.C) [*c]ISteamNetworkingSockets;
+extern fn SteamAPI_ISteamNetworkingMessages_SendMessageToUser(self: ?*anyopaque, identityRemote: [*c]const SteamNetworkingIdentity, pubData: [*c]const u8, cubData: uint32, nSendFlags: i32, nRemoteChannel: i32) callconv(.c) EResult;
+extern fn SteamAPI_ISteamNetworkingMessages_ReceiveMessagesOnChannel(self: ?*anyopaque, nLocalChannel: i32, ppOutMessages: [*c][*c]SteamNetworkingMessage_t, nMaxMessages: i32) callconv(.c) i32;
+extern fn SteamAPI_ISteamNetworkingMessages_AcceptSessionWithUser(self: ?*anyopaque, identityRemote: [*c]const SteamNetworkingIdentity) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingMessages_CloseSessionWithUser(self: ?*anyopaque, identityRemote: [*c]const SteamNetworkingIdentity) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingMessages_CloseChannelWithUser(self: ?*anyopaque, identityRemote: [*c]const SteamNetworkingIdentity, nLocalChannel: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingMessages_GetSessionConnectionInfo(self: ?*anyopaque, identityRemote: [*c]const SteamNetworkingIdentity, pConnectionInfo: [*c]SteamNetConnectionInfo_t, pQuickStatus: [*c]SteamNetConnectionRealTimeStatus_t) callconv(.c) ESteamNetworkingConnectionState;
+extern fn SteamAPI_SteamNetworkingSockets_SteamAPI_v012() callconv(.c) [*c]ISteamNetworkingSockets;
 /// user
 pub fn SteamNetworkingSockets_SteamAPI() ISteamNetworkingSockets {
     return ISteamNetworkingSockets{ .ptr = SteamAPI_SteamNetworkingSockets_SteamAPI_v012() };
 }
-extern fn SteamAPI_SteamGameServerNetworkingSockets_SteamAPI_v012() callconv(.C) [*c]ISteamNetworkingSockets;
+extern fn SteamAPI_SteamGameServerNetworkingSockets_SteamAPI_v012() callconv(.c) [*c]ISteamNetworkingSockets;
 /// gameserver
 pub fn SteamGameServerNetworkingSockets_SteamAPI() ISteamNetworkingSockets {
     return ISteamNetworkingSockets{ .ptr = SteamAPI_SteamGameServerNetworkingSockets_SteamAPI_v012() };
@@ -10382,54 +10382,54 @@ pub const ISteamNetworkingSockets = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamNetworkingSockets_CreateListenSocketIP(self: ?*anyopaque, localAddress: [*c]const SteamNetworkingIPAddr, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.C) HSteamListenSocket;
-extern fn SteamAPI_ISteamNetworkingSockets_ConnectByIPAddress(self: ?*anyopaque, address: [*c]const SteamNetworkingIPAddr, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.C) HSteamNetConnection;
-extern fn SteamAPI_ISteamNetworkingSockets_CreateListenSocketP2P(self: ?*anyopaque, nLocalVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.C) HSteamListenSocket;
-extern fn SteamAPI_ISteamNetworkingSockets_ConnectP2P(self: ?*anyopaque, identityRemote: [*c]const SteamNetworkingIdentity, nRemoteVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.C) HSteamNetConnection;
-extern fn SteamAPI_ISteamNetworkingSockets_AcceptConnection(self: ?*anyopaque, hConn: HSteamNetConnection) callconv(.C) EResult;
-extern fn SteamAPI_ISteamNetworkingSockets_CloseConnection(self: ?*anyopaque, hPeer: HSteamNetConnection, nReason: i32, pszDebug: [*c]const u8, bEnableLinger: bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingSockets_CloseListenSocket(self: ?*anyopaque, hSocket: HSteamListenSocket) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingSockets_SetConnectionUserData(self: ?*anyopaque, hPeer: HSteamNetConnection, nUserData: int64) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingSockets_GetConnectionUserData(self: ?*anyopaque, hPeer: HSteamNetConnection) callconv(.C) int64;
-extern fn SteamAPI_ISteamNetworkingSockets_SetConnectionName(self: ?*anyopaque, hPeer: HSteamNetConnection, pszName: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_ISteamNetworkingSockets_GetConnectionName(self: ?*anyopaque, hPeer: HSteamNetConnection, pszName: [*c]u8, nMaxLen: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingSockets_SendMessageToConnection(self: ?*anyopaque, hConn: HSteamNetConnection, pData: [*c]const u8, cbData: uint32, nSendFlags: i32, pOutMessageNumber: [*c]int64) callconv(.C) EResult;
-extern fn SteamAPI_ISteamNetworkingSockets_SendMessages(self: ?*anyopaque, nMessages: i32, pMessages: [*c]const [*c]SteamNetworkingMessage_t, pOutMessageNumberOrResult: [*c]int64) callconv(.C) void;
-extern fn SteamAPI_ISteamNetworkingSockets_FlushMessagesOnConnection(self: ?*anyopaque, hConn: HSteamNetConnection) callconv(.C) EResult;
-extern fn SteamAPI_ISteamNetworkingSockets_ReceiveMessagesOnConnection(self: ?*anyopaque, hConn: HSteamNetConnection, ppOutMessages: [*c][*c]SteamNetworkingMessage_t, nMaxMessages: i32) callconv(.C) i32;
-extern fn SteamAPI_ISteamNetworkingSockets_GetConnectionInfo(self: ?*anyopaque, hConn: HSteamNetConnection, pInfo: [*c]SteamNetConnectionInfo_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingSockets_GetConnectionRealTimeStatus(self: ?*anyopaque, hConn: HSteamNetConnection, pStatus: [*c]SteamNetConnectionRealTimeStatus_t, nLanes: i32, pLanes: [*c]SteamNetConnectionRealTimeLaneStatus_t) callconv(.C) EResult;
-extern fn SteamAPI_ISteamNetworkingSockets_GetDetailedConnectionStatus(self: ?*anyopaque, hConn: HSteamNetConnection, pszBuf: [*c]u8, cbBuf: i32) callconv(.C) i32;
-extern fn SteamAPI_ISteamNetworkingSockets_GetListenSocketAddress(self: ?*anyopaque, hSocket: HSteamListenSocket, address: [*c]SteamNetworkingIPAddr) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingSockets_CreateSocketPair(self: ?*anyopaque, pOutConnection1: [*c]HSteamNetConnection, pOutConnection2: [*c]HSteamNetConnection, bUseNetworkLoopback: bool, pIdentity1: [*c]const SteamNetworkingIdentity, pIdentity2: [*c]const SteamNetworkingIdentity) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingSockets_ConfigureConnectionLanes(self: ?*anyopaque, hConn: HSteamNetConnection, nNumLanes: i32, pLanePriorities: [*c]const i32, pLaneWeights: [*c]const uint16) callconv(.C) EResult;
-extern fn SteamAPI_ISteamNetworkingSockets_GetIdentity(self: ?*anyopaque, pIdentity: [*c]SteamNetworkingIdentity) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingSockets_InitAuthentication(self: ?*anyopaque) callconv(.C) ESteamNetworkingAvailability;
-extern fn SteamAPI_ISteamNetworkingSockets_GetAuthenticationStatus(self: ?*anyopaque, pDetails: [*c]SteamNetAuthenticationStatus_t) callconv(.C) ESteamNetworkingAvailability;
-extern fn SteamAPI_ISteamNetworkingSockets_CreatePollGroup(self: ?*anyopaque) callconv(.C) HSteamNetPollGroup;
-extern fn SteamAPI_ISteamNetworkingSockets_DestroyPollGroup(self: ?*anyopaque, hPollGroup: HSteamNetPollGroup) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingSockets_SetConnectionPollGroup(self: ?*anyopaque, hConn: HSteamNetConnection, hPollGroup: HSteamNetPollGroup) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup(self: ?*anyopaque, hPollGroup: HSteamNetPollGroup, ppOutMessages: [*c][*c]SteamNetworkingMessage_t, nMaxMessages: i32) callconv(.C) i32;
-extern fn SteamAPI_ISteamNetworkingSockets_ReceivedRelayAuthTicket(self: ?*anyopaque, pvTicket: [*c]const u8, cbTicket: i32, pOutParsedTicket: [*c]SteamDatagramRelayAuthTicket) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingSockets_FindRelayAuthTicketForServer(self: ?*anyopaque, identityGameServer: [*c]const SteamNetworkingIdentity, nRemoteVirtualPort: i32, pOutParsedTicket: [*c]SteamDatagramRelayAuthTicket) callconv(.C) i32;
-extern fn SteamAPI_ISteamNetworkingSockets_ConnectToHostedDedicatedServer(self: ?*anyopaque, identityTarget: [*c]const SteamNetworkingIdentity, nRemoteVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.C) HSteamNetConnection;
-extern fn SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerPort(self: ?*anyopaque) callconv(.C) uint16;
-extern fn SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerPOPID(self: ?*anyopaque) callconv(.C) SteamNetworkingPOPID;
-extern fn SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerAddress(self: ?*anyopaque, pRouting: [*c]SteamDatagramHostedAddress) callconv(.C) EResult;
-extern fn SteamAPI_ISteamNetworkingSockets_CreateHostedDedicatedServerListenSocket(self: ?*anyopaque, nLocalVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.C) HSteamListenSocket;
-extern fn SteamAPI_ISteamNetworkingSockets_GetGameCoordinatorServerLogin(self: ?*anyopaque, pLoginInfo: [*c]SteamDatagramGameCoordinatorServerLogin, pcbSignedBlob: [*c]i32, pBlob: [*c]u8) callconv(.C) EResult;
-extern fn SteamAPI_ISteamNetworkingSockets_ConnectP2PCustomSignaling(self: ?*anyopaque, pSignaling: [*c]ISteamNetworkingConnectionSignaling, pPeerIdentity: [*c]const SteamNetworkingIdentity, nRemoteVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.C) HSteamNetConnection;
-extern fn SteamAPI_ISteamNetworkingSockets_ReceivedP2PCustomSignal(self: ?*anyopaque, pMsg: [*c]const u8, cbMsg: i32, pContext: [*c]ISteamNetworkingSignalingRecvContext) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingSockets_GetCertificateRequest(self: ?*anyopaque, pcbBlob: [*c]i32, pBlob: [*c]u8, errMsg: [*c]SteamNetworkingErrMsg) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingSockets_SetCertificate(self: ?*anyopaque, pCertificate: [*c]const u8, cbCertificate: i32, errMsg: [*c]SteamNetworkingErrMsg) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingSockets_ResetIdentity(self: ?*anyopaque, pIdentity: [*c]const SteamNetworkingIdentity) callconv(.C) void;
-extern fn SteamAPI_ISteamNetworkingSockets_RunCallbacks(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamNetworkingSockets_BeginAsyncRequestFakeIP(self: ?*anyopaque, nNumPorts: i32) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingSockets_GetFakeIP(self: ?*anyopaque, idxFirstPort: i32, pInfo: [*c]SteamNetworkingFakeIPResult_t) callconv(.C) void;
-extern fn SteamAPI_ISteamNetworkingSockets_CreateListenSocketP2PFakeIP(self: ?*anyopaque, idxFakePort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.C) HSteamListenSocket;
-extern fn SteamAPI_ISteamNetworkingSockets_GetRemoteFakeIPForConnection(self: ?*anyopaque, hConn: HSteamNetConnection, pOutAddr: [*c]SteamNetworkingIPAddr) callconv(.C) EResult;
-extern fn SteamAPI_ISteamNetworkingSockets_CreateFakeUDPPort(self: ?*anyopaque, idxFakeServerPort: i32) callconv(.C) [*c]ISteamNetworkingFakeUDPPort;
-extern fn SteamAPI_SteamNetworkingUtils_SteamAPI_v004() callconv(.C) [*c]ISteamNetworkingUtils;
+extern fn SteamAPI_ISteamNetworkingSockets_CreateListenSocketIP(self: ?*anyopaque, localAddress: [*c]const SteamNetworkingIPAddr, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.c) HSteamListenSocket;
+extern fn SteamAPI_ISteamNetworkingSockets_ConnectByIPAddress(self: ?*anyopaque, address: [*c]const SteamNetworkingIPAddr, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.c) HSteamNetConnection;
+extern fn SteamAPI_ISteamNetworkingSockets_CreateListenSocketP2P(self: ?*anyopaque, nLocalVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.c) HSteamListenSocket;
+extern fn SteamAPI_ISteamNetworkingSockets_ConnectP2P(self: ?*anyopaque, identityRemote: [*c]const SteamNetworkingIdentity, nRemoteVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.c) HSteamNetConnection;
+extern fn SteamAPI_ISteamNetworkingSockets_AcceptConnection(self: ?*anyopaque, hConn: HSteamNetConnection) callconv(.c) EResult;
+extern fn SteamAPI_ISteamNetworkingSockets_CloseConnection(self: ?*anyopaque, hPeer: HSteamNetConnection, nReason: i32, pszDebug: [*c]const u8, bEnableLinger: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingSockets_CloseListenSocket(self: ?*anyopaque, hSocket: HSteamListenSocket) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingSockets_SetConnectionUserData(self: ?*anyopaque, hPeer: HSteamNetConnection, nUserData: int64) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingSockets_GetConnectionUserData(self: ?*anyopaque, hPeer: HSteamNetConnection) callconv(.c) int64;
+extern fn SteamAPI_ISteamNetworkingSockets_SetConnectionName(self: ?*anyopaque, hPeer: HSteamNetConnection, pszName: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamNetworkingSockets_GetConnectionName(self: ?*anyopaque, hPeer: HSteamNetConnection, pszName: [*c]u8, nMaxLen: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingSockets_SendMessageToConnection(self: ?*anyopaque, hConn: HSteamNetConnection, pData: [*c]const u8, cbData: uint32, nSendFlags: i32, pOutMessageNumber: [*c]int64) callconv(.c) EResult;
+extern fn SteamAPI_ISteamNetworkingSockets_SendMessages(self: ?*anyopaque, nMessages: i32, pMessages: [*c]const [*c]SteamNetworkingMessage_t, pOutMessageNumberOrResult: [*c]int64) callconv(.c) void;
+extern fn SteamAPI_ISteamNetworkingSockets_FlushMessagesOnConnection(self: ?*anyopaque, hConn: HSteamNetConnection) callconv(.c) EResult;
+extern fn SteamAPI_ISteamNetworkingSockets_ReceiveMessagesOnConnection(self: ?*anyopaque, hConn: HSteamNetConnection, ppOutMessages: [*c][*c]SteamNetworkingMessage_t, nMaxMessages: i32) callconv(.c) i32;
+extern fn SteamAPI_ISteamNetworkingSockets_GetConnectionInfo(self: ?*anyopaque, hConn: HSteamNetConnection, pInfo: [*c]SteamNetConnectionInfo_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingSockets_GetConnectionRealTimeStatus(self: ?*anyopaque, hConn: HSteamNetConnection, pStatus: [*c]SteamNetConnectionRealTimeStatus_t, nLanes: i32, pLanes: [*c]SteamNetConnectionRealTimeLaneStatus_t) callconv(.c) EResult;
+extern fn SteamAPI_ISteamNetworkingSockets_GetDetailedConnectionStatus(self: ?*anyopaque, hConn: HSteamNetConnection, pszBuf: [*c]u8, cbBuf: i32) callconv(.c) i32;
+extern fn SteamAPI_ISteamNetworkingSockets_GetListenSocketAddress(self: ?*anyopaque, hSocket: HSteamListenSocket, address: [*c]SteamNetworkingIPAddr) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingSockets_CreateSocketPair(self: ?*anyopaque, pOutConnection1: [*c]HSteamNetConnection, pOutConnection2: [*c]HSteamNetConnection, bUseNetworkLoopback: bool, pIdentity1: [*c]const SteamNetworkingIdentity, pIdentity2: [*c]const SteamNetworkingIdentity) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingSockets_ConfigureConnectionLanes(self: ?*anyopaque, hConn: HSteamNetConnection, nNumLanes: i32, pLanePriorities: [*c]const i32, pLaneWeights: [*c]const uint16) callconv(.c) EResult;
+extern fn SteamAPI_ISteamNetworkingSockets_GetIdentity(self: ?*anyopaque, pIdentity: [*c]SteamNetworkingIdentity) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingSockets_InitAuthentication(self: ?*anyopaque) callconv(.c) ESteamNetworkingAvailability;
+extern fn SteamAPI_ISteamNetworkingSockets_GetAuthenticationStatus(self: ?*anyopaque, pDetails: [*c]SteamNetAuthenticationStatus_t) callconv(.c) ESteamNetworkingAvailability;
+extern fn SteamAPI_ISteamNetworkingSockets_CreatePollGroup(self: ?*anyopaque) callconv(.c) HSteamNetPollGroup;
+extern fn SteamAPI_ISteamNetworkingSockets_DestroyPollGroup(self: ?*anyopaque, hPollGroup: HSteamNetPollGroup) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingSockets_SetConnectionPollGroup(self: ?*anyopaque, hConn: HSteamNetConnection, hPollGroup: HSteamNetPollGroup) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingSockets_ReceiveMessagesOnPollGroup(self: ?*anyopaque, hPollGroup: HSteamNetPollGroup, ppOutMessages: [*c][*c]SteamNetworkingMessage_t, nMaxMessages: i32) callconv(.c) i32;
+extern fn SteamAPI_ISteamNetworkingSockets_ReceivedRelayAuthTicket(self: ?*anyopaque, pvTicket: [*c]const u8, cbTicket: i32, pOutParsedTicket: [*c]SteamDatagramRelayAuthTicket) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingSockets_FindRelayAuthTicketForServer(self: ?*anyopaque, identityGameServer: [*c]const SteamNetworkingIdentity, nRemoteVirtualPort: i32, pOutParsedTicket: [*c]SteamDatagramRelayAuthTicket) callconv(.c) i32;
+extern fn SteamAPI_ISteamNetworkingSockets_ConnectToHostedDedicatedServer(self: ?*anyopaque, identityTarget: [*c]const SteamNetworkingIdentity, nRemoteVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.c) HSteamNetConnection;
+extern fn SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerPort(self: ?*anyopaque) callconv(.c) uint16;
+extern fn SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerPOPID(self: ?*anyopaque) callconv(.c) SteamNetworkingPOPID;
+extern fn SteamAPI_ISteamNetworkingSockets_GetHostedDedicatedServerAddress(self: ?*anyopaque, pRouting: [*c]SteamDatagramHostedAddress) callconv(.c) EResult;
+extern fn SteamAPI_ISteamNetworkingSockets_CreateHostedDedicatedServerListenSocket(self: ?*anyopaque, nLocalVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.c) HSteamListenSocket;
+extern fn SteamAPI_ISteamNetworkingSockets_GetGameCoordinatorServerLogin(self: ?*anyopaque, pLoginInfo: [*c]SteamDatagramGameCoordinatorServerLogin, pcbSignedBlob: [*c]i32, pBlob: [*c]u8) callconv(.c) EResult;
+extern fn SteamAPI_ISteamNetworkingSockets_ConnectP2PCustomSignaling(self: ?*anyopaque, pSignaling: [*c]ISteamNetworkingConnectionSignaling, pPeerIdentity: [*c]const SteamNetworkingIdentity, nRemoteVirtualPort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.c) HSteamNetConnection;
+extern fn SteamAPI_ISteamNetworkingSockets_ReceivedP2PCustomSignal(self: ?*anyopaque, pMsg: [*c]const u8, cbMsg: i32, pContext: [*c]ISteamNetworkingSignalingRecvContext) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingSockets_GetCertificateRequest(self: ?*anyopaque, pcbBlob: [*c]i32, pBlob: [*c]u8, errMsg: [*c]SteamNetworkingErrMsg) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingSockets_SetCertificate(self: ?*anyopaque, pCertificate: [*c]const u8, cbCertificate: i32, errMsg: [*c]SteamNetworkingErrMsg) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingSockets_ResetIdentity(self: ?*anyopaque, pIdentity: [*c]const SteamNetworkingIdentity) callconv(.c) void;
+extern fn SteamAPI_ISteamNetworkingSockets_RunCallbacks(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamNetworkingSockets_BeginAsyncRequestFakeIP(self: ?*anyopaque, nNumPorts: i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingSockets_GetFakeIP(self: ?*anyopaque, idxFirstPort: i32, pInfo: [*c]SteamNetworkingFakeIPResult_t) callconv(.c) void;
+extern fn SteamAPI_ISteamNetworkingSockets_CreateListenSocketP2PFakeIP(self: ?*anyopaque, idxFakePort: i32, nOptions: i32, pOptions: [*c]const SteamNetworkingConfigValue_t) callconv(.c) HSteamListenSocket;
+extern fn SteamAPI_ISteamNetworkingSockets_GetRemoteFakeIPForConnection(self: ?*anyopaque, hConn: HSteamNetConnection, pOutAddr: [*c]SteamNetworkingIPAddr) callconv(.c) EResult;
+extern fn SteamAPI_ISteamNetworkingSockets_CreateFakeUDPPort(self: ?*anyopaque, idxFakeServerPort: i32) callconv(.c) [*c]ISteamNetworkingFakeUDPPort;
+extern fn SteamAPI_SteamNetworkingUtils_SteamAPI_v004() callconv(.c) [*c]ISteamNetworkingUtils;
 /// global
 pub fn SteamNetworkingUtils_SteamAPI() ISteamNetworkingUtils {
     return ISteamNetworkingUtils{ .ptr = SteamAPI_SteamNetworkingUtils_SteamAPI_v004() };
@@ -10605,48 +10605,48 @@ pub const ISteamNetworkingUtils = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamNetworkingUtils_AllocateMessage(self: ?*anyopaque, cbAllocateBuffer: i32) callconv(.C) [*c]SteamNetworkingMessage_t;
-extern fn SteamAPI_ISteamNetworkingUtils_InitRelayNetworkAccess(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamNetworkingUtils_GetRelayNetworkStatus(self: ?*anyopaque, pDetails: [*c]SteamRelayNetworkStatus_t) callconv(.C) ESteamNetworkingAvailability;
-extern fn SteamAPI_ISteamNetworkingUtils_GetLocalPingLocation(self: ?*anyopaque, result: [*c]SteamNetworkPingLocation_t) callconv(.C) f32;
-extern fn SteamAPI_ISteamNetworkingUtils_EstimatePingTimeBetweenTwoLocations(self: ?*anyopaque, location1: [*c]const SteamNetworkPingLocation_t, location2: [*c]const SteamNetworkPingLocation_t) callconv(.C) i32;
-extern fn SteamAPI_ISteamNetworkingUtils_EstimatePingTimeFromLocalHost(self: ?*anyopaque, remoteLocation: [*c]const SteamNetworkPingLocation_t) callconv(.C) i32;
-extern fn SteamAPI_ISteamNetworkingUtils_ConvertPingLocationToString(self: ?*anyopaque, location: [*c]const SteamNetworkPingLocation_t, pszBuf: [*c]u8, cchBufSize: i32) callconv(.C) void;
-extern fn SteamAPI_ISteamNetworkingUtils_ParsePingLocationString(self: ?*anyopaque, pszString: [*c]const u8, result: [*c]SteamNetworkPingLocation_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_CheckPingDataUpToDate(self: ?*anyopaque, flMaxAgeSeconds: f32) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_GetPingToDataCenter(self: ?*anyopaque, popID: SteamNetworkingPOPID, pViaRelayPoP: [*c]SteamNetworkingPOPID) callconv(.C) i32;
-extern fn SteamAPI_ISteamNetworkingUtils_GetDirectPingToPOP(self: ?*anyopaque, popID: SteamNetworkingPOPID) callconv(.C) i32;
-extern fn SteamAPI_ISteamNetworkingUtils_GetPOPCount(self: ?*anyopaque) callconv(.C) i32;
-extern fn SteamAPI_ISteamNetworkingUtils_GetPOPList(self: ?*anyopaque, list: [*c]SteamNetworkingPOPID, nListSz: i32) callconv(.C) i32;
-extern fn SteamAPI_ISteamNetworkingUtils_GetLocalTimestamp(self: ?*anyopaque) callconv(.C) SteamNetworkingMicroseconds;
-extern fn SteamAPI_ISteamNetworkingUtils_SetDebugOutputFunction(self: ?*anyopaque, eDetailLevel: ESteamNetworkingSocketsDebugOutputType, pfnFunc: FSteamNetworkingSocketsDebugOutput) callconv(.C) void;
-extern fn SteamAPI_ISteamNetworkingUtils_IsFakeIPv4(self: ?*anyopaque, nIPv4: uint32) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_GetIPv4FakeIPType(self: ?*anyopaque, nIPv4: uint32) callconv(.C) ESteamNetworkingFakeIPType;
-extern fn SteamAPI_ISteamNetworkingUtils_GetRealIdentityForFakeIP(self: ?*anyopaque, fakeIP: [*c]const SteamNetworkingIPAddr, pOutRealIdentity: [*c]SteamNetworkingIdentity) callconv(.C) EResult;
-extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalConfigValueInt32(self: ?*anyopaque, eValue: ESteamNetworkingConfigValue, val: int32) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalConfigValueFloat(self: ?*anyopaque, eValue: ESteamNetworkingConfigValue, val: f32) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalConfigValueString(self: ?*anyopaque, eValue: ESteamNetworkingConfigValue, val: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalConfigValuePtr(self: ?*anyopaque, eValue: ESteamNetworkingConfigValue, val: [*c]u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_SetConnectionConfigValueInt32(self: ?*anyopaque, hConn: HSteamNetConnection, eValue: ESteamNetworkingConfigValue, val: int32) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_SetConnectionConfigValueFloat(self: ?*anyopaque, hConn: HSteamNetConnection, eValue: ESteamNetworkingConfigValue, val: f32) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_SetConnectionConfigValueString(self: ?*anyopaque, hConn: HSteamNetConnection, eValue: ESteamNetworkingConfigValue, val: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_SteamNetConnectionStatusChanged(self: ?*anyopaque, fnCallback: FnSteamNetConnectionStatusChanged) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_SteamNetAuthenticationStatusChanged(self: ?*anyopaque, fnCallback: FnSteamNetAuthenticationStatusChanged) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_SteamRelayNetworkStatusChanged(self: ?*anyopaque, fnCallback: FnSteamRelayNetworkStatusChanged) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_FakeIPResult(self: ?*anyopaque, fnCallback: FnSteamNetworkingFakeIPResult) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_MessagesSessionRequest(self: ?*anyopaque, fnCallback: FnSteamNetworkingMessagesSessionRequest) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_MessagesSessionFailed(self: ?*anyopaque, fnCallback: FnSteamNetworkingMessagesSessionFailed) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_SetConfigValue(self: ?*anyopaque, eValue: ESteamNetworkingConfigValue, eScopeType: ESteamNetworkingConfigScope, scopeObj: intptr_t, eDataType: ESteamNetworkingConfigDataType, pArg: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_SetConfigValueStruct(self: ?*anyopaque, opt: [*c]const SteamNetworkingConfigValue_t, eScopeType: ESteamNetworkingConfigScope, scopeObj: intptr_t) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_GetConfigValue(self: ?*anyopaque, eValue: ESteamNetworkingConfigValue, eScopeType: ESteamNetworkingConfigScope, scopeObj: intptr_t, pOutDataType: [*c]ESteamNetworkingConfigDataType, pResult: [*c]u8, cbResult: [*c]size_t) callconv(.C) ESteamNetworkingGetConfigValueResult;
-extern fn SteamAPI_ISteamNetworkingUtils_GetConfigValueInfo(self: ?*anyopaque, eValue: ESteamNetworkingConfigValue, pOutDataType: [*c]ESteamNetworkingConfigDataType, pOutScope: [*c]ESteamNetworkingConfigScope) callconv(.C) [*c]const u8;
-extern fn SteamAPI_ISteamNetworkingUtils_IterateGenericEditableConfigValues(self: ?*anyopaque, eCurrent: ESteamNetworkingConfigValue, bEnumerateDevVars: bool) callconv(.C) ESteamNetworkingConfigValue;
-extern fn SteamAPI_ISteamNetworkingUtils_SteamNetworkingIPAddr_ToString(self: ?*anyopaque, addr: [*c]const SteamNetworkingIPAddr, buf: [*c]u8, cbBuf: uint32, bWithPort: bool) callconv(.C) void;
-extern fn SteamAPI_ISteamNetworkingUtils_SteamNetworkingIPAddr_ParseString(self: ?*anyopaque, pAddr: [*c]SteamNetworkingIPAddr, pszStr: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamNetworkingUtils_SteamNetworkingIPAddr_GetFakeIPType(self: ?*anyopaque, addr: [*c]const SteamNetworkingIPAddr) callconv(.C) ESteamNetworkingFakeIPType;
-extern fn SteamAPI_ISteamNetworkingUtils_SteamNetworkingIdentity_ToString(self: ?*anyopaque, identity: [*c]const SteamNetworkingIdentity, buf: [*c]u8, cbBuf: uint32) callconv(.C) void;
-extern fn SteamAPI_ISteamNetworkingUtils_SteamNetworkingIdentity_ParseString(self: ?*anyopaque, pIdentity: [*c]SteamNetworkingIdentity, pszStr: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_SteamGameServer_v015() callconv(.C) [*c]ISteamGameServer;
+extern fn SteamAPI_ISteamNetworkingUtils_AllocateMessage(self: ?*anyopaque, cbAllocateBuffer: i32) callconv(.c) [*c]SteamNetworkingMessage_t;
+extern fn SteamAPI_ISteamNetworkingUtils_InitRelayNetworkAccess(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamNetworkingUtils_GetRelayNetworkStatus(self: ?*anyopaque, pDetails: [*c]SteamRelayNetworkStatus_t) callconv(.c) ESteamNetworkingAvailability;
+extern fn SteamAPI_ISteamNetworkingUtils_GetLocalPingLocation(self: ?*anyopaque, result: [*c]SteamNetworkPingLocation_t) callconv(.c) f32;
+extern fn SteamAPI_ISteamNetworkingUtils_EstimatePingTimeBetweenTwoLocations(self: ?*anyopaque, location1: [*c]const SteamNetworkPingLocation_t, location2: [*c]const SteamNetworkPingLocation_t) callconv(.c) i32;
+extern fn SteamAPI_ISteamNetworkingUtils_EstimatePingTimeFromLocalHost(self: ?*anyopaque, remoteLocation: [*c]const SteamNetworkPingLocation_t) callconv(.c) i32;
+extern fn SteamAPI_ISteamNetworkingUtils_ConvertPingLocationToString(self: ?*anyopaque, location: [*c]const SteamNetworkPingLocation_t, pszBuf: [*c]u8, cchBufSize: i32) callconv(.c) void;
+extern fn SteamAPI_ISteamNetworkingUtils_ParsePingLocationString(self: ?*anyopaque, pszString: [*c]const u8, result: [*c]SteamNetworkPingLocation_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_CheckPingDataUpToDate(self: ?*anyopaque, flMaxAgeSeconds: f32) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_GetPingToDataCenter(self: ?*anyopaque, popID: SteamNetworkingPOPID, pViaRelayPoP: [*c]SteamNetworkingPOPID) callconv(.c) i32;
+extern fn SteamAPI_ISteamNetworkingUtils_GetDirectPingToPOP(self: ?*anyopaque, popID: SteamNetworkingPOPID) callconv(.c) i32;
+extern fn SteamAPI_ISteamNetworkingUtils_GetPOPCount(self: ?*anyopaque) callconv(.c) i32;
+extern fn SteamAPI_ISteamNetworkingUtils_GetPOPList(self: ?*anyopaque, list: [*c]SteamNetworkingPOPID, nListSz: i32) callconv(.c) i32;
+extern fn SteamAPI_ISteamNetworkingUtils_GetLocalTimestamp(self: ?*anyopaque) callconv(.c) SteamNetworkingMicroseconds;
+extern fn SteamAPI_ISteamNetworkingUtils_SetDebugOutputFunction(self: ?*anyopaque, eDetailLevel: ESteamNetworkingSocketsDebugOutputType, pfnFunc: FSteamNetworkingSocketsDebugOutput) callconv(.c) void;
+extern fn SteamAPI_ISteamNetworkingUtils_IsFakeIPv4(self: ?*anyopaque, nIPv4: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_GetIPv4FakeIPType(self: ?*anyopaque, nIPv4: uint32) callconv(.c) ESteamNetworkingFakeIPType;
+extern fn SteamAPI_ISteamNetworkingUtils_GetRealIdentityForFakeIP(self: ?*anyopaque, fakeIP: [*c]const SteamNetworkingIPAddr, pOutRealIdentity: [*c]SteamNetworkingIdentity) callconv(.c) EResult;
+extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalConfigValueInt32(self: ?*anyopaque, eValue: ESteamNetworkingConfigValue, val: int32) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalConfigValueFloat(self: ?*anyopaque, eValue: ESteamNetworkingConfigValue, val: f32) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalConfigValueString(self: ?*anyopaque, eValue: ESteamNetworkingConfigValue, val: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalConfigValuePtr(self: ?*anyopaque, eValue: ESteamNetworkingConfigValue, val: [*c]u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_SetConnectionConfigValueInt32(self: ?*anyopaque, hConn: HSteamNetConnection, eValue: ESteamNetworkingConfigValue, val: int32) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_SetConnectionConfigValueFloat(self: ?*anyopaque, hConn: HSteamNetConnection, eValue: ESteamNetworkingConfigValue, val: f32) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_SetConnectionConfigValueString(self: ?*anyopaque, hConn: HSteamNetConnection, eValue: ESteamNetworkingConfigValue, val: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_SteamNetConnectionStatusChanged(self: ?*anyopaque, fnCallback: FnSteamNetConnectionStatusChanged) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_SteamNetAuthenticationStatusChanged(self: ?*anyopaque, fnCallback: FnSteamNetAuthenticationStatusChanged) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_SteamRelayNetworkStatusChanged(self: ?*anyopaque, fnCallback: FnSteamRelayNetworkStatusChanged) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_FakeIPResult(self: ?*anyopaque, fnCallback: FnSteamNetworkingFakeIPResult) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_MessagesSessionRequest(self: ?*anyopaque, fnCallback: FnSteamNetworkingMessagesSessionRequest) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_SetGlobalCallback_MessagesSessionFailed(self: ?*anyopaque, fnCallback: FnSteamNetworkingMessagesSessionFailed) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_SetConfigValue(self: ?*anyopaque, eValue: ESteamNetworkingConfigValue, eScopeType: ESteamNetworkingConfigScope, scopeObj: intptr_t, eDataType: ESteamNetworkingConfigDataType, pArg: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_SetConfigValueStruct(self: ?*anyopaque, opt: [*c]const SteamNetworkingConfigValue_t, eScopeType: ESteamNetworkingConfigScope, scopeObj: intptr_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_GetConfigValue(self: ?*anyopaque, eValue: ESteamNetworkingConfigValue, eScopeType: ESteamNetworkingConfigScope, scopeObj: intptr_t, pOutDataType: [*c]ESteamNetworkingConfigDataType, pResult: [*c]u8, cbResult: [*c]size_t) callconv(.c) ESteamNetworkingGetConfigValueResult;
+extern fn SteamAPI_ISteamNetworkingUtils_GetConfigValueInfo(self: ?*anyopaque, eValue: ESteamNetworkingConfigValue, pOutDataType: [*c]ESteamNetworkingConfigDataType, pOutScope: [*c]ESteamNetworkingConfigScope) callconv(.c) [*c]const u8;
+extern fn SteamAPI_ISteamNetworkingUtils_IterateGenericEditableConfigValues(self: ?*anyopaque, eCurrent: ESteamNetworkingConfigValue, bEnumerateDevVars: bool) callconv(.c) ESteamNetworkingConfigValue;
+extern fn SteamAPI_ISteamNetworkingUtils_SteamNetworkingIPAddr_ToString(self: ?*anyopaque, addr: [*c]const SteamNetworkingIPAddr, buf: [*c]u8, cbBuf: uint32, bWithPort: bool) callconv(.c) void;
+extern fn SteamAPI_ISteamNetworkingUtils_SteamNetworkingIPAddr_ParseString(self: ?*anyopaque, pAddr: [*c]SteamNetworkingIPAddr, pszStr: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamNetworkingUtils_SteamNetworkingIPAddr_GetFakeIPType(self: ?*anyopaque, addr: [*c]const SteamNetworkingIPAddr) callconv(.c) ESteamNetworkingFakeIPType;
+extern fn SteamAPI_ISteamNetworkingUtils_SteamNetworkingIdentity_ToString(self: ?*anyopaque, identity: [*c]const SteamNetworkingIdentity, buf: [*c]u8, cbBuf: uint32) callconv(.c) void;
+extern fn SteamAPI_ISteamNetworkingUtils_SteamNetworkingIdentity_ParseString(self: ?*anyopaque, pIdentity: [*c]SteamNetworkingIdentity, pszStr: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_SteamGameServer_v015() callconv(.c) [*c]ISteamGameServer;
 /// gameserver
 pub fn SteamGameServer() ISteamGameServer {
     return ISteamGameServer{ .ptr = SteamAPI_SteamGameServer_v015() };
@@ -10822,48 +10822,48 @@ pub const ISteamGameServer = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamGameServer_SetProduct(self: ?*anyopaque, pszProduct: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_SetGameDescription(self: ?*anyopaque, pszGameDescription: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_SetModDir(self: ?*anyopaque, pszModDir: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_SetDedicatedServer(self: ?*anyopaque, bDedicated: bool) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_LogOn(self: ?*anyopaque, pszToken: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_LogOnAnonymous(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_LogOff(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_BLoggedOn(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamGameServer_BSecure(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamGameServer_GetSteamID(self: ?*anyopaque) callconv(.C) CSteamID;
-extern fn SteamAPI_ISteamGameServer_WasRestartRequested(self: ?*anyopaque) callconv(.C) bool;
-extern fn SteamAPI_ISteamGameServer_SetMaxPlayerCount(self: ?*anyopaque, cPlayersMax: i32) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_SetBotPlayerCount(self: ?*anyopaque, cBotplayers: i32) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_SetServerName(self: ?*anyopaque, pszServerName: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_SetMapName(self: ?*anyopaque, pszMapName: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_SetPasswordProtected(self: ?*anyopaque, bPasswordProtected: bool) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_SetSpectatorPort(self: ?*anyopaque, unSpectatorPort: uint16) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_SetSpectatorServerName(self: ?*anyopaque, pszSpectatorServerName: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_ClearAllKeyValues(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_SetKeyValue(self: ?*anyopaque, pKey: [*c]const u8, pValue: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_SetGameTags(self: ?*anyopaque, pchGameTags: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_SetGameData(self: ?*anyopaque, pchGameData: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_SetRegion(self: ?*anyopaque, pszRegion: [*c]const u8) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_SetAdvertiseServerActive(self: ?*anyopaque, bActive: bool) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_GetAuthSessionTicket(self: ?*anyopaque, pTicket: [*c]u8, cbMaxTicket: i32, pcbTicket: [*c]uint32, pSnid: [*c]const SteamNetworkingIdentity) callconv(.C) HAuthTicket;
-extern fn SteamAPI_ISteamGameServer_BeginAuthSession(self: ?*anyopaque, pAuthTicket: [*c]const u8, cbAuthTicket: i32, steamID: CSteamID) callconv(.C) EBeginAuthSessionResult;
-extern fn SteamAPI_ISteamGameServer_EndAuthSession(self: ?*anyopaque, steamID: CSteamID) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_CancelAuthTicket(self: ?*anyopaque, hAuthTicket: HAuthTicket) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_UserHasLicenseForApp(self: ?*anyopaque, steamID: CSteamID, appID: AppId_t) callconv(.C) EUserHasLicenseForAppResult;
-extern fn SteamAPI_ISteamGameServer_RequestUserGroupStatus(self: ?*anyopaque, steamIDUser: CSteamID, steamIDGroup: CSteamID) callconv(.C) bool;
-extern fn SteamAPI_ISteamGameServer_GetGameplayStats(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_GetServerReputation(self: ?*anyopaque) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamGameServer_GetPublicIP(self: ?*anyopaque) callconv(.C) SteamIPAddress_t;
-extern fn SteamAPI_ISteamGameServer_HandleIncomingPacket(self: ?*anyopaque, pData: [*c]const u8, cbData: i32, srcIP: uint32, srcPort: uint16) callconv(.C) bool;
-extern fn SteamAPI_ISteamGameServer_GetNextOutgoingPacket(self: ?*anyopaque, pOut: [*c]u8, cbMaxOut: i32, pNetAdr: [*c]uint32, pPort: [*c]uint16) callconv(.C) i32;
-extern fn SteamAPI_ISteamGameServer_AssociateWithClan(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamGameServer_ComputeNewPlayerCompatibility(self: ?*anyopaque, steamIDNewPlayer: CSteamID) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamGameServer_SendUserConnectAndAuthenticate_DEPRECATED(self: ?*anyopaque, unIPClient: uint32, pvAuthBlob: [*c]const u8, cubAuthBlobSize: uint32, pSteamIDUser: [*c]CSteamID) callconv(.C) bool;
-extern fn SteamAPI_ISteamGameServer_CreateUnauthenticatedUserConnection(self: ?*anyopaque) callconv(.C) CSteamID;
-extern fn SteamAPI_ISteamGameServer_SendUserDisconnect_DEPRECATED(self: ?*anyopaque, steamIDUser: CSteamID) callconv(.C) void;
-extern fn SteamAPI_ISteamGameServer_BUpdateUserData(self: ?*anyopaque, steamIDUser: CSteamID, pchPlayerName: [*c]const u8, uScore: uint32) callconv(.C) bool;
-extern fn SteamAPI_SteamGameServerStats_v001() callconv(.C) [*c]ISteamGameServerStats;
+extern fn SteamAPI_ISteamGameServer_SetProduct(self: ?*anyopaque, pszProduct: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_SetGameDescription(self: ?*anyopaque, pszGameDescription: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_SetModDir(self: ?*anyopaque, pszModDir: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_SetDedicatedServer(self: ?*anyopaque, bDedicated: bool) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_LogOn(self: ?*anyopaque, pszToken: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_LogOnAnonymous(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_LogOff(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_BLoggedOn(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamGameServer_BSecure(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamGameServer_GetSteamID(self: ?*anyopaque) callconv(.c) CSteamID;
+extern fn SteamAPI_ISteamGameServer_WasRestartRequested(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamGameServer_SetMaxPlayerCount(self: ?*anyopaque, cPlayersMax: i32) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_SetBotPlayerCount(self: ?*anyopaque, cBotplayers: i32) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_SetServerName(self: ?*anyopaque, pszServerName: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_SetMapName(self: ?*anyopaque, pszMapName: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_SetPasswordProtected(self: ?*anyopaque, bPasswordProtected: bool) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_SetSpectatorPort(self: ?*anyopaque, unSpectatorPort: uint16) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_SetSpectatorServerName(self: ?*anyopaque, pszSpectatorServerName: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_ClearAllKeyValues(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_SetKeyValue(self: ?*anyopaque, pKey: [*c]const u8, pValue: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_SetGameTags(self: ?*anyopaque, pchGameTags: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_SetGameData(self: ?*anyopaque, pchGameData: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_SetRegion(self: ?*anyopaque, pszRegion: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_SetAdvertiseServerActive(self: ?*anyopaque, bActive: bool) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_GetAuthSessionTicket(self: ?*anyopaque, pTicket: [*c]u8, cbMaxTicket: i32, pcbTicket: [*c]uint32, pSnid: [*c]const SteamNetworkingIdentity) callconv(.c) HAuthTicket;
+extern fn SteamAPI_ISteamGameServer_BeginAuthSession(self: ?*anyopaque, pAuthTicket: [*c]const u8, cbAuthTicket: i32, steamID: CSteamID) callconv(.c) EBeginAuthSessionResult;
+extern fn SteamAPI_ISteamGameServer_EndAuthSession(self: ?*anyopaque, steamID: CSteamID) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_CancelAuthTicket(self: ?*anyopaque, hAuthTicket: HAuthTicket) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_UserHasLicenseForApp(self: ?*anyopaque, steamID: CSteamID, appID: AppId_t) callconv(.c) EUserHasLicenseForAppResult;
+extern fn SteamAPI_ISteamGameServer_RequestUserGroupStatus(self: ?*anyopaque, steamIDUser: CSteamID, steamIDGroup: CSteamID) callconv(.c) bool;
+extern fn SteamAPI_ISteamGameServer_GetGameplayStats(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_GetServerReputation(self: ?*anyopaque) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamGameServer_GetPublicIP(self: ?*anyopaque) callconv(.c) SteamIPAddress_t;
+extern fn SteamAPI_ISteamGameServer_HandleIncomingPacket(self: ?*anyopaque, pData: [*c]const u8, cbData: i32, srcIP: uint32, srcPort: uint16) callconv(.c) bool;
+extern fn SteamAPI_ISteamGameServer_GetNextOutgoingPacket(self: ?*anyopaque, pOut: [*c]u8, cbMaxOut: i32, pNetAdr: [*c]uint32, pPort: [*c]uint16) callconv(.c) i32;
+extern fn SteamAPI_ISteamGameServer_AssociateWithClan(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamGameServer_ComputeNewPlayerCompatibility(self: ?*anyopaque, steamIDNewPlayer: CSteamID) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamGameServer_SendUserConnectAndAuthenticate_DEPRECATED(self: ?*anyopaque, unIPClient: uint32, pvAuthBlob: [*c]const u8, cubAuthBlobSize: uint32, pSteamIDUser: [*c]CSteamID) callconv(.c) bool;
+extern fn SteamAPI_ISteamGameServer_CreateUnauthenticatedUserConnection(self: ?*anyopaque) callconv(.c) CSteamID;
+extern fn SteamAPI_ISteamGameServer_SendUserDisconnect_DEPRECATED(self: ?*anyopaque, steamIDUser: CSteamID) callconv(.c) void;
+extern fn SteamAPI_ISteamGameServer_BUpdateUserData(self: ?*anyopaque, steamIDUser: CSteamID, pchPlayerName: [*c]const u8, uScore: uint32) callconv(.c) bool;
+extern fn SteamAPI_SteamGameServerStats_v001() callconv(.c) [*c]ISteamGameServerStats;
 /// gameserver
 pub fn SteamGameServerStats() ISteamGameServerStats {
     return ISteamGameServerStats{ .ptr = SteamAPI_SteamGameServerStats_v001() };
@@ -10915,16 +10915,16 @@ pub const ISteamGameServerStats = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamGameServerStats_RequestUserStats(self: ?*anyopaque, steamIDUser: CSteamID) callconv(.C) SteamAPICall_t;
-extern fn SteamAPI_ISteamGameServerStats_GetUserStatInt32(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8, pData: [*c]int32) callconv(.C) bool;
-extern fn SteamAPI_ISteamGameServerStats_GetUserStatFloat(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8, pData: [*c]f32) callconv(.C) bool;
-extern fn SteamAPI_ISteamGameServerStats_GetUserAchievement(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8, pbAchieved: [*c]bool) callconv(.C) bool;
-extern fn SteamAPI_ISteamGameServerStats_SetUserStatInt32(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8, nData: int32) callconv(.C) bool;
-extern fn SteamAPI_ISteamGameServerStats_SetUserStatFloat(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8, fData: f32) callconv(.C) bool;
-extern fn SteamAPI_ISteamGameServerStats_UpdateUserAvgRateStat(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8, flCountThisSession: f32, dSessionLength: f64) callconv(.C) bool;
-extern fn SteamAPI_ISteamGameServerStats_SetUserAchievement(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamGameServerStats_ClearUserAchievement(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8) callconv(.C) bool;
-extern fn SteamAPI_ISteamGameServerStats_StoreUserStats(self: ?*anyopaque, steamIDUser: CSteamID) callconv(.C) SteamAPICall_t;
+extern fn SteamAPI_ISteamGameServerStats_RequestUserStats(self: ?*anyopaque, steamIDUser: CSteamID) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamGameServerStats_GetUserStatInt32(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8, pData: [*c]int32) callconv(.c) bool;
+extern fn SteamAPI_ISteamGameServerStats_GetUserStatFloat(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8, pData: [*c]f32) callconv(.c) bool;
+extern fn SteamAPI_ISteamGameServerStats_GetUserAchievement(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8, pbAchieved: [*c]bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamGameServerStats_SetUserStatInt32(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8, nData: int32) callconv(.c) bool;
+extern fn SteamAPI_ISteamGameServerStats_SetUserStatFloat(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8, fData: f32) callconv(.c) bool;
+extern fn SteamAPI_ISteamGameServerStats_UpdateUserAvgRateStat(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8, flCountThisSession: f32, dSessionLength: f64) callconv(.c) bool;
+extern fn SteamAPI_ISteamGameServerStats_SetUserAchievement(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamGameServerStats_ClearUserAchievement(self: ?*anyopaque, steamIDUser: CSteamID, pchName: [*c]const u8) callconv(.c) bool;
+extern fn SteamAPI_ISteamGameServerStats_StoreUserStats(self: ?*anyopaque, steamIDUser: CSteamID) callconv(.c) SteamAPICall_t;
 
 pub const ISteamNetworkingFakeUDPPort = extern struct {
     ptr: ?*anyopaque,
@@ -10948,7 +10948,7 @@ pub const ISteamNetworkingFakeUDPPort = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamNetworkingFakeUDPPort_DestroyFakeUDPPort(self: ?*anyopaque) callconv(.C) void;
-extern fn SteamAPI_ISteamNetworkingFakeUDPPort_SendMessageToFakeIP(self: ?*anyopaque, remoteAddress: [*c]const SteamNetworkingIPAddr, pData: [*c]const u8, cbData: uint32, nSendFlags: i32) callconv(.C) EResult;
-extern fn SteamAPI_ISteamNetworkingFakeUDPPort_ReceiveMessages(self: ?*anyopaque, ppOutMessages: [*c][*c]SteamNetworkingMessage_t, nMaxMessages: i32) callconv(.C) i32;
-extern fn SteamAPI_ISteamNetworkingFakeUDPPort_ScheduleCleanup(self: ?*anyopaque, remoteAddress: [*c]const SteamNetworkingIPAddr) callconv(.C) void;
+extern fn SteamAPI_ISteamNetworkingFakeUDPPort_DestroyFakeUDPPort(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamNetworkingFakeUDPPort_SendMessageToFakeIP(self: ?*anyopaque, remoteAddress: [*c]const SteamNetworkingIPAddr, pData: [*c]const u8, cbData: uint32, nSendFlags: i32) callconv(.c) EResult;
+extern fn SteamAPI_ISteamNetworkingFakeUDPPort_ReceiveMessages(self: ?*anyopaque, ppOutMessages: [*c][*c]SteamNetworkingMessage_t, nMaxMessages: i32) callconv(.c) i32;
+extern fn SteamAPI_ISteamNetworkingFakeUDPPort_ScheduleCleanup(self: ?*anyopaque, remoteAddress: [*c]const SteamNetworkingIPAddr) callconv(.c) void;

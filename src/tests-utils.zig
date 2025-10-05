@@ -4,10 +4,10 @@ const std = @import("std");
 const t = std.testing;
 const win = builtin.os.tag == .windows;
 
-extern "C" fn steam_callback_size(cb_id: c_int) callconv(.C) c_int;
-extern "C" fn steam_callback_align(cb_id: c_int) callconv(.C) c_int;
-extern "C" fn steam_callback_size_field(cb_id: c_int, field_number: c_int) callconv(.C) c_int;
-extern "C" fn steam_callback_align_field(cb_id: c_int, field_number: c_int) callconv(.C) c_int;
+extern "C" fn steam_callback_size(cb_id: c_int) callconv(.c) c_int;
+extern "C" fn steam_callback_align(cb_id: c_int) callconv(.c) c_int;
+extern "C" fn steam_callback_size_field(cb_id: c_int, field_number: c_int) callconv(.c) c_int;
+extern "C" fn steam_callback_align_field(cb_id: c_int, field_number: c_int) callconv(.c) c_int;
 
 pub const ValvePackingSentinel_t = struct {
     m_u32: u32 align(steam.StructPlatformPackSize),

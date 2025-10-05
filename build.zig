@@ -8,18 +8,18 @@ pub fn addLibraryPath(b: *std.Build, compile: *std.Build.Step.Compile) void {
         compile.step.dependOn(&compile.step.owner.addInstallBinFile(b.path("steamworks/redistributable_bin/osx/libsteam_api.dylib"), "libsteam_api.dylib").step);
         compile.step.dependOn(&compile.step.owner.addInstallBinFile(b.path("steamworks/public/steam/lib/osx/libsdkencryptedappticket.dylib"), "libsdkencryptedappticket.dylib").step);
 
-        compile.addLibraryPath(b.path("steamworks/public/steam/lib/osx"));
-        compile.addLibraryPath(b.path("steamworks/redistributable_bin/osx"));
+        compile.root_module.addLibraryPath(b.path("steamworks/public/steam/lib/osx"));
+        compile.root_module.addLibraryPath(b.path("steamworks/redistributable_bin/osx"));
     } else if (compile.root_module.resolved_target != null and compile.root_module.resolved_target.?.result.os.tag == .windows) {
         compile.step.dependOn(&compile.step.owner.addInstallBinFile(b.path("steamworks/public/steam/lib/win64/sdkencryptedappticket64.dll"), "sdkencryptedappticket64.dll").step);
         compile.step.dependOn(&compile.step.owner.addInstallBinFile(b.path("steamworks/redistributable_bin/win64/steam_api64.dll"), "steam_api64.dll").step);
-        compile.addLibraryPath(b.path("steamworks/public/steam/lib/win64"));
-        compile.addLibraryPath(b.path("steamworks/redistributable_bin/win64"));
+        compile.root_module.addLibraryPath(b.path("steamworks/public/steam/lib/win64"));
+        compile.root_module.addLibraryPath(b.path("steamworks/redistributable_bin/win64"));
     } else {
         compile.step.dependOn(&compile.step.owner.addInstallBinFile(b.path("steamworks/redistributable_bin/linux64/libsteam_api.so"), "libsteam_api.so").step);
         compile.step.dependOn(&compile.step.owner.addInstallBinFile(b.path("steamworks/public/steam/lib/linux64/libsdkencryptedappticket.so"), "libsdkencryptedappticket.so").step);
-        compile.addLibraryPath(b.path("steamworks/public/steam/lib/linux64"));
-        compile.addLibraryPath(b.path("steamworks/redistributable_bin/linux64"));
+        compile.root_module.addLibraryPath(b.path("steamworks/public/steam/lib/linux64"));
+        compile.root_module.addLibraryPath(b.path("steamworks/redistributable_bin/linux64"));
         // instructs the binary to load libraries from the local path
     }
 }
@@ -41,33 +41,37 @@ pub fn build(b: *std.Build) !void {
 
     const module = b.addModule("steamworks", .{
         .root_source_file = b.path("src/main.zig"),
-    });
-
-    var lib = b.addStaticLibrary(.{
-        .name = "steamworks",
-        // .root_source_file = b.path("src/steam.cpp"),
         .target = target,
         .optimize = optimize,
+        .link_libc = false,
+        .link_libcpp = false,
     });
+
+    var lib = b.addLibrary(.{
+        .name = "steamworks",
+        .root_module = module,
+    });
+    
     lib.linkLibC();
     lib.linkLibCpp();
 
     // Generate flags.
-    var flagContainer = std.ArrayList([]const u8).init(std.heap.page_allocator);
-    if (optimize != .Debug) flagContainer.append("-Os") catch unreachable;
-    flagContainer.append("-Wno-return-type-c-linkage") catch unreachable;
-    flagContainer.append("-fno-sanitize=undefined") catch unreachable;
-    flagContainer.append("-Wgnu-alignof-expression") catch unreachable;
-    flagContainer.append("-Wno-gnu") catch unreachable;
+    var flagContainer: std.ArrayListUnmanaged([]const u8) = .empty;
+
+    if (optimize != .Debug) flagContainer.append(std.heap.page_allocator, "-Os") catch unreachable;
+    flagContainer.append(std.heap.page_allocator, "-Wno-return-type-c-linkage") catch unreachable;
+    flagContainer.append(std.heap.page_allocator, "-fno-sanitize=undefined") catch unreachable;
+    flagContainer.append(std.heap.page_allocator, "-Wgnu-alignof-expression") catch unreachable;
+    flagContainer.append(std.heap.page_allocator, "-Wno-gnu") catch unreachable;
 
     addLibraryPath(b, lib);
 
-    if (lib.root_module.resolved_target != null and lib.root_module.resolved_target.?.result.os.tag == .windows) {
-        lib.linkSystemLibrary("sdkencryptedappticket64");
-        lib.linkSystemLibrary("steam_api64");
+    if (module.resolved_target != null and module.resolved_target.?.result.os.tag == .windows) {
+        module.linkSystemLibrary("sdkencryptedappticket64", .{});
+        module.linkSystemLibrary("steam_api64", .{});
     } else {
-        lib.linkSystemLibrary("sdkencryptedappticket");
-        lib.linkSystemLibrary("steam_api");
+        module.linkSystemLibrary("sdkencryptedappticket", .{.needed = true,.preferred_link_mode = .static});
+        module.linkSystemLibrary("steam_api", .{.needed = true,.preferred_link_mode = .static});
     }
 
     // Include dirs.
@@ -85,42 +89,48 @@ pub fn build(b: *std.Build) !void {
     try build_aux_cli(b, target, optimize, lib);
 }
 
-fn build_example_project(b: *std.Build, module: *std.Build.Module, target: std.Build.ResolvedTarget, optimize: std.builtin.Mode, lib: *std.Build.Step.Compile) !void {
+fn build_example_project(b: *std.Build, module: *std.Build.Module, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode, lib: *std.Build.Step.Compile) !void {
     const test_exe = b.addExecutable(.{
         .name = "example",
         // In this case the main source file is merely a path, however, in more
         // complicated build scripts, this could be a generated file.
-        .root_source_file = b.path("example/main.zig"),
-        .target = target,
-        .optimize = optimize,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("example/main.zig"),
+            .target = target,
+            .optimize = optimize,
+            .imports = &.{
+                .{ .name = "steamworks", .module = module },
+            },
+        }),
     });
 
     addLibraryPath(b, test_exe);
+    test_exe.linkLibrary(lib);
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default
     // step when running `zig build`).
     b.installArtifact(test_exe);
-    test_exe.root_module.addImport("steamworks", module);
-    test_exe.linkLibrary(lib);
 }
 
 fn build_aux_cli(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode, lib: *std.Build.Step.Compile) !void {
     const test_exe = b.addExecutable(.{
         .name = "aux-cli",
-        .target = target,
-        .optimize = optimize,
+        .root_module = b.createModule(.{
+            .target = target,
+            .optimize = optimize,
+        }),
     });
 
     test_exe.linkLibC();
     addLibraryPath(b, test_exe);
     // Generate flags.
-    var flagContainer = std.ArrayList([]const u8).init(std.heap.page_allocator);
-    if (optimize != .Debug) flagContainer.append("-Os") catch unreachable;
-    flagContainer.append("-Wno-return-type-c-linkage") catch unreachable;
-    flagContainer.append("-fno-sanitize=undefined") catch unreachable;
-    flagContainer.append("-Wgnu-alignof-expression") catch unreachable;
-    flagContainer.append("-Wno-gnu") catch unreachable;
+    var flagContainer: std.ArrayListUnmanaged([]const u8) = .empty;
+    if (optimize != .Debug) flagContainer.append(std.heap.page_allocator, "-Os") catch unreachable;
+    flagContainer.append(std.heap.page_allocator, "-Wno-return-type-c-linkage") catch unreachable;
+    flagContainer.append(std.heap.page_allocator, "-fno-sanitize=undefined") catch unreachable;
+    flagContainer.append(std.heap.page_allocator, "-Wgnu-alignof-expression") catch unreachable;
+    flagContainer.append(std.heap.page_allocator, "-Wno-gnu") catch unreachable;
 
     test_exe.addIncludePath(b.path("steamworks/public/steam"));
     test_exe.addCSourceFiles(.{ .files = &.{"src/steam-aux.cpp"}, .flags = flagContainer.items });
@@ -138,21 +148,19 @@ fn build_aux_cli(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.
 
 fn test_step(b: *std.Build, module: *std.Build.Module, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode, lib: *std.Build.Step.Compile) !void {
     const main_tests = b.addTest(.{
-        .root_source_file = b.path(if (builtin.os.tag == .windows) "src/tests-win.zig" else "src/tests-unix.zig"),
-        .target = target,
-        .optimize = optimize,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path(if (builtin.os.tag == .windows) "src/tests-win.zig" else "src/tests-unix.zig"),
+            .target = target,
+            .optimize = optimize,
+            .imports = &.{
+                .{ .name = "steamworks", .module = module },
+            },
+        }),
     });
 
-    main_tests.root_module.addImport("steamworks", module);
     main_tests.linkLibrary(lib);
 
     addLibraryPath(b, main_tests);
-
-    if (main_tests.root_module.resolved_target == null or main_tests.root_module.resolved_target.?.result.os.tag == .linux) {
-        // since .so files are not copied to the test binary folder, we specify an extra rpath for these
-        main_tests.addRPath(b.path("steamworks/public/steam/lib/linux64"));
-        main_tests.addRPath(b.path("steamworks/redistributable_bin/linux64"));
-    }
 
     var run_unit_tests = b.addRunArtifact(main_tests);
     run_unit_tests.cwd = .{ .cwd_relative = b.exe_dir };

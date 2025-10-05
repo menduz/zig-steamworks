@@ -3,7 +3,7 @@ const steam = @import("steamworks");
 var allocator: std.mem.Allocator = undefined;
 
 /// callback hook for debug text emitted from the Steam API
-pub fn SteamAPIDebugTextHook(nSeverity: c_int, pchDebugText: [*c]const u8) callconv(.C) void {
+pub fn SteamAPIDebugTextHook(nSeverity: c_int, pchDebugText: [*c]const u8) callconv(.c) void {
     // if you're running in the debugger, only warnings (nSeverity >= 1) will be sent
     // if you add -debug_steamapi to the command-line, a lot of extra informational messages will also be sent
     std.debug.print("SteamAPIDebugTextHook sev:{} msg: {s}\n", .{ nSeverity, pchDebugText });
@@ -41,7 +41,7 @@ pub fn main() !void {
 
     defer steam.SteamAPI_Shutdown();
 
-    std.debug.print("User {?}\n", .{steam.SteamUser().GetSteamID()});
+    std.debug.print("User {d}\n", .{steam.SteamUser().GetSteamID()});
 
     var sock = steam.SteamNetworkingSockets_SteamAPI();
 
