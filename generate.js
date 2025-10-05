@@ -17,6 +17,15 @@ const cpp = [
   `extern "C" void* CustomSteamClientGetter() { return SteamClient(); }`
 ]
 
+const ommittedMethods = [
+  /*
+    src/main.zig:7333:9: error: genSetReg called with a value larger than dst_reg
+        pub fn GetBeaconLocationData(self: *const Self, BeaconLocation: SteamPartyBeaconLocation_t, eData: ESteamPartyBeaconLocationData, pchDataStringOut: []u8) bool {
+        ~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  */
+  "SteamAPI_ISteamParties_GetBeaconLocationData",
+]
+
 const cpp_last = []
 
 function getStructAlignment(struct, field) {
@@ -77,15 +86,15 @@ out.push(`
 
 /// SteamAPI_Init must be called before using any other API functions. If it fails, an
 /// error message will be output to the debugger (or stderr) with further information.
-pub extern fn SteamAPI_Init() callconv(.C) bool;
+pub extern fn SteamAPI_Init() callconv(.c) bool;
 
 /// SteamAPI_Shutdown should be called during process shutdown if possible.
-pub extern fn SteamAPI_Shutdown() callconv(.C) void;
+pub extern fn SteamAPI_Shutdown() callconv(.c) void;
 
-pub extern fn SteamAPI_GetHSteamPipe() callconv(.C) HSteamPipe;
-pub extern fn SteamAPI_GetHSteamUser() callconv(.C) HSteamPipe;
-pub extern fn SteamGameServer_GetHSteamPipe() callconv(.C) HSteamPipe;
-pub extern fn SteamGameServer_GetHSteamUser() callconv(.C) HSteamPipe;
+pub extern fn SteamAPI_GetHSteamPipe() callconv(.c) HSteamPipe;
+pub extern fn SteamAPI_GetHSteamUser() callconv(.c) HSteamPipe;
+pub extern fn SteamGameServer_GetHSteamPipe() callconv(.c) HSteamPipe;
+pub extern fn SteamGameServer_GetHSteamUser() callconv(.c) HSteamPipe;
 
 // SteamAPI_RestartAppIfNecessary ensures that your executable was launched through Steam.
 //
@@ -97,38 +106,37 @@ pub extern fn SteamGameServer_GetHSteamUser() callconv(.C) HSteamPipe;
 //
 // NOTE: If you use the Steam DRM wrapper on your primary executable file, this check is unnecessary
 // since the DRM wrapper will ensure that your application was launched properly through Steam.
-pub extern fn SteamAPI_RestartAppIfNecessary( unOwnAppID: u32 ) callconv(.C) bool;
+pub extern fn SteamAPI_RestartAppIfNecessary( unOwnAppID: u32 ) callconv(.c) bool;
 
 // Many Steam API functions allocate a small amount of thread-local memory for parameter storage.
 // SteamAPI_ReleaseCurrentThreadMemory() will free API memory associated with the calling thread.
 // This function is also called automatically by SteamAPI_RunCallbacks(), so a single-threaded
 // program never needs to explicitly call this function.
-pub extern fn SteamAPI_ReleaseCurrentThreadMemory() callconv(.C) void;
-
+pub extern fn SteamAPI_ReleaseCurrentThreadMemory() callconv(.c) void;
 
 // crash dump recording functions
-pub extern fn SteamAPI_WriteMiniDump( uStructuredExceptionCode: u32, pvExceptionInfo: [*c]const u8, uBuildID: u32 ) callconv(.C) void;
-pub extern fn SteamAPI_SetMiniDumpComment( pchMsg: [*c]const u8 ) callconv(.C) void;
+pub extern fn SteamAPI_WriteMiniDump( uStructuredExceptionCode: u32, pvExceptionInfo: [*c]const u8, uBuildID: u32 ) callconv(.c) void;
+pub extern fn SteamAPI_SetMiniDumpComment( pchMsg: [*c]const u8 ) callconv(.c) void;
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
-//	steamclient.dll private wrapper functions
+// steamclient.dll private wrapper functions
 //
-//	The following functions are part of abstracting API access to the steamclient.dll, but should only be used in very specific cases
+// The following functions are part of abstracting API access to the steamclient.dll, but should only be used in very specific cases
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 /// SteamAPI_IsSteamRunning() returns true if Steam is currently running
-pub extern fn SteamAPI_IsSteamRunning() callconv(.C) bool;
+pub extern fn SteamAPI_IsSteamRunning() callconv(.c) bool;
 
 /// sets whether or not Steam_RunCallbacks() should do a try {} catch (...) {} around calls to issuing callbacks
 /// This is ignored if you are using the manual callback dispatch method
-pub extern fn SteamAPI_SetTryCatchCallbacks( bTryCatchCallbacks: bool ) callconv(.C) void;
+pub extern fn SteamAPI_SetTryCatchCallbacks( bTryCatchCallbacks: bool ) callconv(.c) void;
 
 /// Inform the API that you wish to use manual event dispatch.  This must be called after SteamAPI_Init, but before
 /// you use any of the other manual dispatch functions below.
-pub extern fn SteamAPI_ManualDispatch_Init() callconv(.C) void;
+pub extern fn SteamAPI_ManualDispatch_Init() callconv(.c) void;
 
 /// Perform certain periodic actions that need to be performed.
-pub extern fn SteamAPI_ManualDispatch_RunFrame(hSteamPipe: HSteamPipe) callconv(.C) void;
+pub extern fn SteamAPI_ManualDispatch_RunFrame(hSteamPipe: HSteamPipe) callconv(.c) void;
 
 /// Internal structure used in manual callback dispatch
 pub const CallbackMsg_t = extern struct  {
@@ -154,7 +162,7 @@ pub const CallbackEnum = enum {
 };
 
 pub const CallbackUnion = union(CallbackEnum) {
-  ${data.callback_structs.map(_ => `${_.struct.replace(/_t$/, '')}: ${_.struct},`).join('\n')} 
+  ${data.callback_structs.map(_ => `${_.struct.replace(/_t$/, '')}: ${_.struct},`).join('\n')}
 };
 
 fn from_callback(comptime T: anytype, callback: *const CallbackMsg_t) T {
@@ -171,19 +179,19 @@ pub fn from_slice(comptime T: anytype, slice: []const u8) T {
   if (struct_info.layout == .@"extern") {
     const max_size = @sizeOf(T);
       if (max_size < slice.len) {
-        return @as(*T, @constCast(@ptrCast(@alignCast(slice[0..max_size])))).*;
+        return @as(*T, @ptrCast(@alignCast(@constCast(slice[0..max_size])))).*;
       } else {
-        return @as(*T, @constCast(@ptrCast(@alignCast(slice)))).*;
+        return @as(*T, @ptrCast(@alignCast(@constCast(slice)))).*;
       }
     }
     @compileLog(T);
     @compileError("Not extern");
   }
-  
+
   pub fn from_slice_debug(comptime T: anytype, slice: []const u8) T {
     var ret: T = std.mem.zeroes(T);
     const retP = &ret;
-    
+
     const struct_info = @typeInfo(T).@"struct";
     if (struct_info.layout == .@"extern") {
       // the following would be ideal, mostly because it performs way fewer branches
@@ -198,21 +206,21 @@ pub fn from_slice(comptime T: anytype, slice: []const u8) T {
           @memcpy(std.mem.asBytes(&@field(ret, field.name)), slice[start..end]);
         }
       }
-      
+
       if (!@inComptime()) {
         const fast_method_result = from_slice(T, slice);
         const fast_method_fmt = std.fmt.allocPrint(std.heap.c_allocator, "{any}", .{fast_method_result}) catch unreachable;
         const slow_method_fmt = std.fmt.allocPrint(std.heap.c_allocator, "{any}", .{ret}) catch unreachable;
-        
+
         const are_different = !std.mem.eql(u8, fast_method_fmt, slow_method_fmt);
-        
+
         // finally, print a warning if the serialization differs from what we received.
         // it is important not to miss this logs and review each struct's alignment. eventually, all
         // structs will be corrected
         if (are_different or slice.len != @sizeOf(T)) {
-           std.debug.print(" 🚨 Final serializations:\\n     struct: {}\\n    message: {}\\n       slow: {any}\\n       fast: {any}\\n", .{
-              std.fmt.fmtSliceHexLower(std.mem.asBytes(retP)),
-              std.fmt.fmtSliceHexLower(slice),
+           std.debug.print(" 🚨 Final serializations:\\n     struct: {x}\\n    message: {x}\\n       slow: {any}\\n       fast: {any}\\n", .{
+              std.mem.asBytes(retP),
+              slice,
               ret,
               fast_method_result,
           });
@@ -222,13 +230,13 @@ pub fn from_slice(comptime T: anytype, slice: []const u8) T {
       @compileLog(T);
       @compileError("Not extern");
     }
-    
+
   return ret;
 }
 
 test {
   @setEvalBranchQuota(1_000_000);
-  
+
   if (builtin.os.tag == .linux and builtin.cpu.arch != .x86_64) {
     // there are no library bindings for linux+arm and that makes the test fail
   } else {
@@ -244,16 +252,16 @@ pub const DigitalAnalogAction_t = extern struct {
 /// Fetch the next pending callback on the given pipe, if any.  If a callback is available, true is returned
 /// and the structure is populated.  In this case, you MUST call SteamAPI_ManualDispatch_FreeLastCallback
 /// (after dispatching the callback) before calling SteamAPI_ManualDispatch_GetNextCallback again.
-pub extern fn SteamAPI_ManualDispatch_GetNextCallback(hSteamPipe: HSteamPipe, pCallbackMsg: [*c]CallbackMsg_t) callconv(.C) bool;
+pub extern fn SteamAPI_ManualDispatch_GetNextCallback(hSteamPipe: HSteamPipe, pCallbackMsg: [*c]CallbackMsg_t) callconv(.c) bool;
 
 /// You must call this after dispatching the callback, if SteamAPI_ManualDispatch_GetNextCallback returns true.
-pub extern fn SteamAPI_ManualDispatch_FreeLastCallback(hSteamPipe: HSteamPipe) callconv(.C) void;
+pub extern fn SteamAPI_ManualDispatch_FreeLastCallback(hSteamPipe: HSteamPipe) callconv(.c) void;
 
 /// Return the call result for the specified call on the specified pipe.  You really should
 /// only call this in a handler for SteamAPICallCompleted_t callback.
 pub extern fn SteamAPI_ManualDispatch_GetAPICallResult(hSteamPipe: HSteamPipe, hSteamAPICall: SteamAPICall_t, result: [*c]u8, size: u32, iCallbackExpected: i32, pbFailed: *bool) bool;
 
-extern fn CustomSteamClientGetter() callconv(.C) [*c]ISteamClient;
+extern fn CustomSteamClientGetter() callconv(.c) [*c]ISteamClient;
 pub fn SteamClient() ISteamClient {
   return ISteamClient{ .ptr = CustomSteamClientGetter() };
 }
@@ -484,6 +492,8 @@ function printStructMethods(structName, data, module) {
     out.push(`// methods`)
     out.push(`const Self = @This();`)
     data.forEach(_ => {
+      if (ommittedMethods.includes(_.methodname_flat)) return
+
       transformParameters(_)
 
       const originalParams = getParamsAdapted(_.params)
@@ -549,7 +559,7 @@ function printFns(structName, data) {
         ...originalParams
       ]
 
-      out.push(`extern fn ${_.methodname_flat}(${params.join(', ')}) callconv(.C) ${convertType(_.returntype, true)};`)
+      out.push(`extern fn ${_.methodname_flat}(${params.join(', ')}) callconv(.c) ${convertType(_.returntype, true)};`)
     })
   }
 }
@@ -677,7 +687,7 @@ out.push(`\n// Interfaces`)
 data.interfaces.forEach(_ => {
 
   _.accessors?.forEach(a => {
-    out.push(`extern fn ${a.name_flat}() callconv(.C) [*c]${_.classname};`)
+    out.push(`extern fn ${a.name_flat}() callconv(.c) [*c]${_.classname};`)
 
     out.push(`/// ${a.kind}`)
     out.push(`pub fn ${a.name}() ${_.classname} {`)
@@ -753,14 +763,14 @@ function convertType(t, isFnSignature) {
   if (t && t.startsWith('void (*)')) {
     const middle = /\(([^\(]*)\)$/.exec(t)
     const types = middle ? middle[1].split(/\s*,\s*/g) : []
-    return `?*const fn (${types.map(_ => convertType(_, true)).join(',')}) callconv(.C) void`
+    return `?*const fn (${types.map(_ => convertType(_, true)).join(',')}) callconv(.c) void`
   }
 
   { // char[123]
     const slice = /([a-z0-9_]+)\s*\[(\d+)\]/i
     const r = slice.exec(t)
     if (r) {
-      // const size slices are incompatible with callconv(.C), use a regular poinnter instead.
+      // const size slices are incompatible with callconv(.c), use a regular poinnter instead.
       // the caller must ensure the pointer has the right size
       if (isFnSignature)
         return `[*c]${convertType(r[1])}`

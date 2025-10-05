@@ -25,17 +25,17 @@ pub const MASTERSERVERUPDATERPORT_USEGAMESOCKETSHARE = 0xFFFF;
 //      UDP packets for the master  server updater. See references to GameSocketShare in isteamgameserver.h.
 // - The version string is usually in the form x.x.x.x, and is used by the master server to detect when the
 //      server is out of date.  (Only servers with the latest version will be listed.)
-pub extern fn SteamInternal_GameServer_Init(unIP: steam.uint32, usLegacySteamPort: u16, usGamePort: steam.uint16, usQueryPort: steam.uint16, eServerMode: steam.EServerMode, pchVersionString: [*c]const u8) callconv(.C) bool;
+pub extern fn SteamInternal_GameServer_Init(unIP: steam.uint32, usLegacySteamPort: u16, usGamePort: steam.uint16, usQueryPort: steam.uint16, eServerMode: steam.EServerMode, pchVersionString: [*c]const u8) callconv(.c) bool;
 
 // Shutdown SteamGameSeverXxx interfaces, log out, and free resources.
-pub extern fn SteamGameServer_Shutdown() callconv(.C) void;
+pub extern fn SteamGameServer_Shutdown() callconv(.c) void;
 
 // Most Steam API functions allocate some amount of thread-local memory for
 // parameter storage. Calling SteamGameServer_ReleaseCurrentThreadMemory()
 // will free all API-related memory associated with the calling thread.
 // This memory is released automatically by SteamGameServer_RunCallbacks(),
 // so single-threaded servers do not need to explicitly call this function.
-pub extern fn SteamGameServer_ReleaseCurrentThreadMemory() void;
+// pub extern fn SteamGameServer_ReleaseCurrentThreadMemory() void;
 
-pub extern fn SteamGameServer_BSecure() callconv(.C) bool;
-pub extern fn SteamGameServer_GetSteamID() callconv(.C) u64;
+pub extern fn SteamGameServer_BSecure() callconv(.c) bool;
+pub extern fn SteamGameServer_GetSteamID() callconv(.c) u64;
