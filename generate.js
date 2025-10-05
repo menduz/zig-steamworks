@@ -17,6 +17,15 @@ const cpp = [
   `extern "C" void* CustomSteamClientGetter() { return SteamClient(); }`
 ]
 
+const ommittedMethods = [
+  /*
+    src/main.zig:7333:9: error: genSetReg called with a value larger than dst_reg
+        pub fn GetBeaconLocationData(self: *const Self, BeaconLocation: SteamPartyBeaconLocation_t, eData: ESteamPartyBeaconLocationData, pchDataStringOut: []u8) bool {
+        ~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  */
+  "SteamAPI_ISteamParties_GetBeaconLocationData",
+]
+
 const cpp_last = []
 
 function getStructAlignment(struct, field) {
@@ -105,15 +114,14 @@ pub extern fn SteamAPI_RestartAppIfNecessary( unOwnAppID: u32 ) callconv(.c) boo
 // program never needs to explicitly call this function.
 pub extern fn SteamAPI_ReleaseCurrentThreadMemory() callconv(.c) void;
 
-
 // crash dump recording functions
 pub extern fn SteamAPI_WriteMiniDump( uStructuredExceptionCode: u32, pvExceptionInfo: [*c]const u8, uBuildID: u32 ) callconv(.c) void;
 pub extern fn SteamAPI_SetMiniDumpComment( pchMsg: [*c]const u8 ) callconv(.c) void;
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
-//	steamclient.dll private wrapper functions
+// steamclient.dll private wrapper functions
 //
-//	The following functions are part of abstracting API access to the steamclient.dll, but should only be used in very specific cases
+// The following functions are part of abstracting API access to the steamclient.dll, but should only be used in very specific cases
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 /// SteamAPI_IsSteamRunning() returns true if Steam is currently running
@@ -154,7 +162,7 @@ pub const CallbackEnum = enum {
 };
 
 pub const CallbackUnion = union(CallbackEnum) {
-  ${data.callback_structs.map(_ => `${_.struct.replace(/_t$/, '')}: ${_.struct},`).join('\n')} 
+  ${data.callback_structs.map(_ => `${_.struct.replace(/_t$/, '')}: ${_.struct},`).join('\n')}
 };
 
 fn from_callback(comptime T: anytype, callback: *const CallbackMsg_t) T {
@@ -171,19 +179,19 @@ pub fn from_slice(comptime T: anytype, slice: []const u8) T {
   if (struct_info.layout == .@"extern") {
     const max_size = @sizeOf(T);
       if (max_size < slice.len) {
-        return @as(*T, @constCast(@ptrCast(@alignCast(slice[0..max_size])))).*;
+        return @as(*T, @ptrCast(@alignCast(@constCast(slice[0..max_size])))).*;
       } else {
-        return @as(*T, @constCast(@ptrCast(@alignCast(slice)))).*;
+        return @as(*T, @ptrCast(@alignCast(@constCast(slice)))).*;
       }
     }
     @compileLog(T);
     @compileError("Not extern");
   }
-  
+
   pub fn from_slice_debug(comptime T: anytype, slice: []const u8) T {
     var ret: T = std.mem.zeroes(T);
     const retP = &ret;
-    
+
     const struct_info = @typeInfo(T).@"struct";
     if (struct_info.layout == .@"extern") {
       // the following would be ideal, mostly because it performs way fewer branches
@@ -198,21 +206,21 @@ pub fn from_slice(comptime T: anytype, slice: []const u8) T {
           @memcpy(std.mem.asBytes(&@field(ret, field.name)), slice[start..end]);
         }
       }
-      
+
       if (!@inComptime()) {
         const fast_method_result = from_slice(T, slice);
         const fast_method_fmt = std.fmt.allocPrint(std.heap.c_allocator, "{any}", .{fast_method_result}) catch unreachable;
         const slow_method_fmt = std.fmt.allocPrint(std.heap.c_allocator, "{any}", .{ret}) catch unreachable;
-        
+
         const are_different = !std.mem.eql(u8, fast_method_fmt, slow_method_fmt);
-        
+
         // finally, print a warning if the serialization differs from what we received.
         // it is important not to miss this logs and review each struct's alignment. eventually, all
         // structs will be corrected
         if (are_different or slice.len != @sizeOf(T)) {
-           std.debug.print(" 🚨 Final serializations:\\n     struct: {}\\n    message: {}\\n       slow: {any}\\n       fast: {any}\\n", .{
-              std.fmt.fmtSliceHexLower(std.mem.asBytes(retP)),
-              std.fmt.fmtSliceHexLower(slice),
+           std.debug.print(" 🚨 Final serializations:\\n     struct: {x}\\n    message: {x}\\n       slow: {any}\\n       fast: {any}\\n", .{
+              std.mem.asBytes(retP),
+              slice,
               ret,
               fast_method_result,
           });
@@ -222,13 +230,13 @@ pub fn from_slice(comptime T: anytype, slice: []const u8) T {
       @compileLog(T);
       @compileError("Not extern");
     }
-    
+
   return ret;
 }
 
 test {
   @setEvalBranchQuota(1_000_000);
-  
+
   if (builtin.os.tag == .linux and builtin.cpu.arch != .x86_64) {
     // there are no library bindings for linux+arm and that makes the test fail
   } else {
@@ -484,6 +492,8 @@ function printStructMethods(structName, data, module) {
     out.push(`// methods`)
     out.push(`const Self = @This();`)
     data.forEach(_ => {
+      if (ommittedMethods.includes(_.methodname_flat)) return
+
       transformParameters(_)
 
       const originalParams = getParamsAdapted(_.params)

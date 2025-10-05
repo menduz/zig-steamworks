@@ -50,9 +50,9 @@ pub extern fn SteamAPI_WriteMiniDump(uStructuredExceptionCode: u32, pvExceptionI
 pub extern fn SteamAPI_SetMiniDumpComment(pchMsg: [*c]const u8) callconv(.c) void;
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
-//  steamclient.dll private wrapper functions
+// steamclient.dll private wrapper functions
 //
-//  The following functions are part of abstracting API access to the steamclient.dll, but should only be used in very specific cases
+// The following functions are part of abstracting API access to the steamclient.dll, but should only be used in very specific cases
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
 
 /// SteamAPI_IsSteamRunning() returns true if Steam is currently running
@@ -752,9 +752,9 @@ pub fn from_slice(comptime T: anytype, slice: []const u8) T {
     if (struct_info.layout == .@"extern") {
         const max_size = @sizeOf(T);
         if (max_size < slice.len) {
-            return @as(*T, @constCast(@ptrCast(@alignCast(slice[0..max_size])))).*;
+            return @as(*T, @ptrCast(@alignCast(@constCast(slice[0..max_size])))).*;
         } else {
-            return @as(*T, @constCast(@ptrCast(@alignCast(slice)))).*;
+            return @as(*T, @ptrCast(@alignCast(@constCast(slice)))).*;
         }
     }
     @compileLog(T);
@@ -7329,10 +7329,6 @@ pub const ISteamParties = extern struct {
     pub fn DestroyBeacon(self: *const Self, ulBeacon: PartyBeaconID_t) bool {
         return SteamAPI_ISteamParties_DestroyBeacon(self.ptr, ulBeacon);
     }
-
-    //pub fn GetBeaconLocationData(self: *const Self, BeaconLocation: SteamPartyBeaconLocation_t, eData: ESteamPartyBeaconLocationData, pchDataStringOut: []u8) bool {
-    //    return SteamAPI_ISteamParties_GetBeaconLocationData(self.ptr, BeaconLocation, eData, pchDataStringOut.ptr, @intCast(pchDataStringOut.len));
-    // }
 };
 
 // static functions

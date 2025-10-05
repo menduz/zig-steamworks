@@ -51,7 +51,7 @@ pub fn build(b: *std.Build) !void {
         .name = "steamworks",
         .root_module = module,
     });
-    
+
     lib.linkLibC();
     lib.linkLibCpp();
 
@@ -70,8 +70,8 @@ pub fn build(b: *std.Build) !void {
         module.linkSystemLibrary("sdkencryptedappticket64", .{});
         module.linkSystemLibrary("steam_api64", .{});
     } else {
-        module.linkSystemLibrary("sdkencryptedappticket", .{.needed = true,.preferred_link_mode = .static});
-        module.linkSystemLibrary("steam_api", .{.needed = true,.preferred_link_mode = .static});
+        module.linkSystemLibrary("sdkencryptedappticket", .{ .needed = true, .preferred_link_mode = .static });
+        module.linkSystemLibrary("steam_api", .{ .needed = true, .preferred_link_mode = .static });
     }
 
     // Include dirs.
