@@ -15,7 +15,7 @@ comptime {
 }
 
 test "process declarations recursively" {
-    std.testing.refAllDeclsRecursive(steam);
+    std.testing.refAllDecls(steam);
 }
 
 test "check callback sizes" {

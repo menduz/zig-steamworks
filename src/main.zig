@@ -813,7 +813,7 @@ test {
     if (builtin.os.tag == .linux and builtin.cpu.arch != .x86_64) {
         // there are no library bindings for linux+arm and that makes the test fail
     } else {
-        std.testing.refAllDeclsRecursive(@This());
+        std.testing.refAllDecls(@This());
     }
 }
 

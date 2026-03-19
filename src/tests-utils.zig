@@ -37,10 +37,10 @@ pub fn assert_offset(comptime T: type, comptime field: []const u8, offset: u32) 
 
 pub const Error = error{ InvalidChar, IllegalCharacter, Overflow };
 
-pub fn bytes_from_slice(slice: []const u8) []const u8 {
+pub fn bytes_from_slice(comptime slice: []const u8) *const [slice.len / 2]u8 {
     @setEvalBranchQuota(10000);
-    var bytes: [slice.len / 2]u8 = std.mem.zeroes([slice.len / 2]u8);
-    for (slice, 0..) |char, index| {
+    comptime var bytes: [slice.len / 2]u8 = std.mem.zeroes([slice.len / 2]u8);
+    inline for (slice, 0..) |char, index| {
         const shift: u3 = if (@rem(index, 2) == 0) 4 else 0;
         const pos: usize = @divFloor(index, 2);
         bytes[pos] = bytes[pos] | try charToInt(char) << shift;
@@ -56,7 +56,7 @@ pub fn test_serializer(comptime value: anytype, comptime slice: []const u8) !voi
     const from_slice_debug = comptime steam.from_slice_debug(@TypeOf(value), bytes);
     const from_slice = comptime steam.from_slice(@TypeOf(value), bytes);
 
-    std.debug.print("{any}\n", .{from_slice});
+    std.debug.print("{}\n", .{from_slice});
 
     // ensure that both deserializers work the same regardless of alignment
     try t.expectEqualDeep(from_slice, from_slice_debug);
@@ -111,7 +111,7 @@ pub fn check_callbacks_sizes() !void {
         if (print) {
             std.debug.print("  fields:\n", .{});
             inline for (@typeInfo(T).@"struct".fields, 0..) |field, i| {
-                std.debug.print("    {s} align \tC: {d}\t Zig: {d}\n", .{ field.name, steam_callback_align_field(cb_id, @intCast(i)), field.alignment });
+                std.debug.print("    {s} align \tC: {d}\t Zig: {?}\n", .{ field.name, steam_callback_align_field(cb_id, @intCast(i)), field.alignment });
             }
         }
     }
