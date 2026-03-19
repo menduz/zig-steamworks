@@ -47,13 +47,21 @@ pub fn build(b: *std.Build) !void {
         .link_libcpp = false,
     });
 
-    var lib = b.addLibrary(.{
-        .name = "steamworks",
-        .root_module = module,
+    const lib_module = b.createModule(.{
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = optimize,
+        .link_libc = false,
+        .link_libcpp = false,
     });
 
-    lib.linkLibC();
-    lib.linkLibCpp();
+    var lib = b.addLibrary(.{
+        .name = "steamworks",
+        .root_module = lib_module,
+    });
+
+    lib.root_module.link_libc = true;
+    lib.root_module.link_libcpp = true;
 
     // Generate flags.
     var flagContainer: std.ArrayListUnmanaged([]const u8) = .empty;
@@ -66,17 +74,17 @@ pub fn build(b: *std.Build) !void {
 
     addLibraryPath(b, lib);
 
-    if (module.resolved_target != null and module.resolved_target.?.result.os.tag == .windows) {
-        module.linkSystemLibrary("sdkencryptedappticket64", .{});
-        module.linkSystemLibrary("steam_api64", .{});
+    if (target.result.os.tag == .windows) {
+        lib_module.linkSystemLibrary("sdkencryptedappticket64", .{});
+        lib_module.linkSystemLibrary("steam_api64", .{});
     } else {
-        module.linkSystemLibrary("sdkencryptedappticket", .{ .needed = true, .preferred_link_mode = .static });
-        module.linkSystemLibrary("steam_api", .{ .needed = true, .preferred_link_mode = .static });
+        lib_module.linkSystemLibrary("sdkencryptedappticket", .{ .needed = true, .preferred_link_mode = .static });
+        lib_module.linkSystemLibrary("steam_api", .{ .needed = true, .preferred_link_mode = .static });
     }
 
     // Include dirs.
-    lib.addIncludePath(b.path("steamworks/public/steam"));
-    lib.addCSourceFiles(.{ .files = &.{"src/steam.cpp"}, .flags = flagContainer.items });
+    lib.root_module.addIncludePath(b.path("steamworks/public/steam"));
+    lib.root_module.addCSourceFiles(.{ .files = &.{"src/steam.cpp"}, .flags = flagContainer.items });
 
     b.installArtifact(lib);
 
@@ -105,7 +113,7 @@ fn build_example_project(b: *std.Build, module: *std.Build.Module, target: std.B
     });
 
     addLibraryPath(b, test_exe);
-    test_exe.linkLibrary(lib);
+    test_exe.root_module.linkLibrary(lib);
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default
@@ -122,7 +130,7 @@ fn build_aux_cli(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.
         }),
     });
 
-    test_exe.linkLibC();
+    test_exe.root_module.link_libc = true;
     addLibraryPath(b, test_exe);
     // Generate flags.
     var flagContainer: std.ArrayListUnmanaged([]const u8) = .empty;
@@ -132,10 +140,10 @@ fn build_aux_cli(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.
     flagContainer.append(std.heap.page_allocator, "-Wgnu-alignof-expression") catch unreachable;
     flagContainer.append(std.heap.page_allocator, "-Wno-gnu") catch unreachable;
 
-    test_exe.addIncludePath(b.path("steamworks/public/steam"));
-    test_exe.addCSourceFiles(.{ .files = &.{"src/steam-aux.cpp"}, .flags = flagContainer.items });
+    test_exe.root_module.addIncludePath(b.path("steamworks/public/steam"));
+    test_exe.root_module.addCSourceFiles(.{ .files = &.{"src/steam-aux.cpp"}, .flags = flagContainer.items });
 
-    test_exe.linkLibrary(lib);
+    test_exe.root_module.linkLibrary(lib);
 
     var run_step = b.step("aux", "Builds the auxiliary executable used to extract alignment information");
     run_step.dependOn(&test_exe.step);
@@ -158,7 +166,7 @@ fn test_step(b: *std.Build, module: *std.Build.Module, target: std.Build.Resolve
         }),
     });
 
-    main_tests.linkLibrary(lib);
+    main_tests.root_module.linkLibrary(lib);
 
     addLibraryPath(b, main_tests);
 
