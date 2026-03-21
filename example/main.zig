@@ -18,7 +18,7 @@ fn authTicket(identity: *steam.SteamNetworkingIdentity) !void {
 }
 
 pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    var gpa = std.heap.DebugAllocator(.{}){};
     allocator = gpa.allocator();
 
     std.debug.print("Starting\n", .{});
