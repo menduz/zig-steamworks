@@ -7,6 +7,21 @@ const steam = @import("main.zig");
 /// More info about this here: https://partner.steamgames.com/doc/api/ISteamGameServer#HandleIncomingPacket
 pub const MASTERSERVERUPDATERPORT_USEGAMESOCKETSHARE = 0xFFFF;
 
+const gameserver_internal_check_interface_versions =
+    "SteamUtils010\x00" ++
+    "SteamNetworkingUtils004\x00" ++
+    "SteamGameServer015\x00" ++
+    "SteamGameServerStats001\x00" ++
+    "STEAMHTTP_INTERFACE_VERSION003\x00" ++
+    "STEAMINVENTORY_INTERFACE_V003\x00" ++
+    "SteamNetworking006\x00" ++
+    "SteamNetworkingMessages002\x00" ++
+    "SteamNetworkingSockets012\x00" ++
+    "STEAMUGC_INTERFACE_VERSION021\x00" ++
+    "\x00";
+
+extern fn SteamInternal_GameServer_Init_V2(unIP: steam.uint32, usGamePort: steam.uint16, usQueryPort: steam.uint16, eServerMode: steam.EServerMode, pchVersionString: [*c]const u8, pszInternalCheckInterfaceVersions: [*c]const u8, pOutErrMsg: ?*anyopaque) callconv(.c) c_int;
+
 // Initialize SteamGameServer client and interface objects, and set server properties which may not be changed.
 //
 // After calling this function, you should set any additional server parameters, and then
@@ -25,7 +40,10 @@ pub const MASTERSERVERUPDATERPORT_USEGAMESOCKETSHARE = 0xFFFF;
 //      UDP packets for the master  server updater. See references to GameSocketShare in isteamgameserver.h.
 // - The version string is usually in the form x.x.x.x, and is used by the master server to detect when the
 //      server is out of date.  (Only servers with the latest version will be listed.)
-pub extern fn SteamInternal_GameServer_Init(unIP: steam.uint32, usLegacySteamPort: u16, usGamePort: steam.uint16, usQueryPort: steam.uint16, eServerMode: steam.EServerMode, pchVersionString: [*c]const u8) callconv(.c) bool;
+pub fn SteamInternal_GameServer_Init(unIP: steam.uint32, usLegacySteamPort: u16, usGamePort: steam.uint16, usQueryPort: steam.uint16, eServerMode: steam.EServerMode, pchVersionString: [*c]const u8) bool {
+    _ = usLegacySteamPort;
+    return SteamInternal_GameServer_Init_V2(unIP, usGamePort, usQueryPort, eServerMode, pchVersionString, gameserver_internal_check_interface_versions.ptr, null) == 0;
+}
 
 // Shutdown SteamGameSeverXxx interfaces, log out, and free resources.
 pub extern fn SteamGameServer_Shutdown() callconv(.c) void;

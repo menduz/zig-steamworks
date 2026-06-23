@@ -1,24 +1,38 @@
 LEVEL := Debug
 TARGET := native
+JS ?= bun
 
 ZIG := /usr/local/lib/zig/lib
 
-build: build-source
+build:
 	@echo '=================== BeginBuild ==================='
 	zig build -Dtarget=$(TARGET) -Doptimize=$(LEVEL) -freference-trace --verbose
 	@echo '===================  EndBuild  ==================='
 
-build-source:
-	node generate.js steamworks/public/steam/steam_api.json
+generate:
+	$(JS) generate.js steamworks/public/steam/steam_api.json
 	zig fmt src
+
+align-linux:
+	$(JS) generate-align.js steamworks/public/steam/steam_api.json x86_64-linux-gnu > steamworks/align-info-linux.json
+
+align-macos:
+	$(JS) generate-align.js steamworks/public/steam/steam_api.json aarch64-macos-none > steamworks/align-info-macos.json
+
+align-windows:
+	$(JS) generate-align.js steamworks/public/steam/steam_api.json x86_64-windows-gnu > steamworks/align-info-windows.json
+
+align: align-linux align-macos align-windows
+
+build-source: generate
 	zig build test -freference-trace --verbose --summary all -Dtarget=$(TARGET) --verbose-link
 
 test-docker:
-	node generate.js steamworks/public/steam/steam_api.json
+	$(JS) generate.js steamworks/public/steam/steam_api.json
 	zig fmt src
 	zig build run -freference-trace --verbose --summary all
 test-docker1:
-	node generate.js steamworks/public/steam/steam_api.json
+	$(JS) generate.js steamworks/public/steam/steam_api.json
 	zig fmt src
 	zig build -Dtarget=$(TARGET)
 
@@ -37,4 +51,4 @@ clean:
 	rm -rf zig-cache
 	rm -rf zig-out
 
-.PHONY: build
+.PHONY: build generate align align-linux align-macos align-windows build-source test-docker test-docker1 cross link-universal clean

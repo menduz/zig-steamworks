@@ -1,4 +1,7 @@
-node generate-aux.js steamworks/public/steam/steam_api.json
-zig build aux -Dtarget=aarch64-macos-none
-cd zig-out/bin
-./aux-cli > ../../steamworks/align-info-macos.json
+#!/usr/bin/env bash
+set -euo pipefail
+
+JS="${JS:-bun}"
+TARGET="${TARGET:-native}"
+
+"$JS" generate-align.js steamworks/public/steam/steam_api.json "$TARGET" > steamworks/align-info-macos.json

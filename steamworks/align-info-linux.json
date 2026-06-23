@@ -304,9 +304,14 @@
         "field": "m_nAppID",
         "size": 4,
         "align": 4
+      },
+      {
+        "field": "m_dwOverlayPID",
+        "size": 4,
+        "align": 4
       }
     ],
-    "size": 8,
+    "size": 12,
     "align": 4
   },
   "GameServerChangeRequested_t": {
@@ -594,27 +599,6 @@
     "size": 412,
     "align": 4
   },
-  "SetPersonaNameResponse_t": {
-    "fields": [
-      {
-        "field": "m_bSuccess",
-        "size": 1,
-        "align": 1
-      },
-      {
-        "field": "m_bLocalSuccess",
-        "size": 1,
-        "align": 1
-      },
-      {
-        "field": "m_result",
-        "size": 4,
-        "align": 4
-      }
-    ],
-    "size": 8,
-    "align": 4
-  },
   "UnreadChatMessagesChanged_t": {
     "fields": [],
     "size": 1,
@@ -676,6 +660,11 @@
       },
       {
         "field": "m_bHasMiniProfileBackground",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_bFromCache",
         "size": 1,
         "align": 1
       }
@@ -1013,22 +1002,6 @@
     "size": 12,
     "align": 4
   },
-  "PSNGameBootInviteResult_t": {
-    "fields": [
-      {
-        "field": "m_bGameBootInviteExists",
-        "size": 1,
-        "align": 1
-      },
-      {
-        "field": "m_steamIDLobby",
-        "size": 8,
-        "align": 1
-      }
-    ],
-    "size": 9,
-    "align": 1
-  },
   "FavoritesListAccountsUpdated_t": {
     "fields": [
       {
@@ -1038,208 +1011,6 @@
       }
     ],
     "size": 4,
-    "align": 4
-  },
-  "SearchForGameProgressCallback_t": {
-    "fields": [
-      {
-        "field": "m_ullSearchID",
-        "size": 8,
-        "align": 4
-      },
-      {
-        "field": "m_eResult",
-        "size": 4,
-        "align": 4
-      },
-      {
-        "field": "m_lobbyID",
-        "size": 8,
-        "align": 1
-      },
-      {
-        "field": "m_steamIDEndedSearch",
-        "size": 8,
-        "align": 1
-      },
-      {
-        "field": "m_nSecondsRemainingEstimate",
-        "size": 4,
-        "align": 4
-      },
-      {
-        "field": "m_cPlayersSearching",
-        "size": 4,
-        "align": 4
-      }
-    ],
-    "size": 36,
-    "align": 4
-  },
-  "SearchForGameResultCallback_t": {
-    "fields": [
-      {
-        "field": "m_ullSearchID",
-        "size": 8,
-        "align": 4
-      },
-      {
-        "field": "m_eResult",
-        "size": 4,
-        "align": 4
-      },
-      {
-        "field": "m_nCountPlayersInGame",
-        "size": 4,
-        "align": 4
-      },
-      {
-        "field": "m_nCountAcceptedGame",
-        "size": 4,
-        "align": 4
-      },
-      {
-        "field": "m_steamIDHost",
-        "size": 8,
-        "align": 1
-      },
-      {
-        "field": "m_bFinalCallback",
-        "size": 1,
-        "align": 1
-      }
-    ],
-    "size": 32,
-    "align": 4
-  },
-  "RequestPlayersForGameProgressCallback_t": {
-    "fields": [
-      {
-        "field": "m_eResult",
-        "size": 4,
-        "align": 4
-      },
-      {
-        "field": "m_ullSearchID",
-        "size": 8,
-        "align": 4
-      }
-    ],
-    "size": 12,
-    "align": 4
-  },
-  "RequestPlayersForGameResultCallback_t": {
-    "fields": [
-      {
-        "field": "m_eResult",
-        "size": 4,
-        "align": 4
-      },
-      {
-        "field": "m_ullSearchID",
-        "size": 8,
-        "align": 4
-      },
-      {
-        "field": "m_SteamIDPlayerFound",
-        "size": 8,
-        "align": 1
-      },
-      {
-        "field": "m_SteamIDLobby",
-        "size": 8,
-        "align": 1
-      },
-      {
-        "field": "m_ePlayerAcceptState",
-        "size": 4,
-        "align": 4
-      },
-      {
-        "field": "m_nPlayerIndex",
-        "size": 4,
-        "align": 4
-      },
-      {
-        "field": "m_nTotalPlayersFound",
-        "size": 4,
-        "align": 4
-      },
-      {
-        "field": "m_nTotalPlayersAcceptedGame",
-        "size": 4,
-        "align": 4
-      },
-      {
-        "field": "m_nSuggestedTeamIndex",
-        "size": 4,
-        "align": 4
-      },
-      {
-        "field": "m_ullUniqueGameID",
-        "size": 8,
-        "align": 4
-      }
-    ],
-    "size": 56,
-    "align": 4
-  },
-  "RequestPlayersForGameFinalResultCallback_t": {
-    "fields": [
-      {
-        "field": "m_eResult",
-        "size": 4,
-        "align": 4
-      },
-      {
-        "field": "m_ullSearchID",
-        "size": 8,
-        "align": 4
-      },
-      {
-        "field": "m_ullUniqueGameID",
-        "size": 8,
-        "align": 4
-      }
-    ],
-    "size": 20,
-    "align": 4
-  },
-  "SubmitPlayerResultResultCallback_t": {
-    "fields": [
-      {
-        "field": "m_eResult",
-        "size": 4,
-        "align": 4
-      },
-      {
-        "field": "ullUniqueGameID",
-        "size": 8,
-        "align": 4
-      },
-      {
-        "field": "steamIDPlayer",
-        "size": 8,
-        "align": 1
-      }
-    ],
-    "size": 20,
-    "align": 4
-  },
-  "EndGameResultCallback_t": {
-    "fields": [
-      {
-        "field": "m_eResult",
-        "size": 4,
-        "align": 4
-      },
-      {
-        "field": "ullUniqueGameID",
-        "size": 8,
-        "align": 4
-      }
-    ],
-    "size": 12,
     "align": 4
   },
   "JoinPartyCallback_t": {
@@ -2186,27 +1957,6 @@
     "size": 12,
     "align": 4
   },
-  "PS3TrophiesInstalled_t": {
-    "fields": [
-      {
-        "field": "m_nGameID",
-        "size": 8,
-        "align": 4
-      },
-      {
-        "field": "m_eResult",
-        "size": 4,
-        "align": 4
-      },
-      {
-        "field": "m_ulRequiredDiskSpace",
-        "size": 8,
-        "align": 4
-      }
-    ],
-    "size": 20,
-    "align": 4
-  },
   "GlobalStatsReceived_t": {
     "fields": [
       {
@@ -2400,112 +2150,6 @@
     "fields": [
       {
         "field": "m_flNewVolume",
-        "size": 4,
-        "align": 4
-      }
-    ],
-    "size": 4,
-    "align": 4
-  },
-  "MusicPlayerRemoteWillActivate_t": {
-    "fields": [],
-    "size": 1,
-    "align": 1
-  },
-  "MusicPlayerRemoteWillDeactivate_t": {
-    "fields": [],
-    "size": 1,
-    "align": 1
-  },
-  "MusicPlayerRemoteToFront_t": {
-    "fields": [],
-    "size": 1,
-    "align": 1
-  },
-  "MusicPlayerWillQuit_t": {
-    "fields": [],
-    "size": 1,
-    "align": 1
-  },
-  "MusicPlayerWantsPlay_t": {
-    "fields": [],
-    "size": 1,
-    "align": 1
-  },
-  "MusicPlayerWantsPause_t": {
-    "fields": [],
-    "size": 1,
-    "align": 1
-  },
-  "MusicPlayerWantsPlayPrevious_t": {
-    "fields": [],
-    "size": 1,
-    "align": 1
-  },
-  "MusicPlayerWantsPlayNext_t": {
-    "fields": [],
-    "size": 1,
-    "align": 1
-  },
-  "MusicPlayerWantsShuffled_t": {
-    "fields": [
-      {
-        "field": "m_bShuffled",
-        "size": 1,
-        "align": 1
-      }
-    ],
-    "size": 1,
-    "align": 1
-  },
-  "MusicPlayerWantsLooped_t": {
-    "fields": [
-      {
-        "field": "m_bLooped",
-        "size": 1,
-        "align": 1
-      }
-    ],
-    "size": 1,
-    "align": 1
-  },
-  "MusicPlayerWantsVolume_t": {
-    "fields": [
-      {
-        "field": "m_flNewVolume",
-        "size": 4,
-        "align": 4
-      }
-    ],
-    "size": 4,
-    "align": 4
-  },
-  "MusicPlayerSelectsQueueEntry_t": {
-    "fields": [
-      {
-        "field": "nID",
-        "size": 4,
-        "align": 4
-      }
-    ],
-    "size": 4,
-    "align": 4
-  },
-  "MusicPlayerSelectsPlaylistEntry_t": {
-    "fields": [
-      {
-        "field": "nID",
-        "size": 4,
-        "align": 4
-      }
-    ],
-    "size": 4,
-    "align": 4
-  },
-  "MusicPlayerWantsPlayingRepeatStatus_t": {
-    "fields": [
-      {
-        "field": "m_nPlayingRepeatStatus",
         "size": 4,
         "align": 4
       }
@@ -2720,7 +2364,7 @@
     "fields": [
       {
         "field": "m_details",
-        "size": 9764,
+        "size": 9772,
         "align": 4
       },
       {
@@ -2729,7 +2373,7 @@
         "align": 1
       }
     ],
-    "size": 9768,
+    "size": 9776,
     "align": 4
   },
   "CreateItemResult_t": {
@@ -2785,9 +2429,19 @@
         "field": "m_nPublishedFileId",
         "size": 8,
         "align": 4
+      },
+      {
+        "field": "m_hLegacyContent",
+        "size": 8,
+        "align": 4
+      },
+      {
+        "field": "m_unManifestID",
+        "size": 8,
+        "align": 4
       }
     ],
-    "size": 12,
+    "size": 28,
     "align": 4
   },
   "DownloadItemResult_t": {
@@ -3082,38 +2736,6 @@
       }
     ],
     "size": 20,
-    "align": 4
-  },
-  "SteamAppInstalled_t": {
-    "fields": [
-      {
-        "field": "m_nAppID",
-        "size": 4,
-        "align": 4
-      },
-      {
-        "field": "m_iInstallFolderIndex",
-        "size": 4,
-        "align": 4
-      }
-    ],
-    "size": 8,
-    "align": 4
-  },
-  "SteamAppUninstalled_t": {
-    "fields": [
-      {
-        "field": "m_nAppID",
-        "size": 4,
-        "align": 4
-      },
-      {
-        "field": "m_iInstallFolderIndex",
-        "size": 4,
-        "align": 4
-      }
-    ],
-    "size": 8,
     "align": 4
   },
   "HTML_BrowserReady_t": {
@@ -3754,6 +3376,53 @@
     "size": 8,
     "align": 4
   },
+  "SteamTimelineGamePhaseRecordingExists_t": {
+    "fields": [
+      {
+        "field": "m_rgchPhaseID",
+        "size": 64,
+        "align": 1
+      },
+      {
+        "field": "m_ulRecordingMS",
+        "size": 8,
+        "align": 4
+      },
+      {
+        "field": "m_ulLongestClipMS",
+        "size": 8,
+        "align": 4
+      },
+      {
+        "field": "m_unClipCount",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unScreenshotCount",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 88,
+    "align": 4
+  },
+  "SteamTimelineEventRecordingExists_t": {
+    "fields": [
+      {
+        "field": "m_ulEventID",
+        "size": 8,
+        "align": 4
+      },
+      {
+        "field": "m_bRecordingExists",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 12,
+    "align": 4
+  },
   "GetVideoURLResult_t": {
     "fields": [
       {
@@ -3789,6 +3458,28 @@
       }
     ],
     "size": 8,
+    "align": 4
+  },
+  "BroadcastUploadStart_t": {
+    "fields": [
+      {
+        "field": "m_bIsRTMP",
+        "size": 1,
+        "align": 1
+      }
+    ],
+    "size": 1,
+    "align": 1
+  },
+  "BroadcastUploadStop_t": {
+    "fields": [
+      {
+        "field": "m_eResult",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 4,
     "align": 4
   },
   "SteamParentalSettingsChanged_t": {
@@ -3828,6 +3519,32 @@
     ],
     "size": 1024,
     "align": 1
+  },
+  "SteamRemotePlaySessionAvatarLoaded_t": {
+    "fields": [
+      {
+        "field": "m_unSessionID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_iImage",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_iWide",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_iTall",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 16,
+    "align": 4
   },
   "SteamNetworkingMessagesSessionRequest_t": {
     "fields": [
@@ -4595,102 +4312,6 @@
     "size": 40,
     "align": 1
   },
-  "InputMotionDataV2_t": {
-    "fields": [
-      {
-        "field": "driftCorrectedQuatX",
-        "size": 4,
-        "align": 1
-      },
-      {
-        "field": "driftCorrectedQuatY",
-        "size": 4,
-        "align": 1
-      },
-      {
-        "field": "driftCorrectedQuatZ",
-        "size": 4,
-        "align": 1
-      },
-      {
-        "field": "driftCorrectedQuatW",
-        "size": 4,
-        "align": 1
-      },
-      {
-        "field": "sensorFusionQuatX",
-        "size": 4,
-        "align": 1
-      },
-      {
-        "field": "sensorFusionQuatY",
-        "size": 4,
-        "align": 1
-      },
-      {
-        "field": "sensorFusionQuatZ",
-        "size": 4,
-        "align": 1
-      },
-      {
-        "field": "sensorFusionQuatW",
-        "size": 4,
-        "align": 1
-      },
-      {
-        "field": "deferredSensorFusionQuatX",
-        "size": 4,
-        "align": 1
-      },
-      {
-        "field": "deferredSensorFusionQuatY",
-        "size": 4,
-        "align": 1
-      },
-      {
-        "field": "deferredSensorFusionQuatZ",
-        "size": 4,
-        "align": 1
-      },
-      {
-        "field": "deferredSensorFusionQuatW",
-        "size": 4,
-        "align": 1
-      },
-      {
-        "field": "gravityX",
-        "size": 4,
-        "align": 1
-      },
-      {
-        "field": "gravityY",
-        "size": 4,
-        "align": 1
-      },
-      {
-        "field": "gravityZ",
-        "size": 4,
-        "align": 1
-      },
-      {
-        "field": "degreesPerSecondX",
-        "size": 4,
-        "align": 1
-      },
-      {
-        "field": "degreesPerSecondY",
-        "size": 4,
-        "align": 1
-      },
-      {
-        "field": "degreesPerSecondZ",
-        "size": 4,
-        "align": 1
-      }
-    ],
-    "size": 72,
-    "align": 1
-  },
   "SteamInputActionEvent_t": {
     "fields": [
       {
@@ -4843,9 +4464,14 @@
         "field": "m_unNumChildren",
         "size": 4,
         "align": 4
+      },
+      {
+        "field": "m_ulTotalFilesSize",
+        "size": 8,
+        "align": 4
       }
     ],
-    "size": 9764,
+    "size": 9772,
     "align": 4
   },
   "SteamItemDetails_t": {
@@ -4872,6 +4498,95 @@
       }
     ],
     "size": 16,
+    "align": 4
+  },
+  "RemotePlayInputMouseMotion_t": {
+    "fields": [
+      {
+        "field": "m_bAbsolute",
+        "size": 1,
+        "align": 1
+      },
+      {
+        "field": "m_flNormalizedX",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_flNormalizedY",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nDeltaX",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_nDeltaY",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 20,
+    "align": 4
+  },
+  "RemotePlayInputMouseWheel_t": {
+    "fields": [
+      {
+        "field": "m_eDirection",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_flAmount",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 8,
+    "align": 4
+  },
+  "RemotePlayInputKey_t": {
+    "fields": [
+      {
+        "field": "m_eScancode",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unModifiers",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_unKeycode",
+        "size": 4,
+        "align": 4
+      }
+    ],
+    "size": 12,
+    "align": 4
+  },
+  "RemotePlayInput_t": {
+    "fields": [
+      {
+        "field": "m_unSessionID",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "m_eType",
+        "size": 4,
+        "align": 4
+      },
+      {
+        "field": "padding",
+        "size": 56,
+        "align": 1
+      }
+    ],
+    "size": 64,
     "align": 4
   },
   "SteamNetworkingIPAddr": {
@@ -5050,8 +4765,13 @@
         "align": 4
       },
       {
+        "field": "m_usecMaxJitter",
+        "size": 4,
+        "align": 4
+      },
+      {
         "field": "reserved",
-        "size": 64,
+        "size": 60,
         "align": 4
       }
     ],

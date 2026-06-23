@@ -11,8 +11,11 @@ const cpp = [
   `#include <concepts>`,
   `#include <type_traits>`,
 
+  `#define private public`,
   `#import "steam_api.h"`,
   `#import "steam_gameserver.h"`,
+  `#import "steamnetworkingfakeip.h"`,
+  `#undef private`,
   ``,
   `extern "C" void* CustomSteamClientGetter() { return SteamClient(); }`
 ]
@@ -86,15 +89,18 @@ out.push(`
 
 /// SteamAPI_Init must be called before using any other API functions. If it fails, an
 /// error message will be output to the debugger (or stderr) with further information.
-pub extern fn SteamAPI_Init() callconv(.c) bool;
+pub extern fn SteamAPI_InitFlat(pOutErrMsg: ?*anyopaque) callconv(.c) c_int;
+pub fn SteamAPI_Init() bool {
+  return SteamAPI_InitFlat(null) == 0;
+}
 
 /// SteamAPI_Shutdown should be called during process shutdown if possible.
 pub extern fn SteamAPI_Shutdown() callconv(.c) void;
 
 pub extern fn SteamAPI_GetHSteamPipe() callconv(.c) HSteamPipe;
-pub extern fn SteamAPI_GetHSteamUser() callconv(.c) HSteamPipe;
+pub extern fn SteamAPI_GetHSteamUser() callconv(.c) HSteamUser;
 pub extern fn SteamGameServer_GetHSteamPipe() callconv(.c) HSteamPipe;
-pub extern fn SteamGameServer_GetHSteamUser() callconv(.c) HSteamPipe;
+pub extern fn SteamGameServer_GetHSteamUser() callconv(.c) HSteamUser;
 
 // SteamAPI_RestartAppIfNecessary ensures that your executable was launched through Steam.
 //
@@ -115,7 +121,7 @@ pub extern fn SteamAPI_RestartAppIfNecessary( unOwnAppID: u32 ) callconv(.c) boo
 pub extern fn SteamAPI_ReleaseCurrentThreadMemory() callconv(.c) void;
 
 // crash dump recording functions
-pub extern fn SteamAPI_WriteMiniDump( uStructuredExceptionCode: u32, pvExceptionInfo: [*c]const u8, uBuildID: u32 ) callconv(.c) void;
+pub extern fn SteamAPI_WriteMiniDump( uStructuredExceptionCode: u32, pvExceptionInfo: ?*anyopaque, uBuildID: u32 ) callconv(.c) void;
 pub extern fn SteamAPI_SetMiniDumpComment( pchMsg: [*c]const u8 ) callconv(.c) void;
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
@@ -259,7 +265,7 @@ pub extern fn SteamAPI_ManualDispatch_FreeLastCallback(hSteamPipe: HSteamPipe) c
 
 /// Return the call result for the specified call on the specified pipe.  You really should
 /// only call this in a handler for SteamAPICallCompleted_t callback.
-pub extern fn SteamAPI_ManualDispatch_GetAPICallResult(hSteamPipe: HSteamPipe, hSteamAPICall: SteamAPICall_t, result: [*c]u8, size: u32, iCallbackExpected: i32, pbFailed: *bool) bool;
+pub extern fn SteamAPI_ManualDispatch_GetAPICallResult(hSteamPipe: HSteamPipe, hSteamAPICall: SteamAPICall_t, result: [*c]u8, size: i32, iCallbackExpected: i32, pbFailed: *bool) callconv(.c) bool;
 
 extern fn CustomSteamClientGetter() callconv(.c) [*c]ISteamClient;
 pub fn SteamClient() ISteamClient {
@@ -268,7 +274,7 @@ pub fn SteamClient() ISteamClient {
 `)
 
 {
-  const deny_list = ['SteamNetworkingFakeIPResult_t']
+  const deny_list = []
 
   cpp_last.push(`extern "C" int steam_callback_size(int cb_id) {`)
   cpp_last.push(`switch(cb_id) {`)
@@ -342,7 +348,7 @@ printConsts(data.consts);
 function printConsts(list) {
   out.push(`\n// Constants`)
   list.forEach(_ => {
-    const val = _.constval === '0xffffffffffffffffull' ? '0xffffffffffffffff' : _.constval
+    const val = normalizeConstValue(_.constval)
 
     if (_.constname == 'HSERVERQUERY_INVALID')
       return out.push(`pub const ${_.constname} = ${val}; `)
@@ -356,6 +362,11 @@ function printConsts(list) {
 
     return out.push(`pub const ${_.constname}: ${convertType(_.consttype)} = ${val}; `)
   })
+}
+
+function normalizeConstValue(value) {
+  if (value === '0xffffffffffffffffull') return '0xffffffffffffffff'
+  return value.replace(/(\d+)\.f\b/g, '$1.0')
 }
 
 function getDefaultValue(typeName, internalType) {
@@ -760,6 +771,11 @@ function convertTypeAdapted(param, fn) {
 function convertType(t, isFnSignature) {
   if (t === undefined) return 'void!'
 
+  {
+    const topLevelConst = /^const\s+([0-9a-z_:]+)$/i.exec(t)
+    if (topLevelConst) return convertType(topLevelConst[1], isFnSignature)
+  }
+
   if (t && t.startsWith('void (*)')) {
     const middle = /\(([^\(]*)\)$/.exec(t)
     const types = middle ? middle[1].split(/\s*,\s*/g) : []
@@ -798,6 +814,8 @@ function convertType(t, isFnSignature) {
     case 'const char *': return '[*c]const u8'
     case 'const char **': return '[*c][*c]const u8'
     case 'SteamInputActionEvent_t::AnalogAction_t': return 'DigitalAnalogAction_t'
+    case 'ScePadTriggerEffectParam':
+      return 'anyopaque'
     case 'RequestPlayersForGameResultCallback_t::PlayerAcceptState_t':
       return 'c_int'
 
