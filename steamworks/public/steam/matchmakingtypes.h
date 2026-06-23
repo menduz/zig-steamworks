@@ -85,7 +85,7 @@ public:
 	}
 
 	
-// ZIG: private:
+private:
 	const char *ToString( uint32 unIP, uint16 usPort ) const;
 	uint16	m_usConnectionPort;	// (in HOST byte order)
 	uint16	m_usQueryPort;
@@ -189,7 +189,7 @@ public:
 	uint32 m_ulTimeLastPlayed;									///< time (in unix time) when this server was last played on (for favorite/history servers)
 	int	m_nServerVersion;										///< server version as reported to Steam
 
-// ZIG: private:
+private:
 
 	/// Game server name
 	char m_szServerName[k_cbMaxGameServerName];

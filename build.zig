@@ -70,8 +70,8 @@ pub fn build(b: *std.Build) !void {
         module.linkSystemLibrary("sdkencryptedappticket64", .{});
         module.linkSystemLibrary("steam_api64", .{});
     } else {
-        module.linkSystemLibrary("sdkencryptedappticket", .{ .needed = true, .preferred_link_mode = .static });
-        module.linkSystemLibrary("steam_api", .{ .needed = true, .preferred_link_mode = .static });
+        module.linkSystemLibrary("sdkencryptedappticket", .{ .needed = true, .preferred_link_mode = .dynamic });
+        module.linkSystemLibrary("steam_api", .{ .needed = true, .preferred_link_mode = .dynamic });
     }
 
     // Include dirs.
@@ -86,7 +86,7 @@ pub fn build(b: *std.Build) !void {
     // create test step
     try test_step(b, module, target, optimize, lib);
 
-    try build_aux_cli(b, target, optimize, lib);
+    try build_aux_cli(b, target, optimize);
 }
 
 fn build_example_project(b: *std.Build, module: *std.Build.Module, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode, lib: *std.Build.Step.Compile) !void {
@@ -112,7 +112,7 @@ fn build_example_project(b: *std.Build, module: *std.Build.Module, target: std.B
     b.installArtifact(test_exe);
 }
 
-fn build_aux_cli(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode, lib: *std.Build.Step.Compile) !void {
+fn build_aux_cli(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode) !void {
     const test_exe = b.addExecutable(.{
         .name = "aux-cli",
         .root_module = b.createModule(.{
@@ -133,8 +133,7 @@ fn build_aux_cli(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.
 
     test_exe.root_module.addIncludePath(b.path("steamworks/public/steam"));
     test_exe.root_module.addCSourceFiles(.{ .files = &.{"src/steam-aux.cpp"}, .flags = flagContainer.items });
-
-    test_exe.root_module.linkLibrary(lib);
+    test_exe.root_module.link_libcpp = true;
 
     var run_step = b.step("aux", "Builds the auxiliary executable used to extract alignment information");
     run_step.dependOn(&test_exe.step);

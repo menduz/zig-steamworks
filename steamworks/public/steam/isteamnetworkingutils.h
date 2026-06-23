@@ -461,15 +461,15 @@ inline bool ISteamNetworkingUtils::SetGlobalCallback_FakeIPResult( FnSteamNetwor
 inline bool ISteamNetworkingUtils::SetGlobalCallback_MessagesSessionRequest( FnSteamNetworkingMessagesSessionRequest fnCallback ) { return SetGlobalConfigValuePtr( k_ESteamNetworkingConfig_Callback_MessagesSessionRequest, (void*)fnCallback ); }
 inline bool ISteamNetworkingUtils::SetGlobalCallback_MessagesSessionFailed( FnSteamNetworkingMessagesSessionFailed fnCallback ) { return SetGlobalConfigValuePtr( k_ESteamNetworkingConfig_Callback_MessagesSessionFailed, (void*)fnCallback ); }
 
-// ZIG:inline bool ISteamNetworkingUtils::SetConfigValueStruct( const SteamNetworkingConfigValue_t &opt, ESteamNetworkingConfigScope eScopeType, intptr_t scopeObj )
-// ZIG:{
-// ZIG:	// Locate the argument.  Strings are a special case, since the
-// ZIG:	// "value" (the whole string buffer) doesn't fit in the struct
-// ZIG:	// NOTE: for pointer values, we pass a pointer to the pointer,
-// ZIG:	// we do not pass the pointer directly.
-// ZIG:	const void *pVal = ( opt.m_eDataType == k_ESteamNetworkingConfig_String ) ? (const void *)opt.m_val.m_string : (const void *)&opt.m_val;
-// ZIG:	return SetConfigValue( opt.m_eValue, eScopeType, scopeObj, opt.m_eDataType, pVal );
-// ZIG:}
+inline bool ISteamNetworkingUtils::SetConfigValueStruct( const SteamNetworkingConfigValue_t &opt, ESteamNetworkingConfigScope eScopeType, intptr_t scopeObj )
+{
+	// Locate the argument.  Strings are a special case, since the
+	// "value" (the whole string buffer) doesn't fit in the struct
+	// NOTE: for pointer values, we pass a pointer to the pointer,
+	// we do not pass the pointer directly.
+	const void *pVal = ( opt.m_eDataType == k_ESteamNetworkingConfig_String ) ? (const void *)opt.m_val.m_string : (const void *)&opt.m_val;
+	return SetConfigValue( opt.m_eValue, eScopeType, scopeObj, opt.m_eDataType, pVal );
+}
 
 // How to get helper functions.
 #if defined( STEAMNETWORKINGSOCKETS_STATIC_LINK ) || defined(STEAMNETWORKINGSOCKETS_FOREXPORT) || defined( STEAMNETWORKINGSOCKETS_STANDALONELIB )

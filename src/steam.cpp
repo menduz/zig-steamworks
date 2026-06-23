@@ -2,8 +2,11 @@
 #include <cstdio>
 #include <concepts>
 #include <type_traits>
+#define private public
 #import "steam_api.h"
 #import "steam_gameserver.h"
+#import "steamnetworkingfakeip.h"
+#undef private
 
 extern "C" void* CustomSteamClientGetter() { return SteamClient(); }
 
@@ -41,7 +44,6 @@ switch(cb_id) {
   case 344: return sizeof(FriendsGetFollowerCount_t);
   case 345: return sizeof(FriendsIsFollowing_t);
   case 346: return sizeof(FriendsEnumerateFollowingList_t);
-  case 347: return sizeof(SetPersonaNameResponse_t);
   case 348: return sizeof(UnreadChatMessagesChanged_t);
   case 349: return sizeof(OverlayBrowserProtocolNavigation_t);
   case 350: return sizeof(EquippedProfileItemsChanged_t);
@@ -65,15 +67,7 @@ switch(cb_id) {
   case 510: return sizeof(LobbyMatchList_t);
   case 512: return sizeof(LobbyKicked_t);
   case 513: return sizeof(LobbyCreated_t);
-  case 515: return sizeof(PSNGameBootInviteResult_t);
   case 516: return sizeof(FavoritesListAccountsUpdated_t);
-  case 5201: return sizeof(SearchForGameProgressCallback_t);
-  case 5202: return sizeof(SearchForGameResultCallback_t);
-  case 5211: return sizeof(RequestPlayersForGameProgressCallback_t);
-  case 5212: return sizeof(RequestPlayersForGameResultCallback_t);
-  case 5213: return sizeof(RequestPlayersForGameFinalResultCallback_t);
-  case 5214: return sizeof(SubmitPlayerResultResultCallback_t);
-  case 5215: return sizeof(EndGameResultCallback_t);
   case 5301: return sizeof(JoinPartyCallback_t);
   case 5302: return sizeof(CreateBeaconCallback_t);
   case 5303: return sizeof(ReservationNotificationCallback_t);
@@ -129,20 +123,6 @@ switch(cb_id) {
   case 2302: return sizeof(ScreenshotRequested_t);
   case 4001: return sizeof(PlaybackStatusHasChanged_t);
   case 4002: return sizeof(VolumeHasChanged_t);
-  case 4101: return sizeof(MusicPlayerRemoteWillActivate_t);
-  case 4102: return sizeof(MusicPlayerRemoteWillDeactivate_t);
-  case 4103: return sizeof(MusicPlayerRemoteToFront_t);
-  case 4104: return sizeof(MusicPlayerWillQuit_t);
-  case 4105: return sizeof(MusicPlayerWantsPlay_t);
-  case 4106: return sizeof(MusicPlayerWantsPause_t);
-  case 4107: return sizeof(MusicPlayerWantsPlayPrevious_t);
-  case 4108: return sizeof(MusicPlayerWantsPlayNext_t);
-  case 4109: return sizeof(MusicPlayerWantsShuffled_t);
-  case 4110: return sizeof(MusicPlayerWantsLooped_t);
-  case 4011: return sizeof(MusicPlayerWantsVolume_t);
-  case 4012: return sizeof(MusicPlayerSelectsQueueEntry_t);
-  case 4013: return sizeof(MusicPlayerSelectsPlaylistEntry_t);
-  case 4114: return sizeof(MusicPlayerWantsPlayingRepeatStatus_t);
   case 2101: return sizeof(HTTPRequestCompleted_t);
   case 2102: return sizeof(HTTPRequestHeadersReceived_t);
   case 2103: return sizeof(HTTPRequestDataReceived_t);
@@ -169,8 +149,6 @@ switch(cb_id) {
   case 3417: return sizeof(DeleteItemResult_t);
   case 3418: return sizeof(UserSubscribedItemsListChanged_t);
   case 3420: return sizeof(WorkshopEULAStatus_t);
-  case 3901: return sizeof(SteamAppInstalled_t);
-  case 3902: return sizeof(SteamAppUninstalled_t);
   case 4501: return sizeof(HTML_BrowserReady_t);
   case 4502: return sizeof(HTML_NeedsPaint_t);
   case 4503: return sizeof(HTML_StartRequest_t);
@@ -200,12 +178,17 @@ switch(cb_id) {
   case 4703: return sizeof(SteamInventoryEligiblePromoItemDefIDs_t);
   case 4704: return sizeof(SteamInventoryStartPurchaseResult_t);
   case 4705: return sizeof(SteamInventoryRequestPricesResult_t);
+  case 6001: return sizeof(SteamTimelineGamePhaseRecordingExists_t);
+  case 6002: return sizeof(SteamTimelineEventRecordingExists_t);
   case 4611: return sizeof(GetVideoURLResult_t);
   case 4624: return sizeof(GetOPFSettingsResult_t);
+  case 4604: return sizeof(BroadcastUploadStart_t);
+  case 4605: return sizeof(BroadcastUploadStop_t);
   case 5001: return sizeof(SteamParentalSettingsChanged_t);
   case 5701: return sizeof(SteamRemotePlaySessionConnected_t);
   case 5702: return sizeof(SteamRemotePlaySessionDisconnected_t);
   case 5703: return sizeof(SteamRemotePlayTogetherGuestInvite_t);
+  case 5704: return sizeof(SteamRemotePlaySessionAvatarLoaded_t);
   case 1251: return sizeof(SteamNetworkingMessagesSessionRequest_t);
   case 1252: return sizeof(SteamNetworkingMessagesSessionFailed_t);
   case 1221: return sizeof(SteamNetConnectionStatusChangedCallback_t);
@@ -223,7 +206,7 @@ switch(cb_id) {
   case 211: return sizeof(ComputeNewPlayerCompatibilityResult_t);
   case 1800: return sizeof(GSStatsReceived_t);
   case 1801: return sizeof(GSStatsStored_t);
-  // case 1223: return sizeof(SteamNetworkingFakeIPResult_t);
+  case 1223: return sizeof(SteamNetworkingFakeIPResult_t);
   default: return 0;
 }
 }
@@ -354,6 +337,7 @@ switch(cb_id) {
     case 0: return sizeof(p_foo->m_bActive);
     case 1: return sizeof(p_foo->m_bUserInitiated);
     case 2: return sizeof(p_foo->m_nAppID);
+    case 3: return sizeof(p_foo->m_dwOverlayPID);
     default:}
     return 0; }
   case 332: {
@@ -470,14 +454,6 @@ switch(cb_id) {
     case 3: return sizeof(p_foo->m_nTotalResultCount);
     default:}
     return 0; }
-  case 347: {
-    struct SetPersonaNameResponse_t    *p_foo = 0;
-    switch(field) {
-    case 0: return sizeof(p_foo->m_bSuccess);
-    case 1: return sizeof(p_foo->m_bLocalSuccess);
-    case 2: return sizeof(p_foo->m_result);
-    default:}
-    return 0; }
   case 348: {
     struct UnreadChatMessagesChanged_t    *p_foo = 0;
     switch(field) {
@@ -505,6 +481,7 @@ switch(cb_id) {
     case 4: return sizeof(p_foo->m_bHasProfileModifier);
     case 5: return sizeof(p_foo->m_bHasProfileBackground);
     case 6: return sizeof(p_foo->m_bHasMiniProfileBackground);
+    case 7: return sizeof(p_foo->m_bFromCache);
     default:}
     return 0; }
   case 701: {
@@ -646,84 +623,10 @@ switch(cb_id) {
     case 1: return sizeof(p_foo->m_ulSteamIDLobby);
     default:}
     return 0; }
-  case 515: {
-    struct PSNGameBootInviteResult_t    *p_foo = 0;
-    switch(field) {
-    case 0: return sizeof(p_foo->m_bGameBootInviteExists);
-    case 1: return sizeof(p_foo->m_steamIDLobby);
-    default:}
-    return 0; }
   case 516: {
     struct FavoritesListAccountsUpdated_t    *p_foo = 0;
     switch(field) {
     case 0: return sizeof(p_foo->m_eResult);
-    default:}
-    return 0; }
-  case 5201: {
-    struct SearchForGameProgressCallback_t    *p_foo = 0;
-    switch(field) {
-    case 0: return sizeof(p_foo->m_ullSearchID);
-    case 1: return sizeof(p_foo->m_eResult);
-    case 2: return sizeof(p_foo->m_lobbyID);
-    case 3: return sizeof(p_foo->m_steamIDEndedSearch);
-    case 4: return sizeof(p_foo->m_nSecondsRemainingEstimate);
-    case 5: return sizeof(p_foo->m_cPlayersSearching);
-    default:}
-    return 0; }
-  case 5202: {
-    struct SearchForGameResultCallback_t    *p_foo = 0;
-    switch(field) {
-    case 0: return sizeof(p_foo->m_ullSearchID);
-    case 1: return sizeof(p_foo->m_eResult);
-    case 2: return sizeof(p_foo->m_nCountPlayersInGame);
-    case 3: return sizeof(p_foo->m_nCountAcceptedGame);
-    case 4: return sizeof(p_foo->m_steamIDHost);
-    case 5: return sizeof(p_foo->m_bFinalCallback);
-    default:}
-    return 0; }
-  case 5211: {
-    struct RequestPlayersForGameProgressCallback_t    *p_foo = 0;
-    switch(field) {
-    case 0: return sizeof(p_foo->m_eResult);
-    case 1: return sizeof(p_foo->m_ullSearchID);
-    default:}
-    return 0; }
-  case 5212: {
-    struct RequestPlayersForGameResultCallback_t    *p_foo = 0;
-    switch(field) {
-    case 0: return sizeof(p_foo->m_eResult);
-    case 1: return sizeof(p_foo->m_ullSearchID);
-    case 2: return sizeof(p_foo->m_SteamIDPlayerFound);
-    case 3: return sizeof(p_foo->m_SteamIDLobby);
-    case 4: return sizeof(p_foo->m_ePlayerAcceptState);
-    case 5: return sizeof(p_foo->m_nPlayerIndex);
-    case 6: return sizeof(p_foo->m_nTotalPlayersFound);
-    case 7: return sizeof(p_foo->m_nTotalPlayersAcceptedGame);
-    case 8: return sizeof(p_foo->m_nSuggestedTeamIndex);
-    case 9: return sizeof(p_foo->m_ullUniqueGameID);
-    default:}
-    return 0; }
-  case 5213: {
-    struct RequestPlayersForGameFinalResultCallback_t    *p_foo = 0;
-    switch(field) {
-    case 0: return sizeof(p_foo->m_eResult);
-    case 1: return sizeof(p_foo->m_ullSearchID);
-    case 2: return sizeof(p_foo->m_ullUniqueGameID);
-    default:}
-    return 0; }
-  case 5214: {
-    struct SubmitPlayerResultResultCallback_t    *p_foo = 0;
-    switch(field) {
-    case 0: return sizeof(p_foo->m_eResult);
-    case 1: return sizeof(p_foo->ullUniqueGameID);
-    case 2: return sizeof(p_foo->steamIDPlayer);
-    default:}
-    return 0; }
-  case 5215: {
-    struct EndGameResultCallback_t    *p_foo = 0;
-    switch(field) {
-    case 0: return sizeof(p_foo->m_eResult);
-    case 1: return sizeof(p_foo->ullUniqueGameID);
     default:}
     return 0; }
   case 5301: {
@@ -1165,82 +1068,6 @@ switch(cb_id) {
     case 0: return sizeof(p_foo->m_flNewVolume);
     default:}
     return 0; }
-  case 4101: {
-    struct MusicPlayerRemoteWillActivate_t    *p_foo = 0;
-    switch(field) {
-    default:}
-    return 0; }
-  case 4102: {
-    struct MusicPlayerRemoteWillDeactivate_t    *p_foo = 0;
-    switch(field) {
-    default:}
-    return 0; }
-  case 4103: {
-    struct MusicPlayerRemoteToFront_t    *p_foo = 0;
-    switch(field) {
-    default:}
-    return 0; }
-  case 4104: {
-    struct MusicPlayerWillQuit_t    *p_foo = 0;
-    switch(field) {
-    default:}
-    return 0; }
-  case 4105: {
-    struct MusicPlayerWantsPlay_t    *p_foo = 0;
-    switch(field) {
-    default:}
-    return 0; }
-  case 4106: {
-    struct MusicPlayerWantsPause_t    *p_foo = 0;
-    switch(field) {
-    default:}
-    return 0; }
-  case 4107: {
-    struct MusicPlayerWantsPlayPrevious_t    *p_foo = 0;
-    switch(field) {
-    default:}
-    return 0; }
-  case 4108: {
-    struct MusicPlayerWantsPlayNext_t    *p_foo = 0;
-    switch(field) {
-    default:}
-    return 0; }
-  case 4109: {
-    struct MusicPlayerWantsShuffled_t    *p_foo = 0;
-    switch(field) {
-    case 0: return sizeof(p_foo->m_bShuffled);
-    default:}
-    return 0; }
-  case 4110: {
-    struct MusicPlayerWantsLooped_t    *p_foo = 0;
-    switch(field) {
-    case 0: return sizeof(p_foo->m_bLooped);
-    default:}
-    return 0; }
-  case 4011: {
-    struct MusicPlayerWantsVolume_t    *p_foo = 0;
-    switch(field) {
-    case 0: return sizeof(p_foo->m_flNewVolume);
-    default:}
-    return 0; }
-  case 4012: {
-    struct MusicPlayerSelectsQueueEntry_t    *p_foo = 0;
-    switch(field) {
-    case 0: return sizeof(p_foo->nID);
-    default:}
-    return 0; }
-  case 4013: {
-    struct MusicPlayerSelectsPlaylistEntry_t    *p_foo = 0;
-    switch(field) {
-    case 0: return sizeof(p_foo->nID);
-    default:}
-    return 0; }
-  case 4114: {
-    struct MusicPlayerWantsPlayingRepeatStatus_t    *p_foo = 0;
-    switch(field) {
-    case 0: return sizeof(p_foo->m_nPlayingRepeatStatus);
-    default:}
-    return 0; }
   case 2101: {
     struct HTTPRequestCompleted_t    *p_foo = 0;
     switch(field) {
@@ -1340,6 +1167,8 @@ switch(cb_id) {
     switch(field) {
     case 0: return sizeof(p_foo->m_unAppID);
     case 1: return sizeof(p_foo->m_nPublishedFileId);
+    case 2: return sizeof(p_foo->m_hLegacyContent);
+    case 3: return sizeof(p_foo->m_unManifestID);
     default:}
     return 0; }
   case 3406: {
@@ -1452,20 +1281,6 @@ switch(cb_id) {
     case 3: return sizeof(p_foo->m_rtAction);
     case 4: return sizeof(p_foo->m_bAccepted);
     case 5: return sizeof(p_foo->m_bNeedsAction);
-    default:}
-    return 0; }
-  case 3901: {
-    struct SteamAppInstalled_t    *p_foo = 0;
-    switch(field) {
-    case 0: return sizeof(p_foo->m_nAppID);
-    case 1: return sizeof(p_foo->m_iInstallFolderIndex);
-    default:}
-    return 0; }
-  case 3902: {
-    struct SteamAppUninstalled_t    *p_foo = 0;
-    switch(field) {
-    case 0: return sizeof(p_foo->m_nAppID);
-    case 1: return sizeof(p_foo->m_iInstallFolderIndex);
     default:}
     return 0; }
   case 4501: {
@@ -1706,6 +1521,23 @@ switch(cb_id) {
     case 1: return sizeof(p_foo->m_rgchCurrency);
     default:}
     return 0; }
+  case 6001: {
+    struct SteamTimelineGamePhaseRecordingExists_t    *p_foo = 0;
+    switch(field) {
+    case 0: return sizeof(p_foo->m_rgchPhaseID);
+    case 1: return sizeof(p_foo->m_ulRecordingMS);
+    case 2: return sizeof(p_foo->m_ulLongestClipMS);
+    case 3: return sizeof(p_foo->m_unClipCount);
+    case 4: return sizeof(p_foo->m_unScreenshotCount);
+    default:}
+    return 0; }
+  case 6002: {
+    struct SteamTimelineEventRecordingExists_t    *p_foo = 0;
+    switch(field) {
+    case 0: return sizeof(p_foo->m_ulEventID);
+    case 1: return sizeof(p_foo->m_bRecordingExists);
+    default:}
+    return 0; }
   case 4611: {
     struct GetVideoURLResult_t    *p_foo = 0;
     switch(field) {
@@ -1719,6 +1551,18 @@ switch(cb_id) {
     switch(field) {
     case 0: return sizeof(p_foo->m_eResult);
     case 1: return sizeof(p_foo->m_unVideoAppID);
+    default:}
+    return 0; }
+  case 4604: {
+    struct BroadcastUploadStart_t    *p_foo = 0;
+    switch(field) {
+    case 0: return sizeof(p_foo->m_bIsRTMP);
+    default:}
+    return 0; }
+  case 4605: {
+    struct BroadcastUploadStop_t    *p_foo = 0;
+    switch(field) {
+    case 0: return sizeof(p_foo->m_eResult);
     default:}
     return 0; }
   case 5001: {
@@ -1742,6 +1586,15 @@ switch(cb_id) {
     struct SteamRemotePlayTogetherGuestInvite_t    *p_foo = 0;
     switch(field) {
     case 0: return sizeof(p_foo->m_szConnectURL);
+    default:}
+    return 0; }
+  case 5704: {
+    struct SteamRemotePlaySessionAvatarLoaded_t    *p_foo = 0;
+    switch(field) {
+    case 0: return sizeof(p_foo->m_unSessionID);
+    case 1: return sizeof(p_foo->m_iImage);
+    case 2: return sizeof(p_foo->m_iWide);
+    case 3: return sizeof(p_foo->m_iTall);
     default:}
     return 0; }
   case 1251: {
@@ -1877,15 +1730,15 @@ switch(cb_id) {
     case 1: return sizeof(p_foo->m_steamIDUser);
     default:}
     return 0; }
-  // case 1223: {
-  //   struct SteamNetworkingFakeIPResult_t    *p_foo = 0;
-  //   switch(field) {
-  //   case 0: return sizeof(p_foo->m_eResult);
-  //   case 1: return sizeof(p_foo->m_identity);
-  //   case 2: return sizeof(p_foo->m_unIP);
-  //   case 3: return sizeof(p_foo->m_unPorts);
-  //   default:}
-  //   return 0; }
+  case 1223: {
+    struct SteamNetworkingFakeIPResult_t    *p_foo = 0;
+    switch(field) {
+    case 0: return sizeof(p_foo->m_eResult);
+    case 1: return sizeof(p_foo->m_identity);
+    case 2: return sizeof(p_foo->m_unIP);
+    case 3: return sizeof(p_foo->m_unPorts);
+    default:}
+    return 0; }
   default: return 0;
 }
 }
@@ -2016,6 +1869,7 @@ switch(cb_id) {
     case 0: return alignof(p_foo->m_bActive);
     case 1: return alignof(p_foo->m_bUserInitiated);
     case 2: return alignof(p_foo->m_nAppID);
+    case 3: return alignof(p_foo->m_dwOverlayPID);
     default: return 0;}
     return 0; }
   case 332: {
@@ -2132,14 +1986,6 @@ switch(cb_id) {
     case 3: return alignof(p_foo->m_nTotalResultCount);
     default: return 0;}
     return 0; }
-  case 347: {
-    struct SetPersonaNameResponse_t    *p_foo = 0;
-    switch(field) {
-    case 0: return alignof(p_foo->m_bSuccess);
-    case 1: return alignof(p_foo->m_bLocalSuccess);
-    case 2: return alignof(p_foo->m_result);
-    default: return 0;}
-    return 0; }
   case 348: {
     struct UnreadChatMessagesChanged_t    *p_foo = 0;
     switch(field) {
@@ -2167,6 +2013,7 @@ switch(cb_id) {
     case 4: return alignof(p_foo->m_bHasProfileModifier);
     case 5: return alignof(p_foo->m_bHasProfileBackground);
     case 6: return alignof(p_foo->m_bHasMiniProfileBackground);
+    case 7: return alignof(p_foo->m_bFromCache);
     default: return 0;}
     return 0; }
   case 701: {
@@ -2308,84 +2155,10 @@ switch(cb_id) {
     case 1: return alignof(p_foo->m_ulSteamIDLobby);
     default: return 0;}
     return 0; }
-  case 515: {
-    struct PSNGameBootInviteResult_t    *p_foo = 0;
-    switch(field) {
-    case 0: return alignof(p_foo->m_bGameBootInviteExists);
-    case 1: return alignof(p_foo->m_steamIDLobby);
-    default: return 0;}
-    return 0; }
   case 516: {
     struct FavoritesListAccountsUpdated_t    *p_foo = 0;
     switch(field) {
     case 0: return alignof(p_foo->m_eResult);
-    default: return 0;}
-    return 0; }
-  case 5201: {
-    struct SearchForGameProgressCallback_t    *p_foo = 0;
-    switch(field) {
-    case 0: return alignof(p_foo->m_ullSearchID);
-    case 1: return alignof(p_foo->m_eResult);
-    case 2: return alignof(p_foo->m_lobbyID);
-    case 3: return alignof(p_foo->m_steamIDEndedSearch);
-    case 4: return alignof(p_foo->m_nSecondsRemainingEstimate);
-    case 5: return alignof(p_foo->m_cPlayersSearching);
-    default: return 0;}
-    return 0; }
-  case 5202: {
-    struct SearchForGameResultCallback_t    *p_foo = 0;
-    switch(field) {
-    case 0: return alignof(p_foo->m_ullSearchID);
-    case 1: return alignof(p_foo->m_eResult);
-    case 2: return alignof(p_foo->m_nCountPlayersInGame);
-    case 3: return alignof(p_foo->m_nCountAcceptedGame);
-    case 4: return alignof(p_foo->m_steamIDHost);
-    case 5: return alignof(p_foo->m_bFinalCallback);
-    default: return 0;}
-    return 0; }
-  case 5211: {
-    struct RequestPlayersForGameProgressCallback_t    *p_foo = 0;
-    switch(field) {
-    case 0: return alignof(p_foo->m_eResult);
-    case 1: return alignof(p_foo->m_ullSearchID);
-    default: return 0;}
-    return 0; }
-  case 5212: {
-    struct RequestPlayersForGameResultCallback_t    *p_foo = 0;
-    switch(field) {
-    case 0: return alignof(p_foo->m_eResult);
-    case 1: return alignof(p_foo->m_ullSearchID);
-    case 2: return alignof(p_foo->m_SteamIDPlayerFound);
-    case 3: return alignof(p_foo->m_SteamIDLobby);
-    case 4: return alignof(p_foo->m_ePlayerAcceptState);
-    case 5: return alignof(p_foo->m_nPlayerIndex);
-    case 6: return alignof(p_foo->m_nTotalPlayersFound);
-    case 7: return alignof(p_foo->m_nTotalPlayersAcceptedGame);
-    case 8: return alignof(p_foo->m_nSuggestedTeamIndex);
-    case 9: return alignof(p_foo->m_ullUniqueGameID);
-    default: return 0;}
-    return 0; }
-  case 5213: {
-    struct RequestPlayersForGameFinalResultCallback_t    *p_foo = 0;
-    switch(field) {
-    case 0: return alignof(p_foo->m_eResult);
-    case 1: return alignof(p_foo->m_ullSearchID);
-    case 2: return alignof(p_foo->m_ullUniqueGameID);
-    default: return 0;}
-    return 0; }
-  case 5214: {
-    struct SubmitPlayerResultResultCallback_t    *p_foo = 0;
-    switch(field) {
-    case 0: return alignof(p_foo->m_eResult);
-    case 1: return alignof(p_foo->ullUniqueGameID);
-    case 2: return alignof(p_foo->steamIDPlayer);
-    default: return 0;}
-    return 0; }
-  case 5215: {
-    struct EndGameResultCallback_t    *p_foo = 0;
-    switch(field) {
-    case 0: return alignof(p_foo->m_eResult);
-    case 1: return alignof(p_foo->ullUniqueGameID);
     default: return 0;}
     return 0; }
   case 5301: {
@@ -2827,82 +2600,6 @@ switch(cb_id) {
     case 0: return alignof(p_foo->m_flNewVolume);
     default: return 0;}
     return 0; }
-  case 4101: {
-    struct MusicPlayerRemoteWillActivate_t    *p_foo = 0;
-    switch(field) {
-    default: return 0;}
-    return 0; }
-  case 4102: {
-    struct MusicPlayerRemoteWillDeactivate_t    *p_foo = 0;
-    switch(field) {
-    default: return 0;}
-    return 0; }
-  case 4103: {
-    struct MusicPlayerRemoteToFront_t    *p_foo = 0;
-    switch(field) {
-    default: return 0;}
-    return 0; }
-  case 4104: {
-    struct MusicPlayerWillQuit_t    *p_foo = 0;
-    switch(field) {
-    default: return 0;}
-    return 0; }
-  case 4105: {
-    struct MusicPlayerWantsPlay_t    *p_foo = 0;
-    switch(field) {
-    default: return 0;}
-    return 0; }
-  case 4106: {
-    struct MusicPlayerWantsPause_t    *p_foo = 0;
-    switch(field) {
-    default: return 0;}
-    return 0; }
-  case 4107: {
-    struct MusicPlayerWantsPlayPrevious_t    *p_foo = 0;
-    switch(field) {
-    default: return 0;}
-    return 0; }
-  case 4108: {
-    struct MusicPlayerWantsPlayNext_t    *p_foo = 0;
-    switch(field) {
-    default: return 0;}
-    return 0; }
-  case 4109: {
-    struct MusicPlayerWantsShuffled_t    *p_foo = 0;
-    switch(field) {
-    case 0: return alignof(p_foo->m_bShuffled);
-    default: return 0;}
-    return 0; }
-  case 4110: {
-    struct MusicPlayerWantsLooped_t    *p_foo = 0;
-    switch(field) {
-    case 0: return alignof(p_foo->m_bLooped);
-    default: return 0;}
-    return 0; }
-  case 4011: {
-    struct MusicPlayerWantsVolume_t    *p_foo = 0;
-    switch(field) {
-    case 0: return alignof(p_foo->m_flNewVolume);
-    default: return 0;}
-    return 0; }
-  case 4012: {
-    struct MusicPlayerSelectsQueueEntry_t    *p_foo = 0;
-    switch(field) {
-    case 0: return alignof(p_foo->nID);
-    default: return 0;}
-    return 0; }
-  case 4013: {
-    struct MusicPlayerSelectsPlaylistEntry_t    *p_foo = 0;
-    switch(field) {
-    case 0: return alignof(p_foo->nID);
-    default: return 0;}
-    return 0; }
-  case 4114: {
-    struct MusicPlayerWantsPlayingRepeatStatus_t    *p_foo = 0;
-    switch(field) {
-    case 0: return alignof(p_foo->m_nPlayingRepeatStatus);
-    default: return 0;}
-    return 0; }
   case 2101: {
     struct HTTPRequestCompleted_t    *p_foo = 0;
     switch(field) {
@@ -3002,6 +2699,8 @@ switch(cb_id) {
     switch(field) {
     case 0: return alignof(p_foo->m_unAppID);
     case 1: return alignof(p_foo->m_nPublishedFileId);
+    case 2: return alignof(p_foo->m_hLegacyContent);
+    case 3: return alignof(p_foo->m_unManifestID);
     default: return 0;}
     return 0; }
   case 3406: {
@@ -3114,20 +2813,6 @@ switch(cb_id) {
     case 3: return alignof(p_foo->m_rtAction);
     case 4: return alignof(p_foo->m_bAccepted);
     case 5: return alignof(p_foo->m_bNeedsAction);
-    default: return 0;}
-    return 0; }
-  case 3901: {
-    struct SteamAppInstalled_t    *p_foo = 0;
-    switch(field) {
-    case 0: return alignof(p_foo->m_nAppID);
-    case 1: return alignof(p_foo->m_iInstallFolderIndex);
-    default: return 0;}
-    return 0; }
-  case 3902: {
-    struct SteamAppUninstalled_t    *p_foo = 0;
-    switch(field) {
-    case 0: return alignof(p_foo->m_nAppID);
-    case 1: return alignof(p_foo->m_iInstallFolderIndex);
     default: return 0;}
     return 0; }
   case 4501: {
@@ -3368,6 +3053,23 @@ switch(cb_id) {
     case 1: return alignof(p_foo->m_rgchCurrency);
     default: return 0;}
     return 0; }
+  case 6001: {
+    struct SteamTimelineGamePhaseRecordingExists_t    *p_foo = 0;
+    switch(field) {
+    case 0: return alignof(p_foo->m_rgchPhaseID);
+    case 1: return alignof(p_foo->m_ulRecordingMS);
+    case 2: return alignof(p_foo->m_ulLongestClipMS);
+    case 3: return alignof(p_foo->m_unClipCount);
+    case 4: return alignof(p_foo->m_unScreenshotCount);
+    default: return 0;}
+    return 0; }
+  case 6002: {
+    struct SteamTimelineEventRecordingExists_t    *p_foo = 0;
+    switch(field) {
+    case 0: return alignof(p_foo->m_ulEventID);
+    case 1: return alignof(p_foo->m_bRecordingExists);
+    default: return 0;}
+    return 0; }
   case 4611: {
     struct GetVideoURLResult_t    *p_foo = 0;
     switch(field) {
@@ -3381,6 +3083,18 @@ switch(cb_id) {
     switch(field) {
     case 0: return alignof(p_foo->m_eResult);
     case 1: return alignof(p_foo->m_unVideoAppID);
+    default: return 0;}
+    return 0; }
+  case 4604: {
+    struct BroadcastUploadStart_t    *p_foo = 0;
+    switch(field) {
+    case 0: return alignof(p_foo->m_bIsRTMP);
+    default: return 0;}
+    return 0; }
+  case 4605: {
+    struct BroadcastUploadStop_t    *p_foo = 0;
+    switch(field) {
+    case 0: return alignof(p_foo->m_eResult);
     default: return 0;}
     return 0; }
   case 5001: {
@@ -3404,6 +3118,15 @@ switch(cb_id) {
     struct SteamRemotePlayTogetherGuestInvite_t    *p_foo = 0;
     switch(field) {
     case 0: return alignof(p_foo->m_szConnectURL);
+    default: return 0;}
+    return 0; }
+  case 5704: {
+    struct SteamRemotePlaySessionAvatarLoaded_t    *p_foo = 0;
+    switch(field) {
+    case 0: return alignof(p_foo->m_unSessionID);
+    case 1: return alignof(p_foo->m_iImage);
+    case 2: return alignof(p_foo->m_iWide);
+    case 3: return alignof(p_foo->m_iTall);
     default: return 0;}
     return 0; }
   case 1251: {
@@ -3539,15 +3262,15 @@ switch(cb_id) {
     case 1: return alignof(p_foo->m_steamIDUser);
     default: return 0;}
     return 0; }
-  // case 1223: {
-  //   struct SteamNetworkingFakeIPResult_t    *p_foo = 0;
-  //   switch(field) {
-  //   case 0: return alignof(p_foo->m_eResult);
-  //   case 1: return alignof(p_foo->m_identity);
-  //   case 2: return alignof(p_foo->m_unIP);
-  //   case 3: return alignof(p_foo->m_unPorts);
-  //   default: return 0;}
-  //   return 0; }
+  case 1223: {
+    struct SteamNetworkingFakeIPResult_t    *p_foo = 0;
+    switch(field) {
+    case 0: return alignof(p_foo->m_eResult);
+    case 1: return alignof(p_foo->m_identity);
+    case 2: return alignof(p_foo->m_unIP);
+    case 3: return alignof(p_foo->m_unPorts);
+    default: return 0;}
+    return 0; }
   default: return 0;
 }
 }
@@ -3585,7 +3308,6 @@ switch(cb_id) {
   case 344: return alignof(FriendsGetFollowerCount_t);
   case 345: return alignof(FriendsIsFollowing_t);
   case 346: return alignof(FriendsEnumerateFollowingList_t);
-  case 347: return alignof(SetPersonaNameResponse_t);
   case 348: return alignof(UnreadChatMessagesChanged_t);
   case 349: return alignof(OverlayBrowserProtocolNavigation_t);
   case 350: return alignof(EquippedProfileItemsChanged_t);
@@ -3609,15 +3331,7 @@ switch(cb_id) {
   case 510: return alignof(LobbyMatchList_t);
   case 512: return alignof(LobbyKicked_t);
   case 513: return alignof(LobbyCreated_t);
-  case 515: return alignof(PSNGameBootInviteResult_t);
   case 516: return alignof(FavoritesListAccountsUpdated_t);
-  case 5201: return alignof(SearchForGameProgressCallback_t);
-  case 5202: return alignof(SearchForGameResultCallback_t);
-  case 5211: return alignof(RequestPlayersForGameProgressCallback_t);
-  case 5212: return alignof(RequestPlayersForGameResultCallback_t);
-  case 5213: return alignof(RequestPlayersForGameFinalResultCallback_t);
-  case 5214: return alignof(SubmitPlayerResultResultCallback_t);
-  case 5215: return alignof(EndGameResultCallback_t);
   case 5301: return alignof(JoinPartyCallback_t);
   case 5302: return alignof(CreateBeaconCallback_t);
   case 5303: return alignof(ReservationNotificationCallback_t);
@@ -3673,20 +3387,6 @@ switch(cb_id) {
   case 2302: return alignof(ScreenshotRequested_t);
   case 4001: return alignof(PlaybackStatusHasChanged_t);
   case 4002: return alignof(VolumeHasChanged_t);
-  case 4101: return alignof(MusicPlayerRemoteWillActivate_t);
-  case 4102: return alignof(MusicPlayerRemoteWillDeactivate_t);
-  case 4103: return alignof(MusicPlayerRemoteToFront_t);
-  case 4104: return alignof(MusicPlayerWillQuit_t);
-  case 4105: return alignof(MusicPlayerWantsPlay_t);
-  case 4106: return alignof(MusicPlayerWantsPause_t);
-  case 4107: return alignof(MusicPlayerWantsPlayPrevious_t);
-  case 4108: return alignof(MusicPlayerWantsPlayNext_t);
-  case 4109: return alignof(MusicPlayerWantsShuffled_t);
-  case 4110: return alignof(MusicPlayerWantsLooped_t);
-  case 4011: return alignof(MusicPlayerWantsVolume_t);
-  case 4012: return alignof(MusicPlayerSelectsQueueEntry_t);
-  case 4013: return alignof(MusicPlayerSelectsPlaylistEntry_t);
-  case 4114: return alignof(MusicPlayerWantsPlayingRepeatStatus_t);
   case 2101: return alignof(HTTPRequestCompleted_t);
   case 2102: return alignof(HTTPRequestHeadersReceived_t);
   case 2103: return alignof(HTTPRequestDataReceived_t);
@@ -3713,8 +3413,6 @@ switch(cb_id) {
   case 3417: return alignof(DeleteItemResult_t);
   case 3418: return alignof(UserSubscribedItemsListChanged_t);
   case 3420: return alignof(WorkshopEULAStatus_t);
-  case 3901: return alignof(SteamAppInstalled_t);
-  case 3902: return alignof(SteamAppUninstalled_t);
   case 4501: return alignof(HTML_BrowserReady_t);
   case 4502: return alignof(HTML_NeedsPaint_t);
   case 4503: return alignof(HTML_StartRequest_t);
@@ -3744,12 +3442,17 @@ switch(cb_id) {
   case 4703: return alignof(SteamInventoryEligiblePromoItemDefIDs_t);
   case 4704: return alignof(SteamInventoryStartPurchaseResult_t);
   case 4705: return alignof(SteamInventoryRequestPricesResult_t);
+  case 6001: return alignof(SteamTimelineGamePhaseRecordingExists_t);
+  case 6002: return alignof(SteamTimelineEventRecordingExists_t);
   case 4611: return alignof(GetVideoURLResult_t);
   case 4624: return alignof(GetOPFSettingsResult_t);
+  case 4604: return alignof(BroadcastUploadStart_t);
+  case 4605: return alignof(BroadcastUploadStop_t);
   case 5001: return alignof(SteamParentalSettingsChanged_t);
   case 5701: return alignof(SteamRemotePlaySessionConnected_t);
   case 5702: return alignof(SteamRemotePlaySessionDisconnected_t);
   case 5703: return alignof(SteamRemotePlayTogetherGuestInvite_t);
+  case 5704: return alignof(SteamRemotePlaySessionAvatarLoaded_t);
   case 1251: return alignof(SteamNetworkingMessagesSessionRequest_t);
   case 1252: return alignof(SteamNetworkingMessagesSessionFailed_t);
   case 1221: return alignof(SteamNetConnectionStatusChangedCallback_t);
@@ -3767,7 +3470,7 @@ switch(cb_id) {
   case 211: return alignof(ComputeNewPlayerCompatibilityResult_t);
   case 1800: return alignof(GSStatsReceived_t);
   case 1801: return alignof(GSStatsStored_t);
-  // case 1223: return alignof(SteamNetworkingFakeIPResult_t);
+  case 1223: return alignof(SteamNetworkingFakeIPResult_t);
   default: return 0;
 }
 }

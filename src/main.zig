@@ -17,15 +17,18 @@ pub const ISteamNetworkingSignalingRecvContext = ?*anyopaque;
 
 /// SteamAPI_Init must be called before using any other API functions. If it fails, an
 /// error message will be output to the debugger (or stderr) with further information.
-pub extern fn SteamAPI_Init() callconv(.c) bool;
+pub extern fn SteamAPI_InitFlat(pOutErrMsg: ?*anyopaque) callconv(.c) c_int;
+pub fn SteamAPI_Init() bool {
+    return SteamAPI_InitFlat(null) == 0;
+}
 
 /// SteamAPI_Shutdown should be called during process shutdown if possible.
 pub extern fn SteamAPI_Shutdown() callconv(.c) void;
 
 pub extern fn SteamAPI_GetHSteamPipe() callconv(.c) HSteamPipe;
-pub extern fn SteamAPI_GetHSteamUser() callconv(.c) HSteamPipe;
+pub extern fn SteamAPI_GetHSteamUser() callconv(.c) HSteamUser;
 pub extern fn SteamGameServer_GetHSteamPipe() callconv(.c) HSteamPipe;
-pub extern fn SteamGameServer_GetHSteamUser() callconv(.c) HSteamPipe;
+pub extern fn SteamGameServer_GetHSteamUser() callconv(.c) HSteamUser;
 
 // SteamAPI_RestartAppIfNecessary ensures that your executable was launched through Steam.
 //
@@ -46,7 +49,7 @@ pub extern fn SteamAPI_RestartAppIfNecessary(unOwnAppID: u32) callconv(.c) bool;
 pub extern fn SteamAPI_ReleaseCurrentThreadMemory() callconv(.c) void;
 
 // crash dump recording functions
-pub extern fn SteamAPI_WriteMiniDump(uStructuredExceptionCode: u32, pvExceptionInfo: [*c]const u8, uBuildID: u32) callconv(.c) void;
+pub extern fn SteamAPI_WriteMiniDump(uStructuredExceptionCode: u32, pvExceptionInfo: ?*anyopaque, uBuildID: u32) callconv(.c) void;
 pub extern fn SteamAPI_SetMiniDumpComment(pchMsg: [*c]const u8) callconv(.c) void;
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------//
@@ -114,7 +117,6 @@ pub const CallbackMsg_t = extern struct {
             344 => .{ .FriendsGetFollowerCount = from_callback(FriendsGetFollowerCount_t, self) },
             345 => .{ .FriendsIsFollowing = from_callback(FriendsIsFollowing_t, self) },
             346 => .{ .FriendsEnumerateFollowingList = from_callback(FriendsEnumerateFollowingList_t, self) },
-            347 => .{ .SetPersonaNameResponse = from_callback(SetPersonaNameResponse_t, self) },
             348 => .{ .UnreadChatMessagesChanged = from_callback(UnreadChatMessagesChanged_t, self) },
             349 => .{ .OverlayBrowserProtocolNavigation = from_callback(OverlayBrowserProtocolNavigation_t, self) },
             350 => .{ .EquippedProfileItemsChanged = from_callback(EquippedProfileItemsChanged_t, self) },
@@ -138,15 +140,7 @@ pub const CallbackMsg_t = extern struct {
             510 => .{ .LobbyMatchList = from_callback(LobbyMatchList_t, self) },
             512 => .{ .LobbyKicked = from_callback(LobbyKicked_t, self) },
             513 => .{ .LobbyCreated = from_callback(LobbyCreated_t, self) },
-            515 => .{ .PSNGameBootInviteResult = from_callback(PSNGameBootInviteResult_t, self) },
             516 => .{ .FavoritesListAccountsUpdated = from_callback(FavoritesListAccountsUpdated_t, self) },
-            5201 => .{ .SearchForGameProgressCallback = from_callback(SearchForGameProgressCallback_t, self) },
-            5202 => .{ .SearchForGameResultCallback = from_callback(SearchForGameResultCallback_t, self) },
-            5211 => .{ .RequestPlayersForGameProgressCallback = from_callback(RequestPlayersForGameProgressCallback_t, self) },
-            5212 => .{ .RequestPlayersForGameResultCallback = from_callback(RequestPlayersForGameResultCallback_t, self) },
-            5213 => .{ .RequestPlayersForGameFinalResultCallback = from_callback(RequestPlayersForGameFinalResultCallback_t, self) },
-            5214 => .{ .SubmitPlayerResultResultCallback = from_callback(SubmitPlayerResultResultCallback_t, self) },
-            5215 => .{ .EndGameResultCallback = from_callback(EndGameResultCallback_t, self) },
             5301 => .{ .JoinPartyCallback = from_callback(JoinPartyCallback_t, self) },
             5302 => .{ .CreateBeaconCallback = from_callback(CreateBeaconCallback_t, self) },
             5303 => .{ .ReservationNotificationCallback = from_callback(ReservationNotificationCallback_t, self) },
@@ -202,20 +196,6 @@ pub const CallbackMsg_t = extern struct {
             2302 => .{ .ScreenshotRequested = from_callback(ScreenshotRequested_t, self) },
             4001 => .{ .PlaybackStatusHasChanged = from_callback(PlaybackStatusHasChanged_t, self) },
             4002 => .{ .VolumeHasChanged = from_callback(VolumeHasChanged_t, self) },
-            4101 => .{ .MusicPlayerRemoteWillActivate = from_callback(MusicPlayerRemoteWillActivate_t, self) },
-            4102 => .{ .MusicPlayerRemoteWillDeactivate = from_callback(MusicPlayerRemoteWillDeactivate_t, self) },
-            4103 => .{ .MusicPlayerRemoteToFront = from_callback(MusicPlayerRemoteToFront_t, self) },
-            4104 => .{ .MusicPlayerWillQuit = from_callback(MusicPlayerWillQuit_t, self) },
-            4105 => .{ .MusicPlayerWantsPlay = from_callback(MusicPlayerWantsPlay_t, self) },
-            4106 => .{ .MusicPlayerWantsPause = from_callback(MusicPlayerWantsPause_t, self) },
-            4107 => .{ .MusicPlayerWantsPlayPrevious = from_callback(MusicPlayerWantsPlayPrevious_t, self) },
-            4108 => .{ .MusicPlayerWantsPlayNext = from_callback(MusicPlayerWantsPlayNext_t, self) },
-            4109 => .{ .MusicPlayerWantsShuffled = from_callback(MusicPlayerWantsShuffled_t, self) },
-            4110 => .{ .MusicPlayerWantsLooped = from_callback(MusicPlayerWantsLooped_t, self) },
-            4011 => .{ .MusicPlayerWantsVolume = from_callback(MusicPlayerWantsVolume_t, self) },
-            4012 => .{ .MusicPlayerSelectsQueueEntry = from_callback(MusicPlayerSelectsQueueEntry_t, self) },
-            4013 => .{ .MusicPlayerSelectsPlaylistEntry = from_callback(MusicPlayerSelectsPlaylistEntry_t, self) },
-            4114 => .{ .MusicPlayerWantsPlayingRepeatStatus = from_callback(MusicPlayerWantsPlayingRepeatStatus_t, self) },
             2101 => .{ .HTTPRequestCompleted = from_callback(HTTPRequestCompleted_t, self) },
             2102 => .{ .HTTPRequestHeadersReceived = from_callback(HTTPRequestHeadersReceived_t, self) },
             2103 => .{ .HTTPRequestDataReceived = from_callback(HTTPRequestDataReceived_t, self) },
@@ -242,8 +222,6 @@ pub const CallbackMsg_t = extern struct {
             3417 => .{ .DeleteItemResult = from_callback(DeleteItemResult_t, self) },
             3418 => .{ .UserSubscribedItemsListChanged = from_callback(UserSubscribedItemsListChanged_t, self) },
             3420 => .{ .WorkshopEULAStatus = from_callback(WorkshopEULAStatus_t, self) },
-            3901 => .{ .SteamAppInstalled = from_callback(SteamAppInstalled_t, self) },
-            3902 => .{ .SteamAppUninstalled = from_callback(SteamAppUninstalled_t, self) },
             4501 => .{ .HTML_BrowserReady = from_callback(HTML_BrowserReady_t, self) },
             4502 => .{ .HTML_NeedsPaint = from_callback(HTML_NeedsPaint_t, self) },
             4503 => .{ .HTML_StartRequest = from_callback(HTML_StartRequest_t, self) },
@@ -273,12 +251,17 @@ pub const CallbackMsg_t = extern struct {
             4703 => .{ .SteamInventoryEligiblePromoItemDefIDs = from_callback(SteamInventoryEligiblePromoItemDefIDs_t, self) },
             4704 => .{ .SteamInventoryStartPurchaseResult = from_callback(SteamInventoryStartPurchaseResult_t, self) },
             4705 => .{ .SteamInventoryRequestPricesResult = from_callback(SteamInventoryRequestPricesResult_t, self) },
+            6001 => .{ .SteamTimelineGamePhaseRecordingExists = from_callback(SteamTimelineGamePhaseRecordingExists_t, self) },
+            6002 => .{ .SteamTimelineEventRecordingExists = from_callback(SteamTimelineEventRecordingExists_t, self) },
             4611 => .{ .GetVideoURLResult = from_callback(GetVideoURLResult_t, self) },
             4624 => .{ .GetOPFSettingsResult = from_callback(GetOPFSettingsResult_t, self) },
+            4604 => .{ .BroadcastUploadStart = from_callback(BroadcastUploadStart_t, self) },
+            4605 => .{ .BroadcastUploadStop = from_callback(BroadcastUploadStop_t, self) },
             5001 => .{ .SteamParentalSettingsChanged = from_callback(SteamParentalSettingsChanged_t, self) },
             5701 => .{ .SteamRemotePlaySessionConnected = from_callback(SteamRemotePlaySessionConnected_t, self) },
             5702 => .{ .SteamRemotePlaySessionDisconnected = from_callback(SteamRemotePlaySessionDisconnected_t, self) },
             5703 => .{ .SteamRemotePlayTogetherGuestInvite = from_callback(SteamRemotePlayTogetherGuestInvite_t, self) },
+            5704 => .{ .SteamRemotePlaySessionAvatarLoaded = from_callback(SteamRemotePlaySessionAvatarLoaded_t, self) },
             1251 => .{ .SteamNetworkingMessagesSessionRequest = from_callback(SteamNetworkingMessagesSessionRequest_t, self) },
             1252 => .{ .SteamNetworkingMessagesSessionFailed = from_callback(SteamNetworkingMessagesSessionFailed_t, self) },
             1221 => .{ .SteamNetConnectionStatusChangedCallback = from_callback(SteamNetConnectionStatusChangedCallback_t, self) },
@@ -335,7 +318,6 @@ pub const CallbackEnum = enum {
     FriendsGetFollowerCount,
     FriendsIsFollowing,
     FriendsEnumerateFollowingList,
-    SetPersonaNameResponse,
     UnreadChatMessagesChanged,
     OverlayBrowserProtocolNavigation,
     EquippedProfileItemsChanged,
@@ -359,15 +341,7 @@ pub const CallbackEnum = enum {
     LobbyMatchList,
     LobbyKicked,
     LobbyCreated,
-    PSNGameBootInviteResult,
     FavoritesListAccountsUpdated,
-    SearchForGameProgressCallback,
-    SearchForGameResultCallback,
-    RequestPlayersForGameProgressCallback,
-    RequestPlayersForGameResultCallback,
-    RequestPlayersForGameFinalResultCallback,
-    SubmitPlayerResultResultCallback,
-    EndGameResultCallback,
     JoinPartyCallback,
     CreateBeaconCallback,
     ReservationNotificationCallback,
@@ -423,20 +397,6 @@ pub const CallbackEnum = enum {
     ScreenshotRequested,
     PlaybackStatusHasChanged,
     VolumeHasChanged,
-    MusicPlayerRemoteWillActivate,
-    MusicPlayerRemoteWillDeactivate,
-    MusicPlayerRemoteToFront,
-    MusicPlayerWillQuit,
-    MusicPlayerWantsPlay,
-    MusicPlayerWantsPause,
-    MusicPlayerWantsPlayPrevious,
-    MusicPlayerWantsPlayNext,
-    MusicPlayerWantsShuffled,
-    MusicPlayerWantsLooped,
-    MusicPlayerWantsVolume,
-    MusicPlayerSelectsQueueEntry,
-    MusicPlayerSelectsPlaylistEntry,
-    MusicPlayerWantsPlayingRepeatStatus,
     HTTPRequestCompleted,
     HTTPRequestHeadersReceived,
     HTTPRequestDataReceived,
@@ -463,8 +423,6 @@ pub const CallbackEnum = enum {
     DeleteItemResult,
     UserSubscribedItemsListChanged,
     WorkshopEULAStatus,
-    SteamAppInstalled,
-    SteamAppUninstalled,
     HTML_BrowserReady,
     HTML_NeedsPaint,
     HTML_StartRequest,
@@ -494,12 +452,17 @@ pub const CallbackEnum = enum {
     SteamInventoryEligiblePromoItemDefIDs,
     SteamInventoryStartPurchaseResult,
     SteamInventoryRequestPricesResult,
+    SteamTimelineGamePhaseRecordingExists,
+    SteamTimelineEventRecordingExists,
     GetVideoURLResult,
     GetOPFSettingsResult,
+    BroadcastUploadStart,
+    BroadcastUploadStop,
     SteamParentalSettingsChanged,
     SteamRemotePlaySessionConnected,
     SteamRemotePlaySessionDisconnected,
     SteamRemotePlayTogetherGuestInvite,
+    SteamRemotePlaySessionAvatarLoaded,
     SteamNetworkingMessagesSessionRequest,
     SteamNetworkingMessagesSessionFailed,
     SteamNetConnectionStatusChangedCallback,
@@ -553,7 +516,6 @@ pub const CallbackUnion = union(CallbackEnum) {
     FriendsGetFollowerCount: FriendsGetFollowerCount_t,
     FriendsIsFollowing: FriendsIsFollowing_t,
     FriendsEnumerateFollowingList: FriendsEnumerateFollowingList_t,
-    SetPersonaNameResponse: SetPersonaNameResponse_t,
     UnreadChatMessagesChanged: UnreadChatMessagesChanged_t,
     OverlayBrowserProtocolNavigation: OverlayBrowserProtocolNavigation_t,
     EquippedProfileItemsChanged: EquippedProfileItemsChanged_t,
@@ -577,15 +539,7 @@ pub const CallbackUnion = union(CallbackEnum) {
     LobbyMatchList: LobbyMatchList_t,
     LobbyKicked: LobbyKicked_t,
     LobbyCreated: LobbyCreated_t,
-    PSNGameBootInviteResult: PSNGameBootInviteResult_t,
     FavoritesListAccountsUpdated: FavoritesListAccountsUpdated_t,
-    SearchForGameProgressCallback: SearchForGameProgressCallback_t,
-    SearchForGameResultCallback: SearchForGameResultCallback_t,
-    RequestPlayersForGameProgressCallback: RequestPlayersForGameProgressCallback_t,
-    RequestPlayersForGameResultCallback: RequestPlayersForGameResultCallback_t,
-    RequestPlayersForGameFinalResultCallback: RequestPlayersForGameFinalResultCallback_t,
-    SubmitPlayerResultResultCallback: SubmitPlayerResultResultCallback_t,
-    EndGameResultCallback: EndGameResultCallback_t,
     JoinPartyCallback: JoinPartyCallback_t,
     CreateBeaconCallback: CreateBeaconCallback_t,
     ReservationNotificationCallback: ReservationNotificationCallback_t,
@@ -641,20 +595,6 @@ pub const CallbackUnion = union(CallbackEnum) {
     ScreenshotRequested: ScreenshotRequested_t,
     PlaybackStatusHasChanged: PlaybackStatusHasChanged_t,
     VolumeHasChanged: VolumeHasChanged_t,
-    MusicPlayerRemoteWillActivate: MusicPlayerRemoteWillActivate_t,
-    MusicPlayerRemoteWillDeactivate: MusicPlayerRemoteWillDeactivate_t,
-    MusicPlayerRemoteToFront: MusicPlayerRemoteToFront_t,
-    MusicPlayerWillQuit: MusicPlayerWillQuit_t,
-    MusicPlayerWantsPlay: MusicPlayerWantsPlay_t,
-    MusicPlayerWantsPause: MusicPlayerWantsPause_t,
-    MusicPlayerWantsPlayPrevious: MusicPlayerWantsPlayPrevious_t,
-    MusicPlayerWantsPlayNext: MusicPlayerWantsPlayNext_t,
-    MusicPlayerWantsShuffled: MusicPlayerWantsShuffled_t,
-    MusicPlayerWantsLooped: MusicPlayerWantsLooped_t,
-    MusicPlayerWantsVolume: MusicPlayerWantsVolume_t,
-    MusicPlayerSelectsQueueEntry: MusicPlayerSelectsQueueEntry_t,
-    MusicPlayerSelectsPlaylistEntry: MusicPlayerSelectsPlaylistEntry_t,
-    MusicPlayerWantsPlayingRepeatStatus: MusicPlayerWantsPlayingRepeatStatus_t,
     HTTPRequestCompleted: HTTPRequestCompleted_t,
     HTTPRequestHeadersReceived: HTTPRequestHeadersReceived_t,
     HTTPRequestDataReceived: HTTPRequestDataReceived_t,
@@ -681,8 +621,6 @@ pub const CallbackUnion = union(CallbackEnum) {
     DeleteItemResult: DeleteItemResult_t,
     UserSubscribedItemsListChanged: UserSubscribedItemsListChanged_t,
     WorkshopEULAStatus: WorkshopEULAStatus_t,
-    SteamAppInstalled: SteamAppInstalled_t,
-    SteamAppUninstalled: SteamAppUninstalled_t,
     HTML_BrowserReady: HTML_BrowserReady_t,
     HTML_NeedsPaint: HTML_NeedsPaint_t,
     HTML_StartRequest: HTML_StartRequest_t,
@@ -712,12 +650,17 @@ pub const CallbackUnion = union(CallbackEnum) {
     SteamInventoryEligiblePromoItemDefIDs: SteamInventoryEligiblePromoItemDefIDs_t,
     SteamInventoryStartPurchaseResult: SteamInventoryStartPurchaseResult_t,
     SteamInventoryRequestPricesResult: SteamInventoryRequestPricesResult_t,
+    SteamTimelineGamePhaseRecordingExists: SteamTimelineGamePhaseRecordingExists_t,
+    SteamTimelineEventRecordingExists: SteamTimelineEventRecordingExists_t,
     GetVideoURLResult: GetVideoURLResult_t,
     GetOPFSettingsResult: GetOPFSettingsResult_t,
+    BroadcastUploadStart: BroadcastUploadStart_t,
+    BroadcastUploadStop: BroadcastUploadStop_t,
     SteamParentalSettingsChanged: SteamParentalSettingsChanged_t,
     SteamRemotePlaySessionConnected: SteamRemotePlaySessionConnected_t,
     SteamRemotePlaySessionDisconnected: SteamRemotePlaySessionDisconnected_t,
     SteamRemotePlayTogetherGuestInvite: SteamRemotePlayTogetherGuestInvite_t,
+    SteamRemotePlaySessionAvatarLoaded: SteamRemotePlaySessionAvatarLoaded_t,
     SteamNetworkingMessagesSessionRequest: SteamNetworkingMessagesSessionRequest_t,
     SteamNetworkingMessagesSessionFailed: SteamNetworkingMessagesSessionFailed_t,
     SteamNetConnectionStatusChangedCallback: SteamNetConnectionStatusChangedCallback_t,
@@ -813,7 +756,7 @@ test {
     if (builtin.os.tag == .linux and builtin.cpu.arch != .x86_64) {
         // there are no library bindings for linux+arm and that makes the test fail
     } else {
-        std.testing.refAllDecls(@This());
+        std.testing.refAllDeclsRecursive(@This());
     }
 }
 
@@ -832,7 +775,7 @@ pub extern fn SteamAPI_ManualDispatch_FreeLastCallback(hSteamPipe: HSteamPipe) c
 
 /// Return the call result for the specified call on the specified pipe.  You really should
 /// only call this in a handler for SteamAPICallCompleted_t callback.
-pub extern fn SteamAPI_ManualDispatch_GetAPICallResult(hSteamPipe: HSteamPipe, hSteamAPICall: SteamAPICall_t, result: [*c]u8, size: u32, iCallbackExpected: i32, pbFailed: *bool) bool;
+pub extern fn SteamAPI_ManualDispatch_GetAPICallResult(hSteamPipe: HSteamPipe, hSteamAPICall: SteamAPICall_t, result: [*c]u8, size: i32, iCallbackExpected: i32, pbFailed: *bool) callconv(.c) bool;
 
 extern fn CustomSteamClientGetter() callconv(.c) [*c]ISteamClient;
 pub fn SteamClient() ISteamClient {
@@ -862,6 +805,7 @@ pub const HAuthTicket = u32;
 pub const PFNPreMinidumpCallback = ?*const fn ([*c]u8) callconv(.c) void;
 pub const HSteamPipe = i32;
 pub const HSteamUser = i32;
+pub const SteamErrMsg = [1024]u8;
 pub const FriendsGroupID_t = i16;
 pub const HServerListRequest = [*c]u8;
 pub const HServerQuery = i32;
@@ -892,7 +836,9 @@ pub const SteamItemInstanceID_t = u64;
 pub const SteamItemDef_t = i32;
 pub const SteamInventoryResult_t = i32;
 pub const SteamInventoryUpdateHandle_t = u64;
+pub const TimelineEventHandle_t = u64;
 pub const RemotePlaySessionID_t = u32;
+pub const RemotePlayCursorID_t = u32;
 pub const FnSteamNetConnectionStatusChanged = ?*const fn ([*c]SteamNetConnectionStatusChangedCallback_t) callconv(.c) void;
 pub const FnSteamNetAuthenticationStatusChanged = ?*const fn ([*c]SteamNetAuthenticationStatus_t) callconv(.c) void;
 pub const FnSteamRelayNetworkStatusChanged = ?*const fn ([*c]SteamRelayNetworkStatus_t) callconv(.c) void;
@@ -1060,8 +1006,9 @@ pub const GameOverlayActivated_t = extern struct {
     m_bActive: bool align(1) = false,
     m_bUserInitiated: bool align(1) = false,
     m_nAppID: AppId_t align(4) = 0,
+    m_dwOverlayPID: uint32 align(4) = 0,
     comptime {
-        if (@sizeOf(GameOverlayActivated_t) != 8 or @alignOf(GameOverlayActivated_t) != 4) @compileLog("Size or alignment of GameOverlayActivated_t are mismatch.", @sizeOf(GameOverlayActivated_t), @alignOf(GameOverlayActivated_t));
+        if (@sizeOf(GameOverlayActivated_t) != 12 or @alignOf(GameOverlayActivated_t) != 4) @compileLog("Size or alignment of GameOverlayActivated_t are mismatch.", @sizeOf(GameOverlayActivated_t), @alignOf(GameOverlayActivated_t));
     }
 };
 /// callbackId = 332
@@ -1193,15 +1140,6 @@ pub const FriendsEnumerateFollowingList_t = extern struct {
         if (@sizeOf(FriendsEnumerateFollowingList_t) != 412 or @alignOf(FriendsEnumerateFollowingList_t) != 4) @compileLog("Size or alignment of FriendsEnumerateFollowingList_t are mismatch.", @sizeOf(FriendsEnumerateFollowingList_t), @alignOf(FriendsEnumerateFollowingList_t));
     }
 };
-/// callbackId = 347
-pub const SetPersonaNameResponse_t = extern struct {
-    m_bSuccess: bool align(1) = false,
-    m_bLocalSuccess: bool align(1) = false,
-    m_result: EResult align(4) = EResult.k_EResultNone,
-    comptime {
-        if (@sizeOf(SetPersonaNameResponse_t) != 8 or @alignOf(SetPersonaNameResponse_t) != 4) @compileLog("Size or alignment of SetPersonaNameResponse_t are mismatch.", @sizeOf(SetPersonaNameResponse_t), @alignOf(SetPersonaNameResponse_t));
-    }
-};
 /// callbackId = 348
 pub const UnreadChatMessagesChanged_t = extern struct {
     padding: u8,
@@ -1232,6 +1170,7 @@ pub const EquippedProfileItems_t = extern struct {
     m_bHasProfileModifier: bool align(1) = false,
     m_bHasProfileBackground: bool align(1) = false,
     m_bHasMiniProfileBackground: bool align(1) = false,
+    m_bFromCache: bool align(1) = false,
     comptime {
         if (@sizeOf(EquippedProfileItems_t) != 20 or @alignOf(EquippedProfileItems_t) != 4) @compileLog("Size or alignment of EquippedProfileItems_t are mismatch.", @sizeOf(EquippedProfileItems_t), @alignOf(EquippedProfileItems_t));
     }
@@ -1403,108 +1342,11 @@ pub const LobbyCreated_t = extern struct {
         if (@sizeOf(LobbyCreated_t) != size or @alignOf(LobbyCreated_t) != StructPlatformPackSize) @compileLog("Size or alignment of LobbyCreated_t are mismatch.", @sizeOf(LobbyCreated_t), @alignOf(LobbyCreated_t));
     }
 };
-/// callbackId = 515
-pub const PSNGameBootInviteResult_t = extern struct {
-    m_bGameBootInviteExists: bool align(1) = false,
-    m_steamIDLobby: CSteamID align(1),
-    comptime {
-        if (@sizeOf(PSNGameBootInviteResult_t) != 9 or @alignOf(PSNGameBootInviteResult_t) != 1) @compileLog("Size or alignment of PSNGameBootInviteResult_t are mismatch.", @sizeOf(PSNGameBootInviteResult_t), @alignOf(PSNGameBootInviteResult_t));
-    }
-};
 /// callbackId = 516
 pub const FavoritesListAccountsUpdated_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
     comptime {
         if (@sizeOf(FavoritesListAccountsUpdated_t) != 4 or @alignOf(FavoritesListAccountsUpdated_t) != 4) @compileLog("Size or alignment of FavoritesListAccountsUpdated_t are mismatch.", @sizeOf(FavoritesListAccountsUpdated_t), @alignOf(FavoritesListAccountsUpdated_t));
-    }
-};
-/// callbackId = 5201
-pub const SearchForGameProgressCallback_t = extern struct {
-    m_ullSearchID: uint64 align(StructPlatformPackSize) = 0,
-    m_eResult: EResult align(4) = EResult.k_EResultNone,
-    m_lobbyID: CSteamID align(1),
-    m_steamIDEndedSearch: CSteamID align(1),
-    m_nSecondsRemainingEstimate: int32 align(4) = 0,
-    m_cPlayersSearching: int32 align(4) = 0,
-    comptime {
-        const size = if (is_windows) 40 else 36;
-        if (@sizeOf(SearchForGameProgressCallback_t) != size or @alignOf(SearchForGameProgressCallback_t) != StructPlatformPackSize) @compileLog("Size or alignment of SearchForGameProgressCallback_t are mismatch.", @sizeOf(SearchForGameProgressCallback_t), @alignOf(SearchForGameProgressCallback_t));
-    }
-};
-/// callbackId = 5202
-pub const SearchForGameResultCallback_t = extern struct {
-    m_ullSearchID: uint64 align(StructPlatformPackSize) = 0,
-    m_eResult: EResult align(4) = EResult.k_EResultNone,
-    m_nCountPlayersInGame: int32 align(4) = 0,
-    m_nCountAcceptedGame: int32 align(4) = 0,
-    m_steamIDHost: CSteamID align(1),
-    m_bFinalCallback: bool align(1) = false,
-    comptime {
-        if (@sizeOf(SearchForGameResultCallback_t) != 32 or @alignOf(SearchForGameResultCallback_t) != StructPlatformPackSize) @compileLog("Size or alignment of SearchForGameResultCallback_t are mismatch.", @sizeOf(SearchForGameResultCallback_t), @alignOf(SearchForGameResultCallback_t));
-    }
-};
-/// callbackId = 5211
-pub const RequestPlayersForGameProgressCallback_t = extern struct {
-    m_eResult: EResult align(4) = EResult.k_EResultNone,
-    m_ullSearchID: uint64 align(StructPlatformPackSize) = 0,
-    comptime {
-        const size = if (is_windows) 16 else 12;
-        if (@sizeOf(RequestPlayersForGameProgressCallback_t) != size or @alignOf(RequestPlayersForGameProgressCallback_t) != StructPlatformPackSize) @compileLog("Size or alignment of RequestPlayersForGameProgressCallback_t are mismatch.", @sizeOf(RequestPlayersForGameProgressCallback_t), @alignOf(RequestPlayersForGameProgressCallback_t));
-    }
-};
-/// callbackId = 5212
-pub const RequestPlayersForGameResultCallback_t = extern struct {
-    m_eResult: EResult align(4) = EResult.k_EResultNone,
-    m_ullSearchID: uint64 align(StructPlatformPackSize) = 0,
-    m_SteamIDPlayerFound: CSteamID align(1),
-    m_SteamIDLobby: CSteamID align(1),
-    m_ePlayerAcceptState: c_int align(4) = 0,
-    m_nPlayerIndex: int32 align(4) = 0,
-    m_nTotalPlayersFound: int32 align(4) = 0,
-    m_nTotalPlayersAcceptedGame: int32 align(4) = 0,
-    m_nSuggestedTeamIndex: int32 align(4) = 0,
-    m_ullUniqueGameID: CGameID align(StructPlatformPackSize),
-    comptime {
-        const size = if (is_windows) 64 else 56;
-        if (@sizeOf(RequestPlayersForGameResultCallback_t) != size or @alignOf(RequestPlayersForGameResultCallback_t) != StructPlatformPackSize) @compileLog("Size or alignment of RequestPlayersForGameResultCallback_t are mismatch.", @sizeOf(RequestPlayersForGameResultCallback_t), @alignOf(RequestPlayersForGameResultCallback_t));
-    }
-
-    // Enums
-
-    pub const PlayerAcceptState_t = enum(c_int) {
-        k_EStateUnknown = 0,
-        k_EStatePlayerAccepted = 1,
-        k_EStatePlayerDeclined = 2,
-        _,
-    };
-};
-/// callbackId = 5213
-pub const RequestPlayersForGameFinalResultCallback_t = extern struct {
-    m_eResult: EResult align(4) = EResult.k_EResultNone,
-    m_ullSearchID: uint64 align(StructPlatformPackSize) = 0,
-    m_ullUniqueGameID: CGameID align(StructPlatformPackSize),
-    comptime {
-        const size = if (is_windows) 24 else 20;
-        if (@sizeOf(RequestPlayersForGameFinalResultCallback_t) != size or @alignOf(RequestPlayersForGameFinalResultCallback_t) != StructPlatformPackSize) @compileLog("Size or alignment of RequestPlayersForGameFinalResultCallback_t are mismatch.", @sizeOf(RequestPlayersForGameFinalResultCallback_t), @alignOf(RequestPlayersForGameFinalResultCallback_t));
-    }
-};
-/// callbackId = 5214
-pub const SubmitPlayerResultResultCallback_t = extern struct {
-    m_eResult: EResult align(4) = EResult.k_EResultNone,
-    ullUniqueGameID: CGameID align(StructPlatformPackSize),
-    steamIDPlayer: CSteamID align(1),
-    comptime {
-        const size = if (is_windows) 24 else 20;
-        if (@sizeOf(SubmitPlayerResultResultCallback_t) != size or @alignOf(SubmitPlayerResultResultCallback_t) != StructPlatformPackSize) @compileLog("Size or alignment of SubmitPlayerResultResultCallback_t are mismatch.", @sizeOf(SubmitPlayerResultResultCallback_t), @alignOf(SubmitPlayerResultResultCallback_t));
-    }
-};
-/// callbackId = 5215
-pub const EndGameResultCallback_t = extern struct {
-    m_eResult: EResult align(4) = EResult.k_EResultNone,
-    ullUniqueGameID: CGameID align(StructPlatformPackSize),
-    comptime {
-        const size = if (is_windows) 16 else 12;
-        if (@sizeOf(EndGameResultCallback_t) != size or @alignOf(EndGameResultCallback_t) != StructPlatformPackSize) @compileLog("Size or alignment of EndGameResultCallback_t are mismatch.", @sizeOf(EndGameResultCallback_t), @alignOf(EndGameResultCallback_t));
     }
 };
 /// callbackId = 5301
@@ -2041,104 +1883,6 @@ pub const VolumeHasChanged_t = extern struct {
         if (@sizeOf(VolumeHasChanged_t) != 4 or @alignOf(VolumeHasChanged_t) != 4) @compileLog("Size or alignment of VolumeHasChanged_t are mismatch.", @sizeOf(VolumeHasChanged_t), @alignOf(VolumeHasChanged_t));
     }
 };
-/// callbackId = 4101
-pub const MusicPlayerRemoteWillActivate_t = extern struct {
-    padding: u8,
-    comptime {
-        if (@sizeOf(MusicPlayerRemoteWillActivate_t) != 1 or @alignOf(MusicPlayerRemoteWillActivate_t) != 1) @compileLog("Size or alignment of MusicPlayerRemoteWillActivate_t are mismatch.", @sizeOf(MusicPlayerRemoteWillActivate_t), @alignOf(MusicPlayerRemoteWillActivate_t));
-    }
-};
-/// callbackId = 4102
-pub const MusicPlayerRemoteWillDeactivate_t = extern struct {
-    padding: u8,
-    comptime {
-        if (@sizeOf(MusicPlayerRemoteWillDeactivate_t) != 1 or @alignOf(MusicPlayerRemoteWillDeactivate_t) != 1) @compileLog("Size or alignment of MusicPlayerRemoteWillDeactivate_t are mismatch.", @sizeOf(MusicPlayerRemoteWillDeactivate_t), @alignOf(MusicPlayerRemoteWillDeactivate_t));
-    }
-};
-/// callbackId = 4103
-pub const MusicPlayerRemoteToFront_t = extern struct {
-    padding: u8,
-    comptime {
-        if (@sizeOf(MusicPlayerRemoteToFront_t) != 1 or @alignOf(MusicPlayerRemoteToFront_t) != 1) @compileLog("Size or alignment of MusicPlayerRemoteToFront_t are mismatch.", @sizeOf(MusicPlayerRemoteToFront_t), @alignOf(MusicPlayerRemoteToFront_t));
-    }
-};
-/// callbackId = 4104
-pub const MusicPlayerWillQuit_t = extern struct {
-    padding: u8,
-    comptime {
-        if (@sizeOf(MusicPlayerWillQuit_t) != 1 or @alignOf(MusicPlayerWillQuit_t) != 1) @compileLog("Size or alignment of MusicPlayerWillQuit_t are mismatch.", @sizeOf(MusicPlayerWillQuit_t), @alignOf(MusicPlayerWillQuit_t));
-    }
-};
-/// callbackId = 4105
-pub const MusicPlayerWantsPlay_t = extern struct {
-    padding: u8,
-    comptime {
-        if (@sizeOf(MusicPlayerWantsPlay_t) != 1 or @alignOf(MusicPlayerWantsPlay_t) != 1) @compileLog("Size or alignment of MusicPlayerWantsPlay_t are mismatch.", @sizeOf(MusicPlayerWantsPlay_t), @alignOf(MusicPlayerWantsPlay_t));
-    }
-};
-/// callbackId = 4106
-pub const MusicPlayerWantsPause_t = extern struct {
-    padding: u8,
-    comptime {
-        if (@sizeOf(MusicPlayerWantsPause_t) != 1 or @alignOf(MusicPlayerWantsPause_t) != 1) @compileLog("Size or alignment of MusicPlayerWantsPause_t are mismatch.", @sizeOf(MusicPlayerWantsPause_t), @alignOf(MusicPlayerWantsPause_t));
-    }
-};
-/// callbackId = 4107
-pub const MusicPlayerWantsPlayPrevious_t = extern struct {
-    padding: u8,
-    comptime {
-        if (@sizeOf(MusicPlayerWantsPlayPrevious_t) != 1 or @alignOf(MusicPlayerWantsPlayPrevious_t) != 1) @compileLog("Size or alignment of MusicPlayerWantsPlayPrevious_t are mismatch.", @sizeOf(MusicPlayerWantsPlayPrevious_t), @alignOf(MusicPlayerWantsPlayPrevious_t));
-    }
-};
-/// callbackId = 4108
-pub const MusicPlayerWantsPlayNext_t = extern struct {
-    padding: u8,
-    comptime {
-        if (@sizeOf(MusicPlayerWantsPlayNext_t) != 1 or @alignOf(MusicPlayerWantsPlayNext_t) != 1) @compileLog("Size or alignment of MusicPlayerWantsPlayNext_t are mismatch.", @sizeOf(MusicPlayerWantsPlayNext_t), @alignOf(MusicPlayerWantsPlayNext_t));
-    }
-};
-/// callbackId = 4109
-pub const MusicPlayerWantsShuffled_t = extern struct {
-    m_bShuffled: bool align(1) = false,
-    comptime {
-        if (@sizeOf(MusicPlayerWantsShuffled_t) != 1 or @alignOf(MusicPlayerWantsShuffled_t) != 1) @compileLog("Size or alignment of MusicPlayerWantsShuffled_t are mismatch.", @sizeOf(MusicPlayerWantsShuffled_t), @alignOf(MusicPlayerWantsShuffled_t));
-    }
-};
-/// callbackId = 4110
-pub const MusicPlayerWantsLooped_t = extern struct {
-    m_bLooped: bool align(1) = false,
-    comptime {
-        if (@sizeOf(MusicPlayerWantsLooped_t) != 1 or @alignOf(MusicPlayerWantsLooped_t) != 1) @compileLog("Size or alignment of MusicPlayerWantsLooped_t are mismatch.", @sizeOf(MusicPlayerWantsLooped_t), @alignOf(MusicPlayerWantsLooped_t));
-    }
-};
-/// callbackId = 4011
-pub const MusicPlayerWantsVolume_t = extern struct {
-    m_flNewVolume: f32 align(4) = 0,
-    comptime {
-        if (@sizeOf(MusicPlayerWantsVolume_t) != 4 or @alignOf(MusicPlayerWantsVolume_t) != 4) @compileLog("Size or alignment of MusicPlayerWantsVolume_t are mismatch.", @sizeOf(MusicPlayerWantsVolume_t), @alignOf(MusicPlayerWantsVolume_t));
-    }
-};
-/// callbackId = 4012
-pub const MusicPlayerSelectsQueueEntry_t = extern struct {
-    nID: i32 align(4) = 0,
-    comptime {
-        if (@sizeOf(MusicPlayerSelectsQueueEntry_t) != 4 or @alignOf(MusicPlayerSelectsQueueEntry_t) != 4) @compileLog("Size or alignment of MusicPlayerSelectsQueueEntry_t are mismatch.", @sizeOf(MusicPlayerSelectsQueueEntry_t), @alignOf(MusicPlayerSelectsQueueEntry_t));
-    }
-};
-/// callbackId = 4013
-pub const MusicPlayerSelectsPlaylistEntry_t = extern struct {
-    nID: i32 align(4) = 0,
-    comptime {
-        if (@sizeOf(MusicPlayerSelectsPlaylistEntry_t) != 4 or @alignOf(MusicPlayerSelectsPlaylistEntry_t) != 4) @compileLog("Size or alignment of MusicPlayerSelectsPlaylistEntry_t are mismatch.", @sizeOf(MusicPlayerSelectsPlaylistEntry_t), @alignOf(MusicPlayerSelectsPlaylistEntry_t));
-    }
-};
-/// callbackId = 4114
-pub const MusicPlayerWantsPlayingRepeatStatus_t = extern struct {
-    m_nPlayingRepeatStatus: i32 align(4) = 0,
-    comptime {
-        if (@sizeOf(MusicPlayerWantsPlayingRepeatStatus_t) != 4 or @alignOf(MusicPlayerWantsPlayingRepeatStatus_t) != 4) @compileLog("Size or alignment of MusicPlayerWantsPlayingRepeatStatus_t are mismatch.", @sizeOf(MusicPlayerWantsPlayingRepeatStatus_t), @alignOf(MusicPlayerWantsPlayingRepeatStatus_t));
-    }
-};
 /// callbackId = 2101
 pub const HTTPRequestCompleted_t = extern struct {
     m_hRequest: HTTPRequestHandle align(4) = 0,
@@ -2228,7 +1972,7 @@ pub const SteamUGCRequestUGCDetailsResult_t = extern struct {
     m_details: SteamUGCDetails_t align(StructPlatformPackSize),
     m_bCachedData: bool align(1) = false,
     comptime {
-        const size = if (is_windows) 9784 else 9768;
+        const size = if (is_windows) 9792 else 9776;
         if (@sizeOf(SteamUGCRequestUGCDetailsResult_t) != size or @alignOf(SteamUGCRequestUGCDetailsResult_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamUGCRequestUGCDetailsResult_t are mismatch.", @sizeOf(SteamUGCRequestUGCDetailsResult_t), @alignOf(SteamUGCRequestUGCDetailsResult_t));
     }
 };
@@ -2255,8 +1999,10 @@ pub const SubmitItemUpdateResult_t = extern struct {
 pub const ItemInstalled_t = extern struct {
     m_unAppID: AppId_t align(4) = 0,
     m_nPublishedFileId: PublishedFileId_t align(StructPlatformPackSize) = 0,
+    m_hLegacyContent: UGCHandle_t align(StructPlatformPackSize) = 0,
+    m_unManifestID: uint64 align(StructPlatformPackSize) = 0,
     comptime {
-        const size = if (is_windows) 16 else 12;
+        const size = if (is_windows) 32 else 28;
         if (@sizeOf(ItemInstalled_t) != size or @alignOf(ItemInstalled_t) != StructPlatformPackSize) @compileLog("Size or alignment of ItemInstalled_t are mismatch.", @sizeOf(ItemInstalled_t), @alignOf(ItemInstalled_t));
     }
 };
@@ -2391,22 +2137,6 @@ pub const WorkshopEULAStatus_t = extern struct {
     m_bNeedsAction: bool align(1) = false,
     comptime {
         if (@sizeOf(WorkshopEULAStatus_t) != 20 or @alignOf(WorkshopEULAStatus_t) != 4) @compileLog("Size or alignment of WorkshopEULAStatus_t are mismatch.", @sizeOf(WorkshopEULAStatus_t), @alignOf(WorkshopEULAStatus_t));
-    }
-};
-/// callbackId = 3901
-pub const SteamAppInstalled_t = extern struct {
-    m_nAppID: AppId_t align(4) = 0,
-    m_iInstallFolderIndex: i32 align(4) = 0,
-    comptime {
-        if (@sizeOf(SteamAppInstalled_t) != 8 or @alignOf(SteamAppInstalled_t) != 4) @compileLog("Size or alignment of SteamAppInstalled_t are mismatch.", @sizeOf(SteamAppInstalled_t), @alignOf(SteamAppInstalled_t));
-    }
-};
-/// callbackId = 3902
-pub const SteamAppUninstalled_t = extern struct {
-    m_nAppID: AppId_t align(4) = 0,
-    m_iInstallFolderIndex: i32 align(4) = 0,
-    comptime {
-        if (@sizeOf(SteamAppUninstalled_t) != 8 or @alignOf(SteamAppUninstalled_t) != 4) @compileLog("Size or alignment of SteamAppUninstalled_t are mismatch.", @sizeOf(SteamAppUninstalled_t), @alignOf(SteamAppUninstalled_t));
     }
 };
 /// callbackId = 4501
@@ -2692,6 +2422,26 @@ pub const SteamInventoryRequestPricesResult_t = extern struct {
         if (@sizeOf(SteamInventoryRequestPricesResult_t) != 8 or @alignOf(SteamInventoryRequestPricesResult_t) != 4) @compileLog("Size or alignment of SteamInventoryRequestPricesResult_t are mismatch.", @sizeOf(SteamInventoryRequestPricesResult_t), @alignOf(SteamInventoryRequestPricesResult_t));
     }
 };
+/// callbackId = 6001
+pub const SteamTimelineGamePhaseRecordingExists_t = extern struct {
+    m_rgchPhaseID: [64]u8 align(1),
+    m_ulRecordingMS: uint64 align(StructPlatformPackSize) = 0,
+    m_ulLongestClipMS: uint64 align(StructPlatformPackSize) = 0,
+    m_unClipCount: uint32 align(4) = 0,
+    m_unScreenshotCount: uint32 align(4) = 0,
+    comptime {
+        if (@sizeOf(SteamTimelineGamePhaseRecordingExists_t) != 88 or @alignOf(SteamTimelineGamePhaseRecordingExists_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamTimelineGamePhaseRecordingExists_t are mismatch.", @sizeOf(SteamTimelineGamePhaseRecordingExists_t), @alignOf(SteamTimelineGamePhaseRecordingExists_t));
+    }
+};
+/// callbackId = 6002
+pub const SteamTimelineEventRecordingExists_t = extern struct {
+    m_ulEventID: uint64 align(StructPlatformPackSize) = 0,
+    m_bRecordingExists: bool align(1) = false,
+    comptime {
+        const size = if (is_windows) 16 else 12;
+        if (@sizeOf(SteamTimelineEventRecordingExists_t) != size or @alignOf(SteamTimelineEventRecordingExists_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamTimelineEventRecordingExists_t are mismatch.", @sizeOf(SteamTimelineEventRecordingExists_t), @alignOf(SteamTimelineEventRecordingExists_t));
+    }
+};
 /// callbackId = 4611
 pub const GetVideoURLResult_t = extern struct {
     m_eResult: EResult align(4) = EResult.k_EResultNone,
@@ -2707,6 +2457,20 @@ pub const GetOPFSettingsResult_t = extern struct {
     m_unVideoAppID: AppId_t align(4) = 0,
     comptime {
         if (@sizeOf(GetOPFSettingsResult_t) != 8 or @alignOf(GetOPFSettingsResult_t) != 4) @compileLog("Size or alignment of GetOPFSettingsResult_t are mismatch.", @sizeOf(GetOPFSettingsResult_t), @alignOf(GetOPFSettingsResult_t));
+    }
+};
+/// callbackId = 4604
+pub const BroadcastUploadStart_t = extern struct {
+    m_bIsRTMP: bool align(1) = false,
+    comptime {
+        if (@sizeOf(BroadcastUploadStart_t) != 1 or @alignOf(BroadcastUploadStart_t) != 1) @compileLog("Size or alignment of BroadcastUploadStart_t are mismatch.", @sizeOf(BroadcastUploadStart_t), @alignOf(BroadcastUploadStart_t));
+    }
+};
+/// callbackId = 4605
+pub const BroadcastUploadStop_t = extern struct {
+    m_eResult: EBroadcastUploadResult align(4) = EBroadcastUploadResult.k_EBroadcastUploadResultNone,
+    comptime {
+        if (@sizeOf(BroadcastUploadStop_t) != 4 or @alignOf(BroadcastUploadStop_t) != 4) @compileLog("Size or alignment of BroadcastUploadStop_t are mismatch.", @sizeOf(BroadcastUploadStop_t), @alignOf(BroadcastUploadStop_t));
     }
 };
 /// callbackId = 5001
@@ -2735,6 +2499,16 @@ pub const SteamRemotePlayTogetherGuestInvite_t = extern struct {
     m_szConnectURL: [1024]u8 align(1),
     comptime {
         if (@sizeOf(SteamRemotePlayTogetherGuestInvite_t) != 1024 or @alignOf(SteamRemotePlayTogetherGuestInvite_t) != 1) @compileLog("Size or alignment of SteamRemotePlayTogetherGuestInvite_t are mismatch.", @sizeOf(SteamRemotePlayTogetherGuestInvite_t), @alignOf(SteamRemotePlayTogetherGuestInvite_t));
+    }
+};
+/// callbackId = 5704
+pub const SteamRemotePlaySessionAvatarLoaded_t = extern struct {
+    m_unSessionID: RemotePlaySessionID_t align(4) = 0,
+    m_iImage: i32 align(4) = 0,
+    m_iWide: i32 align(4) = 0,
+    m_iTall: i32 align(4) = 0,
+    comptime {
+        if (@sizeOf(SteamRemotePlaySessionAvatarLoaded_t) != 16 or @alignOf(SteamRemotePlaySessionAvatarLoaded_t) != 4) @compileLog("Size or alignment of SteamRemotePlaySessionAvatarLoaded_t are mismatch.", @sizeOf(SteamRemotePlaySessionAvatarLoaded_t), @alignOf(SteamRemotePlaySessionAvatarLoaded_t));
     }
 };
 /// callbackId = 1251
@@ -2908,16 +2682,20 @@ pub const SteamNetworkingFakeIPResult_t = extern struct {
 pub const k_uAppIdInvalid: AppId_t = 0x0;
 pub const k_uDepotIdInvalid: DepotId_t = 0x0;
 pub const k_uAPICallInvalid: SteamAPICall_t = 0x0;
+pub const k_uAccountIdInvalid: AccountID_t = 0;
 pub const k_ulPartyBeaconIdInvalid: PartyBeaconID_t = 0;
 pub const k_HAuthTicketInvalid: HAuthTicket = 0;
 pub const k_unSteamAccountIDMask: u32 = 0xFFFFFFFF;
 pub const k_unSteamAccountInstanceMask: u32 = 0x000FFFFF;
 pub const k_unSteamUserDefaultInstance: u32 = 1;
 pub const k_cchGameExtraInfoMax: i32 = 64;
+pub const k_cchMaxSteamErrMsg: i32 = 1024;
 pub const k_cchMaxFriendsGroupName: i32 = 64;
 pub const k_cFriendsGroupLimit: i32 = 100;
 pub const k_FriendsGroupID_Invalid: FriendsGroupID_t = -1;
 pub const k_cEnumerateFollowersMax: i32 = 50;
+pub const k_usFriendGameInfoQueryPort_NotInitialized: uint16 = 0xFFFF;
+pub const k_usFriendGameInfoQueryPort_Error: uint16 = 0xFFFE;
 pub const k_cubChatMetadataMax: uint32 = 8192;
 pub const k_cbMaxGameServerGameDir: i32 = 32;
 pub const k_cbMaxGameServerMapName: i32 = 32;
@@ -2956,6 +2734,10 @@ pub const INVALID_HTMLBROWSER: uint32 = 0;
 // pub const k_SteamItemInstanceIDInvalid: SteamItemInstanceID_t = ( SteamItemInstanceID_t ) ~ 0;
 pub const k_SteamInventoryResultInvalid: SteamInventoryResult_t = -1;
 pub const k_SteamInventoryUpdateHandleInvalid: SteamInventoryUpdateHandle_t = 0xffffffffffffffff;
+pub const k_unMaxTimelinePriority: uint32 = 1000;
+pub const k_unTimelinePriority_KeepCurrentValue: uint32 = 1000000;
+pub const k_flMaxTimelineEventDuration: f32 = 600.0;
+pub const k_cchMaxPhaseIDLength: uint32 = 64;
 pub const k_HSteamNetConnection_Invalid: HSteamNetConnection = 0;
 pub const k_HSteamListenSocket_Invalid: HSteamListenSocket = 0;
 pub const k_HSteamNetPollGroup_Invalid: HSteamNetPollGroup = 0;
@@ -3144,6 +2926,10 @@ pub const EResult = enum(c_int) {
     k_EResultChargerRequired = 125,
     k_EResultCachedCredentialInvalid = 126,
     K_EResultPhoneNumberIsVOIP = 127,
+    k_EResultNotSupported = 128,
+    k_EResultFamilySizeLimitExceeded = 129,
+    k_EResultOfflineAppCacheInvalid = 130,
+    k_EResultTryLater = 131,
     _,
 };
 
@@ -3324,6 +3110,7 @@ pub const EMarketNotAllowedReasonFlags = enum(c_int) {
     k_EMarketNotAllowedReason_NewPaymentMethodCannotBeVerified = 8192,
     k_EMarketNotAllowedReason_NoRecentPurchases = 16384,
     k_EMarketNotAllowedReason_AcceptedWalletGift = 32768,
+    k_EMarketNotAllowedReason_TradeCooldown = 65536,
     _,
 };
 
@@ -3357,25 +3144,13 @@ pub const EDurationControlOnlineState = enum(c_int) {
     _,
 };
 
-pub const EGameSearchErrorCode_t = enum(c_int) {
-    k_EGameSearchErrorCode_OK = 1,
-    k_EGameSearchErrorCode_Failed_Search_Already_In_Progress = 2,
-    k_EGameSearchErrorCode_Failed_No_Search_In_Progress = 3,
-    k_EGameSearchErrorCode_Failed_Not_Lobby_Leader = 4,
-    k_EGameSearchErrorCode_Failed_No_Host_Available = 5,
-    k_EGameSearchErrorCode_Failed_Search_Params_Invalid = 6,
-    k_EGameSearchErrorCode_Failed_Offline = 7,
-    k_EGameSearchErrorCode_Failed_NotAuthorized = 8,
-    k_EGameSearchErrorCode_Failed_Unknown_Error = 9,
-    _,
-};
-
-pub const EPlayerResult_t = enum(c_int) {
-    k_EPlayerResultFailedToConnect = 1,
-    k_EPlayerResultAbandoned = 2,
-    k_EPlayerResultKicked = 3,
-    k_EPlayerResultIncomplete = 4,
-    k_EPlayerResultCompleted = 5,
+pub const EBetaBranchFlags = enum(c_int) {
+    k_EBetaBranch_None = 0,
+    k_EBetaBranch_Default = 1,
+    k_EBetaBranch_Available = 2,
+    k_EBetaBranch_Private = 4,
+    k_EBetaBranch_Selected = 8,
+    k_EBetaBranch_Installed = 16,
     _,
 };
 
@@ -3432,18 +3207,6 @@ pub const EFriendFlags = enum(c_int) {
     k_EFriendFlagIgnoredFriend = 1024,
     k_EFriendFlagChatMember = 4096,
     k_EFriendFlagAll = 65535,
-    _,
-};
-
-pub const EUserRestriction = enum(c_int) {
-    k_nUserRestrictionNone = 0,
-    k_nUserRestrictionUnknown = 1,
-    k_nUserRestrictionAnyChat = 2,
-    k_nUserRestrictionVoiceChat = 4,
-    k_nUserRestrictionGroupChat = 8,
-    k_nUserRestrictionRating = 16,
-    k_nUserRestrictionGameInvites = 32,
-    k_nUserRestrictionTrading = 64,
     _,
 };
 
@@ -3647,7 +3410,8 @@ pub const EWorkshopFileType = enum(c_int) {
     k_EWorkshopFileTypeSteamworksAccessInvite = 13,
     k_EWorkshopFileTypeSteamVideo = 14,
     k_EWorkshopFileTypeGameManagedItem = 15,
-    k_EWorkshopFileTypeMax = 16,
+    k_EWorkshopFileTypeClip = 16,
+    k_EWorkshopFileTypeMax = 17,
     _,
 };
 
@@ -3841,14 +3605,28 @@ pub const EHTTPStatusCode = enum(c_int) {
     k_EHTTPStatusCode416RequestedRangeNotSatisfiable = 416,
     k_EHTTPStatusCode417ExpectationFailed = 417,
     k_EHTTPStatusCode4xxUnknown = 418,
+    k_EHTTPStatusCode421MisdirectedRequest = 421,
+    k_EHTTPStatusCode422UnprocessableContent = 422,
+    k_EHTTPStatusCode423Locked = 423,
+    k_EHTTPStatusCode424FailedDependency = 424,
+    k_EHTTPStatusCode425TooEarly = 425,
+    k_EHTTPStatusCode426UpgradeRequired = 426,
+    k_EHTTPStatusCode428PreconditionRequired = 428,
     k_EHTTPStatusCode429TooManyRequests = 429,
+    k_EHTTPStatusCode431RequestHeaderFieldsTooLarge = 431,
     k_EHTTPStatusCode444ConnectionClosed = 444,
+    k_EHTTPStatusCode451UnavailableForLegalReasons = 451,
     k_EHTTPStatusCode500InternalServerError = 500,
     k_EHTTPStatusCode501NotImplemented = 501,
     k_EHTTPStatusCode502BadGateway = 502,
     k_EHTTPStatusCode503ServiceUnavailable = 503,
     k_EHTTPStatusCode504GatewayTimeout = 504,
     k_EHTTPStatusCode505HTTPVersionNotSupported = 505,
+    k_EHTTPStatusCode506VariantAlsoNegotiates = 506,
+    k_EHTTPStatusCode507InsufficientStorage = 507,
+    k_EHTTPStatusCode508LoopDetected = 508,
+    k_EHTTPStatusCode510NotExtended = 510,
+    k_EHTTPStatusCode511NetworkAuthenticationRequired = 511,
     k_EHTTPStatusCode5xxUnknown = 599,
     _,
 };
@@ -4281,7 +4059,96 @@ pub const EInputActionOrigin = enum(c_int) {
     k_EInputActionOrigin_SteamDeck_Reserved18 = 403,
     k_EInputActionOrigin_SteamDeck_Reserved19 = 404,
     k_EInputActionOrigin_SteamDeck_Reserved20 = 405,
-    k_EInputActionOrigin_Count = 406,
+    k_EInputActionOrigin_Horipad_M1 = 406,
+    k_EInputActionOrigin_Horipad_M2 = 407,
+    k_EInputActionOrigin_Horipad_L4 = 408,
+    k_EInputActionOrigin_Horipad_R4 = 409,
+    k_EInputActionOrigin_LenovoLegionGo_A = 410,
+    k_EInputActionOrigin_LenovoLegionGo_B = 411,
+    k_EInputActionOrigin_LenovoLegionGo_X = 412,
+    k_EInputActionOrigin_LenovoLegionGo_Y = 413,
+    k_EInputActionOrigin_LenovoLegionGo_LB = 414,
+    k_EInputActionOrigin_LenovoLegionGo_RB = 415,
+    k_EInputActionOrigin_LenovoLegionGo_Menu = 416,
+    k_EInputActionOrigin_LenovoLegionGo_View = 417,
+    k_EInputActionOrigin_LenovoLegionGo_LeftPad_Touch = 418,
+    k_EInputActionOrigin_LenovoLegionGo_LeftPad_Swipe = 419,
+    k_EInputActionOrigin_LenovoLegionGo_LeftPad_Click = 420,
+    k_EInputActionOrigin_LenovoLegionGo_LeftPad_DPadNorth = 421,
+    k_EInputActionOrigin_LenovoLegionGo_LeftPad_DPadSouth = 422,
+    k_EInputActionOrigin_LenovoLegionGo_LeftPad_DPadWest = 423,
+    k_EInputActionOrigin_LenovoLegionGo_LeftPad_DPadEast = 424,
+    k_EInputActionOrigin_LenovoLegionGo_RightPad_Touch = 425,
+    k_EInputActionOrigin_LenovoLegionGo_RightPad_Swipe = 426,
+    k_EInputActionOrigin_LenovoLegionGo_RightPad_Click = 427,
+    k_EInputActionOrigin_LenovoLegionGo_RightPad_DPadNorth = 428,
+    k_EInputActionOrigin_LenovoLegionGo_RightPad_DPadSouth = 429,
+    k_EInputActionOrigin_LenovoLegionGo_RightPad_DPadWest = 430,
+    k_EInputActionOrigin_LenovoLegionGo_RightPad_DPadEast = 431,
+    k_EInputActionOrigin_LenovoLegionGo_LT_SoftPull = 432,
+    k_EInputActionOrigin_LenovoLegionGo_LT = 433,
+    k_EInputActionOrigin_LenovoLegionGo_RT_SoftPull = 434,
+    k_EInputActionOrigin_LenovoLegionGo_RT = 435,
+    k_EInputActionOrigin_LenovoLegionGo_LeftStick_Move = 436,
+    k_EInputActionOrigin_LenovoLegionGo_LS = 437,
+    k_EInputActionOrigin_LenovoLegionGo_LeftStick_DPadNorth = 438,
+    k_EInputActionOrigin_LenovoLegionGo_LeftStick_DPadSouth = 439,
+    k_EInputActionOrigin_LenovoLegionGo_LeftStick_DPadWest = 440,
+    k_EInputActionOrigin_LenovoLegionGo_LeftStick_DPadEast = 441,
+    k_EInputActionOrigin_LenovoLegionGo_RightStick_Move = 442,
+    k_EInputActionOrigin_LenovoLegionGo_RS = 443,
+    k_EInputActionOrigin_LenovoLegionGo_RightStick_DPadNorth = 444,
+    k_EInputActionOrigin_LenovoLegionGo_RightStick_DPadSouth = 445,
+    k_EInputActionOrigin_LenovoLegionGo_RightStick_DPadWest = 446,
+    k_EInputActionOrigin_LenovoLegionGo_RightStick_DPadEast = 447,
+    k_EInputActionOrigin_LenovoLegionGo_Y1 = 448,
+    k_EInputActionOrigin_LenovoLegionGo_Y2 = 449,
+    k_EInputActionOrigin_LenovoLegionGo_DPad_Move = 450,
+    k_EInputActionOrigin_LenovoLegionGo_DPad_North = 451,
+    k_EInputActionOrigin_LenovoLegionGo_DPad_South = 452,
+    k_EInputActionOrigin_LenovoLegionGo_DPad_West = 453,
+    k_EInputActionOrigin_LenovoLegionGo_DPad_East = 454,
+    k_EInputActionOrigin_LenovoLegionGo_Gyro_Move = 455,
+    k_EInputActionOrigin_LenovoLegionGo_Gyro_Pitch = 456,
+    k_EInputActionOrigin_LenovoLegionGo_Gyro_Yaw = 457,
+    k_EInputActionOrigin_LenovoLegionGo_Gyro_Roll = 458,
+    k_EInputActionOrigin_LenovoLegionGo_Reserved1 = 459,
+    k_EInputActionOrigin_LenovoLegionGo_Reserved2 = 460,
+    k_EInputActionOrigin_LenovoLegionGo_Reserved3 = 461,
+    k_EInputActionOrigin_LenovoLegionGo_Reserved4 = 462,
+    k_EInputActionOrigin_LenovoLegionGo_Reserved5 = 463,
+    k_EInputActionOrigin_LenovoLegionGo_Reserved6 = 464,
+    k_EInputActionOrigin_LenovoLegionGo_Reserved7 = 465,
+    k_EInputActionOrigin_LenovoLegionGo_Reserved8 = 466,
+    k_EInputActionOrigin_LenovoLegionGo_Reserved9 = 467,
+    k_EInputActionOrigin_LenovoLegionGo_Reserved10 = 468,
+    k_EInputActionOrigin_LenovoLegionGo_Reserved11 = 469,
+    k_EInputActionOrigin_LenovoLegionGo_Reserved12 = 470,
+    k_EInputActionOrigin_LenovoLegionGo_Reserved13 = 471,
+    k_EInputActionOrigin_LenovoLegionGo_Reserved14 = 472,
+    k_EInputActionOrigin_LenovoLegionGo_Reserved15 = 473,
+    k_EInputActionOrigin_LenovoLegionGo_Reserved16 = 474,
+    k_EInputActionOrigin_LenovoLegionGo_Reserved17 = 475,
+    k_EInputActionOrigin_LenovoLegionGo_Reserved18 = 476,
+    k_EInputActionOrigin_LenovoLegionGo_Reserved19 = 477,
+    k_EInputActionOrigin_LenovoLegionGo_Reserved20 = 478,
+    k_EInputActionOrigin_Generic_L4 = 479,
+    k_EInputActionOrigin_Generic_R4 = 480,
+    k_EInputActionOrigin_Generic_L5 = 481,
+    k_EInputActionOrigin_Generic_R5 = 482,
+    k_EInputActionOrigin_Generic_PL = 483,
+    k_EInputActionOrigin_Generic_PR = 484,
+    k_EInputActionOrigin_Generic_C = 485,
+    k_EInputActionOrigin_Generic_Z = 486,
+    k_EInputActionOrigin_Generic_MISC1 = 487,
+    k_EInputActionOrigin_Generic_MISC2 = 488,
+    k_EInputActionOrigin_Generic_MISC3 = 489,
+    k_EInputActionOrigin_Generic_MISC4 = 490,
+    k_EInputActionOrigin_Generic_MISC5 = 491,
+    k_EInputActionOrigin_Generic_MISC6 = 492,
+    k_EInputActionOrigin_Generic_MISC7 = 493,
+    k_EInputActionOrigin_Generic_MISC8 = 494,
+    k_EInputActionOrigin_Count = 495,
     k_EInputActionOrigin_MaximumPossibleValue = 32767,
     _,
 };
@@ -4785,7 +4652,96 @@ pub const EControllerActionOrigin = enum(c_int) {
     k_EControllerActionOrigin_PS5_RightGrip = 383,
     k_EControllerActionOrigin_PS5_LeftFn = 384,
     k_EControllerActionOrigin_PS5_RightFn = 385,
-    k_EControllerActionOrigin_Count = 386,
+    k_EControllerActionOrigin_Horipad_M1 = 386,
+    k_EControllerActionOrigin_Horipad_M2 = 387,
+    k_EControllerActionOrigin_Horipad_L4 = 388,
+    k_EControllerActionOrigin_Horipad_R4 = 389,
+    k_EControllerActionOrigin_LenovoLegionGo_A = 390,
+    k_EControllerActionOrigin_LenovoLegionGo_B = 391,
+    k_EControllerActionOrigin_LenovoLegionGo_X = 392,
+    k_EControllerActionOrigin_LenovoLegionGo_Y = 393,
+    k_EControllerActionOrigin_LenovoLegionGo_LB = 394,
+    k_EControllerActionOrigin_LenovoLegionGo_RB = 395,
+    k_EControllerActionOrigin_LenovoLegionGo_Menu = 396,
+    k_EControllerActionOrigin_LenovoLegionGo_View = 397,
+    k_EControllerActionOrigin_LenovoLegionGo_LeftPad_Touch = 398,
+    k_EControllerActionOrigin_LenovoLegionGo_LeftPad_Swipe = 399,
+    k_EControllerActionOrigin_LenovoLegionGo_LeftPad_Click = 400,
+    k_EControllerActionOrigin_LenovoLegionGo_LeftPad_DPadNorth = 401,
+    k_EControllerActionOrigin_LenovoLegionGo_LeftPad_DPadSouth = 402,
+    k_EControllerActionOrigin_LenovoLegionGo_LeftPad_DPadWest = 403,
+    k_EControllerActionOrigin_LenovoLegionGo_LeftPad_DPadEast = 404,
+    k_EControllerActionOrigin_LenovoLegionGo_RightPad_Touch = 405,
+    k_EControllerActionOrigin_LenovoLegionGo_RightPad_Swipe = 406,
+    k_EControllerActionOrigin_LenovoLegionGo_RightPad_Click = 407,
+    k_EControllerActionOrigin_LenovoLegionGo_RightPad_DPadNorth = 408,
+    k_EControllerActionOrigin_LenovoLegionGo_RightPad_DPadSouth = 409,
+    k_EControllerActionOrigin_LenovoLegionGo_RightPad_DPadWest = 410,
+    k_EControllerActionOrigin_LenovoLegionGo_RightPad_DPadEast = 411,
+    k_EControllerActionOrigin_LenovoLegionGo_LT_SoftPull = 412,
+    k_EControllerActionOrigin_LenovoLegionGo_LT = 413,
+    k_EControllerActionOrigin_LenovoLegionGo_RT_SoftPull = 414,
+    k_EControllerActionOrigin_LenovoLegionGo_RT = 415,
+    k_EControllerActionOrigin_LenovoLegionGo_LeftStick_Move = 416,
+    k_EControllerActionOrigin_LenovoLegionGo_LS = 417,
+    k_EControllerActionOrigin_LenovoLegionGo_LeftStick_DPadNorth = 418,
+    k_EControllerActionOrigin_LenovoLegionGo_LeftStick_DPadSouth = 419,
+    k_EControllerActionOrigin_LenovoLegionGo_LeftStick_DPadWest = 420,
+    k_EControllerActionOrigin_LenovoLegionGo_LeftStick_DPadEast = 421,
+    k_EControllerActionOrigin_LenovoLegionGo_RightStick_Move = 422,
+    k_EControllerActionOrigin_LenovoLegionGo_RS = 423,
+    k_EControllerActionOrigin_LenovoLegionGo_RightStick_DPadNorth = 424,
+    k_EControllerActionOrigin_LenovoLegionGo_RightStick_DPadSouth = 425,
+    k_EControllerActionOrigin_LenovoLegionGo_RightStick_DPadWest = 426,
+    k_EControllerActionOrigin_LenovoLegionGo_RightStick_DPadEast = 427,
+    k_EControllerActionOrigin_LenovoLegionGo_Y1 = 428,
+    k_EControllerActionOrigin_LenovoLegionGo_Y2 = 429,
+    k_EControllerActionOrigin_LenovoLegionGo_DPad_Move = 430,
+    k_EControllerActionOrigin_LenovoLegionGo_DPad_North = 431,
+    k_EControllerActionOrigin_LenovoLegionGo_DPad_South = 432,
+    k_EControllerActionOrigin_LenovoLegionGo_DPad_West = 433,
+    k_EControllerActionOrigin_LenovoLegionGo_DPad_East = 434,
+    k_EControllerActionOrigin_LenovoLegionGo_Gyro_Move = 435,
+    k_EControllerActionOrigin_LenovoLegionGo_Gyro_Pitch = 436,
+    k_EControllerActionOrigin_LenovoLegionGo_Gyro_Yaw = 437,
+    k_EControllerActionOrigin_LenovoLegionGo_Gyro_Roll = 438,
+    k_EControllerActionOrigin_LenovoLegionGo_Reserved1 = 439,
+    k_EControllerActionOrigin_LenovoLegionGo_Reserved2 = 440,
+    k_EControllerActionOrigin_LenovoLegionGo_Reserved3 = 441,
+    k_EControllerActionOrigin_LenovoLegionGo_Reserved4 = 442,
+    k_EControllerActionOrigin_LenovoLegionGo_Reserved5 = 443,
+    k_EControllerActionOrigin_LenovoLegionGo_Reserved6 = 444,
+    k_EControllerActionOrigin_LenovoLegionGo_Reserved7 = 445,
+    k_EControllerActionOrigin_LenovoLegionGo_Reserved8 = 446,
+    k_EControllerActionOrigin_LenovoLegionGo_Reserved9 = 447,
+    k_EControllerActionOrigin_LenovoLegionGo_Reserved10 = 448,
+    k_EControllerActionOrigin_LenovoLegionGo_Reserved11 = 449,
+    k_EControllerActionOrigin_LenovoLegionGo_Reserved12 = 450,
+    k_EControllerActionOrigin_LenovoLegionGo_Reserved13 = 451,
+    k_EControllerActionOrigin_LenovoLegionGo_Reserved14 = 452,
+    k_EControllerActionOrigin_LenovoLegionGo_Reserved15 = 453,
+    k_EControllerActionOrigin_LenovoLegionGo_Reserved16 = 454,
+    k_EControllerActionOrigin_LenovoLegionGo_Reserved17 = 455,
+    k_EControllerActionOrigin_LenovoLegionGo_Reserved18 = 456,
+    k_EControllerActionOrigin_LenovoLegionGo_Reserved19 = 457,
+    k_EControllerActionOrigin_LenovoLegionGo_Reserved20 = 458,
+    k_EControllerActionOrigin_Generic_L4 = 459,
+    k_EControllerActionOrigin_Generic_R4 = 460,
+    k_EControllerActionOrigin_Generic_L5 = 461,
+    k_EControllerActionOrigin_Generic_R5 = 462,
+    k_EControllerActionOrigin_Generic_PL = 463,
+    k_EControllerActionOrigin_Generic_PR = 464,
+    k_EControllerActionOrigin_Generic_C = 465,
+    k_EControllerActionOrigin_Generic_Z = 466,
+    k_EControllerActionOrigin_Generic_MISC1 = 467,
+    k_EControllerActionOrigin_Generic_MISC2 = 468,
+    k_EControllerActionOrigin_Generic_MISC3 = 469,
+    k_EControllerActionOrigin_Generic_MISC4 = 470,
+    k_EControllerActionOrigin_Generic_MISC5 = 471,
+    k_EControllerActionOrigin_Generic_MISC6 = 472,
+    k_EControllerActionOrigin_Generic_MISC7 = 473,
+    k_EControllerActionOrigin_Generic_MISC8 = 474,
+    k_EControllerActionOrigin_Count = 475,
     k_EControllerActionOrigin_MaximumPossibleValue = 32767,
     _,
 };
@@ -4880,6 +4836,7 @@ pub const EItemState = enum(c_int) {
     k_EItemStateNeedsUpdate = 8,
     k_EItemStateDownloading = 16,
     k_EItemStateDownloadPending = 32,
+    k_EItemStateDisabledLocally = 64,
     _,
 };
 
@@ -4906,6 +4863,7 @@ pub const EItemPreviewType = enum(c_int) {
     k_EItemPreviewType_Sketchfab = 2,
     k_EItemPreviewType_EnvironmentMap_HorizontalCross = 3,
     k_EItemPreviewType_EnvironmentMap_LatLong = 4,
+    k_EItemPreviewType_Clip = 5,
     k_EItemPreviewType_ReservedMax = 255,
     _,
 };
@@ -4926,6 +4884,24 @@ pub const ESteamItemFlags = enum(c_int) {
     _,
 };
 
+pub const ETimelineGameMode = enum(c_int) {
+    k_ETimelineGameMode_Invalid = 0,
+    k_ETimelineGameMode_Playing = 1,
+    k_ETimelineGameMode_Staging = 2,
+    k_ETimelineGameMode_Menus = 3,
+    k_ETimelineGameMode_LoadingScreen = 4,
+    k_ETimelineGameMode_Max = 5,
+    _,
+};
+
+pub const ETimelineEventClipPriority = enum(c_int) {
+    k_ETimelineEventClipPriority_Invalid = 0,
+    k_ETimelineEventClipPriority_None = 1,
+    k_ETimelineEventClipPriority_Standard = 2,
+    k_ETimelineEventClipPriority_Featured = 3,
+    _,
+};
+
 pub const EParentalFeature = enum(c_int) {
     k_EFeatureInvalid = 0,
     k_EFeatureStore = 1,
@@ -4941,8 +4917,10 @@ pub const EParentalFeature = enum(c_int) {
     k_EFeatureLibrary = 11,
     k_EFeatureTest = 12,
     k_EFeatureSiteLicense = 13,
-    k_EFeatureKioskMode = 14,
-    k_EFeatureMax = 15,
+    k_EFeatureKioskMode_Deprecated = 14,
+    k_EFeatureBlockAlways = 15,
+    k_EFeatureDesktop = 16,
+    k_EFeatureMax = 17,
     _,
 };
 
@@ -4952,6 +4930,155 @@ pub const ESteamDeviceFormFactor = enum(c_int) {
     k_ESteamDeviceFormFactorTablet = 2,
     k_ESteamDeviceFormFactorComputer = 3,
     k_ESteamDeviceFormFactorTV = 4,
+    k_ESteamDeviceFormFactorVRHeadset = 5,
+    _,
+};
+
+pub const ERemotePlayInputType = enum(c_int) {
+    k_ERemotePlayInputUnknown = 0,
+    k_ERemotePlayInputMouseMotion = 1,
+    k_ERemotePlayInputMouseButtonDown = 2,
+    k_ERemotePlayInputMouseButtonUp = 3,
+    k_ERemotePlayInputMouseWheel = 4,
+    k_ERemotePlayInputKeyDown = 5,
+    k_ERemotePlayInputKeyUp = 6,
+    _,
+};
+
+pub const ERemotePlayMouseButton = enum(c_int) {
+    k_ERemotePlayMouseButtonLeft = 1,
+    k_ERemotePlayMouseButtonRight = 2,
+    k_ERemotePlayMouseButtonMiddle = 16,
+    k_ERemotePlayMouseButtonX1 = 32,
+    k_ERemotePlayMouseButtonX2 = 64,
+    _,
+};
+
+pub const ERemotePlayMouseWheelDirection = enum(c_int) {
+    k_ERemotePlayMouseWheelUp = 1,
+    k_ERemotePlayMouseWheelDown = 2,
+    k_ERemotePlayMouseWheelLeft = 3,
+    k_ERemotePlayMouseWheelRight = 4,
+    _,
+};
+
+pub const ERemotePlayScancode = enum(c_int) {
+    k_ERemotePlayScancodeUnknown = 0,
+    k_ERemotePlayScancodeA = 4,
+    k_ERemotePlayScancodeB = 5,
+    k_ERemotePlayScancodeC = 6,
+    k_ERemotePlayScancodeD = 7,
+    k_ERemotePlayScancodeE = 8,
+    k_ERemotePlayScancodeF = 9,
+    k_ERemotePlayScancodeG = 10,
+    k_ERemotePlayScancodeH = 11,
+    k_ERemotePlayScancodeI = 12,
+    k_ERemotePlayScancodeJ = 13,
+    k_ERemotePlayScancodeK = 14,
+    k_ERemotePlayScancodeL = 15,
+    k_ERemotePlayScancodeM = 16,
+    k_ERemotePlayScancodeN = 17,
+    k_ERemotePlayScancodeO = 18,
+    k_ERemotePlayScancodeP = 19,
+    k_ERemotePlayScancodeQ = 20,
+    k_ERemotePlayScancodeR = 21,
+    k_ERemotePlayScancodeS = 22,
+    k_ERemotePlayScancodeT = 23,
+    k_ERemotePlayScancodeU = 24,
+    k_ERemotePlayScancodeV = 25,
+    k_ERemotePlayScancodeW = 26,
+    k_ERemotePlayScancodeX = 27,
+    k_ERemotePlayScancodeY = 28,
+    k_ERemotePlayScancodeZ = 29,
+    k_ERemotePlayScancode1 = 30,
+    k_ERemotePlayScancode2 = 31,
+    k_ERemotePlayScancode3 = 32,
+    k_ERemotePlayScancode4 = 33,
+    k_ERemotePlayScancode5 = 34,
+    k_ERemotePlayScancode6 = 35,
+    k_ERemotePlayScancode7 = 36,
+    k_ERemotePlayScancode8 = 37,
+    k_ERemotePlayScancode9 = 38,
+    k_ERemotePlayScancode0 = 39,
+    k_ERemotePlayScancodeReturn = 40,
+    k_ERemotePlayScancodeEscape = 41,
+    k_ERemotePlayScancodeBackspace = 42,
+    k_ERemotePlayScancodeTab = 43,
+    k_ERemotePlayScancodeSpace = 44,
+    k_ERemotePlayScancodeMinus = 45,
+    k_ERemotePlayScancodeEquals = 46,
+    k_ERemotePlayScancodeLeftBracket = 47,
+    k_ERemotePlayScancodeRightBracket = 48,
+    k_ERemotePlayScancodeBackslash = 49,
+    k_ERemotePlayScancodeSemicolon = 51,
+    k_ERemotePlayScancodeApostrophe = 52,
+    k_ERemotePlayScancodeGrave = 53,
+    k_ERemotePlayScancodeComma = 54,
+    k_ERemotePlayScancodePeriod = 55,
+    k_ERemotePlayScancodeSlash = 56,
+    k_ERemotePlayScancodeCapsLock = 57,
+    k_ERemotePlayScancodeF1 = 58,
+    k_ERemotePlayScancodeF2 = 59,
+    k_ERemotePlayScancodeF3 = 60,
+    k_ERemotePlayScancodeF4 = 61,
+    k_ERemotePlayScancodeF5 = 62,
+    k_ERemotePlayScancodeF6 = 63,
+    k_ERemotePlayScancodeF7 = 64,
+    k_ERemotePlayScancodeF8 = 65,
+    k_ERemotePlayScancodeF9 = 66,
+    k_ERemotePlayScancodeF10 = 67,
+    k_ERemotePlayScancodeF11 = 68,
+    k_ERemotePlayScancodeF12 = 69,
+    k_ERemotePlayScancodeInsert = 73,
+    k_ERemotePlayScancodeHome = 74,
+    k_ERemotePlayScancodePageUp = 75,
+    k_ERemotePlayScancodeDelete = 76,
+    k_ERemotePlayScancodeEnd = 77,
+    k_ERemotePlayScancodePageDown = 78,
+    k_ERemotePlayScancodeRight = 79,
+    k_ERemotePlayScancodeLeft = 80,
+    k_ERemotePlayScancodeDown = 81,
+    k_ERemotePlayScancodeUp = 82,
+    k_ERemotePlayScancodeKeypadDivide = 84,
+    k_ERemotePlayScancodeKeypadMultiply = 85,
+    k_ERemotePlayScancodeKeypadMinus = 86,
+    k_ERemotePlayScancodeKeypadPlus = 87,
+    k_ERemotePlayScancodeKeypadEnter = 88,
+    k_ERemotePlayScancodeKeypad1 = 89,
+    k_ERemotePlayScancodeKeypad2 = 90,
+    k_ERemotePlayScancodeKeypad3 = 91,
+    k_ERemotePlayScancodeKeypad4 = 92,
+    k_ERemotePlayScancodeKeypad5 = 93,
+    k_ERemotePlayScancodeKeypad6 = 94,
+    k_ERemotePlayScancodeKeypad7 = 95,
+    k_ERemotePlayScancodeKeypad8 = 96,
+    k_ERemotePlayScancodeKeypad9 = 97,
+    k_ERemotePlayScancodeKeypad0 = 98,
+    k_ERemotePlayScancodeKeypadPeriod = 99,
+    k_ERemotePlayScancodeLeftControl = 224,
+    k_ERemotePlayScancodeLeftShift = 225,
+    k_ERemotePlayScancodeLeftAlt = 226,
+    k_ERemotePlayScancodeLeftGUI = 227,
+    k_ERemotePlayScancodeRightControl = 228,
+    k_ERemotePlayScancodeRightShift = 229,
+    k_ERemotePlayScancodeRightALT = 230,
+    k_ERemotePlayScancodeRightGUI = 231,
+    _,
+};
+
+pub const ERemotePlayKeyModifier = enum(c_int) {
+    k_ERemotePlayKeyModifierNone = 0,
+    k_ERemotePlayKeyModifierLeftShift = 1,
+    k_ERemotePlayKeyModifierRightShift = 2,
+    k_ERemotePlayKeyModifierLeftControl = 64,
+    k_ERemotePlayKeyModifierRightControl = 128,
+    k_ERemotePlayKeyModifierLeftAlt = 256,
+    k_ERemotePlayKeyModifierRightAlt = 512,
+    k_ERemotePlayKeyModifierLeftGUI = 1024,
+    k_ERemotePlayKeyModifierRightGUI = 2048,
+    k_ERemotePlayKeyModifierNumLock = 4096,
+    k_ERemotePlayKeyModifierCapsLock = 8192,
+    k_ERemotePlayKeyModifierMask = 65535,
     _,
 };
 
@@ -4974,7 +5101,6 @@ pub const ESteamNetworkingIdentityType = enum(c_int) {
     k_ESteamNetworkingIdentityType_SteamID = 16,
     k_ESteamNetworkingIdentityType_XboxPairwiseID = 17,
     k_ESteamNetworkingIdentityType_SonyPSN = 18,
-    k_ESteamNetworkingIdentityType_GoogleStadia = 19,
     k_ESteamNetworkingIdentityType_IPAddress = 1,
     k_ESteamNetworkingIdentityType_GenericString = 2,
     k_ESteamNetworkingIdentityType_GenericBytes = 3,
@@ -5065,11 +5191,16 @@ pub const ESteamNetworkingConfigValue = enum(c_int) {
     k_ESteamNetworkingConfig_TimeoutInitial = 24,
     k_ESteamNetworkingConfig_TimeoutConnected = 25,
     k_ESteamNetworkingConfig_SendBufferSize = 9,
+    k_ESteamNetworkingConfig_RecvBufferSize = 47,
+    k_ESteamNetworkingConfig_RecvBufferMessages = 48,
+    k_ESteamNetworkingConfig_RecvMaxMessageSize = 49,
+    k_ESteamNetworkingConfig_RecvMaxSegmentsPerPacket = 50,
     k_ESteamNetworkingConfig_ConnectionUserData = 40,
     k_ESteamNetworkingConfig_SendRateMin = 10,
     k_ESteamNetworkingConfig_SendRateMax = 11,
     k_ESteamNetworkingConfig_NagleTime = 12,
     k_ESteamNetworkingConfig_IP_AllowWithoutAuth = 23,
+    k_ESteamNetworkingConfig_IPLocalHost_AllowWithoutAuth = 52,
     k_ESteamNetworkingConfig_MTU_PacketSize = 32,
     k_ESteamNetworkingConfig_MTU_DataSize = 33,
     k_ESteamNetworkingConfig_Unencrypted = 34,
@@ -5077,10 +5208,17 @@ pub const ESteamNetworkingConfigValue = enum(c_int) {
     k_ESteamNetworkingConfig_LocalVirtualPort = 38,
     k_ESteamNetworkingConfig_DualWifi_Enable = 39,
     k_ESteamNetworkingConfig_EnableDiagnosticsUI = 46,
+    k_ESteamNetworkingConfig_SendTimeSincePreviousPacket = 59,
     k_ESteamNetworkingConfig_FakePacketLoss_Send = 2,
     k_ESteamNetworkingConfig_FakePacketLoss_Recv = 3,
     k_ESteamNetworkingConfig_FakePacketLag_Send = 4,
     k_ESteamNetworkingConfig_FakePacketLag_Recv = 5,
+    k_ESteamNetworkingConfig_FakePacketJitter_Send_Avg = 53,
+    k_ESteamNetworkingConfig_FakePacketJitter_Send_Max = 54,
+    k_ESteamNetworkingConfig_FakePacketJitter_Send_Pct = 55,
+    k_ESteamNetworkingConfig_FakePacketJitter_Recv_Avg = 56,
+    k_ESteamNetworkingConfig_FakePacketJitter_Recv_Max = 57,
+    k_ESteamNetworkingConfig_FakePacketJitter_Recv_Pct = 58,
     k_ESteamNetworkingConfig_FakePacketReorder_Send = 6,
     k_ESteamNetworkingConfig_FakePacketReorder_Recv = 7,
     k_ESteamNetworkingConfig_FakePacketReorder_Time = 8,
@@ -5092,6 +5230,7 @@ pub const ESteamNetworkingConfigValue = enum(c_int) {
     k_ESteamNetworkingConfig_FakeRateLimit_Send_Burst = 43,
     k_ESteamNetworkingConfig_FakeRateLimit_Recv_Rate = 44,
     k_ESteamNetworkingConfig_FakeRateLimit_Recv_Burst = 45,
+    k_ESteamNetworkingConfig_OutOfOrderCorrectionWindowMicroseconds = 51,
     k_ESteamNetworkingConfig_Callback_ConnectionStatusChanged = 201,
     k_ESteamNetworkingConfig_Callback_AuthStatusChanged = 202,
     k_ESteamNetworkingConfig_Callback_RelayNetworkStatusChanged = 203,
@@ -5112,15 +5251,18 @@ pub const ESteamNetworkingConfigValue = enum(c_int) {
     k_ESteamNetworkingConfig_SDRClient_MinPingsBeforePingAccurate = 21,
     k_ESteamNetworkingConfig_SDRClient_SingleSocket = 22,
     k_ESteamNetworkingConfig_SDRClient_ForceRelayCluster = 29,
-    k_ESteamNetworkingConfig_SDRClient_DebugTicketAddress = 30,
+    k_ESteamNetworkingConfig_SDRClient_DevTicket = 30,
     k_ESteamNetworkingConfig_SDRClient_ForceProxyAddr = 31,
     k_ESteamNetworkingConfig_SDRClient_FakeClusterPing = 36,
+    k_ESteamNetworkingConfig_SDRClient_LimitPingProbesToNearestN = 60,
     k_ESteamNetworkingConfig_LogLevel_AckRTT = 13,
     k_ESteamNetworkingConfig_LogLevel_PacketDecode = 14,
     k_ESteamNetworkingConfig_LogLevel_Message = 15,
     k_ESteamNetworkingConfig_LogLevel_PacketGaps = 16,
     k_ESteamNetworkingConfig_LogLevel_P2PRendezvous = 17,
     k_ESteamNetworkingConfig_LogLevel_SDRRelayPings = 18,
+    k_ESteamNetworkingConfig_ECN = 999,
+    k_ESteamNetworkingConfig_SDRClient_EnableTOSProbes = 998,
     k_ESteamNetworkingConfig_DELETED_EnumerateDevVars = 35,
     k_ESteamNetworkingConfigValue__Force32Bit = 2147483647,
     _,
@@ -5147,6 +5289,14 @@ pub const ESteamNetworkingSocketsDebugOutputType = enum(c_int) {
     k_ESteamNetworkingSocketsDebugOutputType_Debug = 7,
     k_ESteamNetworkingSocketsDebugOutputType_Everything = 8,
     k_ESteamNetworkingSocketsDebugOutputType__Force32Bit = 2147483647,
+    _,
+};
+
+pub const ESteamAPIInitResult = enum(c_int) {
+    k_ESteamAPIInitResult_OK = 0,
+    k_ESteamAPIInitResult_FailedGeneric = 1,
+    k_ESteamAPIInitResult_NoSteamClient = 2,
+    k_ESteamAPIInitResult_VersionMismatch = 3,
     _,
 };
 
@@ -5382,29 +5532,6 @@ pub const InputMotionData_t = extern struct {
         if (@sizeOf(InputMotionData_t) != 40 or @alignOf(InputMotionData_t) != 1) @compileLog("Size or alignment of InputMotionData_t are mismatch.", @sizeOf(InputMotionData_t), @alignOf(InputMotionData_t));
     }
 };
-pub const InputMotionDataV2_t = extern struct {
-    driftCorrectedQuatX: f32 align(1) = 0,
-    driftCorrectedQuatY: f32 align(1) = 0,
-    driftCorrectedQuatZ: f32 align(1) = 0,
-    driftCorrectedQuatW: f32 align(1) = 0,
-    sensorFusionQuatX: f32 align(1) = 0,
-    sensorFusionQuatY: f32 align(1) = 0,
-    sensorFusionQuatZ: f32 align(1) = 0,
-    sensorFusionQuatW: f32 align(1) = 0,
-    deferredSensorFusionQuatX: f32 align(1) = 0,
-    deferredSensorFusionQuatY: f32 align(1) = 0,
-    deferredSensorFusionQuatZ: f32 align(1) = 0,
-    deferredSensorFusionQuatW: f32 align(1) = 0,
-    gravityX: f32 align(1) = 0,
-    gravityY: f32 align(1) = 0,
-    gravityZ: f32 align(1) = 0,
-    degreesPerSecondX: f32 align(1) = 0,
-    degreesPerSecondY: f32 align(1) = 0,
-    degreesPerSecondZ: f32 align(1) = 0,
-    comptime {
-        if (@sizeOf(InputMotionDataV2_t) != 72 or @alignOf(InputMotionDataV2_t) != 1) @compileLog("Size or alignment of InputMotionDataV2_t are mismatch.", @sizeOf(InputMotionDataV2_t), @alignOf(InputMotionDataV2_t));
-    }
-};
 pub const SteamInputActionEvent_t = extern struct {
     controllerHandle: InputHandle_t align(1) = 0,
     eEventType: ESteamInputActionEventType align(1) = ESteamInputActionEventType.ESteamInputActionEventType_DigitalAction,
@@ -5440,8 +5567,9 @@ pub const SteamUGCDetails_t = extern struct {
     m_unVotesDown: uint32 align(4) = 0,
     m_flScore: f32 align(4) = 0,
     m_unNumChildren: uint32 align(4) = 0,
+    m_ulTotalFilesSize: uint64 align(StructPlatformPackSize) = 0,
     comptime {
-        const size = if (is_windows) 9776 else 9764;
+        const size = if (is_windows) 9784 else 9772;
         if (@sizeOf(SteamUGCDetails_t) != size or @alignOf(SteamUGCDetails_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamUGCDetails_t are mismatch.", @sizeOf(SteamUGCDetails_t), @alignOf(SteamUGCDetails_t));
     }
 };
@@ -5452,6 +5580,39 @@ pub const SteamItemDetails_t = extern struct {
     m_unFlags: uint16 align(2) = 0,
     comptime {
         if (@sizeOf(SteamItemDetails_t) != 16 or @alignOf(SteamItemDetails_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamItemDetails_t are mismatch.", @sizeOf(SteamItemDetails_t), @alignOf(SteamItemDetails_t));
+    }
+};
+pub const RemotePlayInputMouseMotion_t = extern struct {
+    m_bAbsolute: bool align(1) = false,
+    m_flNormalizedX: f32 align(4) = 0,
+    m_flNormalizedY: f32 align(4) = 0,
+    m_nDeltaX: i32 align(4) = 0,
+    m_nDeltaY: i32 align(4) = 0,
+    comptime {
+        if (@sizeOf(RemotePlayInputMouseMotion_t) != 20 or @alignOf(RemotePlayInputMouseMotion_t) != 4) @compileLog("Size or alignment of RemotePlayInputMouseMotion_t are mismatch.", @sizeOf(RemotePlayInputMouseMotion_t), @alignOf(RemotePlayInputMouseMotion_t));
+    }
+};
+pub const RemotePlayInputMouseWheel_t = extern struct {
+    m_eDirection: ERemotePlayMouseWheelDirection align(4),
+    m_flAmount: f32 align(4) = 0,
+    comptime {
+        if (@sizeOf(RemotePlayInputMouseWheel_t) != 8 or @alignOf(RemotePlayInputMouseWheel_t) != 4) @compileLog("Size or alignment of RemotePlayInputMouseWheel_t are mismatch.", @sizeOf(RemotePlayInputMouseWheel_t), @alignOf(RemotePlayInputMouseWheel_t));
+    }
+};
+pub const RemotePlayInputKey_t = extern struct {
+    m_eScancode: i32 align(4) = 0,
+    m_unModifiers: uint32 align(4) = 0,
+    m_unKeycode: uint32 align(4) = 0,
+    comptime {
+        if (@sizeOf(RemotePlayInputKey_t) != 12 or @alignOf(RemotePlayInputKey_t) != 4) @compileLog("Size or alignment of RemotePlayInputKey_t are mismatch.", @sizeOf(RemotePlayInputKey_t), @alignOf(RemotePlayInputKey_t));
+    }
+};
+pub const RemotePlayInput_t = extern struct {
+    m_unSessionID: RemotePlaySessionID_t align(4) = 0,
+    m_eType: ERemotePlayInputType align(4) = ERemotePlayInputType.k_ERemotePlayInputUnknown,
+    padding: [56]u8 align(1),
+    comptime {
+        if (@sizeOf(RemotePlayInput_t) != 64 or @alignOf(RemotePlayInput_t) != 4) @compileLog("Size or alignment of RemotePlayInput_t are mismatch.", @sizeOf(RemotePlayInput_t), @alignOf(RemotePlayInput_t));
     }
 };
 pub const SteamNetworkingIPAddr = extern struct {
@@ -5587,14 +5748,6 @@ pub const SteamNetworkingIdentity = extern struct {
         return SteamAPI_SteamNetworkingIdentity_GetPSNID(@as(?*anyopaque, @ptrCast(self)));
     }
 
-    pub fn SetStadiaID(self: *Self, id: uint64) void {
-        return SteamAPI_SteamNetworkingIdentity_SetStadiaID(@as(?*anyopaque, @ptrCast(self)), id);
-    }
-
-    pub fn GetStadiaID(self: *Self) uint64 {
-        return SteamAPI_SteamNetworkingIdentity_GetStadiaID(@as(?*anyopaque, @ptrCast(self)));
-    }
-
     pub fn SetIPAddr(self: *Self, addr: *const SteamNetworkingIPAddr) void {
         return SteamAPI_SteamNetworkingIdentity_SetIPAddr(@as(?*anyopaque, @ptrCast(self)), addr);
     }
@@ -5667,8 +5820,6 @@ extern fn SteamAPI_SteamNetworkingIdentity_SetXboxPairwiseID(self: ?*anyopaque, 
 extern fn SteamAPI_SteamNetworkingIdentity_GetXboxPairwiseID(self: ?*anyopaque) callconv(.c) [*c]const u8;
 extern fn SteamAPI_SteamNetworkingIdentity_SetPSNID(self: ?*anyopaque, id: uint64) callconv(.c) void;
 extern fn SteamAPI_SteamNetworkingIdentity_GetPSNID(self: ?*anyopaque) callconv(.c) uint64;
-extern fn SteamAPI_SteamNetworkingIdentity_SetStadiaID(self: ?*anyopaque, id: uint64) callconv(.c) void;
-extern fn SteamAPI_SteamNetworkingIdentity_GetStadiaID(self: ?*anyopaque) callconv(.c) uint64;
 extern fn SteamAPI_SteamNetworkingIdentity_SetIPAddr(self: ?*anyopaque, addr: [*c]const SteamNetworkingIPAddr) callconv(.c) void;
 extern fn SteamAPI_SteamNetworkingIdentity_GetIPAddr(self: ?*anyopaque) callconv(.c) [*c]const SteamNetworkingIPAddr;
 extern fn SteamAPI_SteamNetworkingIdentity_SetIPv4Addr(self: ?*anyopaque, nIPv4: uint32, nPort: uint16) callconv(.c) void;
@@ -5716,7 +5867,8 @@ pub const SteamNetConnectionRealTimeStatus_t = extern struct {
     m_cbPendingReliable: i32 align(4) = 0,
     m_cbSentUnackedReliable: i32 align(4) = 0,
     m_usecQueueTime: SteamNetworkingMicroseconds align(StructPlatformPackSize) = 0,
-    reserved: [16]uint32 align(4),
+    m_usecMaxJitter: int32 align(4) = 0,
+    reserved: [15]uint32 align(4),
     comptime {
         if (@sizeOf(SteamNetConnectionRealTimeStatus_t) != 120 or @alignOf(SteamNetConnectionRealTimeStatus_t) != StructPlatformPackSize) @compileLog("Size or alignment of SteamNetConnectionRealTimeStatus_t are mismatch.", @sizeOf(SteamNetConnectionRealTimeStatus_t), @alignOf(SteamNetConnectionRealTimeStatus_t));
     }
@@ -5920,10 +6072,6 @@ pub const ISteamClient = extern struct {
         return SteamAPI_ISteamClient_GetISteamScreenshots(self.ptr, hSteamuser, hSteamPipe, pchVersion);
     }
 
-    pub fn GetISteamGameSearch(self: *const Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: *const u8) [*c]ISteamGameSearch {
-        return SteamAPI_ISteamClient_GetISteamGameSearch(self.ptr, hSteamuser, hSteamPipe, pchVersion);
-    }
-
     pub fn GetIPCCallCount(self: *const Self) uint32 {
         return SteamAPI_ISteamClient_GetIPCCallCount(self.ptr);
     }
@@ -5948,16 +6096,8 @@ pub const ISteamClient = extern struct {
         return SteamAPI_ISteamClient_GetISteamUGC(self.ptr, hSteamUser, hSteamPipe, pchVersion);
     }
 
-    pub fn GetISteamAppList(self: *const Self, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: *const u8) [*c]ISteamAppList {
-        return SteamAPI_ISteamClient_GetISteamAppList(self.ptr, hSteamUser, hSteamPipe, pchVersion);
-    }
-
     pub fn GetISteamMusic(self: *const Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: *const u8) [*c]ISteamMusic {
         return SteamAPI_ISteamClient_GetISteamMusic(self.ptr, hSteamuser, hSteamPipe, pchVersion);
-    }
-
-    pub fn GetISteamMusicRemote(self: *const Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: *const u8) [*c]ISteamMusicRemote {
-        return SteamAPI_ISteamClient_GetISteamMusicRemote(self.ptr, hSteamuser, hSteamPipe, pchVersion);
     }
 
     pub fn GetISteamHTMLSurface(self: *const Self, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: *const u8) [*c]ISteamHTMLSurface {
@@ -6009,16 +6149,13 @@ extern fn SteamAPI_ISteamClient_GetISteamApps(self: ?*anyopaque, hSteamUser: HSt
 extern fn SteamAPI_ISteamClient_GetISteamNetworking(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamNetworking;
 extern fn SteamAPI_ISteamClient_GetISteamRemoteStorage(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamRemoteStorage;
 extern fn SteamAPI_ISteamClient_GetISteamScreenshots(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamScreenshots;
-extern fn SteamAPI_ISteamClient_GetISteamGameSearch(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamGameSearch;
 extern fn SteamAPI_ISteamClient_GetIPCCallCount(self: ?*anyopaque) callconv(.c) uint32;
 extern fn SteamAPI_ISteamClient_SetWarningMessageHook(self: ?*anyopaque, pFunction: SteamAPIWarningMessageHook_t) callconv(.c) void;
 extern fn SteamAPI_ISteamClient_BShutdownIfAllPipesClosed(self: ?*anyopaque) callconv(.c) bool;
 extern fn SteamAPI_ISteamClient_GetISteamHTTP(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamHTTP;
 extern fn SteamAPI_ISteamClient_GetISteamController(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamController;
 extern fn SteamAPI_ISteamClient_GetISteamUGC(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamUGC;
-extern fn SteamAPI_ISteamClient_GetISteamAppList(self: ?*anyopaque, hSteamUser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamAppList;
 extern fn SteamAPI_ISteamClient_GetISteamMusic(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamMusic;
-extern fn SteamAPI_ISteamClient_GetISteamMusicRemote(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamMusicRemote;
 extern fn SteamAPI_ISteamClient_GetISteamHTMLSurface(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamHTMLSurface;
 extern fn SteamAPI_ISteamClient_GetISteamInventory(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamInventory;
 extern fn SteamAPI_ISteamClient_GetISteamVideo(self: ?*anyopaque, hSteamuser: HSteamUser, hSteamPipe: HSteamPipe, pchVersion: [*c]const u8) callconv(.c) [*c]ISteamVideo;
@@ -6203,10 +6340,10 @@ extern fn SteamAPI_ISteamUser_BIsPhoneRequiringVerification(self: ?*anyopaque) c
 extern fn SteamAPI_ISteamUser_GetMarketEligibility(self: ?*anyopaque) callconv(.c) SteamAPICall_t;
 extern fn SteamAPI_ISteamUser_GetDurationControl(self: ?*anyopaque) callconv(.c) SteamAPICall_t;
 extern fn SteamAPI_ISteamUser_BSetDurationControlOnlineState(self: ?*anyopaque, eNewState: EDurationControlOnlineState) callconv(.c) bool;
-extern fn SteamAPI_SteamFriends_v017() callconv(.c) [*c]ISteamFriends;
+extern fn SteamAPI_SteamFriends_v018() callconv(.c) [*c]ISteamFriends;
 /// user
 pub fn SteamFriends() ISteamFriends {
-    return ISteamFriends{ .ptr = SteamAPI_SteamFriends_v017() };
+    return ISteamFriends{ .ptr = SteamAPI_SteamFriends_v018() };
 }
 
 pub const ISteamFriends = extern struct {
@@ -6215,10 +6352,6 @@ pub const ISteamFriends = extern struct {
     const Self = @This();
     pub fn GetPersonaName(self: *const Self) [*c]const u8 {
         return SteamAPI_ISteamFriends_GetPersonaName(self.ptr);
-    }
-
-    pub fn SetPersonaName(self: *const Self, pchPersonaName: *const u8) SteamAPICall_t {
-        return SteamAPI_ISteamFriends_SetPersonaName(self.ptr, pchPersonaName);
     }
 
     pub fn GetPersonaState(self: *const Self) EPersonaState {
@@ -6381,10 +6514,6 @@ pub const ISteamFriends = extern struct {
         return SteamAPI_ISteamFriends_GetClanOfficerByIndex(self.ptr, steamIDClan, iOfficer);
     }
 
-    pub fn GetUserRestrictions(self: *const Self) uint32 {
-        return SteamAPI_ISteamFriends_GetUserRestrictions(self.ptr);
-    }
-
     pub fn SetRichPresence(self: *const Self, pchKey: *const u8, pchValue: *const u8) bool {
         return SteamAPI_ISteamFriends_SetRichPresence(self.ptr, pchKey, pchValue);
     }
@@ -6536,7 +6665,6 @@ pub const ISteamFriends = extern struct {
 
 // static functions
 extern fn SteamAPI_ISteamFriends_GetPersonaName(self: ?*anyopaque) callconv(.c) [*c]const u8;
-extern fn SteamAPI_ISteamFriends_SetPersonaName(self: ?*anyopaque, pchPersonaName: [*c]const u8) callconv(.c) SteamAPICall_t;
 extern fn SteamAPI_ISteamFriends_GetPersonaState(self: ?*anyopaque) callconv(.c) EPersonaState;
 extern fn SteamAPI_ISteamFriends_GetFriendCount(self: ?*anyopaque, iFriendFlags: i32) callconv(.c) i32;
 extern fn SteamAPI_ISteamFriends_GetFriendByIndex(self: ?*anyopaque, iFriend: i32, iFriendFlags: i32) callconv(.c) CSteamID;
@@ -6577,7 +6705,6 @@ extern fn SteamAPI_ISteamFriends_RequestClanOfficerList(self: ?*anyopaque, steam
 extern fn SteamAPI_ISteamFriends_GetClanOwner(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.c) CSteamID;
 extern fn SteamAPI_ISteamFriends_GetClanOfficerCount(self: ?*anyopaque, steamIDClan: CSteamID) callconv(.c) i32;
 extern fn SteamAPI_ISteamFriends_GetClanOfficerByIndex(self: ?*anyopaque, steamIDClan: CSteamID, iOfficer: i32) callconv(.c) CSteamID;
-extern fn SteamAPI_ISteamFriends_GetUserRestrictions(self: ?*anyopaque) callconv(.c) uint32;
 extern fn SteamAPI_ISteamFriends_SetRichPresence(self: ?*anyopaque, pchKey: [*c]const u8, pchValue: [*c]const u8) callconv(.c) bool;
 extern fn SteamAPI_ISteamFriends_ClearRichPresence(self: ?*anyopaque) callconv(.c) void;
 extern fn SteamAPI_ISteamFriends_GetFriendRichPresence(self: ?*anyopaque, steamIDFriend: CSteamID, pchKey: [*c]const u8) callconv(.c) [*c]const u8;
@@ -6773,6 +6900,10 @@ pub const ISteamUtils = extern struct {
     pub fn DismissFloatingGamepadTextInput(self: *const Self) bool {
         return SteamAPI_ISteamUtils_DismissFloatingGamepadTextInput(self.ptr);
     }
+
+    pub fn DismissGamepadTextInput(self: *const Self) bool {
+        return SteamAPI_ISteamUtils_DismissGamepadTextInput(self.ptr);
+    }
 };
 
 // static functions
@@ -6812,6 +6943,7 @@ extern fn SteamAPI_ISteamUtils_IsSteamRunningOnSteamDeck(self: ?*anyopaque) call
 extern fn SteamAPI_ISteamUtils_ShowFloatingGamepadTextInput(self: ?*anyopaque, eKeyboardMode: EFloatingGamepadTextInputMode, nTextFieldXPosition: i32, nTextFieldYPosition: i32, nTextFieldWidth: i32, nTextFieldHeight: i32) callconv(.c) bool;
 extern fn SteamAPI_ISteamUtils_SetGameLauncherMode(self: ?*anyopaque, bLauncherMode: bool) callconv(.c) void;
 extern fn SteamAPI_ISteamUtils_DismissFloatingGamepadTextInput(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamUtils_DismissGamepadTextInput(self: ?*anyopaque) callconv(.c) bool;
 extern fn SteamAPI_SteamMatchmaking_v009() callconv(.c) [*c]ISteamMatchmaking;
 /// user
 pub fn SteamMatchmaking() ISteamMatchmaking {
@@ -7194,88 +7326,6 @@ extern fn SteamAPI_ISteamMatchmakingServers_PingServer(self: ?*anyopaque, unIP: 
 extern fn SteamAPI_ISteamMatchmakingServers_PlayerDetails(self: ?*anyopaque, unIP: uint32, usPort: uint16, pRequestServersResponse: [*c]ISteamMatchmakingPlayersResponse) callconv(.c) HServerQuery;
 extern fn SteamAPI_ISteamMatchmakingServers_ServerRules(self: ?*anyopaque, unIP: uint32, usPort: uint16, pRequestServersResponse: [*c]ISteamMatchmakingRulesResponse) callconv(.c) HServerQuery;
 extern fn SteamAPI_ISteamMatchmakingServers_CancelServerQuery(self: ?*anyopaque, hServerQuery: HServerQuery) callconv(.c) void;
-extern fn SteamAPI_SteamGameSearch_v001() callconv(.c) [*c]ISteamGameSearch;
-/// user
-pub fn SteamGameSearch() ISteamGameSearch {
-    return ISteamGameSearch{ .ptr = SteamAPI_SteamGameSearch_v001() };
-}
-
-pub const ISteamGameSearch = extern struct {
-    ptr: ?*anyopaque,
-    // methods
-    const Self = @This();
-    pub fn AddGameSearchParams(self: *const Self, pchKeyToFind: *const u8, pchValuesToFind: *const u8) EGameSearchErrorCode_t {
-        return SteamAPI_ISteamGameSearch_AddGameSearchParams(self.ptr, pchKeyToFind, pchValuesToFind);
-    }
-
-    pub fn SearchForGameWithLobby(self: *const Self, steamIDLobby: CSteamID, nPlayerMin: i32, nPlayerMax: i32) EGameSearchErrorCode_t {
-        return SteamAPI_ISteamGameSearch_SearchForGameWithLobby(self.ptr, steamIDLobby, nPlayerMin, nPlayerMax);
-    }
-
-    pub fn SearchForGameSolo(self: *const Self, nPlayerMin: i32, nPlayerMax: i32) EGameSearchErrorCode_t {
-        return SteamAPI_ISteamGameSearch_SearchForGameSolo(self.ptr, nPlayerMin, nPlayerMax);
-    }
-
-    pub fn AcceptGame(self: *const Self) EGameSearchErrorCode_t {
-        return SteamAPI_ISteamGameSearch_AcceptGame(self.ptr);
-    }
-
-    pub fn DeclineGame(self: *const Self) EGameSearchErrorCode_t {
-        return SteamAPI_ISteamGameSearch_DeclineGame(self.ptr);
-    }
-
-    pub fn RetrieveConnectionDetails(self: *const Self, steamIDHost: CSteamID, pchConnectionDetails: []u8) EGameSearchErrorCode_t {
-        return SteamAPI_ISteamGameSearch_RetrieveConnectionDetails(self.ptr, steamIDHost, pchConnectionDetails.ptr, @intCast(pchConnectionDetails.len));
-    }
-
-    pub fn EndGameSearch(self: *const Self) EGameSearchErrorCode_t {
-        return SteamAPI_ISteamGameSearch_EndGameSearch(self.ptr);
-    }
-
-    pub fn SetGameHostParams(self: *const Self, pchKey: *const u8, pchValue: *const u8) EGameSearchErrorCode_t {
-        return SteamAPI_ISteamGameSearch_SetGameHostParams(self.ptr, pchKey, pchValue);
-    }
-
-    pub fn SetConnectionDetails(self: *const Self, pchConnectionDetails: []const u8) EGameSearchErrorCode_t {
-        return SteamAPI_ISteamGameSearch_SetConnectionDetails(self.ptr, pchConnectionDetails.ptr, @intCast(pchConnectionDetails.len));
-    }
-
-    pub fn RequestPlayersForGame(self: *const Self, nPlayerMin: i32, nPlayerMax: i32, nMaxTeamSize: i32) EGameSearchErrorCode_t {
-        return SteamAPI_ISteamGameSearch_RequestPlayersForGame(self.ptr, nPlayerMin, nPlayerMax, nMaxTeamSize);
-    }
-
-    pub fn HostConfirmGameStart(self: *const Self, ullUniqueGameID: uint64) EGameSearchErrorCode_t {
-        return SteamAPI_ISteamGameSearch_HostConfirmGameStart(self.ptr, ullUniqueGameID);
-    }
-
-    pub fn CancelRequestPlayersForGame(self: *const Self) EGameSearchErrorCode_t {
-        return SteamAPI_ISteamGameSearch_CancelRequestPlayersForGame(self.ptr);
-    }
-
-    pub fn SubmitPlayerResult(self: *const Self, ullUniqueGameID: uint64, steamIDPlayer: CSteamID, EPlayerResult: EPlayerResult_t) EGameSearchErrorCode_t {
-        return SteamAPI_ISteamGameSearch_SubmitPlayerResult(self.ptr, ullUniqueGameID, steamIDPlayer, EPlayerResult);
-    }
-
-    pub fn EndGame(self: *const Self, ullUniqueGameID: uint64) EGameSearchErrorCode_t {
-        return SteamAPI_ISteamGameSearch_EndGame(self.ptr, ullUniqueGameID);
-    }
-};
-
-// static functions
-extern fn SteamAPI_ISteamGameSearch_AddGameSearchParams(self: ?*anyopaque, pchKeyToFind: [*c]const u8, pchValuesToFind: [*c]const u8) callconv(.c) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_SearchForGameWithLobby(self: ?*anyopaque, steamIDLobby: CSteamID, nPlayerMin: i32, nPlayerMax: i32) callconv(.c) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_SearchForGameSolo(self: ?*anyopaque, nPlayerMin: i32, nPlayerMax: i32) callconv(.c) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_AcceptGame(self: ?*anyopaque) callconv(.c) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_DeclineGame(self: ?*anyopaque) callconv(.c) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_RetrieveConnectionDetails(self: ?*anyopaque, steamIDHost: CSteamID, pchConnectionDetails: [*c]u8, cubConnectionDetails: i32) callconv(.c) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_EndGameSearch(self: ?*anyopaque) callconv(.c) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_SetGameHostParams(self: ?*anyopaque, pchKey: [*c]const u8, pchValue: [*c]const u8) callconv(.c) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_SetConnectionDetails(self: ?*anyopaque, pchConnectionDetails: [*c]const u8, cubConnectionDetails: i32) callconv(.c) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_RequestPlayersForGame(self: ?*anyopaque, nPlayerMin: i32, nPlayerMax: i32, nMaxTeamSize: i32) callconv(.c) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_HostConfirmGameStart(self: ?*anyopaque, ullUniqueGameID: uint64) callconv(.c) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_CancelRequestPlayersForGame(self: ?*anyopaque) callconv(.c) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_SubmitPlayerResult(self: ?*anyopaque, ullUniqueGameID: uint64, steamIDPlayer: CSteamID, EPlayerResult: EPlayerResult_t) callconv(.c) EGameSearchErrorCode_t;
-extern fn SteamAPI_ISteamGameSearch_EndGame(self: ?*anyopaque, ullUniqueGameID: uint64) callconv(.c) EGameSearchErrorCode_t;
 extern fn SteamAPI_SteamParties_v002() callconv(.c) [*c]ISteamParties;
 /// user
 pub fn SteamParties() ISteamParties {
@@ -7651,20 +7701,16 @@ extern fn SteamAPI_ISteamRemoteStorage_GetLocalFileChangeCount(self: ?*anyopaque
 extern fn SteamAPI_ISteamRemoteStorage_GetLocalFileChange(self: ?*anyopaque, iFile: i32, pEChangeType: [*c]ERemoteStorageLocalFileChange, pEFilePathType: [*c]ERemoteStorageFilePathType) callconv(.c) [*c]const u8;
 extern fn SteamAPI_ISteamRemoteStorage_BeginFileWriteBatch(self: ?*anyopaque) callconv(.c) bool;
 extern fn SteamAPI_ISteamRemoteStorage_EndFileWriteBatch(self: ?*anyopaque) callconv(.c) bool;
-extern fn SteamAPI_SteamUserStats_v012() callconv(.c) [*c]ISteamUserStats;
+extern fn SteamAPI_SteamUserStats_v013() callconv(.c) [*c]ISteamUserStats;
 /// user
 pub fn SteamUserStats() ISteamUserStats {
-    return ISteamUserStats{ .ptr = SteamAPI_SteamUserStats_v012() };
+    return ISteamUserStats{ .ptr = SteamAPI_SteamUserStats_v013() };
 }
 
 pub const ISteamUserStats = extern struct {
     ptr: ?*anyopaque,
     // methods
     const Self = @This();
-    pub fn RequestCurrentStats(self: *const Self) bool {
-        return SteamAPI_ISteamUserStats_RequestCurrentStats(self.ptr);
-    }
-
     pub fn GetStatInt32(self: *const Self, pchName: *const u8, pData: *int32) bool {
         return SteamAPI_ISteamUserStats_GetStatInt32(self.ptr, pchName, pData);
     }
@@ -7843,7 +7889,6 @@ pub const ISteamUserStats = extern struct {
 };
 
 // static functions
-extern fn SteamAPI_ISteamUserStats_RequestCurrentStats(self: ?*anyopaque) callconv(.c) bool;
 extern fn SteamAPI_ISteamUserStats_GetStatInt32(self: ?*anyopaque, pchName: [*c]const u8, pData: [*c]int32) callconv(.c) bool;
 extern fn SteamAPI_ISteamUserStats_GetStatFloat(self: ?*anyopaque, pchName: [*c]const u8, pData: [*c]f32) callconv(.c) bool;
 extern fn SteamAPI_ISteamUserStats_SetStatInt32(self: ?*anyopaque, pchName: [*c]const u8, nData: int32) callconv(.c) bool;
@@ -7888,10 +7933,10 @@ extern fn SteamAPI_ISteamUserStats_GetGlobalStatHistoryInt64(self: ?*anyopaque, 
 extern fn SteamAPI_ISteamUserStats_GetGlobalStatHistoryDouble(self: ?*anyopaque, pchStatName: [*c]const u8, pData: [*c]f64, cubData: uint32) callconv(.c) int32;
 extern fn SteamAPI_ISteamUserStats_GetAchievementProgressLimitsInt32(self: ?*anyopaque, pchName: [*c]const u8, pnMinProgress: [*c]int32, pnMaxProgress: [*c]int32) callconv(.c) bool;
 extern fn SteamAPI_ISteamUserStats_GetAchievementProgressLimitsFloat(self: ?*anyopaque, pchName: [*c]const u8, pfMinProgress: [*c]f32, pfMaxProgress: [*c]f32) callconv(.c) bool;
-extern fn SteamAPI_SteamApps_v008() callconv(.c) [*c]ISteamApps;
+extern fn SteamAPI_SteamApps_v009() callconv(.c) [*c]ISteamApps;
 /// user
 pub fn SteamApps() ISteamApps {
-    return ISteamApps{ .ptr = SteamAPI_SteamApps_v008() };
+    return ISteamApps{ .ptr = SteamAPI_SteamApps_v009() };
 }
 
 pub const ISteamApps = extern struct {
@@ -8017,6 +8062,18 @@ pub const ISteamApps = extern struct {
     pub fn SetDlcContext(self: *const Self, nAppID: AppId_t) bool {
         return SteamAPI_ISteamApps_SetDlcContext(self.ptr, nAppID);
     }
+
+    pub fn GetNumBetas(self: *const Self, pnAvailable: *i32, pnPrivate: *i32) i32 {
+        return SteamAPI_ISteamApps_GetNumBetas(self.ptr, pnAvailable, pnPrivate);
+    }
+
+    pub fn GetBetaInfo(self: *const Self, iBetaIndex: i32, punFlags: *uint32, punBuildID: *uint32, pchBetaName: []u8, pchDescription: []u8, punLastUpdated: *uint32) bool {
+        return SteamAPI_ISteamApps_GetBetaInfo(self.ptr, iBetaIndex, punFlags, punBuildID, pchBetaName.ptr, @intCast(pchBetaName.len), pchDescription.ptr, @intCast(pchDescription.len), punLastUpdated);
+    }
+
+    pub fn SetActiveBeta(self: *const Self, pchBetaName: *const u8) bool {
+        return SteamAPI_ISteamApps_SetActiveBeta(self.ptr, pchBetaName);
+    }
 };
 
 // static functions
@@ -8050,6 +8107,9 @@ extern fn SteamAPI_ISteamApps_GetLaunchCommandLine(self: ?*anyopaque, pszCommand
 extern fn SteamAPI_ISteamApps_BIsSubscribedFromFamilySharing(self: ?*anyopaque) callconv(.c) bool;
 extern fn SteamAPI_ISteamApps_BIsTimedTrial(self: ?*anyopaque, punSecondsAllowed: [*c]uint32, punSecondsPlayed: [*c]uint32) callconv(.c) bool;
 extern fn SteamAPI_ISteamApps_SetDlcContext(self: ?*anyopaque, nAppID: AppId_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamApps_GetNumBetas(self: ?*anyopaque, pnAvailable: [*c]i32, pnPrivate: [*c]i32) callconv(.c) i32;
+extern fn SteamAPI_ISteamApps_GetBetaInfo(self: ?*anyopaque, iBetaIndex: i32, punFlags: [*c]uint32, punBuildID: [*c]uint32, pchBetaName: [*c]u8, cchBetaName: i32, pchDescription: [*c]u8, cchDescription: i32, punLastUpdated: [*c]uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamApps_SetActiveBeta(self: ?*anyopaque, pchBetaName: [*c]const u8) callconv(.c) bool;
 extern fn SteamAPI_SteamNetworking_v006() callconv(.c) [*c]ISteamNetworking;
 /// user
 pub fn SteamNetworking() ISteamNetworking {
@@ -8291,178 +8351,6 @@ extern fn SteamAPI_ISteamMusic_PlayPrevious(self: ?*anyopaque) callconv(.c) void
 extern fn SteamAPI_ISteamMusic_PlayNext(self: ?*anyopaque) callconv(.c) void;
 extern fn SteamAPI_ISteamMusic_SetVolume(self: ?*anyopaque, flVolume: f32) callconv(.c) void;
 extern fn SteamAPI_ISteamMusic_GetVolume(self: ?*anyopaque) callconv(.c) f32;
-extern fn SteamAPI_SteamMusicRemote_v001() callconv(.c) [*c]ISteamMusicRemote;
-/// user
-pub fn SteamMusicRemote() ISteamMusicRemote {
-    return ISteamMusicRemote{ .ptr = SteamAPI_SteamMusicRemote_v001() };
-}
-
-pub const ISteamMusicRemote = extern struct {
-    ptr: ?*anyopaque,
-    // methods
-    const Self = @This();
-    pub fn RegisterSteamMusicRemote(self: *const Self, pchName: *const u8) bool {
-        return SteamAPI_ISteamMusicRemote_RegisterSteamMusicRemote(self.ptr, pchName);
-    }
-
-    pub fn DeregisterSteamMusicRemote(self: *const Self) bool {
-        return SteamAPI_ISteamMusicRemote_DeregisterSteamMusicRemote(self.ptr);
-    }
-
-    pub fn BIsCurrentMusicRemote(self: *const Self) bool {
-        return SteamAPI_ISteamMusicRemote_BIsCurrentMusicRemote(self.ptr);
-    }
-
-    pub fn BActivationSuccess(self: *const Self, bValue: bool) bool {
-        return SteamAPI_ISteamMusicRemote_BActivationSuccess(self.ptr, bValue);
-    }
-
-    pub fn SetDisplayName(self: *const Self, pchDisplayName: *const u8) bool {
-        return SteamAPI_ISteamMusicRemote_SetDisplayName(self.ptr, pchDisplayName);
-    }
-
-    pub fn SetPNGIcon_64x64(self: *const Self, pvBuffer: []u8) bool {
-        return SteamAPI_ISteamMusicRemote_SetPNGIcon_64x64(self.ptr, pvBuffer.ptr, @intCast(pvBuffer.len));
-    }
-
-    pub fn EnablePlayPrevious(self: *const Self, bValue: bool) bool {
-        return SteamAPI_ISteamMusicRemote_EnablePlayPrevious(self.ptr, bValue);
-    }
-
-    pub fn EnablePlayNext(self: *const Self, bValue: bool) bool {
-        return SteamAPI_ISteamMusicRemote_EnablePlayNext(self.ptr, bValue);
-    }
-
-    pub fn EnableShuffled(self: *const Self, bValue: bool) bool {
-        return SteamAPI_ISteamMusicRemote_EnableShuffled(self.ptr, bValue);
-    }
-
-    pub fn EnableLooped(self: *const Self, bValue: bool) bool {
-        return SteamAPI_ISteamMusicRemote_EnableLooped(self.ptr, bValue);
-    }
-
-    pub fn EnableQueue(self: *const Self, bValue: bool) bool {
-        return SteamAPI_ISteamMusicRemote_EnableQueue(self.ptr, bValue);
-    }
-
-    pub fn EnablePlaylists(self: *const Self, bValue: bool) bool {
-        return SteamAPI_ISteamMusicRemote_EnablePlaylists(self.ptr, bValue);
-    }
-
-    pub fn UpdatePlaybackStatus(self: *const Self, nStatus: AudioPlayback_Status) bool {
-        return SteamAPI_ISteamMusicRemote_UpdatePlaybackStatus(self.ptr, nStatus);
-    }
-
-    pub fn UpdateShuffled(self: *const Self, bValue: bool) bool {
-        return SteamAPI_ISteamMusicRemote_UpdateShuffled(self.ptr, bValue);
-    }
-
-    pub fn UpdateLooped(self: *const Self, bValue: bool) bool {
-        return SteamAPI_ISteamMusicRemote_UpdateLooped(self.ptr, bValue);
-    }
-
-    pub fn UpdateVolume(self: *const Self, flValue: f32) bool {
-        return SteamAPI_ISteamMusicRemote_UpdateVolume(self.ptr, flValue);
-    }
-
-    pub fn CurrentEntryWillChange(self: *const Self) bool {
-        return SteamAPI_ISteamMusicRemote_CurrentEntryWillChange(self.ptr);
-    }
-
-    pub fn CurrentEntryIsAvailable(self: *const Self, bAvailable: bool) bool {
-        return SteamAPI_ISteamMusicRemote_CurrentEntryIsAvailable(self.ptr, bAvailable);
-    }
-
-    pub fn UpdateCurrentEntryText(self: *const Self, pchText: *const u8) bool {
-        return SteamAPI_ISteamMusicRemote_UpdateCurrentEntryText(self.ptr, pchText);
-    }
-
-    pub fn UpdateCurrentEntryElapsedSeconds(self: *const Self, nValue: i32) bool {
-        return SteamAPI_ISteamMusicRemote_UpdateCurrentEntryElapsedSeconds(self.ptr, nValue);
-    }
-
-    pub fn UpdateCurrentEntryCoverArt(self: *const Self, pvBuffer: []u8) bool {
-        return SteamAPI_ISteamMusicRemote_UpdateCurrentEntryCoverArt(self.ptr, pvBuffer.ptr, @intCast(pvBuffer.len));
-    }
-
-    pub fn CurrentEntryDidChange(self: *const Self) bool {
-        return SteamAPI_ISteamMusicRemote_CurrentEntryDidChange(self.ptr);
-    }
-
-    pub fn QueueWillChange(self: *const Self) bool {
-        return SteamAPI_ISteamMusicRemote_QueueWillChange(self.ptr);
-    }
-
-    pub fn ResetQueueEntries(self: *const Self) bool {
-        return SteamAPI_ISteamMusicRemote_ResetQueueEntries(self.ptr);
-    }
-
-    pub fn SetQueueEntry(self: *const Self, nID: i32, nPosition: i32, pchEntryText: *const u8) bool {
-        return SteamAPI_ISteamMusicRemote_SetQueueEntry(self.ptr, nID, nPosition, pchEntryText);
-    }
-
-    pub fn SetCurrentQueueEntry(self: *const Self, nID: i32) bool {
-        return SteamAPI_ISteamMusicRemote_SetCurrentQueueEntry(self.ptr, nID);
-    }
-
-    pub fn QueueDidChange(self: *const Self) bool {
-        return SteamAPI_ISteamMusicRemote_QueueDidChange(self.ptr);
-    }
-
-    pub fn PlaylistWillChange(self: *const Self) bool {
-        return SteamAPI_ISteamMusicRemote_PlaylistWillChange(self.ptr);
-    }
-
-    pub fn ResetPlaylistEntries(self: *const Self) bool {
-        return SteamAPI_ISteamMusicRemote_ResetPlaylistEntries(self.ptr);
-    }
-
-    pub fn SetPlaylistEntry(self: *const Self, nID: i32, nPosition: i32, pchEntryText: *const u8) bool {
-        return SteamAPI_ISteamMusicRemote_SetPlaylistEntry(self.ptr, nID, nPosition, pchEntryText);
-    }
-
-    pub fn SetCurrentPlaylistEntry(self: *const Self, nID: i32) bool {
-        return SteamAPI_ISteamMusicRemote_SetCurrentPlaylistEntry(self.ptr, nID);
-    }
-
-    pub fn PlaylistDidChange(self: *const Self) bool {
-        return SteamAPI_ISteamMusicRemote_PlaylistDidChange(self.ptr);
-    }
-};
-
-// static functions
-extern fn SteamAPI_ISteamMusicRemote_RegisterSteamMusicRemote(self: ?*anyopaque, pchName: [*c]const u8) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_DeregisterSteamMusicRemote(self: ?*anyopaque) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_BIsCurrentMusicRemote(self: ?*anyopaque) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_BActivationSuccess(self: ?*anyopaque, bValue: bool) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_SetDisplayName(self: ?*anyopaque, pchDisplayName: [*c]const u8) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_SetPNGIcon_64x64(self: ?*anyopaque, pvBuffer: [*c]u8, cbBufferLength: uint32) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_EnablePlayPrevious(self: ?*anyopaque, bValue: bool) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_EnablePlayNext(self: ?*anyopaque, bValue: bool) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_EnableShuffled(self: ?*anyopaque, bValue: bool) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_EnableLooped(self: ?*anyopaque, bValue: bool) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_EnableQueue(self: ?*anyopaque, bValue: bool) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_EnablePlaylists(self: ?*anyopaque, bValue: bool) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_UpdatePlaybackStatus(self: ?*anyopaque, nStatus: AudioPlayback_Status) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_UpdateShuffled(self: ?*anyopaque, bValue: bool) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_UpdateLooped(self: ?*anyopaque, bValue: bool) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_UpdateVolume(self: ?*anyopaque, flValue: f32) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_CurrentEntryWillChange(self: ?*anyopaque) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_CurrentEntryIsAvailable(self: ?*anyopaque, bAvailable: bool) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_UpdateCurrentEntryText(self: ?*anyopaque, pchText: [*c]const u8) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_UpdateCurrentEntryElapsedSeconds(self: ?*anyopaque, nValue: i32) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_UpdateCurrentEntryCoverArt(self: ?*anyopaque, pvBuffer: [*c]u8, cbBufferLength: uint32) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_CurrentEntryDidChange(self: ?*anyopaque) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_QueueWillChange(self: ?*anyopaque) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_ResetQueueEntries(self: ?*anyopaque) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_SetQueueEntry(self: ?*anyopaque, nID: i32, nPosition: i32, pchEntryText: [*c]const u8) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_SetCurrentQueueEntry(self: ?*anyopaque, nID: i32) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_QueueDidChange(self: ?*anyopaque) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_PlaylistWillChange(self: ?*anyopaque) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_ResetPlaylistEntries(self: ?*anyopaque) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_SetPlaylistEntry(self: ?*anyopaque, nID: i32, nPosition: i32, pchEntryText: [*c]const u8) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_SetCurrentPlaylistEntry(self: ?*anyopaque, nID: i32) callconv(.c) bool;
-extern fn SteamAPI_ISteamMusicRemote_PlaylistDidChange(self: ?*anyopaque) callconv(.c) bool;
 extern fn SteamAPI_SteamHTTP_v003() callconv(.c) [*c]ISteamHTTP;
 /// user
 pub fn SteamHTTP() ISteamHTTP {
@@ -8803,7 +8691,7 @@ pub const ISteamInput = extern struct {
         return SteamAPI_ISteamInput_GetSessionInputConfigurationSettings(self.ptr);
     }
 
-    pub fn SetDualSenseTriggerEffect(self: *const Self, inputHandle: InputHandle_t, pParam: *const u8) void {
+    pub fn SetDualSenseTriggerEffect(self: *const Self, inputHandle: InputHandle_t, pParam: *const anyopaque) void {
         return SteamAPI_ISteamInput_SetDualSenseTriggerEffect(self.ptr, inputHandle, pParam);
     }
 };
@@ -8856,7 +8744,7 @@ extern fn SteamAPI_ISteamInput_TranslateActionOrigin(self: ?*anyopaque, eDestina
 extern fn SteamAPI_ISteamInput_GetDeviceBindingRevision(self: ?*anyopaque, inputHandle: InputHandle_t, pMajor: [*c]i32, pMinor: [*c]i32) callconv(.c) bool;
 extern fn SteamAPI_ISteamInput_GetRemotePlaySessionID(self: ?*anyopaque, inputHandle: InputHandle_t) callconv(.c) uint32;
 extern fn SteamAPI_ISteamInput_GetSessionInputConfigurationSettings(self: ?*anyopaque) callconv(.c) uint16;
-extern fn SteamAPI_ISteamInput_SetDualSenseTriggerEffect(self: ?*anyopaque, inputHandle: InputHandle_t, pParam: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamInput_SetDualSenseTriggerEffect(self: ?*anyopaque, inputHandle: InputHandle_t, pParam: *const anyopaque) callconv(.c) void;
 extern fn SteamAPI_SteamController_v008() callconv(.c) [*c]ISteamController;
 /// user
 pub fn SteamController() ISteamController {
@@ -9039,15 +8927,15 @@ extern fn SteamAPI_ISteamController_GetGlyphForXboxOrigin(self: ?*anyopaque, eOr
 extern fn SteamAPI_ISteamController_GetActionOriginFromXboxOrigin(self: ?*anyopaque, controllerHandle: ControllerHandle_t, eOrigin: EXboxOrigin) callconv(.c) EControllerActionOrigin;
 extern fn SteamAPI_ISteamController_TranslateActionOrigin(self: ?*anyopaque, eDestinationInputType: ESteamInputType, eSourceOrigin: EControllerActionOrigin) callconv(.c) EControllerActionOrigin;
 extern fn SteamAPI_ISteamController_GetControllerBindingRevision(self: ?*anyopaque, controllerHandle: ControllerHandle_t, pMajor: [*c]i32, pMinor: [*c]i32) callconv(.c) bool;
-extern fn SteamAPI_SteamUGC_v017() callconv(.c) [*c]ISteamUGC;
+extern fn SteamAPI_SteamUGC_v021() callconv(.c) [*c]ISteamUGC;
 /// user
 pub fn SteamUGC() ISteamUGC {
-    return ISteamUGC{ .ptr = SteamAPI_SteamUGC_v017() };
+    return ISteamUGC{ .ptr = SteamAPI_SteamUGC_v021() };
 }
-extern fn SteamAPI_SteamGameServerUGC_v017() callconv(.c) [*c]ISteamUGC;
+extern fn SteamAPI_SteamGameServerUGC_v021() callconv(.c) [*c]ISteamUGC;
 /// gameserver
 pub fn SteamGameServerUGC() ISteamUGC {
-    return ISteamUGC{ .ptr = SteamAPI_SteamGameServerUGC_v017() };
+    return ISteamUGC{ .ptr = SteamAPI_SteamGameServerUGC_v021() };
 }
 
 pub const ISteamUGC = extern struct {
@@ -9126,6 +9014,14 @@ pub const ISteamUGC = extern struct {
         return SteamAPI_ISteamUGC_GetQueryFirstUGCKeyValueTag(self.ptr, handle, index, pchKey, pchValue.ptr, @intCast(pchValue.len));
     }
 
+    pub fn GetNumSupportedGameVersions(self: *const Self, handle: UGCQueryHandle_t, index: uint32) uint32 {
+        return SteamAPI_ISteamUGC_GetNumSupportedGameVersions(self.ptr, handle, index);
+    }
+
+    pub fn GetSupportedGameVersionData(self: *const Self, handle: UGCQueryHandle_t, index: uint32, versionIndex: uint32, pchGameBranchMin: *u8, pchGameBranchMax: *u8, cchGameBranchSize: uint32) bool {
+        return SteamAPI_ISteamUGC_GetSupportedGameVersionData(self.ptr, handle, index, versionIndex, pchGameBranchMin, pchGameBranchMax, cchGameBranchSize);
+    }
+
     pub fn GetQueryUGCContentDescriptors(self: *const Self, handle: UGCQueryHandle_t, index: uint32, pvecDescriptors: *EUGCContentDescriptorID, cMaxEntries: uint32) uint32 {
         return SteamAPI_ISteamUGC_GetQueryUGCContentDescriptors(self.ptr, handle, index, pvecDescriptors, cMaxEntries);
     }
@@ -9184,6 +9080,10 @@ pub const ISteamUGC = extern struct {
 
     pub fn SetAllowCachedResponse(self: *const Self, handle: UGCQueryHandle_t, unMaxAgeSeconds: uint32) bool {
         return SteamAPI_ISteamUGC_SetAllowCachedResponse(self.ptr, handle, unMaxAgeSeconds);
+    }
+
+    pub fn SetAdminQuery(self: *const Self, handle: UGCUpdateHandle_t, bAdminQuery: bool) bool {
+        return SteamAPI_ISteamUGC_SetAdminQuery(self.ptr, handle, bAdminQuery);
     }
 
     pub fn SetCloudFileNameFilter(self: *const Self, handle: UGCQueryHandle_t, pMatchCloudFileName: *const u8) bool {
@@ -9246,8 +9146,8 @@ pub const ISteamUGC = extern struct {
         return SteamAPI_ISteamUGC_SetItemVisibility(self.ptr, handle, eVisibility);
     }
 
-    pub fn SetItemTags(self: *const Self, updateHandle: UGCUpdateHandle_t, pTags: *const SteamParamStringArray_t) bool {
-        return SteamAPI_ISteamUGC_SetItemTags(self.ptr, updateHandle, pTags);
+    pub fn SetItemTags(self: *const Self, updateHandle: UGCUpdateHandle_t, pTags: *const SteamParamStringArray_t, bAllowAdminTags: bool) bool {
+        return SteamAPI_ISteamUGC_SetItemTags(self.ptr, updateHandle, pTags, bAllowAdminTags);
     }
 
     pub fn SetItemContent(self: *const Self, handle: UGCUpdateHandle_t, pszContentFolder: [:0]const u8) bool {
@@ -9302,6 +9202,10 @@ pub const ISteamUGC = extern struct {
         return SteamAPI_ISteamUGC_RemoveContentDescriptor(self.ptr, handle, descid);
     }
 
+    pub fn SetRequiredGameVersions(self: *const Self, handle: UGCUpdateHandle_t, pszGameBranchMin: [:0]const u8, pszGameBranchMax: [:0]const u8) bool {
+        return SteamAPI_ISteamUGC_SetRequiredGameVersions(self.ptr, handle, pszGameBranchMin.ptr, pszGameBranchMax.ptr);
+    }
+
     pub fn SubmitItemUpdate(self: *const Self, handle: UGCUpdateHandle_t, pchChangeNote: *const u8) SteamAPICall_t {
         return SteamAPI_ISteamUGC_SubmitItemUpdate(self.ptr, handle, pchChangeNote);
     }
@@ -9334,12 +9238,12 @@ pub const ISteamUGC = extern struct {
         return SteamAPI_ISteamUGC_UnsubscribeItem(self.ptr, nPublishedFileID);
     }
 
-    pub fn GetNumSubscribedItems(self: *const Self) uint32 {
-        return SteamAPI_ISteamUGC_GetNumSubscribedItems(self.ptr);
+    pub fn GetNumSubscribedItems(self: *const Self, bIncludeLocallyDisabled: bool) uint32 {
+        return SteamAPI_ISteamUGC_GetNumSubscribedItems(self.ptr, bIncludeLocallyDisabled);
     }
 
-    pub fn GetSubscribedItems(self: *const Self, pvecPublishedFileID: *PublishedFileId_t, cMaxEntries: uint32) uint32 {
-        return SteamAPI_ISteamUGC_GetSubscribedItems(self.ptr, pvecPublishedFileID, cMaxEntries);
+    pub fn GetSubscribedItems(self: *const Self, pvecPublishedFileID: *PublishedFileId_t, cMaxEntries: uint32, bIncludeLocallyDisabled: bool) uint32 {
+        return SteamAPI_ISteamUGC_GetSubscribedItems(self.ptr, pvecPublishedFileID, cMaxEntries, bIncludeLocallyDisabled);
     }
 
     pub fn GetItemState(self: *const Self, nPublishedFileID: PublishedFileId_t) uint32 {
@@ -9409,6 +9313,30 @@ pub const ISteamUGC = extern struct {
     pub fn GetWorkshopEULAStatus(self: *const Self) SteamAPICall_t {
         return SteamAPI_ISteamUGC_GetWorkshopEULAStatus(self.ptr);
     }
+
+    pub fn GetUserContentDescriptorPreferences(self: *const Self, pvecDescriptors: *EUGCContentDescriptorID, cMaxEntries: uint32) uint32 {
+        return SteamAPI_ISteamUGC_GetUserContentDescriptorPreferences(self.ptr, pvecDescriptors, cMaxEntries);
+    }
+
+    pub fn SetItemsDisabledLocally(self: *const Self, pvecPublishedFileIDs: *PublishedFileId_t, unNumPublishedFileIDs: uint32, bDisabledLocally: bool) bool {
+        return SteamAPI_ISteamUGC_SetItemsDisabledLocally(self.ptr, pvecPublishedFileIDs, unNumPublishedFileIDs, bDisabledLocally);
+    }
+
+    pub fn SetSubscriptionsLoadOrder(self: *const Self, pvecPublishedFileIDs: *PublishedFileId_t, unNumPublishedFileIDs: uint32) bool {
+        return SteamAPI_ISteamUGC_SetSubscriptionsLoadOrder(self.ptr, pvecPublishedFileIDs, unNumPublishedFileIDs);
+    }
+
+    pub fn MarkDownloadedItemAsUnused(self: *const Self, nPublishedFileID: PublishedFileId_t) bool {
+        return SteamAPI_ISteamUGC_MarkDownloadedItemAsUnused(self.ptr, nPublishedFileID);
+    }
+
+    pub fn GetNumDownloadedItems(self: *const Self) uint32 {
+        return SteamAPI_ISteamUGC_GetNumDownloadedItems(self.ptr);
+    }
+
+    pub fn GetDownloadedItems(self: *const Self, pvecPublishedFileIDs: *PublishedFileId_t, cMaxEntries: uint32) uint32 {
+        return SteamAPI_ISteamUGC_GetDownloadedItems(self.ptr, pvecPublishedFileIDs, cMaxEntries);
+    }
 };
 
 // static functions
@@ -9430,6 +9358,8 @@ extern fn SteamAPI_ISteamUGC_GetQueryUGCAdditionalPreview(self: ?*anyopaque, han
 extern fn SteamAPI_ISteamUGC_GetQueryUGCNumKeyValueTags(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32) callconv(.c) uint32;
 extern fn SteamAPI_ISteamUGC_GetQueryUGCKeyValueTag(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, keyValueTagIndex: uint32, pchKey: [*c]u8, cchKeySize: uint32, pchValue: [*c]u8, cchValueSize: uint32) callconv(.c) bool;
 extern fn SteamAPI_ISteamUGC_GetQueryFirstUGCKeyValueTag(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, pchKey: [*c]const u8, pchValue: [*c]u8, cchValueSize: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_GetNumSupportedGameVersions(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32) callconv(.c) uint32;
+extern fn SteamAPI_ISteamUGC_GetSupportedGameVersionData(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, versionIndex: uint32, pchGameBranchMin: [*c]u8, pchGameBranchMax: [*c]u8, cchGameBranchSize: uint32) callconv(.c) bool;
 extern fn SteamAPI_ISteamUGC_GetQueryUGCContentDescriptors(self: ?*anyopaque, handle: UGCQueryHandle_t, index: uint32, pvecDescriptors: [*c]EUGCContentDescriptorID, cMaxEntries: uint32) callconv(.c) uint32;
 extern fn SteamAPI_ISteamUGC_ReleaseQueryUGCRequest(self: ?*anyopaque, handle: UGCQueryHandle_t) callconv(.c) bool;
 extern fn SteamAPI_ISteamUGC_AddRequiredTag(self: ?*anyopaque, handle: UGCQueryHandle_t, pTagName: [*c]const u8) callconv(.c) bool;
@@ -9445,6 +9375,7 @@ extern fn SteamAPI_ISteamUGC_SetReturnTotalOnly(self: ?*anyopaque, handle: UGCQu
 extern fn SteamAPI_ISteamUGC_SetReturnPlaytimeStats(self: ?*anyopaque, handle: UGCQueryHandle_t, unDays: uint32) callconv(.c) bool;
 extern fn SteamAPI_ISteamUGC_SetLanguage(self: ?*anyopaque, handle: UGCQueryHandle_t, pchLanguage: [*c]const u8) callconv(.c) bool;
 extern fn SteamAPI_ISteamUGC_SetAllowCachedResponse(self: ?*anyopaque, handle: UGCQueryHandle_t, unMaxAgeSeconds: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetAdminQuery(self: ?*anyopaque, handle: UGCUpdateHandle_t, bAdminQuery: bool) callconv(.c) bool;
 extern fn SteamAPI_ISteamUGC_SetCloudFileNameFilter(self: ?*anyopaque, handle: UGCQueryHandle_t, pMatchCloudFileName: [*c]const u8) callconv(.c) bool;
 extern fn SteamAPI_ISteamUGC_SetMatchAnyTag(self: ?*anyopaque, handle: UGCQueryHandle_t, bMatchAnyTag: bool) callconv(.c) bool;
 extern fn SteamAPI_ISteamUGC_SetSearchText(self: ?*anyopaque, handle: UGCQueryHandle_t, pSearchText: [*c]const u8) callconv(.c) bool;
@@ -9460,7 +9391,7 @@ extern fn SteamAPI_ISteamUGC_SetItemDescription(self: ?*anyopaque, handle: UGCUp
 extern fn SteamAPI_ISteamUGC_SetItemUpdateLanguage(self: ?*anyopaque, handle: UGCUpdateHandle_t, pchLanguage: [*c]const u8) callconv(.c) bool;
 extern fn SteamAPI_ISteamUGC_SetItemMetadata(self: ?*anyopaque, handle: UGCUpdateHandle_t, pchMetaData: [*c]const u8) callconv(.c) bool;
 extern fn SteamAPI_ISteamUGC_SetItemVisibility(self: ?*anyopaque, handle: UGCUpdateHandle_t, eVisibility: ERemoteStoragePublishedFileVisibility) callconv(.c) bool;
-extern fn SteamAPI_ISteamUGC_SetItemTags(self: ?*anyopaque, updateHandle: UGCUpdateHandle_t, pTags: [*c]const SteamParamStringArray_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetItemTags(self: ?*anyopaque, updateHandle: UGCUpdateHandle_t, pTags: [*c]const SteamParamStringArray_t, bAllowAdminTags: bool) callconv(.c) bool;
 extern fn SteamAPI_ISteamUGC_SetItemContent(self: ?*anyopaque, handle: UGCUpdateHandle_t, pszContentFolder: [*c]const u8) callconv(.c) bool;
 extern fn SteamAPI_ISteamUGC_SetItemPreview(self: ?*anyopaque, handle: UGCUpdateHandle_t, pszPreviewFile: [*c]const u8) callconv(.c) bool;
 extern fn SteamAPI_ISteamUGC_SetAllowLegacyUpload(self: ?*anyopaque, handle: UGCUpdateHandle_t, bAllowLegacyUpload: bool) callconv(.c) bool;
@@ -9474,6 +9405,7 @@ extern fn SteamAPI_ISteamUGC_UpdateItemPreviewVideo(self: ?*anyopaque, handle: U
 extern fn SteamAPI_ISteamUGC_RemoveItemPreview(self: ?*anyopaque, handle: UGCUpdateHandle_t, index: uint32) callconv(.c) bool;
 extern fn SteamAPI_ISteamUGC_AddContentDescriptor(self: ?*anyopaque, handle: UGCUpdateHandle_t, descid: EUGCContentDescriptorID) callconv(.c) bool;
 extern fn SteamAPI_ISteamUGC_RemoveContentDescriptor(self: ?*anyopaque, handle: UGCUpdateHandle_t, descid: EUGCContentDescriptorID) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetRequiredGameVersions(self: ?*anyopaque, handle: UGCUpdateHandle_t, pszGameBranchMin: [*c]const u8, pszGameBranchMax: [*c]const u8) callconv(.c) bool;
 extern fn SteamAPI_ISteamUGC_SubmitItemUpdate(self: ?*anyopaque, handle: UGCUpdateHandle_t, pchChangeNote: [*c]const u8) callconv(.c) SteamAPICall_t;
 extern fn SteamAPI_ISteamUGC_GetItemUpdateProgress(self: ?*anyopaque, handle: UGCUpdateHandle_t, punBytesProcessed: [*c]uint64, punBytesTotal: [*c]uint64) callconv(.c) EItemUpdateStatus;
 extern fn SteamAPI_ISteamUGC_SetUserItemVote(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t, bVoteUp: bool) callconv(.c) SteamAPICall_t;
@@ -9482,8 +9414,8 @@ extern fn SteamAPI_ISteamUGC_AddItemToFavorites(self: ?*anyopaque, nAppId: AppId
 extern fn SteamAPI_ISteamUGC_RemoveItemFromFavorites(self: ?*anyopaque, nAppId: AppId_t, nPublishedFileID: PublishedFileId_t) callconv(.c) SteamAPICall_t;
 extern fn SteamAPI_ISteamUGC_SubscribeItem(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t) callconv(.c) SteamAPICall_t;
 extern fn SteamAPI_ISteamUGC_UnsubscribeItem(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t) callconv(.c) SteamAPICall_t;
-extern fn SteamAPI_ISteamUGC_GetNumSubscribedItems(self: ?*anyopaque) callconv(.c) uint32;
-extern fn SteamAPI_ISteamUGC_GetSubscribedItems(self: ?*anyopaque, pvecPublishedFileID: [*c]PublishedFileId_t, cMaxEntries: uint32) callconv(.c) uint32;
+extern fn SteamAPI_ISteamUGC_GetNumSubscribedItems(self: ?*anyopaque, bIncludeLocallyDisabled: bool) callconv(.c) uint32;
+extern fn SteamAPI_ISteamUGC_GetSubscribedItems(self: ?*anyopaque, pvecPublishedFileID: [*c]PublishedFileId_t, cMaxEntries: uint32, bIncludeLocallyDisabled: bool) callconv(.c) uint32;
 extern fn SteamAPI_ISteamUGC_GetItemState(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t) callconv(.c) uint32;
 extern fn SteamAPI_ISteamUGC_GetItemInstallInfo(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t, punSizeOnDisk: [*c]uint64, pchFolder: [*c]u8, cchFolderSize: uint32, punTimeStamp: [*c]uint32) callconv(.c) bool;
 extern fn SteamAPI_ISteamUGC_GetItemDownloadInfo(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t, punBytesDownloaded: [*c]uint64, punBytesTotal: [*c]uint64) callconv(.c) bool;
@@ -9501,43 +9433,12 @@ extern fn SteamAPI_ISteamUGC_GetAppDependencies(self: ?*anyopaque, nPublishedFil
 extern fn SteamAPI_ISteamUGC_DeleteItem(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t) callconv(.c) SteamAPICall_t;
 extern fn SteamAPI_ISteamUGC_ShowWorkshopEULA(self: ?*anyopaque) callconv(.c) bool;
 extern fn SteamAPI_ISteamUGC_GetWorkshopEULAStatus(self: ?*anyopaque) callconv(.c) SteamAPICall_t;
-extern fn SteamAPI_SteamAppList_v001() callconv(.c) [*c]ISteamAppList;
-/// user
-pub fn SteamAppList() ISteamAppList {
-    return ISteamAppList{ .ptr = SteamAPI_SteamAppList_v001() };
-}
-
-pub const ISteamAppList = extern struct {
-    ptr: ?*anyopaque,
-    // methods
-    const Self = @This();
-    pub fn GetNumInstalledApps(self: *const Self) uint32 {
-        return SteamAPI_ISteamAppList_GetNumInstalledApps(self.ptr);
-    }
-
-    pub fn GetInstalledApps(self: *const Self, pvecAppID: *AppId_t, unMaxAppIDs: uint32) uint32 {
-        return SteamAPI_ISteamAppList_GetInstalledApps(self.ptr, pvecAppID, unMaxAppIDs);
-    }
-
-    pub fn GetAppName(self: *const Self, nAppID: AppId_t, pchName: []u8) i32 {
-        return SteamAPI_ISteamAppList_GetAppName(self.ptr, nAppID, pchName.ptr, @intCast(pchName.len));
-    }
-
-    pub fn GetAppInstallDir(self: *const Self, nAppID: AppId_t, pchDirectory: *u8, cchNameMax: i32) i32 {
-        return SteamAPI_ISteamAppList_GetAppInstallDir(self.ptr, nAppID, pchDirectory, cchNameMax);
-    }
-
-    pub fn GetAppBuildId(self: *const Self, nAppID: AppId_t) i32 {
-        return SteamAPI_ISteamAppList_GetAppBuildId(self.ptr, nAppID);
-    }
-};
-
-// static functions
-extern fn SteamAPI_ISteamAppList_GetNumInstalledApps(self: ?*anyopaque) callconv(.c) uint32;
-extern fn SteamAPI_ISteamAppList_GetInstalledApps(self: ?*anyopaque, pvecAppID: [*c]AppId_t, unMaxAppIDs: uint32) callconv(.c) uint32;
-extern fn SteamAPI_ISteamAppList_GetAppName(self: ?*anyopaque, nAppID: AppId_t, pchName: [*c]u8, cchNameMax: i32) callconv(.c) i32;
-extern fn SteamAPI_ISteamAppList_GetAppInstallDir(self: ?*anyopaque, nAppID: AppId_t, pchDirectory: [*c]u8, cchNameMax: i32) callconv(.c) i32;
-extern fn SteamAPI_ISteamAppList_GetAppBuildId(self: ?*anyopaque, nAppID: AppId_t) callconv(.c) i32;
+extern fn SteamAPI_ISteamUGC_GetUserContentDescriptorPreferences(self: ?*anyopaque, pvecDescriptors: [*c]EUGCContentDescriptorID, cMaxEntries: uint32) callconv(.c) uint32;
+extern fn SteamAPI_ISteamUGC_SetItemsDisabledLocally(self: ?*anyopaque, pvecPublishedFileIDs: [*c]PublishedFileId_t, unNumPublishedFileIDs: uint32, bDisabledLocally: bool) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_SetSubscriptionsLoadOrder(self: ?*anyopaque, pvecPublishedFileIDs: [*c]PublishedFileId_t, unNumPublishedFileIDs: uint32) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_MarkDownloadedItemAsUnused(self: ?*anyopaque, nPublishedFileID: PublishedFileId_t) callconv(.c) bool;
+extern fn SteamAPI_ISteamUGC_GetNumDownloadedItems(self: ?*anyopaque) callconv(.c) uint32;
+extern fn SteamAPI_ISteamUGC_GetDownloadedItems(self: ?*anyopaque, pvecPublishedFileIDs: [*c]PublishedFileId_t, cMaxEntries: uint32) callconv(.c) uint32;
 extern fn SteamAPI_SteamHTMLSurface_v005() callconv(.c) [*c]ISteamHTMLSurface;
 /// user
 pub fn SteamHTMLSurface() ISteamHTMLSurface {
@@ -9556,49 +9457,51 @@ pub const ISteamHTMLSurface = extern struct {
         _,
     };
 
-    pub const EMouseCursor = enum(c_int) {
-        dc_user = 0,
-        dc_none = 1,
-        dc_arrow = 2,
-        dc_ibeam = 3,
-        dc_hourglass = 4,
-        dc_waitarrow = 5,
-        dc_crosshair = 6,
-        dc_up = 7,
-        dc_sizenw = 8,
-        dc_sizese = 9,
-        dc_sizene = 10,
-        dc_sizesw = 11,
-        dc_sizew = 12,
-        dc_sizee = 13,
-        dc_sizen = 14,
-        dc_sizes = 15,
-        dc_sizewe = 16,
-        dc_sizens = 17,
-        dc_sizeall = 18,
-        dc_no = 19,
-        dc_hand = 20,
-        dc_blank = 21,
-        dc_middle_pan = 22,
-        dc_north_pan = 23,
-        dc_north_east_pan = 24,
-        dc_east_pan = 25,
-        dc_south_east_pan = 26,
-        dc_south_pan = 27,
-        dc_south_west_pan = 28,
-        dc_west_pan = 29,
-        dc_north_west_pan = 30,
-        dc_alias = 31,
-        dc_cell = 32,
-        dc_colresize = 33,
-        dc_copycur = 34,
-        dc_verticaltext = 35,
-        dc_rowresize = 36,
-        dc_zoomin = 37,
-        dc_zoomout = 38,
-        dc_help = 39,
-        dc_custom = 40,
-        dc_last = 41,
+    pub const EHTMLMouseCursor = enum(c_int) {
+        k_EHTMLMouseCursor_User = 0,
+        k_EHTMLMouseCursor_None = 1,
+        k_EHTMLMouseCursor_Arrow = 2,
+        k_EHTMLMouseCursor_IBeam = 3,
+        k_EHTMLMouseCursor_Hourglass = 4,
+        k_EHTMLMouseCursor_WaitArrow = 5,
+        k_EHTMLMouseCursor_Crosshair = 6,
+        k_EHTMLMouseCursor_Up = 7,
+        k_EHTMLMouseCursor_SizeNW = 8,
+        k_EHTMLMouseCursor_SizeSE = 9,
+        k_EHTMLMouseCursor_SizeNE = 10,
+        k_EHTMLMouseCursor_SizeSW = 11,
+        k_EHTMLMouseCursor_SizeW = 12,
+        k_EHTMLMouseCursor_SizeE = 13,
+        k_EHTMLMouseCursor_SizeN = 14,
+        k_EHTMLMouseCursor_SizeS = 15,
+        k_EHTMLMouseCursor_SizeWE = 16,
+        k_EHTMLMouseCursor_SizeNS = 17,
+        k_EHTMLMouseCursor_SizeAll = 18,
+        k_EHTMLMouseCursor_No = 19,
+        k_EHTMLMouseCursor_Hand = 20,
+        k_EHTMLMouseCursor_Blank = 21,
+        k_EHTMLMouseCursor_MiddlePan = 22,
+        k_EHTMLMouseCursor_NorthPan = 23,
+        k_EHTMLMouseCursor_NorthEastPan = 24,
+        k_EHTMLMouseCursor_EastPan = 25,
+        k_EHTMLMouseCursor_SouthEastPan = 26,
+        k_EHTMLMouseCursor_SouthPan = 27,
+        k_EHTMLMouseCursor_SouthWestPan = 28,
+        k_EHTMLMouseCursor_WestPan = 29,
+        k_EHTMLMouseCursor_NorthWestPan = 30,
+        k_EHTMLMouseCursor_Alias = 31,
+        k_EHTMLMouseCursor_Cell = 32,
+        k_EHTMLMouseCursor_ColResize = 33,
+        k_EHTMLMouseCursor_CopyCur = 34,
+        k_EHTMLMouseCursor_VerticalText = 35,
+        k_EHTMLMouseCursor_RowResize = 36,
+        k_EHTMLMouseCursor_ZoomIn = 37,
+        k_EHTMLMouseCursor_ZoomOut = 38,
+        k_EHTMLMouseCursor_Help = 39,
+        k_EHTMLMouseCursor_Custom = 40,
+        k_EHTMLMouseCursor_SizeNWSE = 41,
+        k_EHTMLMouseCursor_SizeNESW = 42,
+        k_EHTMLMouseCursor_last = 43,
         _,
     };
 
@@ -10005,10 +9908,112 @@ extern fn SteamAPI_ISteamInventory_SetPropertyInt64(self: ?*anyopaque, handle: S
 extern fn SteamAPI_ISteamInventory_SetPropertyFloat(self: ?*anyopaque, handle: SteamInventoryUpdateHandle_t, nItemID: SteamItemInstanceID_t, pchPropertyName: [*c]const u8, flValue: f32) callconv(.c) bool;
 extern fn SteamAPI_ISteamInventory_SubmitUpdateProperties(self: ?*anyopaque, handle: SteamInventoryUpdateHandle_t, pResultHandle: [*c]SteamInventoryResult_t) callconv(.c) bool;
 extern fn SteamAPI_ISteamInventory_InspectItem(self: ?*anyopaque, pResultHandle: [*c]SteamInventoryResult_t, pchItemToken: [*c]const u8) callconv(.c) bool;
-extern fn SteamAPI_SteamVideo_v002() callconv(.c) [*c]ISteamVideo;
+extern fn SteamAPI_SteamTimeline_v004() callconv(.c) [*c]ISteamTimeline;
+/// user
+pub fn SteamTimeline() ISteamTimeline {
+    return ISteamTimeline{ .ptr = SteamAPI_SteamTimeline_v004() };
+}
+
+pub const ISteamTimeline = extern struct {
+    ptr: ?*anyopaque,
+    // methods
+    const Self = @This();
+    pub fn SetTimelineTooltip(self: *const Self, pchDescription: *const u8, flTimeDelta: f32) void {
+        return SteamAPI_ISteamTimeline_SetTimelineTooltip(self.ptr, pchDescription, flTimeDelta);
+    }
+
+    pub fn ClearTimelineTooltip(self: *const Self, flTimeDelta: f32) void {
+        return SteamAPI_ISteamTimeline_ClearTimelineTooltip(self.ptr, flTimeDelta);
+    }
+
+    pub fn SetTimelineGameMode(self: *const Self, eMode: ETimelineGameMode) void {
+        return SteamAPI_ISteamTimeline_SetTimelineGameMode(self.ptr, eMode);
+    }
+
+    pub fn AddInstantaneousTimelineEvent(self: *const Self, pchTitle: *const u8, pchDescription: *const u8, pchIcon: *const u8, unIconPriority: uint32, flStartOffsetSeconds: f32, ePossibleClip: ETimelineEventClipPriority) TimelineEventHandle_t {
+        return SteamAPI_ISteamTimeline_AddInstantaneousTimelineEvent(self.ptr, pchTitle, pchDescription, pchIcon, unIconPriority, flStartOffsetSeconds, ePossibleClip);
+    }
+
+    pub fn AddRangeTimelineEvent(self: *const Self, pchTitle: *const u8, pchDescription: *const u8, pchIcon: *const u8, unIconPriority: uint32, flStartOffsetSeconds: f32, flDuration: f32, ePossibleClip: ETimelineEventClipPriority) TimelineEventHandle_t {
+        return SteamAPI_ISteamTimeline_AddRangeTimelineEvent(self.ptr, pchTitle, pchDescription, pchIcon, unIconPriority, flStartOffsetSeconds, flDuration, ePossibleClip);
+    }
+
+    pub fn StartRangeTimelineEvent(self: *const Self, pchTitle: *const u8, pchDescription: *const u8, pchIcon: *const u8, unPriority: uint32, flStartOffsetSeconds: f32, ePossibleClip: ETimelineEventClipPriority) TimelineEventHandle_t {
+        return SteamAPI_ISteamTimeline_StartRangeTimelineEvent(self.ptr, pchTitle, pchDescription, pchIcon, unPriority, flStartOffsetSeconds, ePossibleClip);
+    }
+
+    pub fn UpdateRangeTimelineEvent(self: *const Self, ulEvent: TimelineEventHandle_t, pchTitle: *const u8, pchDescription: *const u8, pchIcon: *const u8, unPriority: uint32, ePossibleClip: ETimelineEventClipPriority) void {
+        return SteamAPI_ISteamTimeline_UpdateRangeTimelineEvent(self.ptr, ulEvent, pchTitle, pchDescription, pchIcon, unPriority, ePossibleClip);
+    }
+
+    pub fn EndRangeTimelineEvent(self: *const Self, ulEvent: TimelineEventHandle_t, flEndOffsetSeconds: f32) void {
+        return SteamAPI_ISteamTimeline_EndRangeTimelineEvent(self.ptr, ulEvent, flEndOffsetSeconds);
+    }
+
+    pub fn RemoveTimelineEvent(self: *const Self, ulEvent: TimelineEventHandle_t) void {
+        return SteamAPI_ISteamTimeline_RemoveTimelineEvent(self.ptr, ulEvent);
+    }
+
+    pub fn DoesEventRecordingExist(self: *const Self, ulEvent: TimelineEventHandle_t) SteamAPICall_t {
+        return SteamAPI_ISteamTimeline_DoesEventRecordingExist(self.ptr, ulEvent);
+    }
+
+    pub fn StartGamePhase(self: *const Self) void {
+        return SteamAPI_ISteamTimeline_StartGamePhase(self.ptr);
+    }
+
+    pub fn EndGamePhase(self: *const Self) void {
+        return SteamAPI_ISteamTimeline_EndGamePhase(self.ptr);
+    }
+
+    pub fn SetGamePhaseID(self: *const Self, pchPhaseID: *const u8) void {
+        return SteamAPI_ISteamTimeline_SetGamePhaseID(self.ptr, pchPhaseID);
+    }
+
+    pub fn DoesGamePhaseRecordingExist(self: *const Self, pchPhaseID: *const u8) SteamAPICall_t {
+        return SteamAPI_ISteamTimeline_DoesGamePhaseRecordingExist(self.ptr, pchPhaseID);
+    }
+
+    pub fn AddGamePhaseTag(self: *const Self, pchTagName: *const u8, pchTagIcon: *const u8, pchTagGroup: *const u8, unPriority: uint32) void {
+        return SteamAPI_ISteamTimeline_AddGamePhaseTag(self.ptr, pchTagName, pchTagIcon, pchTagGroup, unPriority);
+    }
+
+    pub fn SetGamePhaseAttribute(self: *const Self, pchAttributeGroup: *const u8, pchAttributeValue: *const u8, unPriority: uint32) void {
+        return SteamAPI_ISteamTimeline_SetGamePhaseAttribute(self.ptr, pchAttributeGroup, pchAttributeValue, unPriority);
+    }
+
+    pub fn OpenOverlayToGamePhase(self: *const Self, pchPhaseID: *const u8) void {
+        return SteamAPI_ISteamTimeline_OpenOverlayToGamePhase(self.ptr, pchPhaseID);
+    }
+
+    pub fn OpenOverlayToTimelineEvent(self: *const Self, ulEvent: TimelineEventHandle_t) void {
+        return SteamAPI_ISteamTimeline_OpenOverlayToTimelineEvent(self.ptr, ulEvent);
+    }
+};
+
+// static functions
+extern fn SteamAPI_ISteamTimeline_SetTimelineTooltip(self: ?*anyopaque, pchDescription: [*c]const u8, flTimeDelta: f32) callconv(.c) void;
+extern fn SteamAPI_ISteamTimeline_ClearTimelineTooltip(self: ?*anyopaque, flTimeDelta: f32) callconv(.c) void;
+extern fn SteamAPI_ISteamTimeline_SetTimelineGameMode(self: ?*anyopaque, eMode: ETimelineGameMode) callconv(.c) void;
+extern fn SteamAPI_ISteamTimeline_AddInstantaneousTimelineEvent(self: ?*anyopaque, pchTitle: [*c]const u8, pchDescription: [*c]const u8, pchIcon: [*c]const u8, unIconPriority: uint32, flStartOffsetSeconds: f32, ePossibleClip: ETimelineEventClipPriority) callconv(.c) TimelineEventHandle_t;
+extern fn SteamAPI_ISteamTimeline_AddRangeTimelineEvent(self: ?*anyopaque, pchTitle: [*c]const u8, pchDescription: [*c]const u8, pchIcon: [*c]const u8, unIconPriority: uint32, flStartOffsetSeconds: f32, flDuration: f32, ePossibleClip: ETimelineEventClipPriority) callconv(.c) TimelineEventHandle_t;
+extern fn SteamAPI_ISteamTimeline_StartRangeTimelineEvent(self: ?*anyopaque, pchTitle: [*c]const u8, pchDescription: [*c]const u8, pchIcon: [*c]const u8, unPriority: uint32, flStartOffsetSeconds: f32, ePossibleClip: ETimelineEventClipPriority) callconv(.c) TimelineEventHandle_t;
+extern fn SteamAPI_ISteamTimeline_UpdateRangeTimelineEvent(self: ?*anyopaque, ulEvent: TimelineEventHandle_t, pchTitle: [*c]const u8, pchDescription: [*c]const u8, pchIcon: [*c]const u8, unPriority: uint32, ePossibleClip: ETimelineEventClipPriority) callconv(.c) void;
+extern fn SteamAPI_ISteamTimeline_EndRangeTimelineEvent(self: ?*anyopaque, ulEvent: TimelineEventHandle_t, flEndOffsetSeconds: f32) callconv(.c) void;
+extern fn SteamAPI_ISteamTimeline_RemoveTimelineEvent(self: ?*anyopaque, ulEvent: TimelineEventHandle_t) callconv(.c) void;
+extern fn SteamAPI_ISteamTimeline_DoesEventRecordingExist(self: ?*anyopaque, ulEvent: TimelineEventHandle_t) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamTimeline_StartGamePhase(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamTimeline_EndGamePhase(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamTimeline_SetGamePhaseID(self: ?*anyopaque, pchPhaseID: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamTimeline_DoesGamePhaseRecordingExist(self: ?*anyopaque, pchPhaseID: [*c]const u8) callconv(.c) SteamAPICall_t;
+extern fn SteamAPI_ISteamTimeline_AddGamePhaseTag(self: ?*anyopaque, pchTagName: [*c]const u8, pchTagIcon: [*c]const u8, pchTagGroup: [*c]const u8, unPriority: uint32) callconv(.c) void;
+extern fn SteamAPI_ISteamTimeline_SetGamePhaseAttribute(self: ?*anyopaque, pchAttributeGroup: [*c]const u8, pchAttributeValue: [*c]const u8, unPriority: uint32) callconv(.c) void;
+extern fn SteamAPI_ISteamTimeline_OpenOverlayToGamePhase(self: ?*anyopaque, pchPhaseID: [*c]const u8) callconv(.c) void;
+extern fn SteamAPI_ISteamTimeline_OpenOverlayToTimelineEvent(self: ?*anyopaque, ulEvent: TimelineEventHandle_t) callconv(.c) void;
+extern fn SteamAPI_SteamVideo_v007() callconv(.c) [*c]ISteamVideo;
 /// user
 pub fn SteamVideo() ISteamVideo {
-    return ISteamVideo{ .ptr = SteamAPI_SteamVideo_v002() };
+    return ISteamVideo{ .ptr = SteamAPI_SteamVideo_v007() };
 }
 
 pub const ISteamVideo = extern struct {
@@ -10079,10 +10084,10 @@ extern fn SteamAPI_ISteamParentalSettings_BIsAppBlocked(self: ?*anyopaque, nAppI
 extern fn SteamAPI_ISteamParentalSettings_BIsAppInBlockList(self: ?*anyopaque, nAppID: AppId_t) callconv(.c) bool;
 extern fn SteamAPI_ISteamParentalSettings_BIsFeatureBlocked(self: ?*anyopaque, eFeature: EParentalFeature) callconv(.c) bool;
 extern fn SteamAPI_ISteamParentalSettings_BIsFeatureInBlockList(self: ?*anyopaque, eFeature: EParentalFeature) callconv(.c) bool;
-extern fn SteamAPI_SteamRemotePlay_v001() callconv(.c) [*c]ISteamRemotePlay;
+extern fn SteamAPI_SteamRemotePlay_v004() callconv(.c) [*c]ISteamRemotePlay;
 /// user
 pub fn SteamRemotePlay() ISteamRemotePlay {
-    return ISteamRemotePlay{ .ptr = SteamAPI_SteamRemotePlay_v001() };
+    return ISteamRemotePlay{ .ptr = SteamAPI_SteamRemotePlay_v004() };
 }
 
 pub const ISteamRemotePlay = extern struct {
@@ -10097,8 +10102,28 @@ pub const ISteamRemotePlay = extern struct {
         return SteamAPI_ISteamRemotePlay_GetSessionID(self.ptr, iSessionIndex);
     }
 
+    pub fn BSessionRemotePlayTogether(self: *const Self, unSessionID: RemotePlaySessionID_t) bool {
+        return SteamAPI_ISteamRemotePlay_BSessionRemotePlayTogether(self.ptr, unSessionID);
+    }
+
     pub fn GetSessionSteamID(self: *const Self, unSessionID: RemotePlaySessionID_t) CSteamID {
         return SteamAPI_ISteamRemotePlay_GetSessionSteamID(self.ptr, unSessionID);
+    }
+
+    pub fn GetSessionGuestID(self: *const Self, unSessionID: RemotePlaySessionID_t) uint32 {
+        return SteamAPI_ISteamRemotePlay_GetSessionGuestID(self.ptr, unSessionID);
+    }
+
+    pub fn GetSmallSessionAvatar(self: *const Self, unSessionID: RemotePlaySessionID_t) i32 {
+        return SteamAPI_ISteamRemotePlay_GetSmallSessionAvatar(self.ptr, unSessionID);
+    }
+
+    pub fn GetMediumSessionAvatar(self: *const Self, unSessionID: RemotePlaySessionID_t) i32 {
+        return SteamAPI_ISteamRemotePlay_GetMediumSessionAvatar(self.ptr, unSessionID);
+    }
+
+    pub fn GetLargeSessionAvatar(self: *const Self, unSessionID: RemotePlaySessionID_t) i32 {
+        return SteamAPI_ISteamRemotePlay_GetLargeSessionAvatar(self.ptr, unSessionID);
     }
 
     pub fn GetSessionClientName(self: *const Self, unSessionID: RemotePlaySessionID_t) [*c]const u8 {
@@ -10113,19 +10138,64 @@ pub const ISteamRemotePlay = extern struct {
         return SteamAPI_ISteamRemotePlay_BGetSessionClientResolution(self.ptr, unSessionID, pnResolutionX, pnResolutionY);
     }
 
+    pub fn ShowRemotePlayTogetherUI(self: *const Self) bool {
+        return SteamAPI_ISteamRemotePlay_ShowRemotePlayTogetherUI(self.ptr);
+    }
+
     pub fn BSendRemotePlayTogetherInvite(self: *const Self, steamIDFriend: CSteamID) bool {
         return SteamAPI_ISteamRemotePlay_BSendRemotePlayTogetherInvite(self.ptr, steamIDFriend);
+    }
+
+    pub fn BEnableRemotePlayTogetherDirectInput(self: *const Self) bool {
+        return SteamAPI_ISteamRemotePlay_BEnableRemotePlayTogetherDirectInput(self.ptr);
+    }
+
+    pub fn DisableRemotePlayTogetherDirectInput(self: *const Self) void {
+        return SteamAPI_ISteamRemotePlay_DisableRemotePlayTogetherDirectInput(self.ptr);
+    }
+
+    pub fn GetInput(self: *const Self, pInput: *RemotePlayInput_t, unMaxEvents: uint32) uint32 {
+        return SteamAPI_ISteamRemotePlay_GetInput(self.ptr, pInput, unMaxEvents);
+    }
+
+    pub fn SetMouseVisibility(self: *const Self, unSessionID: RemotePlaySessionID_t, bVisible: bool) void {
+        return SteamAPI_ISteamRemotePlay_SetMouseVisibility(self.ptr, unSessionID, bVisible);
+    }
+
+    pub fn SetMousePosition(self: *const Self, unSessionID: RemotePlaySessionID_t, flNormalizedX: f32, flNormalizedY: f32) void {
+        return SteamAPI_ISteamRemotePlay_SetMousePosition(self.ptr, unSessionID, flNormalizedX, flNormalizedY);
+    }
+
+    pub fn CreateMouseCursor(self: *const Self, nWidth: i32, nHeight: i32, nHotX: i32, nHotY: i32, pBGRA: *const u8, nPitch: i32) RemotePlayCursorID_t {
+        return SteamAPI_ISteamRemotePlay_CreateMouseCursor(self.ptr, nWidth, nHeight, nHotX, nHotY, pBGRA, nPitch);
+    }
+
+    pub fn SetMouseCursor(self: *const Self, unSessionID: RemotePlaySessionID_t, unCursorID: RemotePlayCursorID_t) void {
+        return SteamAPI_ISteamRemotePlay_SetMouseCursor(self.ptr, unSessionID, unCursorID);
     }
 };
 
 // static functions
 extern fn SteamAPI_ISteamRemotePlay_GetSessionCount(self: ?*anyopaque) callconv(.c) uint32;
 extern fn SteamAPI_ISteamRemotePlay_GetSessionID(self: ?*anyopaque, iSessionIndex: i32) callconv(.c) RemotePlaySessionID_t;
+extern fn SteamAPI_ISteamRemotePlay_BSessionRemotePlayTogether(self: ?*anyopaque, unSessionID: RemotePlaySessionID_t) callconv(.c) bool;
 extern fn SteamAPI_ISteamRemotePlay_GetSessionSteamID(self: ?*anyopaque, unSessionID: RemotePlaySessionID_t) callconv(.c) CSteamID;
+extern fn SteamAPI_ISteamRemotePlay_GetSessionGuestID(self: ?*anyopaque, unSessionID: RemotePlaySessionID_t) callconv(.c) uint32;
+extern fn SteamAPI_ISteamRemotePlay_GetSmallSessionAvatar(self: ?*anyopaque, unSessionID: RemotePlaySessionID_t) callconv(.c) i32;
+extern fn SteamAPI_ISteamRemotePlay_GetMediumSessionAvatar(self: ?*anyopaque, unSessionID: RemotePlaySessionID_t) callconv(.c) i32;
+extern fn SteamAPI_ISteamRemotePlay_GetLargeSessionAvatar(self: ?*anyopaque, unSessionID: RemotePlaySessionID_t) callconv(.c) i32;
 extern fn SteamAPI_ISteamRemotePlay_GetSessionClientName(self: ?*anyopaque, unSessionID: RemotePlaySessionID_t) callconv(.c) [*c]const u8;
 extern fn SteamAPI_ISteamRemotePlay_GetSessionClientFormFactor(self: ?*anyopaque, unSessionID: RemotePlaySessionID_t) callconv(.c) ESteamDeviceFormFactor;
 extern fn SteamAPI_ISteamRemotePlay_BGetSessionClientResolution(self: ?*anyopaque, unSessionID: RemotePlaySessionID_t, pnResolutionX: [*c]i32, pnResolutionY: [*c]i32) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemotePlay_ShowRemotePlayTogetherUI(self: ?*anyopaque) callconv(.c) bool;
 extern fn SteamAPI_ISteamRemotePlay_BSendRemotePlayTogetherInvite(self: ?*anyopaque, steamIDFriend: CSteamID) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemotePlay_BEnableRemotePlayTogetherDirectInput(self: ?*anyopaque) callconv(.c) bool;
+extern fn SteamAPI_ISteamRemotePlay_DisableRemotePlayTogetherDirectInput(self: ?*anyopaque) callconv(.c) void;
+extern fn SteamAPI_ISteamRemotePlay_GetInput(self: ?*anyopaque, pInput: [*c]RemotePlayInput_t, unMaxEvents: uint32) callconv(.c) uint32;
+extern fn SteamAPI_ISteamRemotePlay_SetMouseVisibility(self: ?*anyopaque, unSessionID: RemotePlaySessionID_t, bVisible: bool) callconv(.c) void;
+extern fn SteamAPI_ISteamRemotePlay_SetMousePosition(self: ?*anyopaque, unSessionID: RemotePlaySessionID_t, flNormalizedX: f32, flNormalizedY: f32) callconv(.c) void;
+extern fn SteamAPI_ISteamRemotePlay_CreateMouseCursor(self: ?*anyopaque, nWidth: i32, nHeight: i32, nHotX: i32, nHotY: i32, pBGRA: [*c]const u8, nPitch: i32) callconv(.c) RemotePlayCursorID_t;
+extern fn SteamAPI_ISteamRemotePlay_SetMouseCursor(self: ?*anyopaque, unSessionID: RemotePlaySessionID_t, unCursorID: RemotePlayCursorID_t) callconv(.c) void;
 extern fn SteamAPI_SteamNetworkingMessages_SteamAPI_v002() callconv(.c) [*c]ISteamNetworkingMessages;
 /// user
 pub fn SteamNetworkingMessages_SteamAPI() ISteamNetworkingMessages {
